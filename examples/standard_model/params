@@ -1,0 +1,10 @@
+length 250000
+
+mutation_rate 0.000000015
+
+recomb_file model.test
+
+pop_define 1 standard
+pop_size 1 10000
+sample_size 1 100
+

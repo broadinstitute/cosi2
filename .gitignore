@@ -1,0 +1,12 @@
+builds
+binaries
+Makefile
+.deps
+*.lo
+.libs
+*.la
+autom4te.cache
+*.o
+libtool
+config.log
+config.status

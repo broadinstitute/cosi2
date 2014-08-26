@@ -1,0 +1,29 @@
+pushd tests
+rm -f 0_sel40_1_test*
+../coalescent -p 0_sel40_1.cosiParams -o 0_sel40_1_test
+diff 0_sel40_1_test.hap-1 0_sel40_1.hap-1 
+diff 0_sel40_1_test.hap-4 0_sel40_1.hap-4
+diff 0_sel40_1_test.hap-5 0_sel40_1.hap-5
+diff 0_sel40_1_test.pos-1 0_sel40_1.pos-1 
+diff 0_sel40_1_test.pos-4 0_sel40_1.pos-4
+diff 0_sel40_1_test.pos-5 0_sel40_1.pos-5
+rm -f 0_sel40_1_test*
+rm -f 0_sel100_1_test*
+../coalescent -p 0_sel100_1.cosiParams -o 0_sel100_1_test
+diff 0_sel100_1_test.hap-1 0_sel100_1.hap-1 
+diff 0_sel100_1_test.hap-4 0_sel100_1.hap-4
+diff 0_sel100_1_test.hap-5 0_sel100_1.hap-5
+diff 0_sel100_1_test.pos-1 0_sel100_1.pos-1 
+diff 0_sel100_1_test.pos-4 0_sel100_1.pos-4
+diff 0_sel100_1_test.pos-5 0_sel100_1.pos-5
+rm -f 0_sel100_1_test*
+rm -f 0_neutral_test*
+../coalescent -p 0_neutral.cosiParams -o 0_neutral_test
+diff 0_neutral_test.hap-1 0_neutral.hap-1 
+diff 0_neutral_test.hap-4 0_neutral.hap-4
+diff 0_neutral_test.hap-5 0_neutral.hap-5
+diff 0_neutral_test.pos-1 0_neutral.pos-1 
+diff 0_neutral_test.pos-4 0_neutral.pos-4
+diff 0_neutral_test.pos-5 0_neutral.pos-5
+rm -f 0_neutral_test*
+popd

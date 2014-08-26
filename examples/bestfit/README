@@ -1,0 +1,32 @@
+This directory (bestfit) contains an example of the use of the cosi
+simulation, implementing the calibrated model for three human
+populations published in Genome Research (currently in press).  The
+script "run.pl" runs both the program for generating a random local
+recombination map ("recosim") and the coalescent program itself
+("coalescent").  "recosim" is controlled by the parameters in the file
+"recParams"; "coalescent" is controlled by the parameters in the file
+"params".  See the documentation directory for definitions of the 
+parameters.  The only other thing "run.pl" does (besides calling the two
+programs) is extract the sequence length to be simulated from the
+params file, to guarantee that the two programs use the same length.
+
+"recosim" outputs the recombination map in the file "model.test" (the
+name is set as a parameter in "recParams").  The regional
+recombination rate is picked from a distribution found in
+"autosomes_deCODE.distr" (which is, not surprisingly, the distribution
+seen in the deCODE genetic map for the autosomes).
+
+In this example, the parameter file for coalescent is "params".  It
+sets things like the mutation rate, gene conversion rate and sequence
+length.  (With this model, sequences up to ~1 Mb generally run in a
+reasonable time, provided the extreme tail of the recombination rate
+is truncated -- see program documentation.) It also defines the sampled
+populations, their effective population size (in the present) and the
+number of sampled chromosomes.  The rest of the file defines the
+demographic history of the popualations -- in this case, an
+Out-of-Africa model of an ancestral population that splits into
+Africans and non-Africans, and then into Europeans and Asians; African
+Americans are modeled as a recent admixture of the African and
+European populations.
+
+

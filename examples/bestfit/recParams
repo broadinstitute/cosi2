@@ -1,0 +1,14 @@
+model 1
+#random_seed 56789
+outfile model.test
+distribution autosomes_deCODE.distr
+distance_shape 0.35
+local_shape 0.3
+intensity_shape 0.3
+space 8500
+bkgd 0.12
+#  The following option introduces variation into the base 
+#   recombination rate within the region; specifically, the 
+#   rate changes every 100 kb. (The regional rate, picked from 
+#   the deCODE map, remains the same.)
+#local_size 100000

@@ -1,0 +1,1 @@
+g++ -std=c++0x --param max-inline-insns-single=1000 -DNDEBUG -Wall -Winline -Wno-unused -Werror -O0 -ggdb3 -DCOSI_MEMPOOL_DISABLE -o coalescent_dbg -I/idi/sabetilab/ilya/sw/boost_1_50_0 *.cc ../cosi2_rand/libcosi2_rand.a

@@ -1,0 +1,44 @@
+
+#+TITLE: Guide to cosi code
+#+AUTHOR: Ilya Shlyakhter, Pardis Sabeti, Stephen Schaffner
+#+EMAIL: ilya_shl@alum.mit.edu
+#+MACRO: cosi /cosi/
+
+* Introduction
+
+	This is a "developer's guide" to {{{cosi}}} code.
+
+	{{{cosi}}} is written in C++.   Parts of the code are written using
+	[[http://en.wikipedia.org/wiki/Literate_programming][literate programming]] with Emacs [[http://www.orgmode.org][Org mode]].  
+	
+*** Overall architecture of the code
+
+		The main program is ~coalescent.cc~.  It calls code in ~file.cc~
+		which reads the parameter file and sets up the demographic model.
+		This involves creating a programmatic representation of historical
+		events, sorted in chronological order from the present towards the past;
+		loading the recombination map; creating the initial (present-day)
+		[[id:f47c595f-832d-40e4-a4c6-00177c171391][nodes]] for each population.  Each node's  is initialized to
+		the full segment [0,1].  
+		
+		Then, ~sim_execute()~ is called to run the simulation.  The simulator
+		repeatedly samples the time until the next poisson event (coalescence
+		or recombination), compares that with the time until the next historical
+		event, and simulates either the poisson event or the next historical event,
+		whichever is closest.
+		
+		When coalescence is complete, ~print_haps()~ in ~output.cc~ is called to
+		write out the sampled haplotypes.
+		
+*** Source files
+
+		- [[file:defs.org][defs.org]] :: types used throughout cosi
+		- [[-%20file:generalmath.org][generalmath.org]] :: general math routines.
+		
+
+		
+
+		
+
+		
+

@@ -1,0 +1,85 @@
+
+Topic: cosi developer's guide
+
+This file describes the overall architecture of cosi code.
+
+The main program is <coalescent.cc>.  It calls code in <file.cc>
+which reads the parameter file and sets up the demographic model.
+This involves creating a programmatic representation of historical
+events, sorted in chronological order from the present towards the past;
+loading the recombination map; creating the initial (present-day)
+nodes for each population.  Each node's <Seglist> is initialized to
+the full segment [0,1].  
+
+Then, <sim_execute()> is called to run the simulation.  The simulator
+repeatedly samples the time until the next poisson event (coalescence
+or recombination), compares that with the time until the next historical
+event, and simulates either the poisson event or the next historical event,
+whichever is closest.
+
+When coalescence is complete, <print_haps()> in <output.cc> is called to
+write out the sampled haplotypes.
+
+Topic: Misc notes
+
+cosi was originally written in C, and is being gradually rewritten in C++.  Some parts are
+therefore still written more in C style than C++ style.
+
+Topic: Conditional defines
+
+The following conditional defines (#ifdef symbols) are used in the code:
+
+Determining supported features:
+
+  COSI_SUPPORT_COALAPX - support approximating the coalescent by restricting coalescence to nodes whose
+	   seglists nearly overlap
+		 
+
+Lesser-used options:
+
+  COSI_LONG_DOUBLE - use 'long double' instead of 'double' for most calculations
+		 
+Internal use:
+
+  COSI_DEV_PRINT - enable debugging prints
+
+	COSI_DEV_CALLGRIND - enable callgrind
+
+  COSI_TRACK_STRAIGHT_BRANCH_LENGTHS - for each <Seg>, keep the length-so-far (in generations) of the
+     straight branch ending in this Seg.
+
+  COSI_DISABLE_MUTS - if defined, mutations will not be generated
+
+  COSI_LEAFSET_TREE, COSI_LEAFSET_BITSET, COSI_LEAFSET_SIZEONLY - choice of <leafset> implementation
+
+  COSI_R2 - support efficient r^2 computation
+  
+  COSI_DEV_PRINT_COALESCED_LEN - print periodic reports of how much of the total region length has fully coalesced
+  
+  COSI_DEV_SWEEP_REDUCE_DELTA - during sweep, dynamically reduce deltaT to ensure that the step is not too big
+
+	COSI_DEV_SEGLIST_DEBUG - turn on sanity-checking for <Seglist> operations (expensive).
+	COSI_DEV_NODE_DEBUG - turn on sanity-checking for <Node> operations (expensive).
+
+	COSI_DEV_MUTCONTEXT - when simulating selected sweeps, compute for each chrom the portion of the selected mutation's
+	   original context carried by this chrom.
+
+	COSI_DEV_BINOUTPUT - option to write output not in ms format but in custom binary format
+
+Topic: Subversion conventions
+
+Subtopic: Commit message cookies
+
+
+Certain strings in Subversion commit messages identify the commit as having certain properties.
+
+DOCONLY - this commit changes only comments and/or formatting
+TINYCHG - a very minor change.
+WIP - work in progress; the changes in this commit do not add a complete feature or fix a bug, but are an
+  intermediate step in implementing some feature.
+OUTPUTCHG - this commit changes the expected output of the simulator for a given random seed.
+The distribution of the output should, of course, remain the same; but this commit may
+invalidate past test cases that checked for specific (random-seed,output) pairs.
+
+
+

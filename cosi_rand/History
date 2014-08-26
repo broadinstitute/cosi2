@@ -1,0 +1,28 @@
+May 6 2011	Replaced random number generator with mtwist package. Modified package slightly to pass back random seed 
+      		for printing. Currently opting to have no inlining (=-DMT_NO_INLINE arg to gcc), to permit ansi C 
+		compilation. Choosing of random number seed is slow (extra 0.2 sec per job); could be speeded up by 
+		short-circuiting call to /dev/urandom in mts_devseed.  
+
+May 3 2011	Remove obsolete copyright notice. Add some $Id: History,v 1.4 2011/05/06 23:13:09 sfs Exp $ lines. Tag as
+		V05-03-11a.
+
+Apr 12 2011	Import from cosi for renewed development. V04-12-11a.
+==================================================================
+Sep 22 2005	Add copyright.  V09-22-05a.  Replace as Release 1.0.
+
+Sep 16 2005	Release 1.0.
+
+Feb 4 2005	Catch rare error condition in rng.c  V02-04-05a
+
+Oct 4 2004	Added header file for ranbinom.  V10-05-04a.
+
+Oct 04 04	Added poisson.c and supporting function V10-04-04a.
+
+Sep 30 04	Removed rano.h/c and replaced with random.h (in gamma.c).  V09-30-04b.
+
+Sep 30 04	Added multinom.  V09-30-04a.
+
+Aug 19 04	Modification to clean up cosi handling of seed-setting: seed_rng now returns new seed value.
+
+Aug 19 04	First CVS version.  Just modified to make randseed a file static and to provide function to set.
+		V08-19-04a.

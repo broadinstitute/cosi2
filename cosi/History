@@ -1,0 +1,171 @@
+
+July 1  2011   Big changes:
+
+         Added "sentinel" method of detecting regions that have coalesced,
+         replacing original dg_done_coalescent() code.
+
+			Changed how mutations are placed on the genealogy: instead of tracing each
+			individual mutation down the genealogy, for each segment of each seglist
+			we compute the set of leaves that get any mutations carried by that segment.
+			These leafsets are constructed incrementally as new seglists are constructed.
+			This replaces the sim_mutate() step.
+
+			Changed the simulator to keep only the currently active nodes (those currently
+			in a Pop) and place mutations as we go along, instead of first constructing
+			the entire ARG and then placing mutations on it.  This reduces memory usage
+			and improves data locality.
+
+         Changed Seglist representation to be a flat vector of
+			[ beg_0 end_0 beg_1 end_1 ... beg_k end_k ].
+
+			Small changes:
+
+         Changed Seglist representation to be a flat vector of
+			[ beg_0 end_0 beg_1 end_1 ... beg_k end_k ].  (This lets us
+			quickly check if a location falls on a segment or in a gap,
+			by doing one binary search and checking the parity of the
+			resulting index).
+
+			Changed the remove operation on nodelists to run in constant time:
+			removed element is now replaced with the last element of the array,
+			instead of shifting all elements above the removed element.
+			This is ok since the order of nodes within a population is unimportant.
+
+June 08 2011	Remove segment.h/c (replaced by seglist). Add one "break" when getting
+     		head node. V06-07-11a.
+
+June 07 2011	Turn segments into arrays as well; no output change. V06-07-11a.
+     		(Adds seglist.h/c)
+
+June 01 2011	Turn list of recomb sites into arrays. Still no output change. 
+     		Tag as V06-01-01a.
+
+May 31 2011	Get rid of definition of rsitenum (= int). Tagged as V05-31-11a.
+
+May 26 2011	Tidying things up in a number of places: Turn poplist into array, and 
+       		eliminate poplist arguments from 2 dg_ functions (getting pop by name). 
+		No longer remobe migrations to/from non-existent pops Do not add 
+		migration if rate is zero (Historical.c deletes previous migration, and 
+		new one has no effect.) Have migration hold pop pointers, rather than 
+		names. Change dg_coalesce_by_name to dg_coalesce_by_pop. No change to 
+		output.  Tag as V05-26-11a.
+
+May 17 2011	Add protection to sweep.c, so that will not end sweep with nsel=2 (only happens for 
+       		large s).
+
+May 6 2011	One more header problem that I left behind. Removed multiplying random seed by -1, to 
+      		make compatible with transition to mtwist in cosi2_rand (rile.c). Tag as V05-06-11a. 
+		(Correction: some things weren't tagged right. Tag as V05-10-11a.)
+
+May 4 2011	Cleaned up various header-related issues. No functional changes. Tag as V05-04-11a.
+
+May 3 2011	Remove obsolete copyright notice. Add some $\ID lines. 
+      		Update to new directory for cosi2_rand header files. Added nested-header protetion to 
+		some .h files.  Tag as V05-03-11a.
+
+Apr 12 2011	Import from cosi for renewed development. Tag as V04-12-11a.
+
+=================================================================================================
+Nov 08 2010	Make error output more specific when invalid parameter is encountered in reading 
+       		file. Not tagged, but included in 
+
+Jul 19 2010	Swap indices in sweep_execute(), when deciding which gene conversion chunk has the 
+       		parental allele. The existing code was backwards (i.e. wrong), as Ilya discovered.
+
+		Tag as V071910a
+
+Jun 9 2007	Add line to geneconversion.c so that overall rate is calculated both when length 
+		and when rate set. Otherwise, specifying length param first => no gene conversion.
+
+Mar 29 2007	Remove test in sweep.c that ends sweep when down to single selected chrom, since 
+		recombination onto selected allele could still occur (should be minor effect).
+
+Nov 16 2006	Remove debugging output from sweep.c. Fix error in sweep:sw_recomb_pick_popindex, 
+		where I was incorrectly staggering random counter by 0.5, leading to possibility 
+		of picking population with zero members.
+
+Nov 15 2006	Modify sweep to output selected allele. Tag as V080906a.
+		New param format: 
+		pop_event sweep "selective sweep" 5[pop] 10000[time] .02[s] .5[pos] .4[final freq]
+
+Oct 19 2006	-g becomes -O3 in Makefile.
+
+		Tag as V080906a.
+
+Jan 27 2006	Uncovered modest conceptual bug in sweep.c: was summing probability of event over 
+		time intervals until passed random threshold. This is wrong, since the sum will
+		deterministically exceed 1.0, while the probability of nothing happens is always 
+		> 0.  Instead, calc only prob in current time slice and toss random number every slice.
+
+Jan 24 2006	Working on sweep with other populations present. Revise simulator.c to always 
+		check whether done after historical event, and change some function names
+		in demography.c to make more consistent interface.
+
+Jan 17 2006	Code modifications for speed. Now keep track of how many active nodes there
+		are for each location (i.e. for each segment), to reduce checking.
+		Also tried maintaining list of nodes associated with each segment (see forays/demography.stage2), 
+		but ran slower under most circumstances.
+		V011806a.
+
+Sep 22 2005	Add copyright.  V09-22-05a.  Replace as Release 1.0.
+
+Sep 16 2005	Release 1.0.
+
+June 21 2005	Bug fix in bottleneck.c -- require at least 2 nodes to attempt bottleneck execution.  V06-21-6a.
+
+April 26 2005 	Removed increment to time after bottleneck (historical.c), since it was screwing up historical events
+unless spaced by >= 1 gen.  V04-26-05a.
+
+Feb 4 2005	Tract length change somehow failed to get into tagged version (but was tranferred to public_html, etc)
+Retag as V02-04-05a.
+
+Nov 5 2004	Gene conversion tract length set to 500 bp.  V11-05-04a.  Moving this to public_html area.
+
+Oct 19 2004	Switched to having start end of partial sweep be number of chromosomes. V10-19-04a.
+
+Oct 18 2004	Add partial selective sweeps (either end).  V10-18-04a.
+
+Oct 10 2004	Minor tweaks to make work on MPG unix machines.  V10-14-04a.
+
+Oct 6 2004	Fixed bug in exponential expansion (malloc'd 2 instead of 3 
+slots for params).  V10-06-04b
+
+Oct 6 2004	Fixed 2 bugs.  One old one in sweep.c (overrunning array bounds, 
+used realloc), one in output.c (stray line removed). V10-06-04a.
+
+Oct 5 2004	Hardwired some code in dg_coalescent_done for speed (~15% gain 
+in a sample of 1).  Implemented infinite and finite sites.  V10-05-04a.
+
+Oct 4 2004	Cleaning up: switched to using header files instead of 
+stand-alone declarations in a few places, got rid of sim_nummuts call-through.
+Also, a few small changes to try to increase speed.  V10-04-04b.
+
+Oct 4 2004	Switched to using different poisson routine, this one 
+cosi_rand.  V10-04-04a.
+
+Oct 1 2004 	Cleaning up: removed unused file.h, removed unneeded
+comments from headers (in function declarations), made header file 
+names lower case.  V10-01-04a.
+
+Sep 29 2004	Added option of fixed number of segregating sites.
+V09-29-04a.
+
+Sep 28 2004 	Fix bug in migration: swap order of populations, so
+declared migration is forward in time. V09-28-04b.
+
+Sep 27 2004 	Change admixture to simply move some chromosomes.  Only
+change is that it no longer sets the population size of the target
+population.  V09-28-04a.
+
+Sep 24 2004 	Direct output of haps and pos files now works.  Identical
+output except for roundoff error from reading seg.  Chromosomes in
+different populations now get unique chromosome ids.  Got rid of //
+comments so everything compiles with -ansi flag.  Tag V09-24-04a.
+
+Aug 19 2004 	Update location of random.a, clean up setting of random
+seed.
+
+Aug 19 2004 	Kill seg and log output if no output file specified.  Tag
+V08-19-04a.
+
+Aug 18 2004	Moved into local CVS.  Tag V08-18-04a

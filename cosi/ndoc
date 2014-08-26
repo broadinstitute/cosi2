@@ -1,0 +1,3 @@
+#!/bin/sh
+../../../../../Tools/NaturalDocs/NaturalDocs -p ndproj -i . -o FramedHTML doc/html $@
+

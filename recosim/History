@@ -1,0 +1,31 @@
+Sep 22 2005	Add copyright.  V09-22-05a.  Replace as Release 1.0.
+
+Sep 16 2005	Release 1.0.
+
+May 26 2005	Add option of varying local recomb rate within region.  V05-26-05a
+
+May 17 2005	Return to 1 bp width for hotspots. Truncation of extreme values 
+		turned off for now.  V05-17-05a.
+
+May 4 2005	Fix typo in 5/2 bug fix.  (Compile before you commit, dummy.) V05-04-05a
+
+May 2 2005	Fixed bug: distance was only incremented 1 bp for hotspot, 
+		not spotwidth.  Sometimes leads to out-of-order points 
+		(sorted by cosi). V05-02-05a
+	
+		Also, omit conclusion of hotspot if it extends past sequence
+		length.  V050-2-05b
+
+Feb 1 2005	Fixed bug: seed was not initialized. V02-04-05a
+Nov 11 2004	Cap local rate at 10 cM/Mb.  V11-1104a
+
+Nov 5 2004	Add parameters for intensity and local variation shapes.  
+		Make hotspots be 1 kb wide.  V11-05-04a
+
+Oct 6 2004 	Add # as comment character in params file.  V10-06-04a.
+
+Oct 5 2004	Switch to using set_rng_seed. V10-05-04a.
+
+Sep 30 2004	Switched to using random.h.  V09-30-04b.
+Sep 30 2004	Moved random number seed to parameter file.
+Sep 30 2004	First CVS version; working.  V09-30-04a.

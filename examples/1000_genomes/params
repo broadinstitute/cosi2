@@ -1,0 +1,45 @@
+# in bp.
+length 250000
+
+# per bp per generation
+mutation_rate 2.36e-8
+
+gene_conversion_rate 4.5e-9
+
+recomb_file model.test
+
+pop_define 1 YRI
+pop_define 2 CEU
+pop_define 3 CHB
+
+# YRI (W Africa)
+pop_size 1 14474
+sample_size 1 100
+
+# CEU (NW Europe) (also OoA population before eur/as split)
+pop_size 2 338000
+sample_size 2 100
+
+# CHB+JPT (E Asia)
+pop_size 3 454000
+sample_size 3 100
+
+pop_event exp_change_size "eur expansion" 2 0 920 338000 1032
+pop_event exp_change_size "as expansion" 3 0 920 454000 554
+
+pop_event migration_rate "afr->eur migration" 1 2 0. .000025
+pop_event migration_rate "eur->afr migration" 2 1 0. .000025
+pop_event migration_rate "afr->as migration" 1 3 0. .0000078
+pop_event migration_rate "as->afr migration" 3 1 0. .0000078
+pop_event migration_rate "as->eur migration" 3 2 0. .0000311
+pop_event migration_rate "eur->as migration" 2 3 0. .0000311
+
+pop_event split "as/eur split" 2 3 920
+pop_event change_size "set OoA size" 2 920 1861
+
+pop_event migration_rate "afr->OoA migration" 1 2 920 .00015
+pop_event migration_rate "OoA->afr migration" 2 1 920 .00015
+
+pop_event split "out of Africa" 1 2 2040
+
+pop_event change_size "african expansion" 1 5920 7310

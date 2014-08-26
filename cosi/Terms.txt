@@ -1,0 +1,46 @@
+Title: Terms
+
+Terms and concepts used throughout the documentation.
+
+Term: recombination
+
+Short for "crossover recombination".
+
+Term: end
+
+The generation at which an event ends, in the forward sense; in other words, the
+generation at which we first encounter the event when simulating backwards.
+
+Term: start
+
+The generation at which an event starts, in the forward sense; when simulating backwards,
+this is the last generation at which we see the effects of the event.
+
+Term: sampling loc
+
+Sometimes we are running simulations to get the sampling distribution of a statistic at a particular
+location within the simulated region (relative to a specific genetic map).
+In such a case we can greatly optimize the simulation by ignoring details that do not affect
+the value of that statistic at that location.  For example, if computing an iHH-based statistic at
+given location, we may be able to ignore recombination events in the direction away from the location.
+
+Term: leaf
+
+An ARG node of generation 0.0, representing a present-day individual chrom sampled from a present-day population.
+
+Term: ARG
+
+Ancestral Recombination Graph.  Note that during a simulation, cosi keeps only the active frontier
+of the ARG (nodes that do not yet have a parent).  So 'ARG' in the documentation may refer either to
+the full ARG, or to the small subset of the ARG that we actually keep.
+
+Term: region
+
+The simulated region
+
+Term: simulation
+
+One simulation replica.  In other contexts "simulation" might refer to multiple replicas,
+but in cosi documentation "simulation" refers to a single simulation replica.  One cosi run
+can involve doing a number of simulation replicas, "simulations" for short.
+
