@@ -49,7 +49,8 @@ CoSiMain::CoSiMain():
 #ifdef COSI_SUPPORT_COALAPX	
 	, maxCoalDist( 1.0 ), maxCoalDistCvxHull( False )
 #endif
-	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 )
+	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
+							 outputARGedges( False )
 {
 }
 
@@ -122,6 +123,12 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 		 ( "write-tree-stats,T", po::bool_switch(&outputTreeStats), "output tree stats" )
 		 ( "write-mut-ages,M", po::bool_switch(&outputMutGens), "output mutation ages" )
 		 ( "write-recomb-locs,L", po::bool_switch(&outputRecombLocs), "output recombination locations" )
+		 ( "output-ARG,e", po::bool_switch(&outputARGedges), "output ARG edges.  Edges are written in ms output format (see -m option"
+			 "), one per line, after the '//' line but before the 'segsites: ' line of each simulation. "
+			 "Format is:\n\tE <edgeKind> <node_1_id> <node_2_id> <node_1_generation> <node_2_generation> <seg_1_beg> <seg_1_end> ... <seg_k_beg> <seg_k_end>.\n"
+			 "Edge kinds are: R, recombination; G, gene conversion; C, coalescence. "
+			 "seg_i_beg, seg_i_end give chromosomal segments inherited along the edge; locations are values in [0.0,1.0] representing locations "
+			 "within the simulated region.")
 		 ( "write-mut-contexts,C", po::value(&outputMutContextsFor)->value_name( "position" ),
 			 "output mutation contexts for these locations" );
 
@@ -241,12 +248,14 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( condSnpDef ) cosi.set_condSnpDef( boost::make_shared<CondSnpDef>( *this->condSnpDef ) );
 #endif
 		cosi.set_recombfileFN( this->recombfileFN );
+		cosi.set_outputARGedges( this->outputARGedges );
 
 		cosi.setUpSim( paramfile, randGen );
 		if ( simNum == 0 ) {
 			randGen = cosi.getRandGen();
 			if ( !msOutput ) std::cerr << "coalescent seed: " << randGen->getSeed() << "\n";
 			if ( msOutput ) {
+				std::cout.precision( outputPrecision );
 				std::cout << "ms " << cosi.getDemography()->getTotSamples() << " " << nsims << "\n";
 				std::cout << "cosi_rand " << randGen->getSeed() << "\n\n";
 			}
@@ -256,7 +265,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		MutlistP muts = make_shared<Mutlist>();
 		cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist>( muts ) );
 
-		if ( msOutput ) cout << "// seed=" << randGen->getSeed() << endl;
+		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << endl; }
 	
 		ParamFileReaderP params = cosi.getParams();
 		genid endGen = cosi.runSim();

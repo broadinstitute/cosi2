@@ -12,6 +12,7 @@
 
 #include <utility>
 #include <vector>
+#include <string>
 #include <boost/shared_ptr.hpp>
 #include <cosi/defs.h>
 #include <cosi/mutcontext.h>
@@ -42,6 +43,34 @@ void print_haps( DemographyP demography, const string& filebase, len_bp_int_t le
 
 void print_mut_contexts( DemographyP demography, const string& filebase, len_bp_int_t length,
 												 const mutcontext::mutContexts_t& mutContexts );
+
+class ARGOutputHook: public Hook {
+public:
+	 // Virtual method: handle_add_edge
+	 //
+	 // Called after adding an edge to the ARG.  The new edge may be the result of a coalescence,
+	 // a recombination or a gene conversion.
+	 //
+	 // Params:
+	 //
+	 //   nodeId_moreRecent - <nodeid> of the more recent (lower gen) node of the edge
+	 //   nodeId_lessRecent - <nodeid> of the less recent (higher gen) node of the edge.
+	 //   genId_moreRecent - <genid> of the more recent (lower gen) node of the edge
+	 //   genId_lessRecent - <genid> of the less recent (higher gen) node of the edge.
+	 //   seglist - the segments inherited along the edge.  NOTE: this seglist may be destroyed
+	 //       after the call, so make a copy if you need to save it.
+	 //       
+	 virtual void handle_add_edge( nodeid nodeId_moreRecent,
+																 nodeid nodeId_lessRecent,
+																 genid genId_moreRecent,
+																 genid genId_lessRecent, const Seglist *seglist,
+																 edge_kind_t edgeKind );
+	 virtual ~ARGOutputHook();
+	 
+private:
+	 static char edgeKind2code( edge_kind_t edgeKind );
+	 
+}; // class ARGOutputHook
 
 }  // namespace cosi
 

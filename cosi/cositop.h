@@ -103,6 +103,10 @@ private:
 	 // Field: stopAfterMinutes
 	 // If positive, stop simulation after this many minutes (rather than after a given number has been simulated)
 	 double stopAfterMinutes;
+
+	 // Field: outputARGedges
+	 // Whether to print ARG edges to stdout.
+	 bool_t outputARGedges;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

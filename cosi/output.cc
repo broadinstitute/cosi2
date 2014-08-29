@@ -142,6 +142,33 @@ void print_mut_contexts( DemographyP demography, const string& filebase, len_bp_
 			}
 		}
 	}
+}  // print_mut_contexts
+
+//
+// Class impl: ARGOutputHook
+//
+
+void ARGOutputHook::handle_add_edge( nodeid nodeId_moreRecent,
+																		 nodeid nodeId_lessRecent,
+																		 genid genId_moreRecent,
+																		 genid genId_lessRecent, const Seglist *seglist,
+																		 edge_kind_t edgeKind ) {
+	std::cout << "E " << edgeKind2code( edgeKind ) << " " << nodeId_moreRecent << " " << nodeId_lessRecent << " "
+						<< genId_moreRecent << " " << genId_lessRecent;
+
+	BOOST_FOREACH( const seglist::Seg& s, *seglist )
+		std::cout << " " << s.getBeg() << " " << s.getEnd(); 
+
+	std::cout << "\n";
 }
+
+char ARGOutputHook::edgeKind2code( edge_kind_t edgeKind ) {
+	assert( edgeKind == EDGE_RECOMB || edgeKind == EDGE_GC || edgeKind == EDGE_COAL );
+	assert( int(EDGE_RECOMB) == 0  && int(EDGE_GC) == 1 && int(EDGE_COAL) == 2 ); 
+	return "RGC"[ int(edgeKind) ];
+}
+
+
+ARGOutputHook::~ARGOutputHook() { }
 
 }  // namespace cosi

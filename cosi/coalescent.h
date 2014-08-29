@@ -75,6 +75,7 @@ public:
 	 void set_sweepFracSample( bool sweepFracSample_ ) { this->sweepFracSample = sweepFracSample_; }
 	 void set_condSnpDef( CondSnpDefP condSnpDef_ ) { this->condSnpDef = condSnpDef_; }
 	 void set_recombfileFN( filename_t recombfileFN_ ) { this->recombfileFN = recombfileFN_; }
+	 void set_outputARGedges( bool outputARGedges_ ) { outputARGedges = outputARGedges_; }
 	 
 	 //
 	 // Group: Running the simulation
@@ -236,6 +237,10 @@ protected:
 	 // Field: recombfileFN
 	 // If non-empty, overrides the recomb file specified in the paramfile
 	 filename_t recombfileFN;
+
+	 // Field: outputARGedges
+	 // Whether to print ARG edges to stdout.
+	 bool_t outputARGedges;
 
 };  // class CoSi
 

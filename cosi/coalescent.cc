@@ -33,6 +33,7 @@
 #include <cosi/sweep2.h>
 #include <cosi/sweep3.h>
 #include <cosi/condsnp.h>
+#include <cosi/output.h>
 
 namespace cosi {
 
@@ -49,7 +50,7 @@ CoSi::CoSi(): segfp( NULL ), logfp( NULL ), verbose( False ),
 #ifdef COSI_SUPPORT_COALAPX							
 						, maxCoalDist( plen_t( 1.0 ) ), maxCoalDistCvxHull( False )
 #endif
-						, genMapShift( 0 ), sweepFracSample( False )
+						, genMapShift( 0 ), sweepFracSample( False ), outputARGedges( False )
 {
 	seglist::seglist_init_module();
 }
@@ -82,6 +83,10 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
 
 	if ( condSnpDef ) {
 		hooks->addHook( condSnpMgr = make_shared<CondSnpMgr>( demography, *condSnpDef ) );
+	}
+
+	if ( outputARGedges ) {
+		hooks->addHook( make_shared<ARGOutputHook>() );
 	}
 	
 	//if ( treeSizeOnly ) nodePool->setOutputMuts( False );
