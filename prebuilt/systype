@@ -4,7 +4,7 @@
 # Script: systype
 #
 # Determines system type (architecture + operating system), and prints a string representing the system type.
-# Adapted from dotkit.
+# Adapted from dotkit, including modifications added by Broad Institute IT.
 #
 
 # Usage:
@@ -14,8 +14,8 @@
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 export PATH
 
-if [ -r /etc/home.config ]; then
-  SYS_TYPE=`grep SYS_TYPE /etc/home.config | cut -d" " -f2`
+if [ -r /etc/dotkit.config ]; then
+  SYS_TYPE=`grep SYS_TYPE /etc/dotkit.config | cut -d" " -f2`
   echo $SYS_TYPE
   exit
 fi
@@ -34,11 +34,17 @@ case "$us$um" in
       v5.*) SYS_TYPE="tru64_5";;
       *) guess="tru64_5"
     esac;;
-  sunos*) SYS_TYPE="solaris_8_s64";;
+  sunos*)
+    case "$ur" in
+      5.10) SYS_TYPE="solaris_10_i86pc";;
+			*) guess="solaris_8_s64";;
+    esac;;
+
   darwin*i386)
     case "$ur" in
       8.*) SYS_TYPE="macos_104_x86";;
       9.*) SYS_TYPE="macos_105_x86";;
+      10.*) SYS_TYPE="macos_106_x86";;
     esac;;
   darwin*)
     case "$ur" in
@@ -48,18 +54,41 @@ case "$us$um" in
       9.*) SYS_TYPE="macos_105";;
       *) guess="macos_10a"
     esac;;
+  freebsd*)
+    rn=`echo $ur | sed 's/\([0-9]*\)\..*/\1/'`
+    SYS_TYPE="freebsd_${rn}_${um}"
+    ;;   
   linux*86*)
     dtype= rn= ar=
+
+    # Fedora Tests
     if test -f /etc/fedora-release; then
       dtype=fedora
       rn=`sed 's/.*elease \([0-9][0-9]*\).*/\1/' /etc/fedora-release`
+    # SuSE tests
+    elif test -f /etc/SuSE-release; then
+      if grep -i -q "enterprise" /etc/SuSE-release; then
+         #dtype=sles if you want to differentiate between opensuse and SLES.
+         dtype=suse
+      else 
+         dtype=suse
+      fi
+      rn=`grep VERSION /etc/SuSE-release | sed 's/.*VERSION = \([0-9]*\).*/\1/'`
+
+    # Redhat/CentOS tests 
+    # We treat CentOS == RedHat
     elif test -f /etc/redhat-release; then
-      dtype=`sed -e 's/.*[Ee]nterprise.*/rhe/' \
-                 -e 's/.*[Ll]inux.*/redhat/' /etc/redhat-release`
+#      dtype=`sed -e 's/.*[Ee]nterprise.*/rhe/' \
+#                 -e 's/.*[Ll]inux.*/redhat/' /etc/redhat-release`
+      dtype=redhat
       rn=`sed 's/.*elease \([0-9][0-9]*\).*/\1/' /etc/redhat-release`
+    elif test -f /etc/lsb-release; then
+      . /etc/lsb-release
+      dtype=`echo $DISTRIB_ID | tr '[A-Z]' [a-z]`
+      rn=$DISTRIB_CODENAME
     fi
     case "$um" in
-      i[36]86) ar=ia32;;
+      i[3456]86) ar=ia32;;
       *64) ar=x86_64;;
     esac
     if test -z "$dtype"; then
