@@ -1,0 +1,103 @@
+#!/bin/sh
+
+#
+# Script: systype
+#
+# Determines system type (architecture + operating system), and prints a string representing the system type.
+# Adapted from dotkit.
+#
+
+# Usage:
+#   SYS_TYPE=`/path/to/systype`          in sh, ksh, zsh, bash
+#   setenv SYS_TYPE `/path/to/systype`   in csh, tcsh
+
+PATH=/bin:/usr/bin:/usr/sbin:/sbin
+export PATH
+
+if [ -r /etc/home.config ]; then
+  SYS_TYPE=`grep SYS_TYPE /etc/home.config | cut -d" " -f2`
+  echo $SYS_TYPE
+  exit
+fi
+
+um="`uname -m | tr '[A-Z]' '[a-z]'`"
+ur="`uname -r | tr '[A-Z]' '[a-z]'`"
+us="`uname -s | tr '[A-Z]' '[a-z]'`"
+SYS_TYPE=unknown
+guess=
+
+case "$us$um" in
+  aix*) SYS_TYPE="aix_4";;
+  osf*)
+    case "$ur" in
+      v4.*) SYS_TYPE="tru64_4";;
+      v5.*) SYS_TYPE="tru64_5";;
+      *) guess="tru64_5"
+    esac;;
+  sunos*) SYS_TYPE="solaris_8_s64";;
+  darwin*i386)
+    case "$ur" in
+      8.*) SYS_TYPE="macos_104_x86";;
+      9.*) SYS_TYPE="macos_105_x86";;
+    esac;;
+  darwin*)
+    case "$ur" in
+      6.*) SYS_TYPE="macos_10";;
+      7.*) SYS_TYPE="macos_10a";;
+      8.*) SYS_TYPE="macos_104";;
+      9.*) SYS_TYPE="macos_105";;
+      *) guess="macos_10a"
+    esac;;
+  linux*86*)
+    dtype= rn= ar=
+    if test -f /etc/fedora-release; then
+      dtype=fedora
+      rn=`sed 's/.*elease \([0-9][0-9]*\).*/\1/' /etc/fedora-release`
+    elif test -f /etc/redhat-release; then
+      dtype=`sed -e 's/.*[Ee]nterprise.*/rhe/' \
+                 -e 's/.*[Ll]inux.*/redhat/' /etc/redhat-release`
+      rn=`sed 's/.*elease \([0-9][0-9]*\).*/\1/' /etc/redhat-release`
+    fi
+    case "$um" in
+      i[36]86) ar=ia32;;
+      *64) ar=x86_64;;
+    esac
+    if test -z "$dtype"; then
+      guess="rhe_3_${ar:-unknown}"
+    else
+      SYS_TYPE="${dtype}_${rn:-00}_${ar:-unknown}"
+    fi
+    ;;
+  irix*) SYS_TYPE="irix_6.5_64";;
+  hp-ux*) SYS_TYPE="hpux_11";;
+  cygwin*x86_64) SYS_TYPE="cygwin_x86_64";;
+  *) echo "SYS_TYPE: system type unknown: $us $um $ur" >&2 ;;
+esac
+
+if test -n "$guess"; then
+  echo "SYS_TYPE: system release unknown, guessing $guess" >&2
+  SYS_TYPE=$guess
+fi
+echo $SYS_TYPE
+test "$SYS_TYPE" != "unknown"
+exit
+
+------------------------------------------------------------------------
+# collected results from various systems
+
+SYS_TYPE	system-machine		release numbers
+-------------	----------------	---------------
+
+aix_4		AIX-000007074C00	3
+tru64_4		OSF1-alpha		V4.0
+tru64_5sc	OSF1-alpha		V5.1
+redhata_6	Linux-alpha		2.4.2
+
+solaris_8_s64	SunOS-sun4u		5.6 5.7
+redhat_8_ia32	Linux-i686		2.4.18
+redhat_7_ia32	Linux-i686		2.4.2 2.4.5 2.4.6 2.4.7
+redhat_6_ia32	Linux-i686		2.2.19 2.2.19smp
+irix_6.5_64	IRIX64-IP25		6.5
+macos_10	Darwin			10.1,10.2
+redhatEnt_3_x86_64  linux-x86_64        2.4.21-1.1931.2.393.entsmp
+cygwin_x86_64	cygwin-x86_64		1.7.32(0.274/5/3)
