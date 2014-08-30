@@ -1,0 +1,7 @@
+coalescent  -I../../../cosi/cosi/.. -isystem ../../../cosi/cosi/boost -DNDEBUG -DCOSI_TRACK_LAST_COAL -DCOSI_SUPPORT_COALAPX -UHAVE_UNSIGNED_LONG_LONG_INT -Uuintmax_t -std=gnu++11 -O3 -O3 -O3
+libcosi  -I../../../cosi/cosi/.. -isystem ../../../cosi/cosi/boost -DNDEBUG -DCOSI_TRACK_LAST_COAL -DCOSI_SUPPORT_COALAPX -UHAVE_UNSIGNED_LONG_LONG_INT -Uuintmax_t -std=gnu++11 -O3 -O3 -O3
+g++ (GCC) 4.8.2
+Copyright (C) 2013 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
