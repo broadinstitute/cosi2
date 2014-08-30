@@ -99,6 +99,7 @@ case "$us$um" in
     ;;
   irix*) SYS_TYPE="irix_6.5_64";;
   hp-ux*) SYS_TYPE="hpux_11";;
+  cygwin*i686) SYS_TYPE="cygwin_i686";;
   cygwin*x86_64) SYS_TYPE="cygwin_x86_64";;
   *) echo "SYS_TYPE: system type unknown: $us $um $ur" >&2 ;;
 esac
