@@ -42,17 +42,21 @@ case "$us$um" in
 
   darwin*i386)
     case "$ur" in
-      8.*) SYS_TYPE="macos_104_x86";;
-      9.*) SYS_TYPE="macos_105_x86";;
-      10.*) SYS_TYPE="macos_106_x86";;
+      8.*) SYS_TYPE="macos_104_i386";;
+      9.*) SYS_TYPE="macos_105_i386";;
+      10.*) SYS_TYPE="macos_106_i386";;
+      11.*) SYS_TYPE="macos_107_i386";;
+      12.*) SYS_TYPE="macos_108_i386";;
+      13.*) SYS_TYPE="macos_109_i386";;
     esac;;
-  darwin*)
+  darwin*x86_64)
     case "$ur" in
-      6.*) SYS_TYPE="macos_10";;
-      7.*) SYS_TYPE="macos_10a";;
-      8.*) SYS_TYPE="macos_104";;
-      9.*) SYS_TYPE="macos_105";;
-      *) guess="macos_10a"
+      8.*) SYS_TYPE="macos_104_x86_64";;
+      9.*) SYS_TYPE="macos_105_x86_64";;
+      10.*) SYS_TYPE="macos_106_x86_64";;
+      11.*) SYS_TYPE="macos_107_x86_64";;
+      12.*) SYS_TYPE="macos_108_x86_64";;
+      13.*) SYS_TYPE="macos_109_x86_64";;
     esac;;
   freebsd*)
     rn=`echo $ur | sed 's/\([0-9]*\)\..*/\1/'`
@@ -105,7 +109,7 @@ case "$us$um" in
 esac
 
 if test -n "$guess"; then
-  echo "SYS_TYPE: system release unknown, guessing $guess" >&2
+  echo "SYS_TYPE: system release unknown ($ur), guessing $guess" >&2
   SYS_TYPE=$guess
 fi
 echo $SYS_TYPE
