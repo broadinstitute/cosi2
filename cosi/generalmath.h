@@ -44,6 +44,7 @@
 #include <boost/io/ios_state.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/type_traits/integral_constant.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/mpl/assert.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/map.hpp>
@@ -1372,7 +1373,7 @@ public:
 #endif
 
    void save( filename_t filename ) const {
-     std::ofstream out( filename );
+     boost::filesystem::ofstream out( filename );
      out.exceptions( std::ios_base::failbit | std::ios_base::badbit );
      out.precision( 20 );
      out << "x\ty\n";
@@ -1381,7 +1382,7 @@ public:
    }
    
    void load( filename_t filename ) {
-     std::ifstream inFile( filename );
+     boost::filesystem::ifstream inFile( filename );
      inFile.exceptions( std::ios_base::failbit | std::ios_base::badbit );
      clear();
      size_t lineNum = 0;
