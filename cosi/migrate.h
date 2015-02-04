@@ -24,6 +24,7 @@ public:
 	 // Set the rate of migration between two specified pops, overriding any existing rate.
 	 void migrate_set_rate (popid from, popid to, prob_per_chrom_per_gen_t rate);
 
+	 void migrate_delete_all_for_pop( popid );
 	 
 	 struct MigrateRate {
 			Pop* frompop;

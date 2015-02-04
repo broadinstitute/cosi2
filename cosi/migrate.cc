@@ -57,6 +57,20 @@ Migrate::migrate_delete (popid from, popid to) {
 }
 
 
+void 
+Migrate::migrate_delete_all_for_pop (popid pop) {
+	PRINT2( "deleting_all_migrations_involving", pop );
+  for ( MigrateRate **cur = &migrations; *cur; cur = &( (*cur)->next ) ) {
+		if ( (*cur)->frompop->pop_get_name() == pop || (*cur)->topop->pop_get_name() == pop ) {
+			MigrateRate *to_del = *cur;
+			*cur = (*cur)->next;
+			free( to_del );
+			return;
+		}
+  }
+}
+
+
 prob_per_gen_t
 Migrate::migrate_get_all_nodes_rate () const
 {
