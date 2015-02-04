@@ -531,7 +531,7 @@ public:
    void add( idx_t itemIdx, T delta ) {
 		 assert( itemIdx > 0 );
 		 ensureCapacity( itemIdx+1 );
-		 assert( itemIdx < partialSums.size() );
+		 assert( itemIdx < static_cast<idx_t>( partialSums.size() ) );
 	   for (; itemIdx < isize( partialSums ); itemIdx += ( itemIdx & -itemIdx ) ) {
 				partialSums[ itemIdx ] += delta;
 				assert( partialSums[ itemIdx ] >= T(-1e-10) );
