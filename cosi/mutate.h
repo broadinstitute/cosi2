@@ -70,6 +70,10 @@ public:
 	 prob_per_len_per_gen_t getMu() const { return mutate_mu; }
 	 len_bp_t getLength() const { return mutate_chrom_len_bp; }
 
+	 void setFreqsOnly( bool_t freqsOnly_ ) { freqsOnly = freqsOnly_; }
+	 void setDemography( const Demography *demography_ ) { demography = demography_; }
+	 void writeTreeSize() const;
+
 private:
 	 // Field: mutProcessor
 	 // The object that receives the mutations generated during the simulation.
@@ -97,6 +101,12 @@ private:
 	 // Field: waitInitialized
 	 // Whether we have chosen the first wait time, until the first mutation.
 	 bool_t waitInitialized;
+
+	 bool_t freqsOnly;
+	 gens_t totTreeSize;
+	 const Demography *demography;
+	 std::vector<nchroms_t> edgeDerCounts;
+	 std::vector<gens_t> edgeLens;
 	 
 };  // class Mutate
 

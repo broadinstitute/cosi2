@@ -6,6 +6,9 @@
 #include <iostream>
 #include <iterator>
 #include <algorithm>
+#include <numeric>
+#include <boost/range/numeric.hpp>
+#include <boost/range/algorithm/copy.hpp>
 #include <cosi/mutate.h>
 #include <cosi/mutlist.h>
 #include <cosi/demography.h>
@@ -20,7 +23,7 @@ void MutProcessor::postprocess() {}
 
 Mutate::Mutate( RandGenP randGen_, prob_per_bp_per_gen_t mu_, len_bp_t chrom_len_bp_, bool_t /*treeSizeOnly_*/ ):
 	HasRandGen( randGen_ ), mutate_mu( mu_ * chrom_len_bp_ ), mutate_chrom_len_bp( chrom_len_bp_ ),
-	waitInitialized( False ) {
+	waitInitialized( False ), freqsOnly( False ), totTreeSize( 0.0 ), demography(NULL) {
 	setMutProcessor( boost::make_shared<MutProcessor>() );
 }
 
@@ -54,6 +57,16 @@ void Mutate::mutate_print_leafset (loc_t loc, leafset_p leaves, genid gen, popid
 #ifndef COSI_DISABLE_MUTS
 void Mutate::mutate_put_muts_on_seglist( const Seglist *seglist, gens_t edge_gens,
 																				 genid edgeMinGen, popid popName ) {
+
+#ifdef COSI_FREQONLY
+	if ( freqsOnly ) {
+		edgeLens.push_back( edge_gens );
+		const std::valarray<nchroms_t>& chromCounts = seglist::seglist_first_seg_const( seglist )->leafset->chromCounts;
+		for ( size_t i = 0; i < chromCounts.size(); i++ )
+			 edgeDerCounts.push_back( chromCounts[i] );
+		return;
+	}
+#endif	
 
 	if ( !waitInitialized ) {
 		/* Choose the "wait time" until the first mutation. */
@@ -101,6 +114,26 @@ void Mutate::mutate_put_muts_on_seglist( const Seglist *seglist, gens_t edge_gen
   }  /* if ( !seglist_is_empty( seglist ) && edge_gens > 0 ) */
 }  /* Mutate::mutate_put_muts_on_seglist() */
 #endif // #ifndef COSI_DISABLE_MUTS
+
+void Mutate::writeTreeSize() const {
+	if ( freqsOnly ) {
+		std::vector<nchroms_t>::const_iterator it = edgeDerCounts.begin();
+		int npops = demography->dg_get_num_pops();
+
+		std::ostream_iterator<nchroms_t> out_it( std::cout, "\t" );
+		gens_t totGens = boost::accumulate( edgeLens, static_cast<gens_t>(0.0) );
+//		double factor = ( static_cast<gens_t>( 100000000.0 ) / totGens );
+		BOOST_FOREACH( gens_t edgeLen, edgeLens ) {
+			//std::cout << static_cast<unsigned long>( ToDouble( edgeLen ) * factor ) << "\t";
+			std::cout << ( edgeLen / totGens ) << "\t";
+			// (void)edgeLen;
+			// (void)totGens;
+			std::copy( it, it+npops, out_it );
+			std::cout << "\n";
+			std::advance( it, npops );
+		}
+	}
+}
 
 }  // namespace cosi
 

@@ -135,15 +135,15 @@ COSISOURCES = $(srcdir)/coalesce.cc $(srcdir)/coalescent.cc $(srcdir)/demography
 	$(srcdir)/sweep.cc $(srcdir)/sweep1.cc $(srcdir)/sweep2.cc $(srcdir)/sweep3.cc $(srcdir)/genmap.cc $(srcdir)/stats.cc $(srcdir)/hooks.cc \
 	$(srcdir)/traj.cc $(srcdir)/cositop.cc $(srcdir)/mutcontext.cc \
 	$(srcdir)/condsnp.cc $(srcdir)/hullmgr.cc $(srcdir)/utils.cc $(srcdir)/arrival.cc $(srcdir)/cosirand.cc $(srcdir)/gauss_legendre.c \
-	$(srcdir)/mempool.cc $(srcdir)/leafset-tree.cc
+	$(srcdir)/mempool.cc $(srcdir)/leafset-tree.cc $(srcdir)/leafset-counts.cc
 
 libcosi_la_SOURCES = coalesce.cc coalescent.cc demography.cc file.cc geneconversion.cc historical.cc \
 	migrate.cc mutate.cc mutlist.cc node.cc output.cc pop.cc recomb.cc seglist.cc segsumm.cc simulator.cc \
 	sweep.cc sweep1.cc sweep2.cc sweep3.cc genmap.cc stats.cc hooks.cc traj.cc cositop.cc \
 	callgrind.h defs.h coalesce.h demography.h ehh.h ehh.cc file.h geneconversion.h historical.h leafset.h \
-	leafset-bitset.h leafset-tree.h leafset-sizeonly.h leafset-sizeonly.cc mutcontext.cc \
+	leafset-bitset.h leafset-tree.h leafset-sizeonly.h leafset-sizeonly.cc leafset-counts.h mutcontext.cc \
 	migrate.h mutate.h node.h nodefwd.h nodelist.h output.h pop.h popfwd.h recomb.h seglist.h seglistfwd.h \
-	seglistfwd2.h segsumm.h simulator.h \
+	seglistfwd2.h segsumm.h simulator.h cositop.h \
 	sweep.h sweep1.h sweep2.h sweep3.h recomb.h genmap.h stats.h traj.h decls.h hooks.h \
 	coalrate.h condsnp.h condsnp.cc \
 	mutcontext.h hullmgr.h hullmgr.cc \
@@ -168,7 +168,7 @@ subpkginclude_HEADERS = coalescent.h mutlist.h defs.h utildefs.h cositop.h
 #if EHH
 #libcosi_la_SOURCES += leafset-bitset.cc
 #else
-libcosi_la_SOURCES += leafset-tree.cc
+libcosi_la_SOURCES += leafset-tree.cc leafset-counts.cc
 #endif
 
 #COSI_CXX_FLAGS_DEBUG += -O0 -UNDEBUG -D_GLIBCXX_DEBUG -fno-inline-functions -ggdb3
@@ -176,7 +176,7 @@ libcosi_la_SOURCES += leafset-tree.cc
 COSISTATICSOURCES=$(COSISOURCES) $(srcdir)/cosimain.cc $(libprogopt_la_SOURCES) $(libcosifilesystem_la_SOURCES) $(libcosiserialization_la_SOURCES) $(libcositimer_la_SOURCES) $(libcosichrono_la_SOURCES) $(srcdir)/../cosi_rand/mtwist.c $(srcdir)/../cosi_rand/poisson.c $(srcdir)/../cosi_rand/ranbinom.c $(srcdir)/../cosi_rand/gammln.c $(srcdir)/../cosi_rand/rng.c $(srcdir)/../cosi_rand/expdev.c $(srcdir)/../cosi_rand/gamma.c
 
 coalescent_static: $(COSISTATICSOURCES)
-	g++ -v -static -o $@ -I$(srcdir)/.. -I$(srcdir)/boost $(COSI_CPPFLAGS) $(COSI_CXXFLAGS) -Wno-error -pipe $(COSISTATICSOURCES) -lrt -lpthread
+	g++ -v -static -o $@ -I$(srcdir)/.. -I$(srcdir)/boost $(COSI_CPPFLAGS) $(CPPFLAGS) $(COSI_CXXFLAGS) $(CXXFLAGS)  -Wno-error -pipe $(COSISTATICSOURCES) -lrt -lpthread
 
 # End section: Building cosi
 
@@ -193,7 +193,7 @@ check_SCRIPTS =
 include cositests.am
 
 check_PROGRAMS += seglist_test funcs_test test_funcs test_arrproc
-seglist_test_SOURCES = seglist_test.cc seglist.cc seglist.h leafset-tree.h leafset-tree.cc leafset.h segsumm.h segsumm.cc \
+seglist_test_SOURCES = seglist_test.cc seglist.cc seglist.h leafset-tree.h leafset-tree.cc leafset-counts.cc leafset-counts.h leafset.h segsumm.h segsumm.cc \
 	utils.h utils.cc defs.h utildefs.h typedval.h mempool.h mempool.cc
 seglist_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
 seglist_test_CXXFLAGS = $(COSI_CXXFLAGS)

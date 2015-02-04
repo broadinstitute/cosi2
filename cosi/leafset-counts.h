@@ -5,21 +5,23 @@
  * Code for manipulating sets of leaves of the ARG (corresponding to present-day <chroms>).
  */
 
-#ifndef __INCLUDE_COSI_LEAFSET_TREE_H
-#define __INCLUDE_COSI_LEAFSET_TREE_H
+#ifndef __INCLUDE_COSI_LEAFSET_COUNTS_H
+#define __INCLUDE_COSI_LEAFSET_COUNTS_H
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <stack>
+#include <valarray>
+#include <vector>
 #include <boost/intrusive_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <cosi/defs.h>
 #include <cosi/utils.h>
 
 namespace cosi {
-namespace leafset_tree {
+namespace leafset_counts {
 
 /* Type: leaf_id_t */
 /* Identifier of one leaf node of the ARG, representing a present-day <chrom>. */
@@ -33,6 +35,11 @@ typedef leafset_struct leafset_t;
 typedef boost::intrusive_ptr<leafset_t> leafset_p;
 leafset_t * const LEAFSET_NULL = ((leafset_t * const)NULL);
 
+extern const std::vector< popid > *leafset_leaf2popName;
+extern const std::vector<pop_idx_t> *leafset_popname2idx;
+extern int leafset_npops;
+
+
 // Struct: leafset_t
 // A set of leaves, i.e. present-day chroms.
 //
@@ -42,30 +49,23 @@ leafset_t * const LEAFSET_NULL = ((leafset_t * const)NULL);
 //
 struct leafset_struct: public util::refcounted<leafset_struct> {
 public:
-	 // Field: size
-	 // Number of leaves in the leafset.
-	 nchroms_t size;
+	 // Field: chromCounts
+	 // For each popidx, the number of chroms in that pop in this leafset.
+	 std::valarray<nchroms_t> chromCounts;
 	 
-	 // Field: leafId
-	 // If this is a singleton leafset representing one leaf,
-	 // the id of that leaf; otherwise, <NULL_LEAF_ID>.
-	 leaf_id_t leafId;
-
-	 // Fields: children
-	 // If this is a singleton leafset representing one leaf,
-	 // then LEAFSET_NULL, else the two leafsets whose disjoint
-	 // union equals this leafset.
-	 leafset_p childA,childB; 
-
    void* operator new (size_t size);
    void operator delete (void *p);
 
 	 leafset_struct( leaf_id_t leafId_ ):
-		 size( 1 ), leafId( leafId_ ) {}
+		 chromCounts( 0, leafset_npops ) {
+		 ::cosi::util::chk( leafset_leaf2popName, "did not set leafset info" );
+		 popid popName = (*leafset_leaf2popName)[ leafId_ ];
+		 pop_idx_t popidx = (*leafset_popname2idx)[ ToInt( popName ) ];
+		 chromCounts[ popidx ] = 1;
+	 }
 
 	 leafset_struct( leafset_p childA_, leafset_p childB_ ):
-		 size( childA_->size + childB_->size ), leafId( NULL_LEAF_ID ), childA( childA_ ), childB( childB_ ) { }
-
+		 chromCounts( childA_->chromCounts + childB_->chromCounts ) { }
 	 
 #ifdef COSI_R2
 	 
@@ -114,7 +114,7 @@ leafset_p leafset_difference( leafset_p leafset1, leafset_p leafset2 );
 
 const char *leafset_str( leafset_p  );
 
-inline bool_t leafset_is_singleton( leafset_p leafset, leaf_id_t leaf ) { return leafset->leafId == leaf; }
+//inline bool_t leafset_is_singleton( leafset_p leafset, leaf_id_t leaf ) { return leafset->leafId == leaf; }
 
 void leafset_print( leafset_p leafset );
 
@@ -126,53 +126,25 @@ inline bool_t leafset_may_differ( leafset_p leafset1, leafset_p leafset2) { retu
 
 inline
 nchroms_t leafset_size( leafset_p leafset ) {
-	return leafset_is_empty( leafset ) ? 0 : leafset->size;
+	return leafset_is_empty( leafset ) ? 0 : leafset->chromCounts.sum();
 }
 
 inline bool leafset_is_full( leafset_p leafset ) { return leafset_size( leafset ) == leafset_get_max_leaf_id(); }
 
-template <class OutputIter>
-void leafset_get_leaves( leafset_p leafset, OutputIter result ) {
-	if ( !leafset_is_empty( leafset ) ) {
-		std::stack<const leafset_t *> s;
-		s.push( leafset.get() );
-		while( !s.empty() ) {
-			const leafset_t *p = s.top();
-			s.pop();
-			if ( p->leafId != NULL_LEAF_ID ) {
-				*result++ = p->leafId;
-			} else {
-				s.push( p->childA.get() );
-				s.push( p->childB.get() );
-			}
-		}
-	}
-}
+// template <class OutputIter>
+// void leafset_get_leaves( leafset_p leafset, OutputIter result ) {
+// 	assert(0);
+// }
 
-#define COSI_FOR_LEAFSET(leafset,leaf_var,body) do {	\
-		std::stack<const leafset_t *> s;									\
-		s.push( leafset.get() );													\
-		while( !s.empty() ) {															\
-			const leafset_t *p = s.top();										\
-			s.pop();																				\
-			if ( p->leafId != NULL_LEAF_ID ) {							\
-				leaf_id_t leaf_var = p->leafId;								\
-				{ body; }																			\
-			} else {																				\
-				s.push( p->childA.get() );										\
-				s.push( p->childB.get() );										\
-			}																								\
-		}																									\
-  } while(0)
-
+#define COSI_FOR_LEAFSET(leafset,leaf_var,body) do {	assert(0); } while(0)
 
 ostream& operator<<( std::ostream& s, leafset_p leafset );
 
-} // namespace leafset_tree
+} // namespace leafset_counts
 
-using namespace leafset_tree;
+using namespace leafset_counts;
 
 } // namespace cosi
   
 #endif
-// #ifndef __INCLUDE_COSI_LEAFSET_TREE_H
+// #ifndef __INCLUDE_COSI_LEAFSET_COUNTS_H

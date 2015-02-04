@@ -19,7 +19,6 @@
 #include <cosi/utils.h>
 
 namespace cosi {
-namespace leafset_tree {
 
 /* Type: leaf_id_t */
 /* Identifier of one leaf node of the ARG, representing a present-day <chrom>. */
@@ -167,10 +166,6 @@ void leafset_get_leaves( leafset_p leafset, OutputIter result ) {
 
 
 ostream& operator<<( std::ostream& s, leafset_p leafset );
-
-} // namespace leafset_tree
-
-using namespace leafset_tree;
 
 } // namespace cosi
   

@@ -81,8 +81,13 @@ vector<ehh_t> computeEHH( const LeafsetRangeType& leafsets,
 			vector< leafset_type  > newClasses;
 			
 			BOOST_FOREACH( leafset_type  cls, classes ) {
+#ifdef COSI_FREQONLY				
+				leafset_p inters[2] = { LEAFSET_NULL, LEAFSET_NULL };
+				assert(0);
+#else				
 				leafset_p inters[2] = { leafset_intersection( cls, leafset ),
 																leafset_difference( cls, leafset ) };
+#endif				
 				if ( leafset_is_empty( inters[0] ) || leafset_is_empty( inters[1] ) ) {
 					newClasses.push_back( cls );
 				} else {

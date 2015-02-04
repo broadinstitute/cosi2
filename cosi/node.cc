@@ -84,10 +84,14 @@ void NodePool::node_delete( Node **np ) {
 }
 
 Node* 
-NodePool::make_new_leaf (void) 
+NodePool::make_new_leaf ( ) 
 {
   Node *newnodeptr = alloc_node();
+#ifdef COSI_FREQONLY
+  leafset_p leafset = make_singleton_leafset( newnodeptr->name );
+#else
   leafset_p leafset = make_singleton_leafset( outputMuts ? newnodeptr->name : ((leaf_id_t)1) );
+#endif	
 
   newnodeptr->segs = seglist::seglist_make_full( leafset, /* lastCoalGen= */ genid(0) );
 

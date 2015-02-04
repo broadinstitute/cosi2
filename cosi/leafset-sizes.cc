@@ -14,7 +14,6 @@
 #include <cosi/mempool.h>
 
 namespace cosi {
-namespace leafset_tree {
 
 #define ForEach BOOST_FOREACH
 using util::chkCond;
@@ -171,5 +170,4 @@ cosi_double leafset_struct::compute_r2( leafset_p leafset1, leafset_p leafset2 )
 }  // leafset_struct::compute_r2
 #endif // ifdef COSI_R2
 
-}  // namespace leafset_tree
 }  // namespace cosi

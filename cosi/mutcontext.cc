@@ -57,9 +57,13 @@ vector< BasicSeg_loc > computeMutContexts( const Seglist *seglist, loc_t loc ) {
 
 		while( curSegIdx < allSegs.size() ) {
 			//PRINT2( curSegIdx, allSegs[ curSegIdx ] );
-			inters = leafset_intersection( inters, allSegs[ curSegIdx ]->getLeafset() );
 			vector<leaf_id_t> leaves;
+#ifdef COSI_FREQONLY
+			assert(0);
+#else			
+			inters = leafset_intersection( inters, allSegs[ curSegIdx ]->getLeafset() );
 			leafset_get_leaves( inters, std::back_inserter( leaves ) );
+#endif			
 			ForEach( leaf_id_t leaf, leaves ) {
 				if ( dir == -1 )
 					mutContexts[ leaf ].setBeg( allSegs[ curSegIdx ]->getBeg() );

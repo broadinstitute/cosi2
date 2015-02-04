@@ -50,7 +50,7 @@ CoSiMain::CoSiMain():
 	, maxCoalDist( 1.0 ), maxCoalDistCvxHull( False )
 #endif
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
-							 outputARGedges( False )
+							 outputARGedges( False ), freqsOnly( False )
 {
 }
 
@@ -104,7 +104,8 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 		 ( "sweep3-no-one-sided-recombs", po::bool_switch(&sweep3_no_oneSidedRecombs), "handle one-sided recombs (experimental)" )
 		 ( "show-one-sim-progress", po::bool_switch(&showOneSimProgress), "show progress of coalescence in each sim" )
 		 ( "pois-max-steps", po::value(&poisMaxSteps)->default_value(100000), "max # of steps when evaluating waiting times" ) 
-		 ( "pois-prec", po::value(&poisPrec)->default_value(1e-5), "precision when evaluating waiting times" ) 
+		 ( "pois-prec", po::value(&poisPrec)->default_value(1e-5), "precision when evaluating waiting times" )
+		 ( "freqs-only", po::bool_switch(&freqsOnly), "output frequencies only" )
 #ifdef COSI_CONDSNP
 		 ( "condsnp,c", po::value(&this->condSnpDef), "condition sims on a SNP at this loc with these freqs" )
 #endif		 
@@ -176,6 +177,10 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 	}
 	
 	po::notify(vm);
+
+#ifdef COSI_FREQONLY
+	freqsOnly = true;
+#endif	
 
 
 	if (!segfile.empty()) {
@@ -268,10 +273,12 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << endl; }
 	
 		ParamFileReaderP params = cosi.getParams();
+		cosi.getMutate()->setFreqsOnly( freqsOnly );
 		genid endGen = cosi.runSim();
 
 		if ( showNumRecombs ) { PRINT( cosi.getRecomb()->getNumRecombs() ); }
 
+		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
 		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
 			//PRINT( "freezing" );
 			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
@@ -294,6 +301,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 																mutcontext::getSavedMutContexts() );
 #endif				 
 			}
+
 			
 			if ( msOutput ) 
 				 muts->print_haps_ms( std::cout, cosi.getDemography()->getSampleSizes(), cosi.getTreeStatsHook(),

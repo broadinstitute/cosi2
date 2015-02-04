@@ -107,6 +107,10 @@ private:
 	 // Field: outputARGedges
 	 // Whether to print ARG edges to stdout.
 	 bool_t outputARGedges;
+
+	 // Field: freqsOnly
+	 // Output allele freqs only.
+	 bool_t freqsOnly;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

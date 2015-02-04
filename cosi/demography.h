@@ -13,6 +13,7 @@
 #include <map>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include <boost/range/algorithm/copy.hpp>
 #include <cosi/defs.h>
 #include <cosi/utils.h>
 #include <cosi/cosirand.h>
@@ -163,6 +164,7 @@ public:
 	 const vector< nchroms_t >& getSampleSizes() const { return sampleSizes; }
 	 const vector< popid >& getLeaf2PopName() const { return leaf2popName; }
 
+#ifndef COSI_FREQONLY	 
 	 std::map< popid, nchroms_t > getLeafsetPopCounts( leafset_p leafset ) const {
 		 std::map< popid, nchroms_t > result;
 		 COSI_FOR_LEAFSET( leafset, leaf, {
@@ -170,6 +172,17 @@ public:
 			 });
 		 return result;
 	 }
+#endif	 
+
+	 template <typename OutputIterator>
+	 void getLeafsetPopCounts( leafset_p leafset, OutputIterator it ) const {
+		 std::vector<nchroms_t> counts( sampleSizes.size(), 0 );
+		 COSI_FOR_LEAFSET( leafset, leaf, {
+				 counts[ popname2idx[ ToInt( leaf2popName[ leaf ] ) ] ]++;
+			 });
+		 boost::copy( counts, it );
+	 }
+	 
 	 
 private:
 	 // Field: pops

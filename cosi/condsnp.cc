@@ -238,7 +238,12 @@ void CondSnpMgr::handle_add_edge( nodeid /* nodeId_moreRecent */,
 		assert( seg && seg->contains( condSnpDef.getLoc( ) ) );
 		gens_t edgeLen = genId_lessRecent - genId_moreRecent; 
 		condSnpTreeTimeTot += edgeLen;
-		std::map< popid, nchroms_t > popCounts = demography->getLeafsetPopCounts( seg->getLeafset() );
+		std::map< popid, nchroms_t > popCounts;
+#ifdef COSI_FREQONLY
+		assert(0);
+#else		
+		popCounts = demography->getLeafsetPopCounts( seg->getLeafset() );
+#endif		
 		if ( condSnpDef.sampleFreqsMatch( popCounts ) ) {
 			 condSnpTreeTimeMatching += edgeLen;
 			 savedLeafsets.push_back( seg->leafset );
@@ -318,9 +323,11 @@ void CondSnpMgr::printResults( MutlistP mutlist, GenMapP genMap ) const {
 	if ( !causalMutLeafset ) { PRINT4( "----NO-LEAFSET----", savedLeafsets.empty(), nwrongEdges, simsTot ); }
 	
 	if ( causalMutLeafset ) {
+#ifndef COSI_FREQONLY		
 		std::map< popid, nchroms_t > popCnts( demography->getLeafsetPopCounts( causalMutLeafset ) );
 		using util::map_get;
 		PRINT3( map_get( popCnts, popid(1), 0 ), map_get( popCnts, popid(4), 0 ), map_get( popCnts, popid(5), 0 ) );
+#endif		
 
 		vector<Mut> mutsR;
 		boost::range::copy( muts | filtered( bind( &Mut::loc, arg1 ) > val( condSnpDef.getLoc() ) ), back_inserter( mutsR ) );

@@ -76,7 +76,8 @@ void Mutlist::freeze( bool_t inf_sites, len_bp_t length ) {
 		 mi->mutId = i;
 
 	////////
-#ifndef COSI_LEAFSET_SIZEONLY	
+#ifndef COSI_LEAFSET_SIZEONLY
+#ifndef COSI_FREQONLY	
 	leaf2muts.resize( leafset_get_max_leaf_id() );
 	for ( const_iterator it = muts.begin(); it != muts.end(); it++ ) {
 		vector< leaf_id_t > leavesVec;
@@ -84,6 +85,7 @@ void Mutlist::freeze( bool_t inf_sites, len_bp_t length ) {
 		ForEach( leaf_id_t leaf_it, leavesVec )
 			 leaf2muts[ leaf_it ].push_back( it );
 	}
+#endif	
 #endif	
   ///////
 

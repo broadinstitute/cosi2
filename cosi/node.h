@@ -173,7 +173,7 @@ public:
 	 // Method group: Manipulating <Nodes>
 	 //
 	 
-	 Node * make_new_leaf (void);
+	 Node * make_new_leaf ( );
 	 void finishLeaves();
 	 
 	 Node * node_coalesce (Node **, Node **, genid  gen);

@@ -25,6 +25,8 @@
 #include <cosi/leafset-bitset.h>
 #elif defined(COSI_LEAFSET_SIZEONLY)
 #include <cosi/leafset-sizeonly.h>
+#elif defined(COSI_FREQONLY)
+#include <cosi/leafset-counts.h>
 #elif defined(COSI_LEAFSET_TREE)
 #include <cosi/leafset-tree.h>
 #else

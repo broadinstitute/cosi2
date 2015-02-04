@@ -36,7 +36,7 @@ Demography::Demography():
 
 }
 
-void Demography::dg_setMutate( MutateP mutate_ ) { dg_mutate = mutate_; }
+void Demography::dg_setMutate( MutateP mutate_ ) { dg_mutate = mutate_; mutate_->setDemography( this ) ; }
 void Demography::dg_setNodePool( NodePoolP nodePool_ ) { dg_nodePool = nodePool_; }
 
 /* ERROR HANDLING */
@@ -89,7 +89,7 @@ Demography::dg_populate_by_name_do (popid popname, int members, genid gen) {
   Pop *popptr = dg_get_pop_by_name(popname);
   Node *tempnode;
   int i;	
-	
+
   for (i = 0; i < members; i++) {
 		tempnode = dg_nodePool->make_new_leaf();
 		popptr->pop_add_node (tempnode);
@@ -108,9 +108,19 @@ void Demography::dg_complete_initialization() {
   leafset_set_max_leaf_id( totmembers );
 	this->leaf2popName.resize( totmembers + 1 );
 
+#ifdef COSI_FREQONLY
+	// extern const std::vector< popid > *leafset_leaf2popName;
+	// extern const std::vector<pop_idx_t> *leafset_popname2idx;
+
+	leafset_counts::leafset_leaf2popName = &leaf2popName;
+	leafset_counts::leafset_popname2idx = &popname2idx;
+	leafset_counts::leafset_npops = populate_requests.size();
+	
+#endif
+	
+
   leaf_id_t leafFrom = 0;
   ForVec( populate_request, req, populate_requests ) {
-		dg_populate_by_name_do( req->popname, req->members, req->gen );
 		popNames.push_back( req->popname );
 		sampleSizes.push_back( req->members );
 #ifdef COSI_EHH	 
@@ -119,7 +129,10 @@ void Demography::dg_complete_initialization() {
 		for ( leaf_id_t leaf = leafFrom; leaf < leafFrom + req->members; leaf++ )
 			 this->leaf2popName[ leaf ] = req->popname;
 		leafFrom += req->members;
+		dg_populate_by_name_do( req->popname, req->members, req->gen );
+		
   }
+
 
 	dg_nodePool->finishLeaves();
 }
@@ -447,7 +460,8 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
   to_popptr = dg_get_pop_by_name(topop);
 
   num_to_move = exactFraction ? nchroms_t( fractionToMove * from_popptr->pop_get_num_nodes() ) : ranbinom(from_popptr->pop_get_num_nodes(), fractionToMove);
-	//PRINT7( "moving_nodes", gen, frompop, topop, fractionToMove, bool_t(exactFraction), num_to_move );
+	PRINT11( "moving_nodes", gen, frompop, topop, fractionToMove, bool_t(exactFraction), num_to_move,
+					 from_popptr->pop_get_size(), from_popptr->pop_get_num_nodes(), to_popptr->pop_get_size(), to_popptr->pop_get_num_nodes() );
 
   for (i = 0; i < num_to_move; i++) {
 		node_index = (int) (random_double() 
@@ -458,6 +472,7 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
 
 		dg_log(MOVE, gen, tempnode, from_popptr, to_popptr);
   }
+	PRINT3( "aft_moving_nodes", from_popptr->pop_get_num_nodes(), to_popptr->pop_get_num_nodes() );
 }
 
 /* NODE FUNCTIONS */
