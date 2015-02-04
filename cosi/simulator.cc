@@ -56,7 +56,12 @@ Simulator::sim_execute (void)
 	  historical_event_time = sim_get_time_till_next_hist_event (gen);
 	  poisson_event_time = sim_get_time_till_next_pois_event ( gen, historical_event_time );
 	  
-	  if (false) { PRINT7( gen, recombination_rate, coalesce_rate, migrate_rate, geneconv_rate, poisson_event_time, historical_event_time ); }
+#ifdef COSI_DEV_PRINT
+			PRINT7( gen, recombination_rate, coalesce_rate, migrate_rate, geneconv_rate, poisson_event_time, historical_event_time );
+			for ( int i = 0; i < demography->dg_get_num_pops(); i++ )
+				 std::cerr << "|" << i << " " << demography->dg_get_pop_name_by_index( i ) << " " << demography->dg_get_pop_size_by_index( i ) << " " << demography->dg_get_pop_by_index( i )->pop_get_num_nodes() ;
+			std::cerr << "\n";
+#endif
 
 	  if ( is_null( historical_event_time )
 				 || poisson_event_time < historical_event_time) {
