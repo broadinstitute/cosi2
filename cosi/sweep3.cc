@@ -87,7 +87,7 @@ public:
    void add( idx_t itemIdx, T delta ) {
 		 assert( itemIdx > 0 );
 		 ensureCapacity( itemIdx+1 );
-		 assert( itemIdx < partialSums.size() );
+		 assert( itemIdx < static_cast< idx_t >( partialSums.size() ) );
 
 		 while (itemIdx < isize( partialSums ) ){
 			 partialSums[itemIdx] += delta;
