@@ -379,7 +379,8 @@ genid Event_Split::execute() {
 	getDemography()->dg_move_nodes_by_name ( /* going backwards, move all nodes from */ newPop,
 																					 /* into */ fromPop,
 																					 /* fractionToMove= */ 1.0,
-																					 gen );
+																					 gen, /* exactFraction= */ true );
+	getMigrate()->migrate_delete_all_for_pop( newPop );
 	/*		  demography->dg_end_pop_by_name (currentevent->popindex[1]); */
 	return gen;
 }
