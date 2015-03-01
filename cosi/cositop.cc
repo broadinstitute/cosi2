@@ -105,7 +105,9 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 		 ( "show-one-sim-progress", po::bool_switch(&showOneSimProgress), "show progress of coalescence in each sim" )
 		 ( "pois-max-steps", po::value(&poisMaxSteps)->default_value(100000), "max # of steps when evaluating waiting times" ) 
 		 ( "pois-prec", po::value(&poisPrec)->default_value(1e-5), "precision when evaluating waiting times" )
+#ifdef COSI_FREQONLY		 
 		 ( "freqs-only", po::bool_switch(&freqsOnly), "output frequencies only" )
+#endif		 
 #ifdef COSI_CONDSNP
 		 ( "condsnp,c", po::value(&this->condSnpDef), "condition sims on a SNP at this loc with these freqs" )
 #endif		 
@@ -289,7 +291,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 			
 			if (!msOutput && !outfilebase.empty()) {
 			  std::ostringstream fbase;
-			  fbase << outfilebase;
+			  fbase << outfilebase.c_str();
 			  if ( nsims > 1 )
 			    fbase << "_" << simNum;
 			  print_haps( cosi.getDemography(), fbase.str(),
