@@ -29,6 +29,7 @@
 #include <cosi/sweep1.h>
 #include <cosi/sweep2.h>
 #include <cosi/sweep3.h>
+#include <cosi/generalmath.h>
 
 namespace cosi {
 
@@ -84,6 +85,7 @@ public:
 	 Event_PopSizeExp( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
 		 is >> pop >> gen >> genBeg >> popsize >> popSizeBeg;
 		 calcExpansionRate();
+		 PRINT6( pop, gen, genBeg, popsize, popSizeBeg, expansionRate );
 	 }
 	 virtual ~Event_PopSizeExp();
 			
@@ -107,7 +109,7 @@ private:
 			
 	 // Field: popsize
 	 // Population size at <gen>.
-	 double /* nchroms_t */  popsize;
+	 popsize_float_t /* nchroms_t */  popsize;
 			
 	 // Field: genBeg
 	 // Time when the increase started (going forward).  Since time numerically increases pastward,
@@ -116,15 +118,74 @@ private:
 			
 	 // Field: popSizeAtBeg
 	 // Population size at <genBeg>.
-	 double /* nchroms_t */ popSizeBeg;
+	 popsize_float_t /* nchroms_t */ popSizeBeg;
 
 	 // Field: expansionRate
 	 // The expansion rate at each step
-	 double expansionRate;
+	 gensInv_t expansionRate;
 
-	 void calcExpansionRate() { expansionRate = log( popSizeBeg / popsize ) / ToDouble( genBeg - gen ); }
+	 void calcExpansionRate() { expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen ); }
 
 };  // class Event_PopSizeExp 
+
+
+// Class: Event_PopSizeExp2
+// Exponential expansion of population size over a range of generations.
+class Event_PopSizeExp2: public HistEvents::Event {
+
+	 static int procCount;
+	 
+public:
+	 Event_PopSizeExp2( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, nchroms_t popsize_,
+										 genid genBeg_, nchroms_t popSizeBeg_ ):
+		 Event( histEvents_, label_, gen_ ), pop( pop_ ) , popsize( popsize_ ), genBeg( genBeg_ ), popSizeBeg( popSizeBeg_ ) , procName( -1 ) {
+		 calcExpansionRate();
+	 }
+	 Event_PopSizeExp2( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ), procName( -1 ) {
+		 is >> pop >> gen >> genBeg >> popsize >> popSizeBeg;
+		 calcExpansionRate();
+		 PRINT6( pop, gen, genBeg, popsize, popSizeBeg, expansionRate );
+	 }
+	 virtual ~Event_PopSizeExp2();
+			
+	 // Method: typeStr
+	 // Return the string denoting this type of historical event in the <parameter file>.
+	 // Historical events are specified in the parameter file by lines of the form
+	 // pop_event <eventType> <eventParams>
+	 // This method specifies the eventType.
+	 static const char *typeStr() { return "exp_change_size2"; }
+
+	 virtual genid execute();
+
+private:
+	 // Field: pop
+	 // The population in which we're setting the new population size.
+	 popid pop;
+			
+	 // Field: popsize
+	 // Population size at <gen>.
+	 popsize_float_t /* nchroms_t */  popsize;
+			
+	 // Field: genBeg
+	 // Time when the increase started (going forward).  Since time numerically increases pastward,
+	 // genBeg > gen.
+	 genid genBeg;
+			
+	 // Field: popSizeAtBeg
+	 // Population size at <genBeg>.
+	 popsize_float_t /* nchroms_t */ popSizeBeg;
+
+	 // Field: expansionRate
+	 // The expansion rate at each step
+	 gensInv_t expansionRate;
+
+	 int procName;
+	 std::string procNameStr;
+
+	 void calcExpansionRate() { expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen ); }
+
+};  // class Event_PopSizeExp2 
+
 
 // Class: Event_Split
 // Split a pop going forward (join two pops going backward).
@@ -298,6 +359,7 @@ private:
 
 Event_PopSize::~Event_PopSize() {}
 Event_PopSizeExp::~Event_PopSizeExp() {}
+Event_PopSizeExp2::~Event_PopSizeExp2() {}
 Event_Bottleneck::~Event_Bottleneck() {}
 Event_MigrationRate::~Event_MigrationRate() {}
 Event_Admix::~Event_Admix() {}
@@ -311,20 +373,89 @@ genid Event_PopSize::execute() {
 
 // Const: STEP
 // By how many generations to step each time while we implement the exponential expansion?
-const gens_t Event_PopSizeExp::STEP( 10.0 );
+const gens_t Event_PopSizeExp::STEP( getenv( "COSI_POPSIZEEXP_STEP" ) ? atof( getenv( "COSI_POPSIZEEXP_STEP" ) ) : 10.0 );
 
 genid Event_PopSizeExp::execute() {
-	getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( popsize + .5 ) );
+	PRINT( STEP );
+	getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( ToDouble( popsize + static_cast< popsize_float_t >( .5 ) ) ) );
 	genid oldgen = gen;
 	if ( gen < genBeg ) {
 		genid newgen = std::min( oldgen + STEP, genBeg );
 		//		double popsize_bef = popsize;
-		popsize *= exp( expansionRate * ToDouble( newgen - oldgen ) );
+		popsize *= exp( expansionRate * ( newgen - oldgen ) );
 		gen = newgen;
 		addEvent( shared_from_this() );
 	}
 	return oldgen;
 }
+
+int Event_PopSizeExp2::procCount = 0;
+
+genid Event_PopSizeExp2::execute() {
+
+	genid oldgen = gen;
+	Pop *popPtr = getDemography()->dg_get_pop_by_name( pop );
+	if ( procName == -1 ) {
+		procName = ++procCount;
+		std::ostringstream procNameStrm;
+		procNameStrm << "exp" << ++procCount;
+		procNameStr = procNameStrm.str();
+
+		using namespace math;
+
+		BOOST_AUTO( exponent,
+								( Function< genid, gensInv_t, Const<> >( expansionRate ) *
+									(
+										Function< genid, gens_t, Const<> >( genBeg - static_cast<genid>( 0.0 ) )
+										 -
+										 Function< genid, gens_t, X_To<1> >()
+										) ) );
+		BOOST_AUTO( with_exp, exp_( exponent ) );
+		BOOST_AUTO( f, ( Function<genid,popsizeInv_float_t,Const<> >( 1. / popSizeBeg ) * with_exp ) );
+
+		PRINT4( popsize, popSizeBeg, 1.0 / eval( f, gen ), 1.0 / eval( f, genBeg ) );
+
+		BOOST_AUTO( coalRateFn, ( Function< genid, double, Const<> >( .5 ) * ( f ) ) );
+
+#ifndef NDEBUG		
+		{
+			std::cerr.precision( 15 );
+			const genid g_beg( 10.0 ), g_end( 150.0 );
+			const gens_t g_step( 1.0 );
+			genid g( g_beg );
+			while( g < g_end ) {
+				PRINT2( g, eval( coalRateFn, g ) );
+				g += g_step;
+			}
+
+			for( int n = 1; n < 25; ++n ) {
+				PRINT2( n, ( integrateNumerically( coalRateFn, g_beg, g_end, n ) ) );
+			}
+			PRINT( definiteIntegral( coalRateFn, g_beg, g_end ) );
+		}
+#endif		
+		
+		popPtr->
+			 setCoalArrivalProcess(
+				 ArrivalProcess< genid, Any< RandGen > >(
+					 makeNonHomogeneousPoissonProcess
+					 ( coalRateFn, gen, procNameStr ) ) );
+
+		PRINT( popPtr->getCoalArrivalProcess() );
+
+		gen = genBeg;
+		addEvent( shared_from_this() );
+	} else {
+		if ( popPtr->getCoalArrivalProcess() && popPtr->getCoalArrivalProcess().getLabel() == procNameStr ) {
+			 popPtr->clearCoalArrivalProcess();
+			 
+			 PRINT( "clearedArrivalProcess" );
+			 getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( ToDouble( popSizeBeg + static_cast< popsize_float_t >( .5 ) ) ) );			 
+		}
+	}
+	return oldgen;
+}
+
 
 genid Event_Bottleneck::execute() {
   Pop* the_pop = getDemography()->dg_get_pop_by_name(pop);
@@ -448,6 +579,7 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 		is >> typestr;
 		if ( typestr == Event_PopSize::typeStr() ) event.reset( new Event_PopSize( this, is ) );
 		else if ( typestr == Event_PopSizeExp::typeStr() ) event.reset( new Event_PopSizeExp( this, is ) );
+		else if ( typestr == Event_PopSizeExp2::typeStr() ) event.reset( new Event_PopSizeExp2( this, is ) );
 		else if ( typestr == Event_Split::typeStr() ) event.reset( new Event_Split( this, is ) );
 		else if ( typestr == Event_MigrationRate::typeStr() ) event.reset( new Event_MigrationRate( this, is ) );
 		else if ( typestr == Event_Bottleneck::typeStr() ) event.reset( new Event_Bottleneck( this, is ) );
