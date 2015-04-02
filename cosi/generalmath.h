@@ -75,6 +75,21 @@ template <typename TVal> struct DiffType {
    typedef BOOST_TYPEOF_TPL( boost::declval<TVal>() - boost::declval<TVal>()) type;
 };
 
+// Metafunction: DivType
+// Returns the type of the division of values of the given type.
+template <typename TVal1, typename TVal2> struct DivType {
+	 typedef BOOST_TYPEOF_TPL( boost::declval<TVal1>() / boost::declval<TVal2>()) type;
+};
+
+// Metafunction: DerivType
+// The type for a derivative, i.e. the result of differentiating a function with given domain and range.
+template <typename TDomain, typename TRange>
+struct DerivType {
+   typedef typename DiffType<TDomain>::type domain_diff_type;
+   typedef typename DiffType<TRange>::type range_diff_type;
+   typedef typename DivType<range_diff_type, domain_diff_type>::type type;
+};
+
 // Metafunction: AreaType
 // The type for an area, i.e. the result of integrating a function with given domain and range.
 template <typename TDomain, typename TRange>
@@ -144,7 +159,10 @@ template <typename T, typename Enabler = void> struct IsFunctionSpec: public boo
 
 template <typename TFunc> struct DomainType { typedef typename TFunc::argument_type type; };
 template <typename TFunc> struct RangeType { typedef typename TFunc::result_type type; };
-template <typename TFunc> struct SpecType { typedef typename TFunc::spec_type type; };
+template <typename TFunc> struct SpecType {
+	 typedef typename TFunc::spec_type type;
+   BOOST_MPL_ASSERT(( IsFunctionSpec<type> ));
+};
 
 //
 // *** Generic function: eval
@@ -413,31 +431,31 @@ operator/( const Function<TDomain,TRange1,TSpec1>& f1,
 //
 
 
-template <typename TDomain, typename TRange1, typename TRange2>
+template <typename TDomain, typename TRange1, typename TRange2, typename TConstSpec1, typename TConstSpec2>
 Function<TDomain, typename AddOp<TRange1,TRange2>::result_type, Const<> >
-operator+( const Function< TDomain, TRange1, Const<> >& f1,
-           const Function< TDomain, TRange2, Const<> >& f2 ) {
+operator+( const Function< TDomain, TRange1, Const<TConstSpec1> >& f1,
+           const Function< TDomain, TRange2, Const<TConstSpec2> >& f2 ) {
   return Function< TDomain, typename AddOp<TRange1,TRange2>::result_type, Const<> >( evalConst( f1 ) + evalConst( f2 ) );
 }
 
-template <typename TDomain, typename TRange1, typename TRange2>
+template <typename TDomain, typename TRange1, typename TRange2, typename TConstSpec1, typename TConstSpec2>
 Function<TDomain, typename SubOp<TRange1,TRange2>::result_type, Const<> >
-operator-( const Function< TDomain, TRange1, Const<> >& f1,
-           const Function< TDomain, TRange2, Const<> >& f2 ) {
+operator-( const Function< TDomain, TRange1, Const<TConstSpec1> >& f1,
+           const Function< TDomain, TRange2, Const<TConstSpec2> >& f2 ) {
   return Function< TDomain, typename SubOp<TRange1,TRange2>::result_type, Const<> >( evalConst( f1 ) - evalConst( f2 ) );
 }
 
-template <typename TDomain, typename TRange1, typename TRange2>
+template <typename TDomain, typename TRange1, typename TRange2, typename TConstSpec1, typename TConstSpec2>
 Function<TDomain, typename MultOp<TRange1,TRange2>::result_type, Const<> >
-operator*( const Function< TDomain, TRange1, Const<> >& f1,
-           const Function< TDomain, TRange2, Const<> >& f2 ) {
+operator*( const Function< TDomain, TRange1, Const<TConstSpec1> >& f1,
+           const Function< TDomain, TRange2, Const<TConstSpec2> >& f2 ) {
   return Function< TDomain, typename MultOp<TRange1,TRange2>::result_type, Const<> >( evalConst( f1 ) * evalConst( f2 ) );
 }
 
-template <typename TDomain, typename TRange1, typename TRange2>
+template <typename TDomain, typename TRange1, typename TRange2, typename TConstSpec1, typename TConstSpec2>
 Function<TDomain, typename DivOp<TRange1,TRange2>::result_type, Const<> >
-operator/( const Function< TDomain, TRange1, Const<> >& f1,
-           const Function< TDomain, TRange2, Const<> >& f2 ) {
+operator/( const Function< TDomain, TRange1, Const<TConstSpec1> >& f1,
+           const Function< TDomain, TRange2, Const<TConstSpec2> >& f2 ) {
   return Function< TDomain, typename DivOp<TRange1,TRange2>::result_type, Const<> >( evalConst( f1 ) / evalConst( f2 ) );
 }
 
@@ -448,6 +466,10 @@ operator/( const Function< TDomain, TRange1, Const<> >& f1,
 //
 
 template <typename TSpec, typename Op> struct UnaryOp;
+template <typename TSpec, typename Op>
+struct IsFunctionSpec< UnaryOp<TSpec, Op>,
+											 typename boost::enable_if< IsFunctionSpec< TSpec > >::type >: public boost::true_type {};
+																						 
 
 template <typename TDomain, typename TRange, typename TSpec, typename Op>
 class Function<TDomain, TRange, UnaryOp<TSpec, Op> > {
@@ -465,7 +487,9 @@ public:
 
    TRange operator()( TDomain x ) const { return op( f( x ) ); }
 
-   friend ostream& operator<<( ostream& s, const Function& f ) { s << op << " " << f.f; return s; }
+//   friend ostream& operator<<( ostream& s, const Function& f ) { s << op << " " << f.f; return s; }
+
+	 const function_type& getFunction() const { return f; }
    
 private:
    static const Op op;
@@ -485,6 +509,47 @@ Function<TDomain, TRange, UnaryOp<TSpec, std::negate< TRange > > >
 operator-( const Function<TDomain,TRange,TSpec>& f ) {
   return Function<TDomain, TRange, UnaryOp<TSpec, std::negate< TRange > > >( f );
 }
+
+template <typename TDomain, typename TRange, typename TSpec>
+ostream& operator<<( ostream& s, const Function<TDomain,TRange,UnaryOp<TSpec, std::negate<TRange> > >& f ) {
+	s << "-(" << f.getFunction() << ")"; return s;
+}
+
+
+struct Exp
+{
+	 template <typename T>
+	 T operator()(T x) const { return exp(x);}
+};
+
+template <typename TDomain, typename TSpec>
+ostream& operator<<( ostream& s, const Function<TDomain,double,UnaryOp<TSpec, Exp> >& f ) {
+	s << "e^(" << f.getFunction() << ")"; return s;
+}
+
+struct Log
+{
+	 template <typename T>
+	 T operator()(T x) const { return log(x);}
+};
+template <typename TDomain, typename TSpec>
+ostream& operator<<( ostream& s, const Function<TDomain,double,UnaryOp<TSpec, Log> >& f ) {
+	s << "ln(" << f.getFunction() << ")"; return s;
+}
+
+
+template <typename TDomain, typename TSpec>
+Function<TDomain, double, UnaryOp<TSpec,Exp> >
+exp_( const Function<TDomain,double,TSpec>& f ) {
+	return Function<TDomain, double, UnaryOp<TSpec,Exp> >( f );
+}
+
+template <typename TDomain, typename TSpec>
+Function<TDomain, double, UnaryOp<TSpec,Log> >
+log_( const Function<TDomain,double,TSpec>& f ) {
+	return Function<TDomain, double, UnaryOp<TSpec,Log> >( f );
+}
+
 
 // ** Linear functions: creating a linear function from two points through which it passes.
 
@@ -724,6 +789,118 @@ void indefiniteIntegral( const Function< TDomain, TRange, TSpec >& f) {
   BOOST_STATIC_ASSERT_MSG( sizeof( f ) == 0, "don't know how to integrate f" );
 }
 
+template <typename TDomain, typename TRange, typename TSpec> struct result_of_differentiate {
+	 BOOST_STATIC_ASSERT_MSG( sizeof( TDomain ) == 0, "don't know how to get type of differentiation of f" );
+};
+
+template <typename TDomain, typename TRange, typename TSpec>
+void differentiate( const Function< TDomain, TRange, TSpec >& f) {
+  BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+  BOOST_STATIC_ASSERT_MSG( sizeof( f ) == 0, "don't know how to differentiate f" );
+}
+
+template <typename TDomain, typename TRange, typename TConstSpec>
+struct result_of_differentiate<TDomain, TRange, Const<TConstSpec> > {
+	 typedef typename DerivType<TDomain,TRange>::type deriv_type;
+	 typedef Function< TDomain, deriv_type, Const< CompileTime<0> > > type;
+};
+
+template <typename TDomain, typename TRange, typename TConstSpec >
+typename result_of_differentiate<TDomain,TRange,Const<TConstSpec> >::type
+differentiate( const Function< TDomain, TRange, Const<TConstSpec> >& f ) {
+	return typename result_of_differentiate<TDomain,TRange,Const<TConstSpec> >::type();
+}
+
+template <typename TDomain, typename TRange, typename TFactor>
+struct result_of_differentiate<TDomain, TRange, X_To<1,TFactor> > {
+	 typedef typename DerivType<TDomain,TRange>::type deriv_type;
+   typedef Function< TDomain, deriv_type, Const<> > type;
+};
+
+template <typename TDomain, typename TRange, typename TFactor>
+typename result_of_differentiate<TDomain,TRange, X_To<1,TFactor> >::type
+differentiate( const Function< TDomain, TRange, X_To<1,TFactor> >& f ) {
+	return typename result_of_differentiate<TDomain,TRange,X_To<1,TFactor> >::type( f.getFactor() );
+}
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
+struct result_of_differentiate<TDomain, typename MultOp<TRange1,TRange2>::result_type,
+															 BinOp< Const<>, TSpec, MultOp<TRange1,TRange2> > >  {
+   BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+   typedef Function< TDomain, TRange1, Const<> > f_const_t;
+   typedef typename result_of_differentiate<TDomain, TRange2, TSpec>::type f_t;
+   typedef BOOST_TYPEOF_TPL(( boost::declval<f_const_t>() * boost::declval<f_t>() )) type;
+};
+
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
+typename result_of_differentiate<TDomain, typename MultOp<TRange1, TRange2>::result_type,
+																 BinOp< Const<>, TSpec,
+																				MultOp<TRange1,TRange2> > >::type
+differentiate( const Function< TDomain, typename MultOp<TRange1,TRange2>::result_type,
+                    BinOp< Const<>, TSpec,
+                    MultOp<TRange1,TRange2> > >& f ) {
+  BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+  return f.first() * differentiate( f.second() );
+}
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
+typename result_of_differentiate<TDomain, typename MultOp<TRange1, TRange2>::result_type,
+                                      BinOp< Const<>, TSpec,
+                                             MultOp<TRange1,TRange2> > >::type
+differentiate( const Function< TDomain, typename MultOp<TRange1,TRange2>::result_type,
+                    BinOp< TSpec, Const<>,
+                    MultOp<TRange1,TRange2> > >& f ) {
+  BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+  return f.second() * differentiate( f.first() );
+}
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
+struct result_of_differentiate<TDomain, typename AddOp<TRange1,TRange2>::result_type,
+                                    BinOp<TSpec1, TSpec2, AddOp<TRange1,TRange2> > >  {
+   BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec1> ));
+   BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec2> ));
+   typedef typename result_of_differentiate<TDomain, TRange1, TSpec1>::type f1_t;
+   typedef typename result_of_differentiate<TDomain, TRange2, TSpec2>::type f2_t;
+   typedef BOOST_TYPEOF_TPL(( boost::declval<f1_t>() + boost::declval<f2_t>() )) type;
+};
+
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
+typename result_of_differentiate<TDomain, typename AddOp<TRange1, TRange2>::result_type,
+                                      BinOp< TSpec1, TSpec2,
+                                             AddOp<TRange1,TRange2> > >::type
+differentiate( const Function< TDomain, typename AddOp<TRange1,TRange2>::result_type,
+                    BinOp< TSpec1, TSpec2,
+                    AddOp<TRange1,TRange2> > >& f ) {
+  BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec1> ));
+  BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec2> ));
+  return differentiate( f.first() ) + differentiate( f.second() );
+}
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
+struct result_of_differentiate<TDomain, typename SubOp<TRange1,TRange2>::result_type,
+                                    BinOp<TSpec1, TSpec2, SubOp<TRange1,TRange2> > >  {
+   BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec1> ));
+   BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec2> ));
+   typedef typename result_of_differentiate<TDomain, TRange1, TSpec1>::type f1_t;
+   typedef typename result_of_differentiate<TDomain, TRange2, TSpec2>::type f2_t;
+   typedef BOOST_TYPEOF_TPL(( boost::declval<f1_t>() - boost::declval<f2_t>() )) type;
+};
+
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
+typename result_of_differentiate<TDomain, typename SubOp<TRange1, TRange2>::result_type,
+                                      BinOp< TSpec1, TSpec2,
+                                             SubOp<TRange1,TRange2> > >::type
+differentiate( const Function< TDomain, typename SubOp<TRange1,TRange2>::result_type,
+                    BinOp< TSpec1, TSpec2,
+                    SubOp<TRange1,TRange2> > >& f ) {
+  BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec1> ));
+  BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec2> ));
+  return differentiate( f.first() ) - differentiate( f.second() );
+}
+
 //
 // *** Definite integrals
 //
@@ -885,6 +1062,33 @@ indefiniteIntegral( const Function< TDomain, typename SubOp<TRange1,TRange2>::re
 // makeMapValueTransformer( const std::map<TKey,TValue>&, TValueTransformer transformer ) {
 //  return MapValueTransformer<TKey, TValue, TValueTransformer>( transformer );
 // }
+
+
+template <typename TDomain, typename TSpec>
+struct result_of_indefiniteIntegral<TDomain,double, UnaryOp<TSpec,Exp> > {
+	 typedef typename result_of_differentiate<TDomain, double, TSpec>::type deriv_type;
+	 typedef typename DivType< Function< TDomain, double, Const< CompileTime< 1 > > >, deriv_type >::type fctr_type;
+	 typedef Function<TDomain,double,TSpec> exponent_type;
+	 typedef Function<TDomain,double, UnaryOp<TSpec,Exp> > orig_func_type;
+	 typedef typename MultType< fctr_type, orig_func_type >::type type;
+};
+
+
+template <typename TDomain, typename TSpec>
+typename boost::enable_if< boost::is_same<
+														 typename SpecType< typename result_of_differentiate<TDomain,double,TSpec>::type >::type,
+														 Const<>
+														 >,
+ 													 typename result_of_indefiniteIntegral<TDomain,double, UnaryOp< TSpec, Exp > >::type >::type
+//typename result_of_indefiniteIntegral<TDomain,double, UnaryOp< TSpec, Exp > >::type
+indefiniteIntegral( const Function< TDomain, double, UnaryOp< TSpec, Exp > >& f ) {
+	BOOST_AUTO_TPL( d, differentiate( f.getFunction() ) );
+	typedef BOOST_TYPEOF_TPL( d ) d_type;
+	typedef Const<> const_t;
+//	BOOST_MPL_ASSERT(( boost::is_same< typename SpecType<d_type>::type, const_t ));
+	return ( Function< TDomain, double, Const< CompileTime<1> > >() / d ) * f;
+}
+
 
 //
 // *** Integrating piecewise functions
@@ -1546,6 +1750,9 @@ BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::result_of_makeNonHomogeneousPoissonPr
 
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::InterpFn,2)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::InterpBiFun,2)
+
+BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Exp,1)
+BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Log,1)
 
 #endif  // #ifndef __INCLUDE_COSI_GENERALMATH_H
 // Postamble:1 ends here
