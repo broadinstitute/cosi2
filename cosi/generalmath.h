@@ -137,7 +137,7 @@ private:
    
 };  // FunctionConcept
 
-template <typename T> std::string getLabel( const T& );
+//template <typename T> std::string getLabel( const T& );
 
 // *** GenericClass Function - A mathematical function of one variable.
 template <typename TDomain, typename TRange, typename TSpec> class Function;
@@ -266,7 +266,8 @@ public:
    typedef FactorType factor_type;
 
 	 BOOST_MPL_ASSERT(( boost::is_convertible< typename MultType<FactorType, domain_diff_type >::type,
-											result_type> ));
+	 										result_type >
+	 										));
 
    Function( ): factor( 1.0 ) {}
    Function( factor_type factor_ ): factor( factor_ ) {}
@@ -807,7 +808,7 @@ struct result_of_differentiate<TDomain, TRange, Const<TConstSpec> > {
 
 template <typename TDomain, typename TRange, typename TConstSpec >
 typename result_of_differentiate<TDomain,TRange,Const<TConstSpec> >::type
-differentiate( const Function< TDomain, TRange, Const<TConstSpec> >& f ) {
+differentiate( const Function< TDomain, TRange, Const<TConstSpec> >& ) {
 	return typename result_of_differentiate<TDomain,TRange,Const<TConstSpec> >::type();
 }
 
@@ -1083,8 +1084,8 @@ typename boost::enable_if< boost::is_same<
 //typename result_of_indefiniteIntegral<TDomain,double, UnaryOp< TSpec, Exp > >::type
 indefiniteIntegral( const Function< TDomain, double, UnaryOp< TSpec, Exp > >& f ) {
 	BOOST_AUTO_TPL( d, differentiate( f.getFunction() ) );
-	typedef BOOST_TYPEOF_TPL( d ) d_type;
-	typedef Const<> const_t;
+//	typedef BOOST_TYPEOF_TPL( d ) d_type;
+//	typedef Const<> const_t;
 //	BOOST_MPL_ASSERT(( boost::is_same< typename SpecType<d_type>::type, const_t ));
 	return ( Function< TDomain, double, Const< CompileTime<1> > >() / d ) * f;
 }
@@ -1297,7 +1298,7 @@ class ArrivalProcess<TTime, Any< TRand > > {
         return proc.nextArrivalTime( fromTime, maxTime, rateFactor, randGen, eps, maxSteps );
       }
 			virtual ostream& print( ostream& s ) const { s << proc; return s; }
-			virtual std::string doGetLabel() const { return getLabel( proc ); }
+			virtual std::string doGetLabel() const { return proc.getLabel(); }
    private:
       ArrivalProcess<TTime, TSpec> proc;
    };
@@ -1323,12 +1324,19 @@ public:
      return object->doNextArrival( fromTime, maxTime, rateFactor, randGen, eps, maxSteps );
    }
 	 ostream& print( ostream& s ) const { return object->print( s ); }
+
+	 std::string getLabel() const { return object->doGetLabel(); }
    
    friend ostream& operator<<( ostream& s, const ArrivalProcess& f ) {
 		 return f.print( s );
 	 }
-	 friend std::string getLabel( const ArrivalProcess& p ) { return p.doGetLabel(); }
+//	 friend std::string getLabel<>( const ArrivalProcess& p ); // { return p.object->doGetLabel(); }
 }; // class ArrivalProcess<TTime, Any< TRand > >
+
+// template <typename TTime, typename TRand>
+// inline std::string getLabel( const ArrivalProcess<TTime, Any<TRand> >& p ) {
+//   return p.object->doGetLabel();
+//  }
 
 
 //
@@ -1387,9 +1395,9 @@ public:
      BOOST_AUTO_TPL(integralAtFromTime, ( eval( rateFunctionIntegral, fromTime )  ));
      BOOST_AUTO_TPL(integralAtMaxTime, ( eval( rateFunctionIntegral, maxTime ) ));
      assert( integralAtMaxTime >= integralAtFromTime );
+		 PRINT7( label, fromTime, maxTime, rateFactor, eps, integralAtFromTime, integralAtMaxTime );
 		 if ( integralAtMaxTime == integralAtFromTime ) return maxTime;
 #ifndef NDEBUG
-		 PRINT7( label, fromTime, maxTime, rateFactor, eps, integralAtFromTime, integralAtMaxTime );
 #ifdef COSI_DEV_PRINT_GENERALMATH
 		 PRINT( rateFunctionIntegral );
 #endif		 
@@ -1434,7 +1442,7 @@ public:
 		 return s;
 	 }
 
-	 friend std::string getLabel( const ArrivalProcess& p ) { return p.label; }
+	 std::string getLabel() const { return label; }
 
 private:
    rate_function_integral_type rateFunctionIntegral;
