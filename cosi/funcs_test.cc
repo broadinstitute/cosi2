@@ -216,12 +216,12 @@ void test_funcs() {
 									Function<double,int,X_To<1> > >() )));
 	PRINT( sizeof(( boost::compressed_pair< Function<double,int,X_To<1> >,
 									Function<double,int,Const<> > >() )));
-
+	
 	PRINT( sizeof(( boost::compressed_pair< Function<double,int,X_To<1> >, Function<double,int,X_To<1> > >())));
-
+	
 	PRINT( sizeof(( Function<double,int,Const<> >( 3 ) ) * Function<double,int,X_To<1> >( )
 								+ Function<double,int,Const<> >( 4 ) ) );
-
+	
 	PRINT(( ::boost::is_empty< Function<double,int,X_To<1> > >::value ));
 
 	BOOST_AUTO( flinemin, -fline );
@@ -236,12 +236,41 @@ void test_funcs() {
 
 	testArrival();
 
-
 	cerr << "tests done\n";
 }
+
+void test_funcs2() {
+	using namespace std;
+	using namespace math;
+	
+	Function< double, double, Const<> > f_const_7( 7.0 );
+	Function< double, double, Const< CompileTime< 3 > > > f_const_3;
+	Function< double, double, X_To<1> > f_x( 2.0 );
+	
+	BOOST_AUTO( f, ( f_const_7 * ( f_x - f_const_3 ) ) );
+	
+	BOOST_AUTO( e, exp_( f ) );
+	
+	BOOST_AUTO( i, indefiniteIntegral( e ) );
+	
+	
+	typedef BOOST_TYPEOF( e ) e_type;
+	
+	typedef e_type::unop_spec_type e_spec;
+	typedef result_of_differentiate< double, double, e_spec >::type r_d;
+	
+	PRINT( e );
+	PRINT(( boost::is_same< SpecType< r_d >::type, Const<> >::type::value ));
+	PRINT( i );
+
+	//PRINT( typeid( e_spec ).name() );
+
+//	typedef result_of_differentiate<double,double, SpecType<   >::spec_type s_t;
+}
+
 }  // namespace cosi
 
 int main( int /*argc*/, char ** /*argv */ ) {
-	cosi::test_funcs();
+	cosi::test_funcs2();
 	return EXIT_SUCCESS;
 }
