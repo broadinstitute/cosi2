@@ -1,0 +1,7 @@
+
+real	21m2.088s
+user	16m25.081s
+sys	1m10.181s
+retcode 0
+host node1341
+uname Linux node1341 2.6.18-194.8.1.el5 #1 SMP Thu Jul 1 19:04:48 EDT 2010 x86_64 GNU/Linux

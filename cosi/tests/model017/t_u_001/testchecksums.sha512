@@ -1,0 +1,16 @@
+0f2765d8800ab4a2d496570f319305d355c8e5b61b2f0933d79b52daa36771e9b5eb166c33ca33a6160502c50a2e7e81157c6cc65c4866c6088aa7b00b485300  ../../../cosi/tests/model017/t_u_001/exact/x86_64-linux_g++/coalescent
+db8f5dfb1388bcd9f3e8706735b47b86c5883ebce6074a0a6c6b11f6bbfd8d81aef4499e905f9f3108e21bc73f1537413aedddd01ee6da881acddd5ec10d34f7  ../../../cosi/tests/model017/t_u_001/exact/x86_64-linux_g++/coalescent.flags.txt
+2b2834994d7124fd57ffcb1af13a8f8afad400b4627bd8ff027d7ff921d0ad6f98b174fc8ec42e6ebf299d09ebb6ca35cd0b0ef68ad47d60bcd4166624ae1915  ../../../cosi/tests/model017/t_u_001/exact/x86_64-linux_g++/exactcmd.txt
+330b3672a72f25a167bdfb4ca7d411ab960834ca99294823aa664c51b0bcd2101ec669154f7e90e00a752598e329f6cfe12285b9b17089c94aebced632d208d8  ../../../cosi/tests/model017/t_u_001/exact/x86_64-linux_g++/exactsum.sha512
+820172c98d39b982a94f8691d92fde63bbf3cad495c1a4c5c3f69030385dd21ff2396203d8b02fe110e71be483ed8557d555403fffba9df8465235f679d763f8  ../../../cosi/tests/model017/t_u_001/run.sh
+acdfb676431484d72e8e317f4672108f65dcb850e9626c2be92d59cdee5e6f795a523520f79f80c1c609c9c5ea6344a6182c10e96cd897de60f0e562f8582909  ../../../cosi/tests/model017/t_u_001/stoch/dflt/coalescent
+5ee42fb7bde3d44463a3817eaa24b869a7079a76cb8d0f86c3e4e3941e030424671355ec787d4f63fe2a7939766e4077e0e1fc8e426758edcd2d478f2f6ec66d  ../../../cosi/tests/model017/t_u_001/stoch/dflt/coalescent.flags.txt
+be8925eba0af3a589f4c104b349742714319068b9dec5d4410d493d2add7cd595176ac3106e80f32ef69dab5f20dac76bd75baf7597af8cef2e80609ac61b142  ../../../cosi/tests/model017/t_u_001/stoch/dflt/sample_stats_extra
+be8925eba0af3a589f4c104b349742714319068b9dec5d4410d493d2add7cd595176ac3106e80f32ef69dab5f20dac76bd75baf7597af8cef2e80609ac61b142  ../../../cosi/tests/model017/t_u_001/stoch/dflt/sample_stats_extra.flags.txt
+d2377103da109d2ac42745a44e57c48156e28b66cd0ceb4f05b5606508c07034cb4f4753436aa01ca36e6afa7e6c334080bc8c5944876bde0d2d20203b1f24a4  ../../../cosi/tests/model017/t_u_001/stoch/dflt/stochcmd.txt
+0e2134196b6f11ed59ea3beef72e61ec33831c68c8a1f51bd3541f973f554d5d2c007ea1535b9def540684f8dc0a4b249add011ce9f132a4870fecb9f19f1041  ../../../cosi/tests/model017/t_u_001/stoch/dflt/stochcount.txt
+b68102d8df6512b0e03733f7b1f2401c30eee9545ecc48cd9da8a00d3e45e2847f3dfeb7ef9b81fc60c380cfdd95e41c50b188d1a7f76f04f19956923d9b6b1e  ../../../cosi/tests/model017/t_u_001/stoch/dflt/stochsumm.tsv.bz2
+155dfb4b0a1ba117cc57d9cbeaf0373b45910058ffb896185f5bcea555ae1879e17771a142d2e4710705c4c41672d1eb7201a2dd0953fcc22d57e4cf6881080b  ../../../cosi/tests/model017/t_u_001/stoch/dflt/stochtime.txt
+31a4b87bba2633ffcd23dcd270a3b1db90a023bfe5aa2676d8bb7fce1fd37904f698da8e5a6d11ad65dee6bba6c268f4c21b41e82b9fb02951625cf675e3aabf  ../../../cosi/tests/model017/t_u_001/update.log1
+458a8c1a96929e69790af79aa0dfd00bae60f997b086a21f740fa24ae63aed3ad6460e1fe8efd0460ef2414f17a0cc4e33611399e1671ac2cccbecf8900b9499  ../../../cosi/tests/model017/t_u_001/update.out1
+cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e  ../../../cosi/tests/model017/t_u_001/updating.lck

@@ -27,10 +27,10 @@ def parseArgs():
     parser.add_argument( '--test-name', help = 'test name (determines test dir)' )
     parser.add_argument( '--test-dir', help = 'the test dir' )
     parser.add_argument( '--update-exact', action = 'store_true',
-                         default = bool( os.environ.get( 'COSI_TEST_UPDATE_EXACT', False ) ),
+                         default = bool( int( os.environ.get( 'COSI_TEST_UPDATE_EXACT', 0 ) ) ),
                          help = 'update the exact test case, rather than checking it' )
     parser.add_argument( '--update-stoch', action = 'store_true',
-                         default = bool( os.environ.get( 'COSI_TEST_UPDATE_STOCH', False ) ),
+                         default = bool( int( os.environ.get( 'COSI_TEST_UPDATE_STOCH', 0 ) ) ),
                          help = 'update the stochastic test case, rather than checking it' )
     parser.add_argument( '--variant-exact',
                          help = 'variant string for the exact test case',
@@ -39,7 +39,7 @@ def parseArgs():
     parser.add_argument( '--variant-stoch',
                          help = 'variant string for the stochastic test case',
                          default = 'dflt' )
-    parser.add_argument( '--seed', help = 'random seed for cosi (0 to use time)', type = long, default = 0 )
+    parser.add_argument( '--seed', help = 'random seed for cosi (0 to use time)', type = int, default = 0 )
     parser.add_argument( '--nsims-exact', help = 'number of simulations for the exact check', type = int,
                          default = int( os.environ.get( 'COSI_TEST_NSIMS_EXACT', 3 ) ) ) 
     parser.add_argument( '--nsims-stoch', help = 'number of simulations for the stochastic check', type = int,
@@ -52,21 +52,24 @@ def parseArgs():
                          help = 'max slowdown factor compared to reference; test fails if slowdown is more than this',
                          default = float( os.environ.get( 'COSI_TEST_MAX_SLOWDOWN', 2 ) ) )
     parser.add_argument( '--use-orig-seed', action = 'store_true',
-                         default = bool( os.environ.get( 'COSI_TEST_USE_ORIG_SEED', False ) ), 
+                         default = bool( int( os.environ.get( 'COSI_TEST_USE_ORIG_SEED', 0 ) ) ), 
                          help = 'for stochastic test running, use original random seed used to generate the test' )
     parser.add_argument( '--use-lsf', action = 'store_true', help = 'dispatch stochastic tests to LSF',
-                         default = bool( os.environ.get( 'COSI_TEST_USE_LSF', False ) ) )
+                         default = bool( int( os.environ.get( 'COSI_TEST_USE_LSF', 0 ) ) ) )
 
     miscArgs = parser.add_argument_group( 'misc', 'miscellaneous args' )
-    miscArgs.add_argument( '--cosi-binary', help =  'path to cosi binary', default = './coalescent' )
-    miscArgs.add_argument( '--stats-binary', help =  'path to sample_stats_extra binary', default = './sample_stats_extra' )
+    miscArgs.add_argument( '--cosi-binary', help =  'path to cosi binary',
+                           default = os.environ.get( 'COSI_TEST_COSI_BINARY', './coalescent' ) )
+    miscArgs.add_argument( '--stats-binary', help =  'path to sample_stats_extra binary',
+                           default = os.environ.get( 'COSI_TEST_STATS_BINARY', './sample_stats_extra' ) )
 
     args = parser.parse_args()
     logging.info( 'args=' + str( args ) + ' env=' + str( os.environ ) )
 
     return args
 
-def SystemSucceed( cmd, dbg = False, exitCodesOk = ( 0, ), useLSF = False, lsfJobName = 'runtest' ):
+def SystemSucceed( cmd, dbg = False, exitCodesOk = ( 0, ), useLSF = False, lsfJobName = 'runtest',
+                   lsfPreExecCmd = '' ):
     """Run a shell command, and raise a fatal error if the command fails."""
     logging.info( 'Running command ' + cmd + ' ; called from ' + sys._getframe(1).f_code.co_filename + ':' +
                   str( sys._getframe(1).f_lineno ) )
@@ -84,7 +87,8 @@ def SystemSucceed( cmd, dbg = False, exitCodesOk = ( 0, ), useLSF = False, lsfJo
         if useLSF:
             outFN = ReserveTmpFileName( prefix = 'runtestlsfoutput' )
             grpId = '/ilya/cosi/runtest/' + socket.getfqdn() + ':' + str( os.getpid() )
-            scriptCmd = "bsub -K -q hour -W '04:00' -P sabeti_cosi -G sabeti_labfolk -g '%(grpId)s' -J '%(lsfJobName)s' -E 'pushd /idi/sabeti-data/ilya/gsvn/Temp && python ../Operations/Ilya_Operations/PipeRun/python/testpython.py && popd' -R 'rusage[lightning_io=1,mem=3]' -o %(outFN)s '%(scriptFN)s'" % locals()
+            preExecOpts = '' if not lsfPreExecCmd else " -E '" + lsfPreExecCmd + "'"
+            scriptCmd = "bsub -K -q hour -W '04:00' -P sabeti_cosi -g '%(grpId)s' -J '%(lsfJobName)s' %(preExecOpts)s -R 'rusage[argon_io=1,mem=3]' -o %(outFN)s '%(scriptFN)s'" % locals()
             logging.info( 'outFN=' + outFN + ' scriptCmd=' + scriptCmd )
         exitCode = os.system( scriptCmd )
         logging.info( 'Finished command ' + cmd + ' with exit code ' + str( exitCode ) )
@@ -120,7 +124,7 @@ def SlurpFile( fname ):
     with open( fname ) as f:
         return f.read()
 
-def joinstr( *args ): return ' '.join( map( str, filter( None, args ) ) )
+def joinstr( *args ): return ' '.join( map( str, [_f for _f in args if _f] ) )
 
 def subst( s, localEnv ): return string.Template( s ).substitute( localEnv )
 
@@ -197,7 +201,7 @@ class SimpleFlock(object):
             # Lock acquired!
             logging.info( 'acquired ' + ( 'exclusive' if self._exclusive else 'shared' ) + ' lock ' + self._path )
             return
-         except IOError, ex:
+         except IOError as ex:
             if ex.errno not in ( errno.EAGAIN, errno.EACCES ): # error other than "lock already held"
                raise
             elif self._timeout is not None and time.time() > (start_lock_search + self._timeout):
@@ -257,6 +261,7 @@ def runTest( args ):
 
     if not args.test_name: args.test_name = 't%03d' % args.test_num
 
+    srcdir = args.srcdir
     testDir = args.test_dir or os.path.join( args.srcdir, 'tests', 'dist', args.test_name )
     exactDir = os.path.join( testDir, 'exact', args.variant_exact )
     stochDir = os.path.join( testDir, 'stoch', args.variant_stoch )
@@ -282,88 +287,93 @@ def runTest( args ):
 
         if not args.seed:
             r = random.Random()
-            r.jumpahead( args.test_num )
-            args.seed = r.randrange( 37, sys.maxint )
+            # r.jumpahead( args.test_num )
+            args.seed = r.randrange( 37, sys.maxsize )
 
         logging.info( 'runTest: seed is ' + str( args.seed ) )
 
         cosiBinary = args.cosi_binary
         cosiCmd = '$cosiBinary -p $paramFN -R $genMapFN -m ' + args.cosi_sim_params
 
-        cosiCmdFN = os.path.join( exactDir, 'exactcmd.txt' )
-        if args.update_exact:
-            # save the result of the exact check
-            shutil.copy( cosiBinary, os.path.join( exactDir, 'coalescent' ) )
-            shutil.copy( cosiBinary + '.flags.txt', os.path.join( exactDir, 'coalescent.flags.txt' ) )
-            cosiCmdExact = joinstr( cosiCmd, '-n', args.nsims_exact, '--seed', args.seed )
-            DumpFile( cosiCmdFN, cosiCmdExact )
-        else:
-            cosiCmdExact = SlurpFile( cosiCmdFN )
+        if args.nsims_exact > 0:
+            cosiCmdFN = os.path.join( exactDir, 'exactcmd.txt' )
+            if args.update_exact:
+                # save the result of the exact check
+                shutil.copy( cosiBinary, os.path.join( exactDir, 'coalescent' ) )
+                shutil.copy( cosiBinary + '.flags.txt', os.path.join( exactDir, 'coalescent.flags.txt' ) )
+                cosiCmdExact = joinstr( cosiCmd, '-n', args.nsims_exact, '--seed', args.seed )
+                DumpFile( cosiCmdFN, cosiCmdExact )
+            else:
+                cosiCmdExact = SlurpFile( cosiCmdFN )
 
-        sumFN = os.path.join( exactDir, 'exactsum.sha512' )
-        SystemSucceed( joinstr( subst( cosiCmdExact, locals() ), ' | sha512sum', '>' if args.update_exact else '-c', sumFN ) )
+            sumFN = os.path.join( exactDir, 'exactsum.sha512' )
+            SystemSucceed( joinstr( subst( cosiCmdExact, locals() ), ' | sha512sum', '>' if args.update_exact else '-c', sumFN ),
+                           lsfPreExecCmd = 'ls -l %(srcdir)s/runtest.py' % locals() )
 
         # * Stochastic check
-        afsMinBinSize = 4
-        afsBinCount = 20
-        afsBinSize = max( afsMinBinSize, int( totSampleSize / afsBinCount ) )
-        statsBinary = args.stats_binary
-        statsCmd = joinstr( '$statsBinary -a',
-                            ','.join( map( str, [1,2,3,4,5] +
-                                           [ '%d-%d' % ( f, min( f+afsBinSize-1, totSampleSize ) )
-                                             for f in range( 6, totSampleSize, afsBinSize )  ] ) ),
-                            '--ld-seps 5,50,100,200,300,500,1000,2000,3000,5000,10000 -g 10' )
+        if args.nsims_stoch > 0:
+            afsMinBinSize = 4
+            afsBinCount = 20
+            afsBinSize = max( afsMinBinSize, int( totSampleSize / afsBinCount ) )
+            statsBinary = args.stats_binary
+            statsCmd = joinstr( '$statsBinary -a',
+                                ','.join( map( str, [1,2,3,4,5] +
+                                               [ '%d-%d' % ( f, min( f+afsBinSize-1, totSampleSize ) )
+                                                 for f in range( 6, totSampleSize, afsBinSize )  ] ) ),
+                                '--ld-seps 5,50,100,200,300,500,1000,2000,3000,5000,10000 -g 10' )
 
-        cmpDistScript = os.path.join( args.srcdir, 'cmpdist.py' )
-        stochSummaryFN = os.path.join( stochDir, 'stochsumm.tsv.bz2' )
-        nsimsStoch = args.nsims_stoch
+            cmpDistScript = os.path.join( args.srcdir, 'cmpdist.py' )
+            stochSummaryFN = os.path.join( stochDir, 'stochsumm.tsv.bz2' )
+            nsimsStoch = args.nsims_stoch
 
-        stochCmdFN = os.path.join( stochDir, 'stochcmd.txt' )
-        stochTimeFN = os.path.join( stochDir, 'stochtime.txt' )
-        stochTimeFN_orig = None
-        stochCountFN = os.path.join( stochDir, 'stochcount.txt' )
-        timeScript = os.path.join( args.srcdir, 'timecmd.sh' )
-        try:
-            if args.update_stoch:
-                shutil.copy( cosiBinary, os.path.join( stochDir, 'coalescent' ) )
-                shutil.copy( cosiBinary + '.flags.txt', os.path.join( stochDir, 'coalescent.flags.txt' ) )
-                shutil.copy( statsBinary, os.path.join( stochDir, 'sample_stats_extra' ) )
-                shutil.copy( statsBinary, os.path.join( stochDir, 'sample_stats_extra.flags.txt' ) )
-                
-                cosiCmdStoch = joinstr( '$timeScript -t $stochTimeFN', '--',
-                                        cosiCmd, '--output-sim-times --output-end-gens -n $nsimsStoch', '--seed', args.seed,
-                                        '|', statsCmd,
-                                        '| $cmpDistScript --file1 stdin.tsv --file2 $stochSummaryFN --exclude-cols time' )
-                DumpFile( stochCmdFN, cosiCmdStoch )
-                DumpFile( stochCountFN, nsimsStoch )
-                cosiCmdStoch = joinstr( cosiCmdStoch, '--record' )
-            else:
-                cosiCmdStoch = SlurpFile( stochCmdFN )
-                stochTimeFN_orig = stochTimeFN
-                stochTimeFN = ReserveTmpFileName( prefix = 'runteststochtime' )
-                if args.max_minutes:
-                    cosiCmdStoch = string.replace( cosiCmdStoch, '-m ', '-m --stop-after-minutes %f ' % args.max_minutes )
-                if not args.use_orig_seed:
-                    cosiCmdStoch = re.sub( '--seed \d+', '--seed ' + str( args.seed ), cosiCmdStoch, count = 1 )
+            stochCmdFN = os.path.join( stochDir, 'stochcmd.txt' )
+            stochTimeFN = os.path.join( stochDir, 'stochtime.txt' )
+            stochTimeFN_orig = None
+            stochCountFN = os.path.join( stochDir, 'stochcount.txt' )
+            timeScript = os.path.join( args.srcdir, 'timecmd.sh' )
+            try:
+                if args.update_stoch:
+                    shutil.copy( cosiBinary, os.path.join( stochDir, 'coalescent' ) )
+                    shutil.copy( cosiBinary + '.flags.txt', os.path.join( stochDir, 'coalescent.flags.txt' ) )
+                    shutil.copy( statsBinary, os.path.join( stochDir, 'sample_stats_extra' ) )
+                    shutil.copy( statsBinary, os.path.join( stochDir, 'sample_stats_extra.flags.txt' ) )
 
-            SystemSucceed( subst( cosiCmdStoch, locals() ), useLSF = args.use_lsf, lsfJobName = testDir )
+                    cosiCmdStoch = joinstr( '$timeScript -t $stochTimeFN', '--',
+                                            cosiCmd, '--output-sim-times --output-end-gens -n $nsimsStoch', '--seed', args.seed,
+                                            '|', statsCmd,
+                                            '| $cmpDistScript --file1 stdin.tsv --file2 $stochSummaryFN --exclude-cols time' )
+                    DumpFile( stochCmdFN, cosiCmdStoch )
+                    DumpFile( stochCountFN, nsimsStoch )
+                    cosiCmdStoch = joinstr( cosiCmdStoch, '--record' )
+                else:
+                    cosiCmdStoch = SlurpFile( stochCmdFN )
+                    stochTimeFN_orig = stochTimeFN
+                    stochTimeFN = ReserveTmpFileName( prefix = 'runteststochtime' )
+                    if args.max_minutes:
+                        cosiCmdStoch = string.replace( cosiCmdStoch, '-m ', '-m --stop-after-minutes %f ' % args.max_minutes )
+                    if not args.use_orig_seed:
+                        cosiCmdStoch = re.sub( '--seed \d+', '--seed ' + str( args.seed ), cosiCmdStoch, count = 1 )
 
-            if not args.update_stoch:
-                origTime = readTime( stochTimeFN_orig ) / float( SlurpFile( stochCountFN ) )
-                curTime = readTime( stochTimeFN ) / float( nsimsStoch )
-                logging.info( 'origTime=' + str( origTime ) + ' curTime=' + str( curTime ) + ' slowdown=' +
-                              str( curTime / origTime ) )
-                assert  curTime <=  origTime * args.max_slowdown
+                SystemSucceed( subst( cosiCmdStoch, locals() ), useLSF = args.use_lsf, lsfJobName = testDir,
+                               lsfPreExecCmd = 'ls -l %(srcdir)s/runtest.py' % locals() )
 
-            if updating:
-                checksumFN = '%(testDir)s/testchecksums.sha512' % locals()
-                if os.path.isfile( checksumFN ): os.remove( checksumFN )
-                SystemSucceed( "sha512sum `find %(testDir)s -type f -not -name testchecksums.sha512 -and -not -name '*~' | sort` > %(checksumFN)s" % locals() )
-                
-        finally:
-            if not args.update_stoch and stochTimeFN_orig and os.path.isfile( stochTimeFN ) \
-               and 'COSI_KEEP_TMP' not in os.environ:
-                os.remove( stochTimeFN )
+                if not args.update_stoch:
+                    origTime = readTime( stochTimeFN_orig ) / float( SlurpFile( stochCountFN ) )
+                    curTime = readTime( stochTimeFN ) / float( nsimsStoch )
+                    logging.info( 'origTime=' + str( origTime ) + ' curTime=' + str( curTime ) + ' slowdown=' +
+                                  str( curTime / origTime ) )
+                    assert  curTime <=  origTime * args.max_slowdown
+
+                if updating:
+                    checksumFN = '%(testDir)s/testchecksums.sha512' % locals()
+                    if os.path.isfile( checksumFN ): os.remove( checksumFN )
+                    SystemSucceed( "sha512sum `find %(testDir)s -type f -not -name testchecksums.sha512 -and -not -name '*~' | sort` > %(checksumFN)s" % locals(),
+                                   lsfPreExecCmd = 'ls -l %(srcdir)s/runtest.py' % locals() )
+
+            finally:
+                if not args.update_stoch and stochTimeFN_orig and os.path.isfile( stochTimeFN ) \
+                   and 'COSI_KEEP_TMP' not in os.environ:
+                    os.remove( stochTimeFN )
 
     # end: with lock
 # end: def runTest

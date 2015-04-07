@@ -1,0 +1,32 @@
+Sender: LSF System <lsf@node1741>
+Subject: Job 5332481: <model014_t> Exited
+
+Job <model014_t> was submitted from host <node1378> by user <ilya> in cluster <cromwell>.
+Job was executed on host(s) <node1741>, in queue <hour>, as user <ilya> in cluster <cromwell>.
+</home/unix/ilya> was used as the home directory.
+</idi/sabeti-data/ilya/gsvn/Operations/Ilya_Operations/sim/cosi22_opt_sel/cosi> was used as the working directory.
+Started at Mon Apr 28 17:43:26 2014
+Results reported at Mon Apr 28 17:43:39 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+env COSI_TEST_UPDATE_EXACT=1 COSI_TEST_UPDATE_STOCH=1 COSI_TEST_NSIMS_STOCH=1000 srcdir=../../../cosi ../../../cosi/tests/model014/t/run.sh >& tests/model014/t/update.out1
+------------------------------------------------------------
+
+Exited with exit code 127.
+
+Resource usage summary:
+
+    CPU time   :      1.13 sec.
+    Max Memory :        26 MB
+    Max Swap   :       224 MB
+
+    Max Processes  :         3
+    Max Threads    :         3
+
+The output (if any) follows:
+
+/idi/sabeti-data/ilya/gsvn/Temp /idi/sabeti-data/ilya/gsvn/Operations/Ilya_Operations/sim/cosi22_opt_sel/cosi
+/idi/sabeti-data/ilya/gsvn/Operations/Ilya_Operations/sim/cosi22_opt_sel/cosi

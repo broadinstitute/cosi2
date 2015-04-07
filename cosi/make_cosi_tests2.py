@@ -25,10 +25,11 @@ def makeCosiTests():
                          'model004/t_u_0001 tests/model005/t_u_001 tests/model005/t_u_0001 '
                          'tests/model006/t_u_001 tests/model006/t_u_0001 tests/model014/t_u_001 '
                          'tests/model014/t_u_0001 tests/model015/t_u_0001 tests/model015/t_u_001 '
-                         'tests/model016/t_u_0001'.split(),
+                         'tests/model013/t_u_001 tests/model013/t_u_0001 '
+                         'tests/model016/t_u_0001 tests/model003/t_u_001'.split(),
                          help = 'skip these tests' )
     parser.add_argument( '--xfail', action = DefaultAppend, help = 'tests expected to fail',
-                         default = 'tests/model003/t_u_001'.split() )
+                         default = () )
 
     logging.basicConfig( level = logging.DEBUG,
                          format='%(process)d %(asctime)s %(levelname)-8s %(filename)s:%(lineno)s %(message)s' )
@@ -95,7 +96,7 @@ def Sfx( *vals ):
     def underscorify( val ):
         """prepend undescrore if needed"""
         if not val and val != 0: return ''
-        noPrefix = isinstance( val, types.StringTypes) and val.startswith('#')
+        noPrefix = isinstance( val, str) and val.startswith('#')
         alphaVal = MakeAlphaNum( str( val ) )
         return alphaVal[1:] if noPrefix else ( alphaVal if alphaVal.startswith( '_' ) else '_' + alphaVal )
     
@@ -139,7 +140,7 @@ def IsSeq( val ):
     """
     return ( isinstance( val, ( collections.Sequence, types.GeneratorType ) ) or
              ( hasattr( val, '__getitem__' ) and hasattr( val, '__len__' ) ) )  \
-             and not isinstance( val, ( types.StringTypes, collections.Mapping, AtomicForIsSeq ) )
+             and not isinstance( val, ( str, collections.Mapping, AtomicForIsSeq ) )
 
 class DefaultAppend(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):

@@ -2,6 +2,5 @@ seglist_test
 *.log
 *.trs
 TAGS
-tests/
 tmp/
 

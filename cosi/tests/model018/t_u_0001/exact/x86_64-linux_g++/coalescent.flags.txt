@@ -1,0 +1,7 @@
+coalescent  -I../../../cosi/.. -isystem ../../../cosi/boost -DNDEBUG -DCOSI_TRACK_LAST_COAL -DCOSI_SUPPORT_COALAPX -std=gnu++11 -O3 --param max-inline-insns-single=1000 -Werror -Wall -Wextra -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op -Wmissing-declarations -Wdouble-promotion -Winit-self -O3 -flto
+libcosi  -I../../../cosi/.. -isystem ../../../cosi/boost -DNDEBUG -DCOSI_TRACK_LAST_COAL -DCOSI_SUPPORT_COALAPX -std=gnu++11 -O3 --param max-inline-insns-single=1000 -Werror -Wall -Wextra -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op -Wmissing-declarations -Wdouble-promotion -Winit-self -O3 -flto
+g++ (GCC) 4.8.2
+Copyright (C) 2013 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+

@@ -1,0 +1,7 @@
+
+real	16m7.779s
+user	13m13.906s
+sys	0m18.927s
+retcode 0
+host node1374
+uname Linux node1374 2.6.18-194.8.1.el5 #1 SMP Thu Jul 1 19:04:48 EDT 2010 x86_64 GNU/Linux

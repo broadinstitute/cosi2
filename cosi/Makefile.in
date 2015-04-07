@@ -120,25 +120,23 @@ DIST_COMMON = $(srcdir)/cositests.am INSTALL NEWS README AUTHORS \
 TESTS = tests/model001/t/run.sh tests/model001/t_u_001/run.sh \
 	tests/model001/t_u_0001/run.sh tests/model002/t/run.sh \
 	tests/model002/t_u_001/run.sh tests/model002/t_u_0001/run.sh \
-	tests/model003/t/run.sh tests/model003/t_u_001/run.sh \
-	tests/model004/t/run.sh tests/model005/t/run.sh \
-	tests/model006/t/run.sh tests/model007/t/run.sh \
-	tests/model007/t_u_001/run.sh tests/model007/t_u_0001/run.sh \
-	tests/model008/t/run.sh tests/model008/t_u_001/run.sh \
-	tests/model008/t_u_0001/run.sh tests/model009/t/run.sh \
-	tests/model009/t_u_001/run.sh tests/model009/t_u_0001/run.sh \
-	tests/model010/t/run.sh tests/model010/t_u_001/run.sh \
-	tests/model010/t_u_0001/run.sh tests/model011/t/run.sh \
-	tests/model011/t_u_001/run.sh tests/model011/t_u_0001/run.sh \
-	tests/model012/t/run.sh tests/model012/t_u_001/run.sh \
-	tests/model012/t_u_0001/run.sh tests/model013/t/run.sh \
-	tests/model013/t_u_001/run.sh tests/model013/t_u_0001/run.sh \
-	tests/model014/t/run.sh tests/model015/t/run.sh \
-	tests/model016/t/run.sh tests/model016/t_u_001/run.sh \
-	tests/model017/t/run.sh tests/model017/t_u_001/run.sh \
-	tests/model017/t_u_0001/run.sh tests/model018/t/run.sh \
-	tests/model018/t_u_001/run.sh tests/model018/t_u_0001/run.sh \
+	tests/model003/t/run.sh tests/model004/t/run.sh \
+	tests/model005/t/run.sh tests/model006/t/run.sh \
+	tests/model007/t/run.sh tests/model007/t_u_001/run.sh \
+	tests/model007/t_u_0001/run.sh tests/model008/t/run.sh \
+	tests/model008/t_u_001/run.sh tests/model008/t_u_0001/run.sh \
+	tests/model009/t/run.sh tests/model009/t_u_001/run.sh \
+	tests/model009/t_u_0001/run.sh tests/model010/t/run.sh \
+	tests/model010/t_u_001/run.sh tests/model010/t_u_0001/run.sh \
+	tests/model011/t/run.sh tests/model011/t_u_001/run.sh \
+	tests/model011/t_u_0001/run.sh tests/model012/t/run.sh \
+	tests/model012/t_u_001/run.sh tests/model012/t_u_0001/run.sh \
+	tests/model013/t/run.sh tests/model014/t/run.sh \
+	tests/model015/t/run.sh tests/model016/t/run.sh \
+	tests/model016/t_u_001/run.sh tests/model017/t/run.sh \
+	tests/model017/t_u_001/run.sh tests/model017/t_u_0001/run.sh \
 	seglist_test$(EXEEXT) test_funcs$(EXEEXT)
+XFAIL_TESTS =
 @HAVE_CMPDIST_TRUE@@HAVE_PYTHON_TRUE@am__append_2 = cmpdist.py runtest.py timecmd.sh
 @HAVE_GTEST_TRUE@am__append_3 = ost_test_main
 
@@ -970,8 +968,7 @@ subpkginclude_HEADERS = coalescent.h mutlist.h defs.h utildefs.h cositop.h
 #COSI_CXX_FLAGS_DEBUG += -O0 -UNDEBUG -D_GLIBCXX_DEBUG -fno-inline-functions -ggdb3
 COSISTATICSOURCES = $(COSISOURCES) $(srcdir)/cosimain.cc $(libprogopt_la_SOURCES) $(libcosifilesystem_la_SOURCES) $(libcosiserialization_la_SOURCES) $(libcositimer_la_SOURCES) $(libcosichrono_la_SOURCES) $(srcdir)/../cosi_rand/mtwist.c $(srcdir)/../cosi_rand/poisson.c $(srcdir)/../cosi_rand/ranbinom.c $(srcdir)/../cosi_rand/gammln.c $(srcdir)/../cosi_rand/rng.c $(srcdir)/../cosi_rand/expdev.c $(srcdir)/../cosi_rand/gamma.c
 check_SCRIPTS = $(am__append_2)
-XFAIL_TESTS = tests/model003/t_u_001/run.sh
-COSI_TESTDATA = tests/model001 tests/model002 tests/model003 tests/model004 tests/model005 tests/model006 tests/model007 tests/model008 tests/model009 tests/model010 tests/model011 tests/model012 tests/model013 tests/model014 tests/model015 tests/model016 tests/model017 tests/model018
+COSI_TESTDATA = tests/model001 tests/model002 tests/model003 tests/model004 tests/model005 tests/model006 tests/model007 tests/model008 tests/model009 tests/model010 tests/model011 tests/model012 tests/model013 tests/model014 tests/model015 tests/model016 tests/model017
 seglist_test_SOURCES = seglist_test.cc seglist.cc seglist.h leafset-tree.h leafset-tree.cc leafset-counts.cc leafset-counts.h leafset.h segsumm.h segsumm.cc \
 	utils.h utils.cc defs.h utildefs.h typedval.h mempool.h mempool.cc
 
@@ -2804,13 +2801,6 @@ tests/model003/t/run.sh.log: tests/model003/t/run.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model003/t_u_001/run.sh.log: tests/model003/t_u_001/run.sh
-	@p='tests/model003/t_u_001/run.sh'; \
-	b='tests/model003/t_u_001/run.sh'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 tests/model004/t/run.sh.log: tests/model004/t/run.sh
 	@p='tests/model004/t/run.sh'; \
 	b='tests/model004/t/run.sh'; \
@@ -2965,20 +2955,6 @@ tests/model013/t/run.sh.log: tests/model013/t/run.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model013/t_u_001/run.sh.log: tests/model013/t_u_001/run.sh
-	@p='tests/model013/t_u_001/run.sh'; \
-	b='tests/model013/t_u_001/run.sh'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model013/t_u_0001/run.sh.log: tests/model013/t_u_0001/run.sh
-	@p='tests/model013/t_u_0001/run.sh'; \
-	b='tests/model013/t_u_0001/run.sh'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 tests/model014/t/run.sh.log: tests/model014/t/run.sh
 	@p='tests/model014/t/run.sh'; \
 	b='tests/model014/t/run.sh'; \
@@ -3024,27 +3000,6 @@ tests/model017/t_u_001/run.sh.log: tests/model017/t_u_001/run.sh
 tests/model017/t_u_0001/run.sh.log: tests/model017/t_u_0001/run.sh
 	@p='tests/model017/t_u_0001/run.sh'; \
 	b='tests/model017/t_u_0001/run.sh'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model018/t/run.sh.log: tests/model018/t/run.sh
-	@p='tests/model018/t/run.sh'; \
-	b='tests/model018/t/run.sh'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model018/t_u_001/run.sh.log: tests/model018/t_u_001/run.sh
-	@p='tests/model018/t_u_001/run.sh'; \
-	b='tests/model018/t_u_001/run.sh'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model018/t_u_0001/run.sh.log: tests/model018/t_u_0001/run.sh
-	@p='tests/model018/t_u_0001/run.sh'; \
-	b='tests/model018/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

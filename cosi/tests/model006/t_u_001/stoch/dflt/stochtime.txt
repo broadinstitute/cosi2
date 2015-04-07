@@ -1,0 +1,9 @@
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Iterator's operation exceeded bounds
+../../../cosi/timecmd.sh: line 106: 29226 Aborted                 (core dumped) $TIMEOUTCMD $REST > $OUTFILE 2> $ERRFILE
+
+real	9m6.323s
+user	5m51.824s
+sys	0m16.170s
+retcode 134
+host node1378
