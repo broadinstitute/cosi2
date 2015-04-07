@@ -104,7 +104,7 @@ AC_ARG_ENABLE(
             *) AC_MSG_ERROR([[invalid argument --enable-lto=$disableval... stopping]]);;
         esac
     ],
-    [enable_lto="yes"]
+    [enable_lto="no"]
 )
 
 #
