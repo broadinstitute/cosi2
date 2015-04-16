@@ -4,7 +4,7 @@
 
 from __future__ import division
 import os, sys, argparse, logging, subprocess, random, string, tempfile, inspect, re, stat, contextlib, fcntl, errno, time, \
-    platform, shutil, socket
+    platform, shutil, socket, subprocess
 
 try:
     import lsfutil
@@ -68,7 +68,7 @@ def parseArgs():
 
     return args
 
-def SystemSucceed( cmd, dbg = False, exitCodesOk = ( 0, ), useLSF = False, lsfJobName = 'runtest',
+def SystemSucceed( cmd, dbg = False, useLSF = False, lsfJobName = 'runtest',
                    lsfPreExecCmd = '' ):
     """Run a shell command, and raise a fatal error if the command fails."""
     logging.info( 'Running command ' + cmd + ' ; called from ' + sys._getframe(1).f_code.co_filename + ':' +
@@ -76,24 +76,21 @@ def SystemSucceed( cmd, dbg = False, exitCodesOk = ( 0, ), useLSF = False, lsfJo
     scriptFN = None
     outFN = None
     try:
-        scriptFN = ReserveTmpFileName( executable = True, prefix = 'runtestsysscrpt' )
-        with open( scriptFN, 'w' ) as out:
-            out.write( '#!/usr/bin/env bash\n' )
-            out.write( 'set -e -o pipefail -o nounset\n' )
-            out.write( cmd + '\n' )
-            os.fchmod( out.fileno(), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO )
+        # scriptFN = ReserveTmpFileName( executable = True, prefix = 'runtestsysscrpt' )
+        # with open( scriptFN, 'w' ) as out:
+        #     out.write( '#!/usr/bin/env bash\n' )
+        #     out.write( 'set -e -o pipefail -o nounset\n' )
+        #     out.write( cmd + '\n' )
+        #     os.fchmod( out.fileno(), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO )
 
-        scriptCmd = scriptFN
         if useLSF:
             outFN = ReserveTmpFileName( prefix = 'runtestlsfoutput' )
             grpId = '/ilya/cosi/runtest/' + socket.getfqdn() + ':' + str( os.getpid() )
             preExecOpts = '' if not lsfPreExecCmd else " -E '" + lsfPreExecCmd + "'"
-            scriptCmd = "bsub -K -q hour -W '04:00' -P sabeti_cosi -g '%(grpId)s' -J '%(lsfJobName)s' %(preExecOpts)s -R 'rusage[argon_io=1,mem=3]' -o %(outFN)s '%(scriptFN)s'" % locals()
-            logging.info( 'outFN=' + outFN + ' scriptCmd=' + scriptCmd )
-        exitCode = os.system( scriptCmd )
-        logging.info( 'Finished command ' + cmd + ' with exit code ' + str( exitCode ) )
-        if exitCodesOk != 'any' and exitCode not in exitCodesOk:
-            raise IOError( "Command %s failed with exit code %d" % ( cmd, exitCode ) )
+            cmd = "bsub -K -q hour -W '04:00' -P sabeti_cosi -g '%(grpId)s' -J '%(lsfJobName)s' %(preExecOpts)s -R 'rusage[argon_io=1,mem=3]' -o %(outFN)s '%(cmd)s'" % locals()
+            logging.info( 'outFN=' + outFN + ' scriptCmd=' + cmd )
+        subprocess.check_call( cmd, shell = True )
+        logging.info( 'Finished command ' + cmd + ' with exit code 0' )
     finally:
         if outFN:
             logging.info( 'printing output file ' + outFN )
@@ -158,7 +155,7 @@ def readTime( timeFN ):
         return userTime + sysTime
     
 def ReserveTmpFileName( prefix = 'mytmp', suffix = '.tmp', text = True,
-                        tmpDir = os.environ.get( 'COSI_TMP_DIR', '/idi/sabeti-data/ilya/tmp' ),
+                        tmpDir = os.environ.get( '__LSF_JOB_TMPDIR__', '/tmp' ),
                         executable = False ):
     """Create a unique temp file, close it, and return its name.
     The caller then would typically overwrite this file,
@@ -192,12 +189,14 @@ class SimpleFlock(object):
       self._rand.seed()
 
    def __enter__(self):
-      self._fd = os.open(self._path, os.O_CREAT)
+      if not self._exclusive and not os.path.isfile( self._path ):
+          raise IOError( "Lockfile for shared lock not found: " + self._path )
+      self._fd = os.open(self._path, ( ( os.O_CREAT | os.O_EXCL | os.O_WRONLY ) if self._exclusive else os.O_RDONLY ) )
       start_lock_search = time.time()
       checkInterval = self._minCheckInterval
       while True:
          try:
-            fcntl.flock(self._fd, ( fcntl.LOCK_EX if self._exclusive else fcntl.LOCK_SH ) | fcntl.LOCK_NB)
+            fcntl.lockf(self._fd, ( fcntl.LOCK_EX if self._exclusive else fcntl.LOCK_SH ) | fcntl.LOCK_NB)
             # Lock acquired!
             logging.info( 'acquired ' + ( 'exclusive' if self._exclusive else 'shared' ) + ' lock ' + self._path )
             return
@@ -216,7 +215,7 @@ class SimpleFlock(object):
    # end: def __enter__() 
 
    def __exit__(self, *args):
-      fcntl.flock(self._fd, fcntl.LOCK_UN)
+      fcntl.lockf(self._fd, fcntl.LOCK_UN)
       os.close(self._fd)
       self._fd = None
       logging.info( 'released ' + ( 'exclusive' if self._exclusive else 'shared' ) +' lock ' + self._path )
@@ -349,6 +348,7 @@ def runTest( args ):
                     cosiCmdStoch = SlurpFile( stochCmdFN )
                     stochTimeFN_orig = stochTimeFN
                     stochTimeFN = ReserveTmpFileName( prefix = 'runteststochtime' )
+                    print( 'stochTimeFN', stochTimeFN )
                     if args.max_minutes:
                         cosiCmdStoch = string.replace( cosiCmdStoch, '-m ', '-m --stop-after-minutes %f ' % args.max_minutes )
                     if not args.use_orig_seed:
@@ -358,6 +358,8 @@ def runTest( args ):
                                lsfPreExecCmd = 'ls -l %(srcdir)s/runtest.py' % locals() )
 
                 if not args.update_stoch:
+                    if os.path.isfile( os.path.join( stochDir, 'stochcount.long.txt' ) ):
+                        stochCountFN = os.path.join( stochDir, 'stochcount.long.txt' )
                     origTime = readTime( stochTimeFN_orig ) / float( SlurpFile( stochCountFN ) )
                     curTime = readTime( stochTimeFN ) / float( nsimsStoch )
                     logging.info( 'origTime=' + str( origTime ) + ' curTime=' + str( curTime ) + ' slowdown=' +
@@ -371,9 +373,10 @@ def runTest( args ):
                                    lsfPreExecCmd = 'ls -l %(srcdir)s/runtest.py' % locals() )
 
             finally:
-                if not args.update_stoch and stochTimeFN_orig and os.path.isfile( stochTimeFN ) \
-                   and 'COSI_KEEP_TMP' not in os.environ:
-                    os.remove( stochTimeFN )
+                pass
+#                if not args.update_stoch and stochTimeFN_orig and os.path.isfile( stochTimeFN ) \
+#                   and 'COSI_KEEP_TMP' not in os.environ:
+#                    os.remove( stochTimeFN )
 
     # end: with lock
 # end: def runTest
