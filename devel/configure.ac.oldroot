@@ -1,0 +1,17 @@
+AC_PREREQ([2.68])
+AC_INIT([cosi], [2.0])
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([m4])
+AM_INIT_AUTOMAKE([1.9 tar-pax parallel-tests subdir-objects -Wall])
+LT_INIT([disable-shared])
+AC_PROG_CC
+AM_PROG_CC_C_O
+AC_PROG_CXX
+AM_MAINTAINER_MODE([disable])
+#AC_CHECK_HEADERS([sys/dir.h sys/syscall.h sys/procfs.h excpt.h setjmp.h execinfo.h unwind.h])
+AC_CONFIG_FILES([Makefile])
+# Call hand's ./configure script recursively.
+#AC_CONFIG_SUBDIRS([cosi_rand randseed recomap cosi PipeRun cosi2_rand cosi2 showtree])
+AC_CONFIG_SUBDIRS([cosi_rand recosim cosi])
+AC_OUTPUT
+
