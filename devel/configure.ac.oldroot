@@ -12,6 +12,6 @@ AM_MAINTAINER_MODE([disable])
 AC_CONFIG_FILES([Makefile])
 # Call hand's ./configure script recursively.
 #AC_CONFIG_SUBDIRS([cosi_rand randseed recomap cosi PipeRun cosi2_rand cosi2 showtree])
-AC_CONFIG_SUBDIRS([cosi_rand recosim cosi])
+#AC_CONFIG_SUBDIRS([cosi_rand recosim cosi])
 AC_OUTPUT
 

@@ -1,0 +1,8 @@
+lib_LTLIBRARIES += libcositimer.la
+
+TI=$(BOOST_DIR)/libs/timer/src
+libcositimer_la_SOURCES = $(TI)/auto_timers_construction.cpp $(TI)/cpu_timer.cpp
+libcositimer_la_CPPFLAGS = $(AM_CPPFLAGS)
+libcositimer_la_LIBADD = $(BOOST_CHRONO_LIBS)
+
+

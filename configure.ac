@@ -8,7 +8,7 @@ AC_PREREQ([2.68])
 AC_INIT([cosi_coalescent], [2.0], [ilya_shl@alum.mit.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([1.9 tar-pax parallel-tests subdir-objects -Wall])
+AM_INIT_AUTOMAKE([1.9 tar-pax parallel-tests -Wall])
 
 #AM_PATH_PYTHON([2.5],, [:])
 #AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
