@@ -44,6 +44,9 @@ def parseArgs():
                          default = int( os.environ.get( 'COSI_TEST_NSIMS_EXACT', 3 ) ) ) 
     parser.add_argument( '--nsims-stoch', help = 'number of simulations for the stochastic check', type = int,
                          default = int( os.environ.get( 'COSI_TEST_NSIMS_STOCH', 1000 ) ) )
+    parser.add_argument( '--force-stoch', help = 'run the stochastic check even if exact check succeeds',
+                         action = 'store_true',
+                         default = bool( int( os.environ.get( 'COSI_TEST_FORCE_STOCH', 0 ) ) ) )
     parser.add_argument( '--cosi-sim-params', help = 'additional args to pass to cosi', default = '' )
     parser.add_argument( '--max-minutes', type = float, default = float( os.environ.get( 'COSI_TEST_MAX_MINUTES', 0 ) ),
                          help = 'if >0, stop sims after this many minutes' )
@@ -178,7 +181,7 @@ class SimpleFlock(object):
    Adapted from https://github.com/derpston/python-simpleflock.git
    """
 
-   def __init__(self, path, exclusive = True, timeout = None, minCheckInterval = 0.1, maxCheckInterval = 10 ):
+   def __init__(self, path, exclusive = True, timeout = None, minCheckInterval = 0.1, maxCheckInterval = 10, disable = False ):
       self._path = path
       self._exclusive = exclusive
       self._timeout = timeout
@@ -187,8 +190,10 @@ class SimpleFlock(object):
       self._maxCheckInterval = maxCheckInterval
       self._rand = random.Random()
       self._rand.seed()
+      self._disable = disable
 
    def __enter__(self):
+      if self._disable: return 
       if not self._exclusive and not os.path.isfile( self._path ):
           raise IOError( "Lockfile for shared lock not found: " + self._path )
       self._fd = os.open(self._path, ( ( os.O_CREAT | os.O_EXCL | os.O_WRONLY ) if self._exclusive else os.O_RDONLY ) )
@@ -215,6 +220,7 @@ class SimpleFlock(object):
    # end: def __enter__() 
 
    def __exit__(self, *args):
+      if self._disable: return 
       fcntl.lockf(self._fd, fcntl.LOCK_UN)
       os.close(self._fd)
       self._fd = None
@@ -272,7 +278,8 @@ def runTest( args ):
         if args.update_stoch: EnsureDirExists( stochDir )
 
     logging.info( 'getting lock' )
-    with SimpleFlock( os.path.join( testDir, 'updating.lck' ), timeout = 0, exclusive = updating ):
+    with SimpleFlock( os.path.join( testDir, 'updating.lck' ), timeout = 0, exclusive = updating,
+                      disable = not updating ):
         logging.info( 'got lock' )
 
         paramFN = os.path.join( testDir, '..', 'test.cosiParams' )
@@ -310,7 +317,7 @@ def runTest( args ):
                            lsfPreExecCmd = 'ls -l %(srcdir)s/runtest.py' % locals() )
 
         # * Stochastic check
-        if args.nsims_stoch > 0:
+        if ( args.force_stoch or args.update_stoch ) and args.nsims_stoch > 0:
             afsMinBinSize = 4
             afsBinCount = 20
             afsBinSize = max( afsMinBinSize, int( totSampleSize / afsBinCount ) )
@@ -350,7 +357,7 @@ def runTest( args ):
                     stochTimeFN = ReserveTmpFileName( prefix = 'runteststochtime' )
                     print( 'stochTimeFN', stochTimeFN )
                     if args.max_minutes:
-                        cosiCmdStoch = string.replace( cosiCmdStoch, '-m ', '-m --stop-after-minutes %f ' % args.max_minutes )
+                        cosiCmdStoch = str.replace( cosiCmdStoch, '-m ', '-m --stop-after-minutes %f ' % args.max_minutes )
                     if not args.use_orig_seed:
                         cosiCmdStoch = re.sub( '--seed \d+', '--seed ' + str( args.seed ), cosiCmdStoch, count = 1 )
 

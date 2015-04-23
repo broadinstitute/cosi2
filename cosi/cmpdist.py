@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import division
+
 """Test whether the distribution of any of a set of summary statistics differs between two 
 sets of simulations."""
 
@@ -7,6 +9,7 @@ sets of simulations."""
 import sys, argparse, logging, bz2, os, re
 import numpy as np
 from scipy.stats import ks_2samp
+from scipy.stats.mstats import mquantiles
 
 parser = argparse.ArgumentParser( description = 'Test for differences in distribution of summary statistics',
                                   formatter_class = argparse.ArgumentDefaultsHelpFormatter )
@@ -96,6 +99,8 @@ logging.info( 'z1.dtype.names=' + str( z1.dtype.names ) + ' z2.dtype.names=' + s
 logging.info( 'checking two files, sizes %d and %d, for %d stats' % ( len( z1 ), len( z2 ), len( z1.dtype.names ) ) )
 #assert z1.dtype.names == z2.dtype.names
 pVals = []
+qdiffs = []
+qdiffsRel = []
 
 excludeColsRegexps = list(map( re.compile, args.exclude_cols )) if args.exclude_cols else ()
 
@@ -107,7 +112,21 @@ for c in z1.dtype.names:
         raise RuntimeError( 'distribution of column %s does not match: p=%s, D=%s' % ( c, p, D ) )
     pVals.append( ( p, c ) )
 
-sorted_pvals = sorted( pVals ) 
+    probs = np.arange( .1, 1., .1 )
+    q1 = mquantiles( z1[ c ], prob = probs )
+    q2 = mquantiles( z2[ c ], prob = probs )
+    c_std=np.std( z2[ c ] )
+    if c_std < 1e-15: c_std = np.nan
+    print( 'c=', c, 'len=', len( z2[ c ] ), 'c_std=', c_std )
+    qdiffs.append( np.max( np.abs( q1 - q2 ) ) )
+    qdiffsRel.append( np.max( np.abs( q1 - q2 ) / c_std ) )
+
+sorted_pvals = sorted( pVals )
+
+sorted_qdiffs = sorted( qdiffs, reverse = True )
+sorted_qdiffsRel = sorted( qdiffsRel, reverse = True )
+print( 'sorted_qdiffs', sorted_qdiffs[:5] )
+print( 'sorted_qdiffsRel', sorted_qdiffsRel[:5] )
     
 if not args.v: sorted_pvals = sorted_pvals[:5]
     
