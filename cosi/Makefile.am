@@ -186,59 +186,7 @@ coalescent_static: $(COSISTATICSOURCES)
 #
 # Section: Tests
 #
-
-check_PROGRAMS =
-check_SCRIPTS =
-
-include cositests.am
-
-check_PROGRAMS += seglist_test funcs_test test_funcs test_arrproc
-seglist_test_SOURCES = seglist_test.cc seglist.cc seglist.h leafset-tree.h leafset-tree.cc leafset-counts.cc leafset-counts.h leafset.h segsumm.h segsumm.cc \
-	utils.h utils.cc defs.h utildefs.h typedval.h mempool.h mempool.cc
-seglist_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
-seglist_test_CXXFLAGS = $(COSI_CXXFLAGS)
-seglist_test_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
-seglist_test_LDADD = $(builddir)/../cosi_rand/libcosi_rand_noinst.la $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)
-
-funcs_test_SOURCES = funcs_test.cc generalmath.h utils.h utils.cc
-funcs_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
-funcs_test_LDADD = $(BOOST_SYSTEM_LIBS)
-
-test_funcs_SOURCES = test_funcs.cc generalmath.h utils.h utils.cc
-test_funcs_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG -DCOSI_DEV_PRINT
-test_funcs_LDADD = $(BOOST_SYSTEM_LIBS)
-
-test_arrproc_SOURCES = test_arrproc.cc generalmath.h utils.h utils.cc arrproc.h typeutil.h
-test_arrproc_CPPFLAGS = $(COSI_CPPFLAGS) -DCOSI_DEV_PRINT -UNDEBUG
-test_arrproc_LDADD = $(BOOST_SYSTEM_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
-
-EXTRA_DIST += $(TESTS) $(COSI_TESTDATA) $(srcdir)/make_cosi_tests.py $(srcdir)/update_cosi_tests.py $(srcdir)/runtest.py \
-	$(srcdir)/make_cosi_tests2.py $(srcdir)/update_tests.py $(srcdir)/cmpdist.py $(srcdir)/timecmd.sh
-
-TESTS += seglist_test test_funcs
-
-if HAVE_PYTHON
-if HAVE_CMPDIST
-check_SCRIPTS += cmpdist.py runtest.py timecmd.sh
-endif
-endif
-
-#bin_PROGRAMS += test_random_access
-#test_random_access_SOURCES = test_random_access.cpp random_access_skip_list.h skip_list_detail.h test_types.h catch.hpp 
-#test_random_access_CXXFLAGS = -Wno-unknown-pragmas
-
-check_PROGRAMS += ost_test
-ost_test_SOURCES = ost_test.cpp order_statistics.hpp utils.h utils.cc
-ost_test_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(builddir)/../cosi_rand/libcosi_rand.la
-ost_test_CPPFLAGS = $(AM_CPPFLAGS) -UNDEBUG
-
-if HAVE_GTEST
-check_PROGRAMS += ost_test_main
-ost_test_main_SOURCES = ost_test_main.cpp order_statistics.hpp utils.h utils.cc
-ost_test_main_CPPFLAGS = $(AM_CPPFLAGS) -UNDEBUG -I$(GTEST_DIR)/include
-ost_test_main_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(builddir)/../cosi_rand/libcosi_rand.la
-ost_test_main_LDFLAGS = $(AM_LDFLAGS) -L$(GTEST_DIR)/lib -lgtest
-endif  # if HAVE_GTEST
+include $(srcdir)/tests/tests.am
 
 #
 # Section: Building documentation
@@ -251,35 +199,6 @@ doc:
 	$(srcdir)/NaturalDocs/NaturalDocs -p $(srcdir)/ndproj -i $(srcdir) -xi $(srcdir)/boost -xi $(srcdir)/NaturalDocs -o FramedHTML $(builddir)/doc/html
 
 .PHONY: doc
-
-
-#
-# Section: Development/experimental options
-#
-
-if HAVEROOT
-bin_PROGRAMS += cosiroot ldhist
-endif
-
-bin_PROGRAMS += sample_stats_extra
-
-
-sample_stats_extra_SOURCES = sample_stats_extra.cc tajd.cc
-sample_stats_extra_CPPFLAGS = $(AM_CPPFLAGS) #-I @LIBSEQUENCE_INC_DIR@
-sample_stats_extra_CXXFLAGS = $(COSI_CXXFLAGS)
-sample_stats_extra_LDFLAGS = $(BOOST_REGEX_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) 
-sample_stats_extra_LDADD = $(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) 
-
-if HAVEROOT
-cosiroot_SOURCES = cosiroot.cc
-cosiroot_CPPFLAGS = $(AM_CPPFLAGS) $(ROOTCFLAGS)
-cosiroot_LDADD = $(coalescent_LDADD) -L$(ROOTLIBDIR) $(ROOTLIBS)
-
-ldhist_SOURCES = ldhist.cc
-ldhist_CPPFLAGS = $(AM_CPPFLAGS) $(ROOTCFLAGS)
-ldhist_LDADD = $(coalescent_LDADD) -L$(ROOTLIBDIR) $(ROOTLIBS)
-
-endif
 
 COSIFLAGS = $(builddir)/coalescent.flags.txt
 

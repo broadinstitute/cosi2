@@ -4,7 +4,7 @@ AC_CONFIG_SRCDIR([gammln.h])
 #AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([-Wall -Werror])
+AM_INIT_AUTOMAKE([1.9 tar-pax parallel-tests subdir-objects -Wall -Werror])
 AC_LANG(C)
 AM_PROG_AR
 LT_INIT([disable-shared])

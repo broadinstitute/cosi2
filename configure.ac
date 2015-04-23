@@ -2,7 +2,7 @@ AC_PREREQ([2.68])
 AC_INIT([cosi], [2.0])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([1.9 tar-pax])
+AM_INIT_AUTOMAKE([1.9 tar-pax parallel-tests subdir-objects -Wall])
 LT_INIT([disable-shared])
 AC_PROG_CC
 AM_PROG_CC_C_O
