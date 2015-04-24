@@ -131,7 +131,7 @@ make-docs:
 
 COSIFLAGS = $(builddir)/coalescent.flags.txt
 
-$(COSIFLAGS): $(builddir)/coalescent
+$(COSIFLAGS): $(builddir)/coalescent$(EXEEXT)
 	echo "coalescent " $(coalescent_CPPFLAGS) $(CPPFLAGS) $(coalescent_CXXFLAGS) $(CXXFLAGS) $(coalescent_LDFLAGS) $(LDFLAGS) > $@
 	echo "libcosi " $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) $(libcosi_la_LDFLAGS) $(LDFLAGS) >> $@
 	$(CXX) --version >> $@
