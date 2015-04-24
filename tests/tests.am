@@ -1,10 +1,10 @@
 check_PROGRAMS =
 check_SCRIPTS =
 
-
-include $(srcdir)/tests/cositests.am
 TD=$(srcdir)/tests
 SD=$(srcdir)/cosi
+
+include $(srcdir)/tests/cositests.am
 check_PROGRAMS += seglist_test funcs_test test_funcs test_arrproc
 seglist_test_SOURCES = $(TD)/seglist_test.cc $(SD)/seglist.cc $(SD)/seglist.h $(SD)/leafset-tree.h \
 	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/leafset-counts.h \
@@ -29,7 +29,7 @@ test_arrproc_CPPFLAGS = $(COSI_CPPFLAGS) -DCOSI_DEV_PRINT -UNDEBUG
 test_arrproc_LDADD = $(BOOST_SYSTEM_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
 
 
-EXTRA_DIST += $(TESTS) $(COSI_TESTDATA) $(TD)/make_cosi_tests.py $(TD)/update_cosi_tests.py $(TD)/runtest.py \
+EXTRA_DIST += $(TD)/make_cosi_tests.py $(TD)/update_cosi_tests.py $(TD)/runtest.py \
 	$(TD)/make_cosi_tests2.py $(TD)/update_tests.py $(TD)/cmpdist.py $(TD)/timecmd.sh
 
 TESTS += seglist_test test_funcs

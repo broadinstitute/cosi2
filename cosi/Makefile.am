@@ -60,6 +60,7 @@ COSIUTILHEADERS = $(SD)/utils.h $(SD)/arrival.h $(SD)/generalmath.h $(SD)/cosira
 	$(SD)/drd.h $(SD)/memcheck.h $(SD)/mempool.h 
 libcosiutil_la_SOURCES = $(SD)/utils.cc $(SD)/arrival.cc $(SD)/cosirand.cc $(SD)/gauss_legendre.c $(SD)/mempool.cc \
 	$(COSIUTILHEADERS)
+libcosiutil_la_CPPFLAGS = $(AM_CPPFLAGS)
 
 
 COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/file.cc $(SD)/geneconversion.cc \
@@ -68,8 +69,7 @@ COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/fi
 	$(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
 	$(SD)/sweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
 	$(SD)/traj.cc $(SD)/cositop.cc $(SD)/mutcontext.cc \
-	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/utils.cc $(SD)/arrival.cc $(SD)/cosirand.cc $(SD)/gauss_legendre.c \
-	$(SD)/mempool.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
+	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
 
 libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/file.cc $(SD)/geneconversion.cc \
 	$(SD)/historical.cc \
@@ -82,7 +82,7 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $
 	$(SD)/sweep.h $(SD)/sweep1.h $(SD)/sweep2.h $(SD)/sweep3.h $(SD)/recomb.h $(SD)/genmap.h $(SD)/stats.h $(SD)/traj.h $(SD)/decls.h $(SD)/hooks.h \
 	$(SD)/coalrate.h $(SD)/condsnp.h $(SD)/condsnp.cc \
 	$(SD)/mutcontext.h $(SD)/hullmgr.h $(SD)/hullmgr.cc \
-	$(SD)/cosicfg.h $(COSIUTILHEADERS)
+	$(SD)/cosicfg.h $(SD)/coalescent.h $(SD)/mutlist.h $(COSIUTILHEADERS)
 
 libcosi_la_CPPFLAGS = $(COSI_CPPFLAGS)
 libcosi_la_CXXFLAGS = $(COSI_CXXFLAGS)
@@ -96,9 +96,6 @@ coalescent_CXXFLAGS = $(COSI_CXXFLAGS)
 coalescent_LDADD = $(builddir)/libcosi.la $(builddir)/libcosi_rand.la $(BOOST_PROGRAM_OPTIONS_LIBS)	\
 	$(BOOST_FILESYSTEM_LIBS) $(BOOST_TIMER_LIBS) $(BOOST_SERIALIZATION_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
 coalescent_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS)
-
-subpkgincludedir = $(includedir)/cosi
-subpkginclude_HEADERS = $(SD)/coalescent.h $(SD)/mutlist.h $(SD)/defs.h $(SD)/utildefs.h $(SD)/cositop.h
 
 #if EHH
 #libcosi_la_SOURCES += leafset-bitset.cc
@@ -126,13 +123,11 @@ coalescent_static: $(COSISTATICSOURCES)
 # Section: Building documentation
 #
 
-EXTRA_DIST += $(srcdir)/NaturalDocs $(SD)/ndproj
-
-doc:
+make-docs:
 	$(mkdir_p) $(builddir)/doc/html
-	$(srcdir)/doc/NaturalDocs/NaturalDocs -p $(srcdir)/doc/ndproj -i $(SD)  -o FramedHTML $(builddir)/doc/html
+	$(srcdir)/doc/NaturalDocs/NaturalDocs -p $(srcdir)/doc/developers/ndproj -i $(SD) -o FramedHTML $(builddir)/doc/html
 
-.PHONY: doc
+.PHONY: make-docs
 
 COSIFLAGS = $(builddir)/coalescent.flags.txt
 

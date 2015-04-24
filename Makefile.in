@@ -28,7 +28,6 @@
 #SUBDIRS=libsigc++-2.3.1
 
 
-
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -106,24 +105,42 @@ host_triplet = @host@
 bin_PROGRAMS = coalescent$(EXEEXT) recosimulate$(EXEEXT) \
 	get_recomap$(EXEEXT) recomap_hapmap2$(EXEEXT) $(am__EXEEXT_1) \
 	sample_stats_extra$(EXEEXT)
-TESTS = tests/model001/t/run.sh tests/model001/t_u_001/run.sh \
-	tests/model001/t_u_0001/run.sh tests/model002/t/run.sh \
-	tests/model002/t_u_001/run.sh tests/model002/t_u_0001/run.sh \
-	tests/model003/t/run.sh tests/model004/t/run.sh \
-	tests/model005/t/run.sh tests/model006/t/run.sh \
-	tests/model007/t/run.sh tests/model007/t_u_001/run.sh \
-	tests/model007/t_u_0001/run.sh tests/model008/t/run.sh \
-	tests/model008/t_u_001/run.sh tests/model008/t_u_0001/run.sh \
-	tests/model009/t/run.sh tests/model009/t_u_001/run.sh \
-	tests/model009/t_u_0001/run.sh tests/model010/t/run.sh \
-	tests/model010/t_u_001/run.sh tests/model010/t_u_0001/run.sh \
-	tests/model011/t/run.sh tests/model011/t_u_001/run.sh \
-	tests/model011/t_u_0001/run.sh tests/model012/t/run.sh \
-	tests/model012/t_u_001/run.sh tests/model012/t_u_0001/run.sh \
-	tests/model013/t/run.sh tests/model014/t/run.sh \
-	tests/model015/t/run.sh tests/model016/t/run.sh \
-	tests/model016/t_u_001/run.sh tests/model017/t/run.sh \
-	tests/model017/t_u_001/run.sh tests/model017/t_u_0001/run.sh \
+TESTS = tests/testScripts/tests/model001/t/run.sh \
+	tests/testScripts/tests/model001/t_u_001/run.sh \
+	tests/testScripts/tests/model001/t_u_0001/run.sh \
+	tests/testScripts/tests/model002/t/run.sh \
+	tests/testScripts/tests/model002/t_u_001/run.sh \
+	tests/testScripts/tests/model002/t_u_0001/run.sh \
+	tests/testScripts/tests/model003/t/run.sh \
+	tests/testScripts/tests/model004/t/run.sh \
+	tests/testScripts/tests/model005/t/run.sh \
+	tests/testScripts/tests/model006/t/run.sh \
+	tests/testScripts/tests/model007/t/run.sh \
+	tests/testScripts/tests/model007/t_u_001/run.sh \
+	tests/testScripts/tests/model007/t_u_0001/run.sh \
+	tests/testScripts/tests/model008/t/run.sh \
+	tests/testScripts/tests/model008/t_u_001/run.sh \
+	tests/testScripts/tests/model008/t_u_0001/run.sh \
+	tests/testScripts/tests/model009/t/run.sh \
+	tests/testScripts/tests/model009/t_u_001/run.sh \
+	tests/testScripts/tests/model009/t_u_0001/run.sh \
+	tests/testScripts/tests/model010/t/run.sh \
+	tests/testScripts/tests/model010/t_u_001/run.sh \
+	tests/testScripts/tests/model010/t_u_0001/run.sh \
+	tests/testScripts/tests/model011/t/run.sh \
+	tests/testScripts/tests/model011/t_u_001/run.sh \
+	tests/testScripts/tests/model011/t_u_0001/run.sh \
+	tests/testScripts/tests/model012/t/run.sh \
+	tests/testScripts/tests/model012/t_u_001/run.sh \
+	tests/testScripts/tests/model012/t_u_0001/run.sh \
+	tests/testScripts/tests/model013/t/run.sh \
+	tests/testScripts/tests/model014/t/run.sh \
+	tests/testScripts/tests/model015/t/run.sh \
+	tests/testScripts/tests/model016/t/run.sh \
+	tests/testScripts/tests/model016/t_u_001/run.sh \
+	tests/testScripts/tests/model017/t/run.sh \
+	tests/testScripts/tests/model017/t_u_001/run.sh \
+	tests/testScripts/tests/model017/t_u_0001/run.sh \
 	seglist_test$(EXEEXT) test_funcs$(EXEEXT)
 @DEVOPTS_TRUE@am__append_1 = --param max-inline-insns-single=1000 \
 @DEVOPTS_TRUE@	-Werror -Wall -Wextra -Wno-unused-function -Wuninitialized \
@@ -152,8 +169,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_cxx_compile_stdcxx_11.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
-	$(am__configure_deps) $(subpkginclude_HEADERS) \
-	$(am__DIST_COMMON)
+	$(am__configure_deps) $(am__DIST_COMMON)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
@@ -186,8 +202,7 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(subpkgincludedir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libcosi_la_DEPENDENCIES = $(builddir)/libcosi_rand.la \
 	$(builddir)/libcosiutil.la $(BOOST_PROGRAM_OPTIONS_LIBS) \
@@ -216,12 +231,21 @@ libcosi_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libcosi_la_CXXFLAGS) \
 	$(CXXFLAGS) $(libcosi_la_LDFLAGS) $(LDFLAGS) -o $@
 libcosi_rand_la_LIBADD =
-am_libcosi_rand_la_OBJECTS = expdev.lo gamma.lo gammln.lo mtwist.lo \
-	multinom.lo poisson.lo ranbinom.lo rng.lo
+am_libcosi_rand_la_OBJECTS = libcosi_rand_la-expdev.lo \
+	libcosi_rand_la-gamma.lo libcosi_rand_la-gammln.lo \
+	libcosi_rand_la-mtwist.lo libcosi_rand_la-multinom.lo \
+	libcosi_rand_la-poisson.lo libcosi_rand_la-ranbinom.lo \
+	libcosi_rand_la-rng.lo
 libcosi_rand_la_OBJECTS = $(am_libcosi_rand_la_OBJECTS)
 libcosi_rand_noinst_la_LIBADD =
-am__objects_2 = expdev.lo gamma.lo gammln.lo mtwist.lo multinom.lo \
-	poisson.lo ranbinom.lo rng.lo
+am__objects_2 = libcosi_rand_noinst_la-expdev.lo \
+	libcosi_rand_noinst_la-gamma.lo \
+	libcosi_rand_noinst_la-gammln.lo \
+	libcosi_rand_noinst_la-mtwist.lo \
+	libcosi_rand_noinst_la-multinom.lo \
+	libcosi_rand_noinst_la-poisson.lo \
+	libcosi_rand_noinst_la-ranbinom.lo \
+	libcosi_rand_noinst_la-rng.lo
 am_libcosi_rand_noinst_la_OBJECTS = $(am__objects_2)
 libcosi_rand_noinst_la_OBJECTS = $(am_libcosi_rand_noinst_la_OBJECTS)
 libcosichrono_la_LIBADD =
@@ -327,8 +351,10 @@ am_libcositimer_la_OBJECTS =  \
 	libcositimer_la-cpu_timer.lo
 libcositimer_la_OBJECTS = $(am_libcositimer_la_OBJECTS)
 libcosiutil_la_LIBADD =
-am_libcosiutil_la_OBJECTS = utils.lo arrival.lo cosirand.lo \
-	gauss_legendre.lo mempool.lo $(am__objects_1)
+am_libcosiutil_la_OBJECTS = libcosiutil_la-utils.lo \
+	libcosiutil_la-arrival.lo libcosiutil_la-cosirand.lo \
+	libcosiutil_la-gauss_legendre.lo libcosiutil_la-mempool.lo \
+	$(am__objects_1)
 libcosiutil_la_OBJECTS = $(am_libcosiutil_la_OBJECTS)
 @HAVEROOT_TRUE@am__EXEEXT_1 = cosiroot$(EXEEXT) ldhist$(EXEEXT)
 @HAVE_GTEST_TRUE@am__EXEEXT_2 = ost_test_main$(EXEEXT)
@@ -505,7 +531,6 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-HEADERS = $(subpkginclude_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -897,25 +922,57 @@ lib_LTLIBRARIES = libcosiprogopt.la libcosiregex.la \
 	libcositimer.la libcosiserialization.la libcosi_rand.la \
 	libcosiutil.la libcosi.la
 noinst_LTLIBRARIES = libcosi_rand_noinst.la
-
-# End section: Building cosi
-
-###########################################################################################################################
-
-#
-# Section: Tests
-#
-
-#
-# Section: Building documentation
-#
-EXTRA_DIST = ext/boost examples doc $(srcdir)/NaturalDocs $(SD)/ndproj \
-	$(TESTS) $(COSI_TESTDATA) $(TD)/make_cosi_tests.py \
+EXTRA_DIST = ext/boost examples doc \
+	$(srcdir)/tests/testScripts/tests/model001/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model001/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model001/t_u_0001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model002/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model002/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model002/t_u_0001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model003/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model004/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model005/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model006/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model007/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model007/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model007/t_u_0001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model008/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model008/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model008/t_u_0001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model009/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model009/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model009/t_u_0001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model010/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model010/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model010/t_u_0001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model011/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model011/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model011/t_u_0001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model012/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model012/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model012/t_u_0001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model013/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model014/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model015/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model016/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model016/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model017/t/run.sh \
+	$(srcdir)/tests/testScripts/tests/model017/t_u_001/run.sh \
+	$(srcdir)/tests/testScripts/tests/model017/t_u_0001/run.sh \
+	$(srcdir)/tests/model001 $(srcdir)/tests/model002 \
+	$(srcdir)/tests/model003 $(srcdir)/tests/model004 \
+	$(srcdir)/tests/model005 $(srcdir)/tests/model006 \
+	$(srcdir)/tests/model007 $(srcdir)/tests/model008 \
+	$(srcdir)/tests/model009 $(srcdir)/tests/model010 \
+	$(srcdir)/tests/model011 $(srcdir)/tests/model012 \
+	$(srcdir)/tests/model013 $(srcdir)/tests/model014 \
+	$(srcdir)/tests/model015 $(srcdir)/tests/model016 \
+	$(srcdir)/tests/model017 $(TD)/make_cosi_tests.py \
 	$(TD)/update_cosi_tests.py $(TD)/runtest.py \
 	$(TD)/make_cosi_tests2.py $(TD)/update_tests.py \
 	$(TD)/cmpdist.py $(TD)/timecmd.sh
 BOOST_CPPFLAGS = -isystem $(srcdir)/ext/boost
-AM_CPPFLAGS = -I$(srcdir)/.. $(BOOST_CPPFLAGS) -DNDEBUG 
+AM_CPPFLAGS = -I$(srcdir) $(BOOST_CPPFLAGS) -DNDEBUG 
 AM_CXXFLAGS = $(CXX11_CXXFLAGS) -O3
 BOOST_DIR = $(srcdir)/ext/boost
 BOOST_PROGRAM_OPTIONS_LIBS = $(builddir)/libcosiprogopt.la
@@ -960,11 +1017,12 @@ libcosiserialization_la_SOURCES = $(SR)/archive_exception.cpp $(SR)/basic_archiv
 libcosiserialization_la_CPPFLAGS = $(AM_CPPFLAGS)
 RD = $(srcdir)/cosi_rand
 libcosi_rand_la_SOURCES = $(RD)/expdev.c $(RD)/gamma.c $(RD)/gammln.c $(RD)/mtwist.c $(RD)/multinom.c $(RD)/poisson.c \
-	$(RD)/ranbinom.c $(RD)/rng.c
+	$(RD)/ranbinom.c $(RD)/rng.c $(RD)/expdev.h $(RD)/gamma.h $(RD)/gammln.h $(RD)/mtwist.h $(RD)/multinom.h \
+	$(RD)/poisson.h $(RD)/ranbinom.h $(RD)/random.h
 
+libcosi_rand_la_CPPFLAGS = -I$(srcdir)
 libcosi_rand_noinst_la_SOURCES = $(libcosi_rand_la_SOURCES)
-subpkgincludedir = $(includedir)/cosi
-subpkginclude_HEADERS = $(SD)/coalescent.h $(SD)/mutlist.h $(SD)/defs.h $(SD)/utildefs.h $(SD)/cositop.h
+libcosi_rand_noinst_la_CPPFLAGS = $(libcosi_rand_la_CPPFLAGS)
 
 #if COALAPX
 # Turn on support for approximating the coalescent by restricting coalescence to nodes whose
@@ -984,14 +1042,14 @@ COSIUTILHEADERS = $(SD)/utils.h $(SD)/arrival.h $(SD)/generalmath.h $(SD)/cosira
 libcosiutil_la_SOURCES = $(SD)/utils.cc $(SD)/arrival.cc $(SD)/cosirand.cc $(SD)/gauss_legendre.c $(SD)/mempool.cc \
 	$(COSIUTILHEADERS)
 
+libcosiutil_la_CPPFLAGS = $(AM_CPPFLAGS)
 COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/file.cc $(SD)/geneconversion.cc \
 	$(SD)/historical.cc \
 	$(SD)/migrate.cc $(SD)/mutate.cc $(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc $(SD)/pop.cc $(SD)/recomb.cc \
 	$(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
 	$(SD)/sweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
 	$(SD)/traj.cc $(SD)/cositop.cc $(SD)/mutcontext.cc \
-	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/utils.cc $(SD)/arrival.cc $(SD)/cosirand.cc $(SD)/gauss_legendre.c \
-	$(SD)/mempool.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
+	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
 
 
 #if EHH
@@ -1019,8 +1077,9 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc \
 	$(SD)/recomb.h $(SD)/genmap.h $(SD)/stats.h $(SD)/traj.h \
 	$(SD)/decls.h $(SD)/hooks.h $(SD)/coalrate.h $(SD)/condsnp.h \
 	$(SD)/condsnp.cc $(SD)/mutcontext.h $(SD)/hullmgr.h \
-	$(SD)/hullmgr.cc $(SD)/cosicfg.h $(COSIUTILHEADERS) \
-	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
+	$(SD)/hullmgr.cc $(SD)/cosicfg.h $(SD)/coalescent.h \
+	$(SD)/mutlist.h $(COSIUTILHEADERS) $(SD)/leafset-tree.cc \
+	$(SD)/leafset-counts.cc
 libcosi_la_CPPFLAGS = $(COSI_CPPFLAGS)
 libcosi_la_CXXFLAGS = $(COSI_CXXFLAGS)
 libcosi_la_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
@@ -1051,7 +1110,6 @@ recomap_hapmap2_SOURCES = $(srcdir)/recosim/recomap_hapmap2.c
 recomap_hapmap2_LDADD = $(LIBRAND)
 recomap_hapmap2_LDFLAGS = -lm
 check_SCRIPTS = $(am__append_2)
-COSI_TESTDATA = tests/model001 tests/model002 tests/model003 tests/model004 tests/model005 tests/model006 tests/model007 tests/model008 tests/model009 tests/model010 tests/model011 tests/model012 tests/model013 tests/model014 tests/model015 tests/model016 tests/model017
 TD = $(srcdir)/tests
 seglist_test_SOURCES = $(TD)/seglist_test.cc $(SD)/seglist.cc $(SD)/seglist.h $(SD)/leafset-tree.h \
 	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/leafset-counts.h \
@@ -1325,16 +1383,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arrival.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coalescent-cosimain.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cosirand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cosiroot-cosiroot.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/expdev.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/funcs_test-funcs_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/funcs_test-utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gamma.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gammln.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gauss_legendre.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_recomap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ldhist-ldhist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-coalesce.Plo@am__quote@
@@ -1369,6 +1421,22 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-sweep2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-sweep3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-traj.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-expdev.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-gamma.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-gammln.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-mtwist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-multinom.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-poisson.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-ranbinom.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-rng.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-expdev.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-gamma.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-gammln.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-mtwist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-multinom.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-poisson.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-ranbinom.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-rng.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosichrono_la-chrono.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosichrono_la-process_cpu_clocks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosichrono_la-thread_clock.Plo@am__quote@
@@ -1451,18 +1519,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosisystem_la-error_code.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcositimer_la-auto_timers_construction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcositimer_la-cpu_timer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempool.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtwist.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multinom.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiutil_la-arrival.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiutil_la-cosirand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiutil_la-gauss_legendre.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiutil_la-mempool.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiutil_la-utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ost_test-ost_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ost_test-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ost_test_main-ost_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ost_test_main-utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/poisson.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ranbinom.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recomap_hapmap2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recosim.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sample_stats_extra-sample_stats_extra.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sample_stats_extra-tajd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/seglist_test-leafset-counts.Po@am__quote@
@@ -1476,7 +1543,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_arrproc-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_funcs-test_funcs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_funcs-utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1499,68 +1565,124 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
-expdev.lo: $(RD)/expdev.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT expdev.lo -MD -MP -MF $(DEPDIR)/expdev.Tpo -c -o expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/expdev.Tpo $(DEPDIR)/expdev.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/expdev.c' object='expdev.lo' libtool=yes @AMDEPBACKSLASH@
+libcosi_rand_la-expdev.lo: $(RD)/expdev.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-expdev.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-expdev.Tpo -c -o libcosi_rand_la-expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-expdev.Tpo $(DEPDIR)/libcosi_rand_la-expdev.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/expdev.c' object='libcosi_rand_la-expdev.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
 
-gamma.lo: $(RD)/gamma.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gamma.lo -MD -MP -MF $(DEPDIR)/gamma.Tpo -c -o gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/gamma.Tpo $(DEPDIR)/gamma.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gamma.c' object='gamma.lo' libtool=yes @AMDEPBACKSLASH@
+libcosi_rand_la-gamma.lo: $(RD)/gamma.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-gamma.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-gamma.Tpo -c -o libcosi_rand_la-gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-gamma.Tpo $(DEPDIR)/libcosi_rand_la-gamma.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gamma.c' object='libcosi_rand_la-gamma.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
 
-gammln.lo: $(RD)/gammln.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gammln.lo -MD -MP -MF $(DEPDIR)/gammln.Tpo -c -o gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/gammln.Tpo $(DEPDIR)/gammln.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gammln.c' object='gammln.lo' libtool=yes @AMDEPBACKSLASH@
+libcosi_rand_la-gammln.lo: $(RD)/gammln.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-gammln.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-gammln.Tpo -c -o libcosi_rand_la-gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-gammln.Tpo $(DEPDIR)/libcosi_rand_la-gammln.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gammln.c' object='libcosi_rand_la-gammln.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
 
-mtwist.lo: $(RD)/mtwist.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mtwist.lo -MD -MP -MF $(DEPDIR)/mtwist.Tpo -c -o mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mtwist.Tpo $(DEPDIR)/mtwist.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/mtwist.c' object='mtwist.lo' libtool=yes @AMDEPBACKSLASH@
+libcosi_rand_la-mtwist.lo: $(RD)/mtwist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-mtwist.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-mtwist.Tpo -c -o libcosi_rand_la-mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-mtwist.Tpo $(DEPDIR)/libcosi_rand_la-mtwist.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/mtwist.c' object='libcosi_rand_la-mtwist.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
 
-multinom.lo: $(RD)/multinom.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT multinom.lo -MD -MP -MF $(DEPDIR)/multinom.Tpo -c -o multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/multinom.Tpo $(DEPDIR)/multinom.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/multinom.c' object='multinom.lo' libtool=yes @AMDEPBACKSLASH@
+libcosi_rand_la-multinom.lo: $(RD)/multinom.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-multinom.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-multinom.Tpo -c -o libcosi_rand_la-multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-multinom.Tpo $(DEPDIR)/libcosi_rand_la-multinom.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/multinom.c' object='libcosi_rand_la-multinom.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
 
-poisson.lo: $(RD)/poisson.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT poisson.lo -MD -MP -MF $(DEPDIR)/poisson.Tpo -c -o poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/poisson.Tpo $(DEPDIR)/poisson.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/poisson.c' object='poisson.lo' libtool=yes @AMDEPBACKSLASH@
+libcosi_rand_la-poisson.lo: $(RD)/poisson.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-poisson.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-poisson.Tpo -c -o libcosi_rand_la-poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-poisson.Tpo $(DEPDIR)/libcosi_rand_la-poisson.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/poisson.c' object='libcosi_rand_la-poisson.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
 
-ranbinom.lo: $(RD)/ranbinom.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ranbinom.lo -MD -MP -MF $(DEPDIR)/ranbinom.Tpo -c -o ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/ranbinom.Tpo $(DEPDIR)/ranbinom.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/ranbinom.c' object='ranbinom.lo' libtool=yes @AMDEPBACKSLASH@
+libcosi_rand_la-ranbinom.lo: $(RD)/ranbinom.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-ranbinom.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-ranbinom.Tpo -c -o libcosi_rand_la-ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-ranbinom.Tpo $(DEPDIR)/libcosi_rand_la-ranbinom.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/ranbinom.c' object='libcosi_rand_la-ranbinom.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
 
-rng.lo: $(RD)/rng.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rng.lo -MD -MP -MF $(DEPDIR)/rng.Tpo -c -o rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/rng.Tpo $(DEPDIR)/rng.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/rng.c' object='rng.lo' libtool=yes @AMDEPBACKSLASH@
+libcosi_rand_la-rng.lo: $(RD)/rng.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-rng.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-rng.Tpo -c -o libcosi_rand_la-rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-rng.Tpo $(DEPDIR)/libcosi_rand_la-rng.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/rng.c' object='libcosi_rand_la-rng.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
 
-gauss_legendre.lo: $(SD)/gauss_legendre.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT gauss_legendre.lo -MD -MP -MF $(DEPDIR)/gauss_legendre.Tpo -c -o gauss_legendre.lo `test -f '$(SD)/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/gauss_legendre.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/gauss_legendre.Tpo $(DEPDIR)/gauss_legendre.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(SD)/gauss_legendre.c' object='gauss_legendre.lo' libtool=yes @AMDEPBACKSLASH@
+libcosi_rand_noinst_la-expdev.lo: $(RD)/expdev.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-expdev.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-expdev.Tpo -c -o libcosi_rand_noinst_la-expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-expdev.Tpo $(DEPDIR)/libcosi_rand_noinst_la-expdev.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/expdev.c' object='libcosi_rand_noinst_la-expdev.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o gauss_legendre.lo `test -f '$(SD)/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/gauss_legendre.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
+
+libcosi_rand_noinst_la-gamma.lo: $(RD)/gamma.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-gamma.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-gamma.Tpo -c -o libcosi_rand_noinst_la-gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-gamma.Tpo $(DEPDIR)/libcosi_rand_noinst_la-gamma.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gamma.c' object='libcosi_rand_noinst_la-gamma.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
+
+libcosi_rand_noinst_la-gammln.lo: $(RD)/gammln.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-gammln.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-gammln.Tpo -c -o libcosi_rand_noinst_la-gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-gammln.Tpo $(DEPDIR)/libcosi_rand_noinst_la-gammln.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gammln.c' object='libcosi_rand_noinst_la-gammln.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
+
+libcosi_rand_noinst_la-mtwist.lo: $(RD)/mtwist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-mtwist.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-mtwist.Tpo -c -o libcosi_rand_noinst_la-mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-mtwist.Tpo $(DEPDIR)/libcosi_rand_noinst_la-mtwist.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/mtwist.c' object='libcosi_rand_noinst_la-mtwist.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
+
+libcosi_rand_noinst_la-multinom.lo: $(RD)/multinom.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-multinom.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-multinom.Tpo -c -o libcosi_rand_noinst_la-multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-multinom.Tpo $(DEPDIR)/libcosi_rand_noinst_la-multinom.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/multinom.c' object='libcosi_rand_noinst_la-multinom.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
+
+libcosi_rand_noinst_la-poisson.lo: $(RD)/poisson.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-poisson.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-poisson.Tpo -c -o libcosi_rand_noinst_la-poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-poisson.Tpo $(DEPDIR)/libcosi_rand_noinst_la-poisson.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/poisson.c' object='libcosi_rand_noinst_la-poisson.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
+
+libcosi_rand_noinst_la-ranbinom.lo: $(RD)/ranbinom.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-ranbinom.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-ranbinom.Tpo -c -o libcosi_rand_noinst_la-ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-ranbinom.Tpo $(DEPDIR)/libcosi_rand_noinst_la-ranbinom.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/ranbinom.c' object='libcosi_rand_noinst_la-ranbinom.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
+
+libcosi_rand_noinst_la-rng.lo: $(RD)/rng.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-rng.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-rng.Tpo -c -o libcosi_rand_noinst_la-rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-rng.Tpo $(DEPDIR)/libcosi_rand_noinst_la-rng.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/rng.c' object='libcosi_rand_noinst_la-rng.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
+
+libcosiutil_la-gauss_legendre.lo: $(SD)/gauss_legendre.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosiutil_la-gauss_legendre.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-gauss_legendre.Tpo -c -o libcosiutil_la-gauss_legendre.lo `test -f '$(SD)/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/gauss_legendre.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-gauss_legendre.Tpo $(DEPDIR)/libcosiutil_la-gauss_legendre.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(SD)/gauss_legendre.c' object='libcosiutil_la-gauss_legendre.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosiutil_la-gauss_legendre.lo `test -f '$(SD)/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/gauss_legendre.c
 
 get_recomap.o: $(srcdir)/recosim/get_recomap.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT get_recomap.o -MD -MP -MF $(DEPDIR)/get_recomap.Tpo -c -o get_recomap.o `test -f '$(srcdir)/recosim/get_recomap.c' || echo '$(srcdir)/'`$(srcdir)/recosim/get_recomap.c
@@ -2423,33 +2545,33 @@ libcositimer_la-cpu_timer.lo: $(TI)/cpu_timer.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcositimer_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcositimer_la-cpu_timer.lo `test -f '$(TI)/cpu_timer.cpp' || echo '$(srcdir)/'`$(TI)/cpu_timer.cpp
 
-utils.lo: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utils.lo -MD -MP -MF $(DEPDIR)/utils.Tpo -c -o utils.lo `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/utils.Tpo $(DEPDIR)/utils.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='utils.lo' libtool=yes @AMDEPBACKSLASH@
+libcosiutil_la-utils.lo: $(SD)/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-utils.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-utils.Tpo -c -o libcosiutil_la-utils.lo `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-utils.Tpo $(DEPDIR)/libcosiutil_la-utils.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='libcosiutil_la-utils.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utils.lo `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-utils.lo `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
 
-arrival.lo: $(SD)/arrival.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT arrival.lo -MD -MP -MF $(DEPDIR)/arrival.Tpo -c -o arrival.lo `test -f '$(SD)/arrival.cc' || echo '$(srcdir)/'`$(SD)/arrival.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/arrival.Tpo $(DEPDIR)/arrival.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/arrival.cc' object='arrival.lo' libtool=yes @AMDEPBACKSLASH@
+libcosiutil_la-arrival.lo: $(SD)/arrival.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-arrival.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-arrival.Tpo -c -o libcosiutil_la-arrival.lo `test -f '$(SD)/arrival.cc' || echo '$(srcdir)/'`$(SD)/arrival.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-arrival.Tpo $(DEPDIR)/libcosiutil_la-arrival.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/arrival.cc' object='libcosiutil_la-arrival.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o arrival.lo `test -f '$(SD)/arrival.cc' || echo '$(srcdir)/'`$(SD)/arrival.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-arrival.lo `test -f '$(SD)/arrival.cc' || echo '$(srcdir)/'`$(SD)/arrival.cc
 
-cosirand.lo: $(SD)/cosirand.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cosirand.lo -MD -MP -MF $(DEPDIR)/cosirand.Tpo -c -o cosirand.lo `test -f '$(SD)/cosirand.cc' || echo '$(srcdir)/'`$(SD)/cosirand.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cosirand.Tpo $(DEPDIR)/cosirand.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/cosirand.cc' object='cosirand.lo' libtool=yes @AMDEPBACKSLASH@
+libcosiutil_la-cosirand.lo: $(SD)/cosirand.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-cosirand.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-cosirand.Tpo -c -o libcosiutil_la-cosirand.lo `test -f '$(SD)/cosirand.cc' || echo '$(srcdir)/'`$(SD)/cosirand.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-cosirand.Tpo $(DEPDIR)/libcosiutil_la-cosirand.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/cosirand.cc' object='libcosiutil_la-cosirand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cosirand.lo `test -f '$(SD)/cosirand.cc' || echo '$(srcdir)/'`$(SD)/cosirand.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-cosirand.lo `test -f '$(SD)/cosirand.cc' || echo '$(srcdir)/'`$(SD)/cosirand.cc
 
-mempool.lo: $(SD)/mempool.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mempool.lo -MD -MP -MF $(DEPDIR)/mempool.Tpo -c -o mempool.lo `test -f '$(SD)/mempool.cc' || echo '$(srcdir)/'`$(SD)/mempool.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mempool.Tpo $(DEPDIR)/mempool.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/mempool.cc' object='mempool.lo' libtool=yes @AMDEPBACKSLASH@
+libcosiutil_la-mempool.lo: $(SD)/mempool.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-mempool.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-mempool.Tpo -c -o libcosiutil_la-mempool.lo `test -f '$(SD)/mempool.cc' || echo '$(srcdir)/'`$(SD)/mempool.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-mempool.Tpo $(DEPDIR)/libcosiutil_la-mempool.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/mempool.cc' object='libcosiutil_la-mempool.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mempool.lo `test -f '$(SD)/mempool.cc' || echo '$(srcdir)/'`$(SD)/mempool.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-mempool.lo `test -f '$(SD)/mempool.cc' || echo '$(srcdir)/'`$(SD)/mempool.cc
 
 coalescent-cosimain.o: $(SD)/cosimain.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(coalescent_CPPFLAGS) $(CPPFLAGS) $(coalescent_CXXFLAGS) $(CXXFLAGS) -MT coalescent-cosimain.o -MD -MP -MF $(DEPDIR)/coalescent-cosimain.Tpo -c -o coalescent-cosimain.o `test -f '$(SD)/cosimain.cc' || echo '$(srcdir)/'`$(SD)/cosimain.cc
@@ -2788,27 +2910,6 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
-install-subpkgincludeHEADERS: $(subpkginclude_HEADERS)
-	@$(NORMAL_INSTALL)
-	@list='$(subpkginclude_HEADERS)'; test -n "$(subpkgincludedir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(subpkgincludedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(subpkgincludedir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(subpkgincludedir)'"; \
-	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(subpkgincludedir)" || exit $$?; \
-	done
-
-uninstall-subpkgincludeHEADERS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(subpkginclude_HEADERS)'; test -n "$(subpkgincludedir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(subpkgincludedir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -3010,254 +3111,254 @@ recheck: all $(check_PROGRAMS) $(check_SCRIPTS)
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-tests/model001/t/run.sh.log: tests/model001/t/run.sh
-	@p='tests/model001/t/run.sh'; \
-	b='tests/model001/t/run.sh'; \
+tests/testScripts/tests/model001/t/run.sh.log: tests/testScripts/tests/model001/t/run.sh
+	@p='tests/testScripts/tests/model001/t/run.sh'; \
+	b='tests/testScripts/tests/model001/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model001/t_u_001/run.sh.log: tests/model001/t_u_001/run.sh
-	@p='tests/model001/t_u_001/run.sh'; \
-	b='tests/model001/t_u_001/run.sh'; \
+tests/testScripts/tests/model001/t_u_001/run.sh.log: tests/testScripts/tests/model001/t_u_001/run.sh
+	@p='tests/testScripts/tests/model001/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model001/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model001/t_u_0001/run.sh.log: tests/model001/t_u_0001/run.sh
-	@p='tests/model001/t_u_0001/run.sh'; \
-	b='tests/model001/t_u_0001/run.sh'; \
+tests/testScripts/tests/model001/t_u_0001/run.sh.log: tests/testScripts/tests/model001/t_u_0001/run.sh
+	@p='tests/testScripts/tests/model001/t_u_0001/run.sh'; \
+	b='tests/testScripts/tests/model001/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model002/t/run.sh.log: tests/model002/t/run.sh
-	@p='tests/model002/t/run.sh'; \
-	b='tests/model002/t/run.sh'; \
+tests/testScripts/tests/model002/t/run.sh.log: tests/testScripts/tests/model002/t/run.sh
+	@p='tests/testScripts/tests/model002/t/run.sh'; \
+	b='tests/testScripts/tests/model002/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model002/t_u_001/run.sh.log: tests/model002/t_u_001/run.sh
-	@p='tests/model002/t_u_001/run.sh'; \
-	b='tests/model002/t_u_001/run.sh'; \
+tests/testScripts/tests/model002/t_u_001/run.sh.log: tests/testScripts/tests/model002/t_u_001/run.sh
+	@p='tests/testScripts/tests/model002/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model002/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model002/t_u_0001/run.sh.log: tests/model002/t_u_0001/run.sh
-	@p='tests/model002/t_u_0001/run.sh'; \
-	b='tests/model002/t_u_0001/run.sh'; \
+tests/testScripts/tests/model002/t_u_0001/run.sh.log: tests/testScripts/tests/model002/t_u_0001/run.sh
+	@p='tests/testScripts/tests/model002/t_u_0001/run.sh'; \
+	b='tests/testScripts/tests/model002/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model003/t/run.sh.log: tests/model003/t/run.sh
-	@p='tests/model003/t/run.sh'; \
-	b='tests/model003/t/run.sh'; \
+tests/testScripts/tests/model003/t/run.sh.log: tests/testScripts/tests/model003/t/run.sh
+	@p='tests/testScripts/tests/model003/t/run.sh'; \
+	b='tests/testScripts/tests/model003/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model004/t/run.sh.log: tests/model004/t/run.sh
-	@p='tests/model004/t/run.sh'; \
-	b='tests/model004/t/run.sh'; \
+tests/testScripts/tests/model004/t/run.sh.log: tests/testScripts/tests/model004/t/run.sh
+	@p='tests/testScripts/tests/model004/t/run.sh'; \
+	b='tests/testScripts/tests/model004/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model005/t/run.sh.log: tests/model005/t/run.sh
-	@p='tests/model005/t/run.sh'; \
-	b='tests/model005/t/run.sh'; \
+tests/testScripts/tests/model005/t/run.sh.log: tests/testScripts/tests/model005/t/run.sh
+	@p='tests/testScripts/tests/model005/t/run.sh'; \
+	b='tests/testScripts/tests/model005/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model006/t/run.sh.log: tests/model006/t/run.sh
-	@p='tests/model006/t/run.sh'; \
-	b='tests/model006/t/run.sh'; \
+tests/testScripts/tests/model006/t/run.sh.log: tests/testScripts/tests/model006/t/run.sh
+	@p='tests/testScripts/tests/model006/t/run.sh'; \
+	b='tests/testScripts/tests/model006/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model007/t/run.sh.log: tests/model007/t/run.sh
-	@p='tests/model007/t/run.sh'; \
-	b='tests/model007/t/run.sh'; \
+tests/testScripts/tests/model007/t/run.sh.log: tests/testScripts/tests/model007/t/run.sh
+	@p='tests/testScripts/tests/model007/t/run.sh'; \
+	b='tests/testScripts/tests/model007/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model007/t_u_001/run.sh.log: tests/model007/t_u_001/run.sh
-	@p='tests/model007/t_u_001/run.sh'; \
-	b='tests/model007/t_u_001/run.sh'; \
+tests/testScripts/tests/model007/t_u_001/run.sh.log: tests/testScripts/tests/model007/t_u_001/run.sh
+	@p='tests/testScripts/tests/model007/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model007/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model007/t_u_0001/run.sh.log: tests/model007/t_u_0001/run.sh
-	@p='tests/model007/t_u_0001/run.sh'; \
-	b='tests/model007/t_u_0001/run.sh'; \
+tests/testScripts/tests/model007/t_u_0001/run.sh.log: tests/testScripts/tests/model007/t_u_0001/run.sh
+	@p='tests/testScripts/tests/model007/t_u_0001/run.sh'; \
+	b='tests/testScripts/tests/model007/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model008/t/run.sh.log: tests/model008/t/run.sh
-	@p='tests/model008/t/run.sh'; \
-	b='tests/model008/t/run.sh'; \
+tests/testScripts/tests/model008/t/run.sh.log: tests/testScripts/tests/model008/t/run.sh
+	@p='tests/testScripts/tests/model008/t/run.sh'; \
+	b='tests/testScripts/tests/model008/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model008/t_u_001/run.sh.log: tests/model008/t_u_001/run.sh
-	@p='tests/model008/t_u_001/run.sh'; \
-	b='tests/model008/t_u_001/run.sh'; \
+tests/testScripts/tests/model008/t_u_001/run.sh.log: tests/testScripts/tests/model008/t_u_001/run.sh
+	@p='tests/testScripts/tests/model008/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model008/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model008/t_u_0001/run.sh.log: tests/model008/t_u_0001/run.sh
-	@p='tests/model008/t_u_0001/run.sh'; \
-	b='tests/model008/t_u_0001/run.sh'; \
+tests/testScripts/tests/model008/t_u_0001/run.sh.log: tests/testScripts/tests/model008/t_u_0001/run.sh
+	@p='tests/testScripts/tests/model008/t_u_0001/run.sh'; \
+	b='tests/testScripts/tests/model008/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model009/t/run.sh.log: tests/model009/t/run.sh
-	@p='tests/model009/t/run.sh'; \
-	b='tests/model009/t/run.sh'; \
+tests/testScripts/tests/model009/t/run.sh.log: tests/testScripts/tests/model009/t/run.sh
+	@p='tests/testScripts/tests/model009/t/run.sh'; \
+	b='tests/testScripts/tests/model009/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model009/t_u_001/run.sh.log: tests/model009/t_u_001/run.sh
-	@p='tests/model009/t_u_001/run.sh'; \
-	b='tests/model009/t_u_001/run.sh'; \
+tests/testScripts/tests/model009/t_u_001/run.sh.log: tests/testScripts/tests/model009/t_u_001/run.sh
+	@p='tests/testScripts/tests/model009/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model009/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model009/t_u_0001/run.sh.log: tests/model009/t_u_0001/run.sh
-	@p='tests/model009/t_u_0001/run.sh'; \
-	b='tests/model009/t_u_0001/run.sh'; \
+tests/testScripts/tests/model009/t_u_0001/run.sh.log: tests/testScripts/tests/model009/t_u_0001/run.sh
+	@p='tests/testScripts/tests/model009/t_u_0001/run.sh'; \
+	b='tests/testScripts/tests/model009/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model010/t/run.sh.log: tests/model010/t/run.sh
-	@p='tests/model010/t/run.sh'; \
-	b='tests/model010/t/run.sh'; \
+tests/testScripts/tests/model010/t/run.sh.log: tests/testScripts/tests/model010/t/run.sh
+	@p='tests/testScripts/tests/model010/t/run.sh'; \
+	b='tests/testScripts/tests/model010/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model010/t_u_001/run.sh.log: tests/model010/t_u_001/run.sh
-	@p='tests/model010/t_u_001/run.sh'; \
-	b='tests/model010/t_u_001/run.sh'; \
+tests/testScripts/tests/model010/t_u_001/run.sh.log: tests/testScripts/tests/model010/t_u_001/run.sh
+	@p='tests/testScripts/tests/model010/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model010/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model010/t_u_0001/run.sh.log: tests/model010/t_u_0001/run.sh
-	@p='tests/model010/t_u_0001/run.sh'; \
-	b='tests/model010/t_u_0001/run.sh'; \
+tests/testScripts/tests/model010/t_u_0001/run.sh.log: tests/testScripts/tests/model010/t_u_0001/run.sh
+	@p='tests/testScripts/tests/model010/t_u_0001/run.sh'; \
+	b='tests/testScripts/tests/model010/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model011/t/run.sh.log: tests/model011/t/run.sh
-	@p='tests/model011/t/run.sh'; \
-	b='tests/model011/t/run.sh'; \
+tests/testScripts/tests/model011/t/run.sh.log: tests/testScripts/tests/model011/t/run.sh
+	@p='tests/testScripts/tests/model011/t/run.sh'; \
+	b='tests/testScripts/tests/model011/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model011/t_u_001/run.sh.log: tests/model011/t_u_001/run.sh
-	@p='tests/model011/t_u_001/run.sh'; \
-	b='tests/model011/t_u_001/run.sh'; \
+tests/testScripts/tests/model011/t_u_001/run.sh.log: tests/testScripts/tests/model011/t_u_001/run.sh
+	@p='tests/testScripts/tests/model011/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model011/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model011/t_u_0001/run.sh.log: tests/model011/t_u_0001/run.sh
-	@p='tests/model011/t_u_0001/run.sh'; \
-	b='tests/model011/t_u_0001/run.sh'; \
+tests/testScripts/tests/model011/t_u_0001/run.sh.log: tests/testScripts/tests/model011/t_u_0001/run.sh
+	@p='tests/testScripts/tests/model011/t_u_0001/run.sh'; \
+	b='tests/testScripts/tests/model011/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model012/t/run.sh.log: tests/model012/t/run.sh
-	@p='tests/model012/t/run.sh'; \
-	b='tests/model012/t/run.sh'; \
+tests/testScripts/tests/model012/t/run.sh.log: tests/testScripts/tests/model012/t/run.sh
+	@p='tests/testScripts/tests/model012/t/run.sh'; \
+	b='tests/testScripts/tests/model012/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model012/t_u_001/run.sh.log: tests/model012/t_u_001/run.sh
-	@p='tests/model012/t_u_001/run.sh'; \
-	b='tests/model012/t_u_001/run.sh'; \
+tests/testScripts/tests/model012/t_u_001/run.sh.log: tests/testScripts/tests/model012/t_u_001/run.sh
+	@p='tests/testScripts/tests/model012/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model012/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model012/t_u_0001/run.sh.log: tests/model012/t_u_0001/run.sh
-	@p='tests/model012/t_u_0001/run.sh'; \
-	b='tests/model012/t_u_0001/run.sh'; \
+tests/testScripts/tests/model012/t_u_0001/run.sh.log: tests/testScripts/tests/model012/t_u_0001/run.sh
+	@p='tests/testScripts/tests/model012/t_u_0001/run.sh'; \
+	b='tests/testScripts/tests/model012/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model013/t/run.sh.log: tests/model013/t/run.sh
-	@p='tests/model013/t/run.sh'; \
-	b='tests/model013/t/run.sh'; \
+tests/testScripts/tests/model013/t/run.sh.log: tests/testScripts/tests/model013/t/run.sh
+	@p='tests/testScripts/tests/model013/t/run.sh'; \
+	b='tests/testScripts/tests/model013/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model014/t/run.sh.log: tests/model014/t/run.sh
-	@p='tests/model014/t/run.sh'; \
-	b='tests/model014/t/run.sh'; \
+tests/testScripts/tests/model014/t/run.sh.log: tests/testScripts/tests/model014/t/run.sh
+	@p='tests/testScripts/tests/model014/t/run.sh'; \
+	b='tests/testScripts/tests/model014/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model015/t/run.sh.log: tests/model015/t/run.sh
-	@p='tests/model015/t/run.sh'; \
-	b='tests/model015/t/run.sh'; \
+tests/testScripts/tests/model015/t/run.sh.log: tests/testScripts/tests/model015/t/run.sh
+	@p='tests/testScripts/tests/model015/t/run.sh'; \
+	b='tests/testScripts/tests/model015/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model016/t/run.sh.log: tests/model016/t/run.sh
-	@p='tests/model016/t/run.sh'; \
-	b='tests/model016/t/run.sh'; \
+tests/testScripts/tests/model016/t/run.sh.log: tests/testScripts/tests/model016/t/run.sh
+	@p='tests/testScripts/tests/model016/t/run.sh'; \
+	b='tests/testScripts/tests/model016/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model016/t_u_001/run.sh.log: tests/model016/t_u_001/run.sh
-	@p='tests/model016/t_u_001/run.sh'; \
-	b='tests/model016/t_u_001/run.sh'; \
+tests/testScripts/tests/model016/t_u_001/run.sh.log: tests/testScripts/tests/model016/t_u_001/run.sh
+	@p='tests/testScripts/tests/model016/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model016/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model017/t/run.sh.log: tests/model017/t/run.sh
-	@p='tests/model017/t/run.sh'; \
-	b='tests/model017/t/run.sh'; \
+tests/testScripts/tests/model017/t/run.sh.log: tests/testScripts/tests/model017/t/run.sh
+	@p='tests/testScripts/tests/model017/t/run.sh'; \
+	b='tests/testScripts/tests/model017/t/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model017/t_u_001/run.sh.log: tests/model017/t_u_001/run.sh
-	@p='tests/model017/t_u_001/run.sh'; \
-	b='tests/model017/t_u_001/run.sh'; \
+tests/testScripts/tests/model017/t_u_001/run.sh.log: tests/testScripts/tests/model017/t_u_001/run.sh
+	@p='tests/testScripts/tests/model017/t_u_001/run.sh'; \
+	b='tests/testScripts/tests/model017/t_u_001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/model017/t_u_0001/run.sh.log: tests/model017/t_u_0001/run.sh
-	@p='tests/model017/t_u_0001/run.sh'; \
-	b='tests/model017/t_u_0001/run.sh'; \
+tests/testScripts/tests/model017/t_u_0001/run.sh.log: tests/testScripts/tests/model017/t_u_0001/run.sh
+	@p='tests/testScripts/tests/model017/t_u_0001/run.sh'; \
+	b='tests/testScripts/tests/model017/t_u_0001/run.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -3458,11 +3559,11 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS) all-local
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(subpkgincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -3524,7 +3625,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-subpkgincludeHEADERS
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -3572,8 +3673,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
-	uninstall-subpkgincludeHEADERS
+uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .MAKE: check-am install-am install-strip
 
@@ -3591,12 +3691,11 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
 	install-exec-am install-html install-html-am install-info \
 	install-info-am install-libLTLIBRARIES install-man install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
-	install-subpkgincludeHEADERS installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am recheck tags tags-am \
-	uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-libLTLIBRARIES uninstall-subpkgincludeHEADERS
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	recheck tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .PRECIOUS: Makefile
 
@@ -3604,11 +3703,23 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
 coalescent_static: $(COSISTATICSOURCES)
 	g++ -v -static -o $@ -I$(SD)/.. -I$(SD)/boost $(COSI_CPPFLAGS) $(CPPFLAGS) $(COSI_CXXFLAGS) $(CXXFLAGS)  -Wno-error -pipe $(COSISTATICSOURCES) -lrt -lpthread
 
-doc:
-	$(mkdir_p) $(builddir)/doc/html
-	$(srcdir)/doc/NaturalDocs/NaturalDocs -p $(srcdir)/doc/ndproj -i $(SD)  -o FramedHTML $(builddir)/doc/html
+# End section: Building cosi
 
-.PHONY: doc
+###########################################################################################################################
+
+#
+# Section: Tests
+#
+
+#
+# Section: Building documentation
+#
+
+make-docs:
+	$(mkdir_p) $(builddir)/doc/html
+	$(srcdir)/doc/NaturalDocs/NaturalDocs -p $(srcdir)/doc/developers/ndproj -i $(SD) -o FramedHTML $(builddir)/doc/html
+
+.PHONY: make-docs
 
 $(COSIFLAGS): $(builddir)/coalescent
 	echo "coalescent " $(coalescent_CPPFLAGS) $(CPPFLAGS) $(coalescent_CXXFLAGS) $(CXXFLAGS) $(coalescent_LDFLAGS) $(LDFLAGS) > $@

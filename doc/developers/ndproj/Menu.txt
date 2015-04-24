@@ -38,9 +38,6 @@ Timestamp: Updated mm/dd/yyyy
 # --------------------------------------------------------------------------
 
 
-File: Developer's guide to cosi  (no auto-title, DevelopersGuide.txt)
-File: Glossary  (no auto-title, Terms.txt)
-
 Group: Top-level classes  {
 
    Group: Cosi as a library  {
@@ -101,6 +98,43 @@ Group: Execution of various events and functions  {
    File: output.cc  (no auto-title, output.cc)
    File: sweep.h  (no auto-title, sweep.h)
    File: sweep1.cc  (no auto-title, sweep1.cc)
+   File: arrproc.h  (arrproc.h)
+   File: coalesce.h  (coalesce.h)
+   File: coalrate.h  (coalrate.h)
+   File: computeMutContexts  (mutcontext.cc)
+   File: condsnp.h  (condsnp.h)
+   File: cosicfg.h  (cosicfg.h)
+   File: generalmath.h  (generalmath.h)
+   File: generalmath2.h  (generalmath2.h)
+   File: HullBeg  (hullmgr_impl.h)
+   File: HullMgr  (hullmgr.h)
+   File: HullMgr  (hullmgr_cntOnly.h)
+   File: hullmgr.cc  (hullmgr.cc)
+   File: hullmgr_cntOnly.cc  (hullmgr_cntOnly.cc)
+   File: leafset.c  (leafset-counts.cc)
+   File: leafset.c  (leafset-sizes.cc)
+   File: leafset.h  (leafset-sizes.h)
+   File: leafset.h  (leafset-counts.h)
+   File: mutcontext.h  (mutcontext.h)
+   File: order_statistics.hpp  (order_statistics.hpp)
+   File: order_statistics.hpp  (ost_no_delta.hpp)
+   File: poissonprocess.h  (arrival.h)
+   File: random_access_skip_list  (random_access_skip_list.h)
+   File: StepwiseFn  (condsnp.cc)
+   File: sweep1.h  (sweep3.h)
+   File: sweep1.h  (sweep1.h)
+   File: sweep1.h  (sweep2.h)
+   File: sweep2.cc  (sweep2.cc)
+   File: sweep3.cc  (sweep3.cc)
+
+   Group: Tmp  {
+
+      File: ArrivalProcess  (tmp/arrproc.hpp)
+      File: coalrate.h  (tmp/exprate.h)
+      File: generalmath3.h  (tmp/generalmath3.h)
+      }  # Group: Tmp
+
+   File: utildefs.h  (utildefs.h)
    }  # Group: Execution of various events and functions
 
 Group: Intermediate-level classes  {
@@ -128,17 +162,9 @@ Group: Util/misc  {
    File: stats.h  (stats.h)
    File: stats.h  (no auto-title, stats.cc)
    File: cosirand.h  (cosirand.h)
-   File: make_cosi_tests.py  (make_cosi_tests.py)
-   File: update_cosi_tests.py  (update_cosi_tests.py)
    }  # Group: Util/misc
 
-Group: Extensions  {
-
-   File: ehh.h  (ehh.h)
-   File: ehh.cc  (ehh.cc)
-   File: ldhist.cc  (ldhist.cc)
-   File: sample_stats_extra  (sample_stats_extra.cc)
-   }  # Group: Extensions
+File: ehh.h  (ehh.h)
 
 Group: Index  {
 
