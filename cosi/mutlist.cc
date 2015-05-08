@@ -349,5 +349,13 @@ void MutProcessor_AddToMutlist::postprocess() {
 	
 }
 
+// Class impl: MutProcessor_AddToMutlist_WithAscertainment
+MutProcessor_AddToMutlist_WithAscertainment::~MutProcessor_AddToMutlist_WithAscertainment() { }
+
+void MutProcessor_AddToMutlist_WithAscertainment::processMut(loc_t loc, leafset_p leaves, genid gen, popid popName) {
+	if ( ( leafset_size( leaves ) != 1 ) || ( random_double() > dropSingletonsFrac ) )
+		 PARENT::processMut( loc, leaves, gen, popName );
+}
+
 
 }  // namespace cosi

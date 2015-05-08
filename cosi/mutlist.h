@@ -24,6 +24,7 @@
 #include <cosi/decls.h>
 #include <cosi/leafset.h>
 #include <cosi/mutate.h>
+#include <cosi/cosirand.h>
 
 namespace cosi {
 
@@ -220,6 +221,23 @@ private:
 	 MutlistP mutlist;
 };
 typedef boost::shared_ptr<MutProcessor_AddToMutlist> MutProcessor_AddToMutlistP;
+
+class MutProcessor_AddToMutlist_WithAscertainment: public MutProcessor_AddToMutlist, private HasRandGen {
+	 typedef MutProcessor_AddToMutlist PARENT;
+public:
+	 MutProcessor_AddToMutlist_WithAscertainment( MutlistP mutlist_, frac_t dropSingletonsFrac_,
+																								RandGenP randGen_ ):
+		 PARENT( mutlist_ ), HasRandGen( randGen_ ), dropSingletonsFrac( dropSingletonsFrac_ ) { }
+	 virtual ~MutProcessor_AddToMutlist_WithAscertainment();
+
+	 // Virtual method: processMut
+	 // Adds the mutation to the mutlist.
+	 virtual void processMut(loc_t loc, leafset_p leaves, genid gen, popid popName);
+
+private:
+	 frac_t dropSingletonsFrac;
+	 
+};  // class MutProcessor_AddToMutlist_WithAscertainment
 
 //
 // Implementations

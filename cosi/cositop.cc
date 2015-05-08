@@ -50,7 +50,8 @@ CoSiMain::CoSiMain():
 	, maxCoalDist( 1.0 ), maxCoalDistCvxHull( False )
 #endif
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
-							 outputARGedges( False ), freqsOnly( False )
+							 outputARGedges( False ), freqsOnly( False ),
+							 dropSingletonsFrac( 0 )
 {
 }
 
@@ -133,7 +134,10 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 			 "seg_i_beg, seg_i_end give chromosomal segments inherited along the edge; locations are values in [0.0,1.0] representing locations "
 			 "within the simulated region.")
 		 ( "write-mut-contexts,C", po::value(&outputMutContextsFor)->value_name( "position" ),
-			 "output mutation contexts for these locations" );
+			 "output mutation contexts for these locations" )
+		 ( "drop-singletons", po::value(&dropSingletonsFrac)->value_name("fraction"),
+			 "drop this fraction of singleton SNPs" )
+		 ;
 
 	po::options_description misc_options( "Misc options" );
 	misc_options.add_options()
@@ -270,7 +274,11 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 
 		using boost::make_shared;
 		MutlistP muts = make_shared<Mutlist>();
-		cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist>( muts ) );
+		if ( dropSingletonsFrac < 1e-10 )
+			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist>( muts ) );
+		else
+			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
+																																											 dropSingletonsFrac, randGen ) );
 
 		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << endl; }
 	
