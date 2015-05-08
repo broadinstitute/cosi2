@@ -336,7 +336,7 @@ def runTest( args ):
             stochTimeFN = os.path.join( stochDir, 'stochtime.txt' )
             stochTimeFN_orig = None
             stochCountFN = os.path.join( stochDir, 'stochcount.txt' )
-            timeScript = os.path.join( args.srcdir, 'timecmd.sh' )
+            timeScript = os.path.join( args.srcdir, 'tests', 'timecmd.sh' )
             try:
                 if args.update_stoch:
                     shutil.copy( cosiBinary, os.path.join( stochDir, 'coalescent' ) )
