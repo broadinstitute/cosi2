@@ -1,0 +1,5 @@
+lib_LTLIBRARIES += libcosichrono.la
+
+CR=$(BOOST_DIR)/libs/chrono/src
+libcosichrono_la_SOURCES = $(CR)/chrono.cpp $(CR)/process_cpu_clocks.cpp $(CR)/thread_clock.cpp
+libcosichrono_la_CPPFLAGS = $(AM_CPPFLAGS)

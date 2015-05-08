@@ -1,0 +1,7 @@
+lib_LTLIBRARIES += libcosisystem.la
+
+SY=$(BOOST_DIR)/libs/system/src
+libcosisystem_la_SOURCES = $(SY)/error_code.cpp $(SY)/local_free_on_destruction.hpp
+libcosisystem_la_CPPFLAGS=$(AM_CPPFLAGS)
+
+

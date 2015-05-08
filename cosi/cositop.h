@@ -111,6 +111,10 @@ private:
 	 // Field: freqsOnly
 	 // Output allele freqs only.
 	 bool_t freqsOnly;
+
+	 // Field: dropSingletonsFrac
+	 // Drop this fraction of SNPs which appear on only one chrom across all pops
+	 frac_t dropSingletonsFrac;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();
