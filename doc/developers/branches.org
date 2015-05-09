@@ -1,0 +1,18 @@
+#+TITLE: Description of the branches in the cosi git repository
+
+We use the git-flow branching model described at http://nvie.com/posts/a-successful-git-branching-model/
+
+* Feature branches
+
+	
+*** f-dbg
+
+		Addition of debugging code
+
+*** f-050715-genmap-enable-sampling-random-region
+
+		When running multiple simulations in one cosi run, add the ability to randomly choose a different chunk of
+		the genetic map for the simulation.
+		
+
+
