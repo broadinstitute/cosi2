@@ -58,9 +58,12 @@ Simulator::sim_execute (void)
 	  
 #ifdef COSI_DEV_PRINT
 			PRINT7( gen, recombination_rate, coalesce_rate, migrate_rate, geneconv_rate, poisson_event_time, historical_event_time );
-			for ( int i = 0; i < demography->dg_get_num_pops(); i++ )
-				 std::cerr << "|" << i << " " << demography->dg_get_pop_name_by_index( i ) << " " << demography->dg_get_pop_size_by_index( i ) << " " << demography->dg_get_pop_by_index( i )->pop_get_num_nodes() ;
-			std::cerr << "\n";
+		 if ( !cosi::util::noDbgPrint ) {
+
+			 for ( int i = 0; i < demography->dg_get_num_pops(); i++ )
+					std::cerr << "|" << i << " " << demography->dg_get_pop_name_by_index( i ) << " " << demography->dg_get_pop_size_by_index( i ) << " " << demography->dg_get_pop_by_index( i )->pop_get_num_nodes() ;
+			 std::cerr << "\n";
+		 }
 #endif
 
 	  if ( is_null( historical_event_time )
