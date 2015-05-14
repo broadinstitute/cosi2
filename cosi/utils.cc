@@ -1,7 +1,7 @@
 
 // * utils: Miscellaneous utils not specific to population genetics
 
-// ** includes
+// *** includes
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
@@ -31,7 +31,7 @@
 #endif
 #include <cosi/utils.h>
 
-// ** main impl
+// *** main impl
 
 namespace cosi {
 namespace util {
@@ -42,7 +42,7 @@ struct MyDbgPrintInit {
    MyDbgPrintInit() { if ( getenv( "COSI_NO_DBG_PRINT" ) ) noDbgPrint = True; }
 } myDbgPrintInit;
 
-// ** Function DateStr
+// *** Function DateStr
 const char * DateStr( )
 {    static char nowstr[256];
   memset( nowstr, 0, 256 );
@@ -60,7 +60,7 @@ const char * DateStr( )
   return nowstr;
 }
 
-// ** Function dbg
+// *** Function dbg
 void dbg(const char *fmt, ...) {
   va_list ap;
 
@@ -108,7 +108,7 @@ FILE *fopenChk( const char *fname, const char *mode ) {
   return ( FILE *)chk( fopen( fname, mode ), "could not open file %s in mode %s", fname, mode );
 }
 
-// ** Function GetMemUsage
+// *** Function GetMemUsage
 long GetMemUsage( )
 {   
 #ifdef __linux
@@ -312,7 +312,7 @@ unsigned long timespec_since(const struct timespec *start)
 
 namespace tsv {
 
-// ** Function create_tsv_idx
+// *** Function create_tsv_idx
 
 // Create an index of a tsv file based on one of its columns.
 //
