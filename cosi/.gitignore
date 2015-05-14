@@ -3,4 +3,5 @@ seglist_test
 *.trs
 TAGS
 tmp/
+dox/
 
