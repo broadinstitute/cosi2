@@ -18,8 +18,9 @@
 #include <boost/io/ios_state.hpp>
 #include <boost/foreach.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <cosi/genmap.h>
 #include <cosi/utils.h>
+#include <cosi/cosirand.h>
+#include <cosi/genmap.h>
 
 namespace cosi {
 
@@ -32,11 +33,47 @@ using std::ios;
 using std::map;
 using util::chkCond;
 
-GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_, ploc_bp_diff_t genMapShift_ ):
+GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_, ploc_bp_diff_t genMapShift_,
+								bool_t genmapRandomRegions_, RandGenP randGen ):
 	rec_recombrate( 0.0 ),
 	rec_length( length_ ) {
 	try {
 	  boost::filesystem::ifstream f( fname );
+
+		if ( genmapRandomRegions_ ) {
+			// get length of file:
+			f.seekg (0, f.end);
+			istream::streampos stream_length = f.tellg();
+			// find start of last line
+			using std::ios_base;
+			f.seekg( -1, ios_base::cur );
+			if ( f.peek() == '\n' ) f.seekg( -1, ios_base::cur );
+			while( f.tellg() > 0  &&  f.peek() != '\n' )
+				 f.seekg( -1, ios_base::cur );
+			loc_bp_int_t endPos = -1;
+			f >> endPos;
+
+			while( true ) {
+				istream::streampos seekTo = static_cast< istream::streampos >( randGen->random_double() * stream_length );
+				//std::cerr << "seekTo=" << seekTo << "\n";
+				f.seekg( seekTo );
+				std::string line;
+				std::getline( f, line );
+				std::getline( f, line );
+				loc_bp_int_t begPos;
+				double rate;
+				if ( sscanf(line.c_str(), "%ld %lf", &begPos, &rate) != 2 )
+					 BOOST_THROW_EXCEPTION( cosi_io_error()
+																	<< boost::errinfo_file_name( fname.string() ) <<
+																	error_msg( "Error reading genetic map file" ) );
+
+				if ( endPos - begPos >= length_ ) {
+					genMapShift_ = -begPos;
+					break;
+				}
+			}  // while( true )
+		}  // if( genmapRandomRegions_ )
+		
 		readFrom( f, genMapShift_ );
 	} catch( boost::exception& e ) {
 		BOOST_THROW_EXCEPTION( cosi_io_error()
@@ -62,7 +99,7 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t genMapShift_ ) {
 	recombfp.exceptions( ios::failbit | ios::badbit );
 
 	try {
-		long start;
+		loc_bp_int_t start;
 		double rate;
 
 		loc2cumRate.clear();
@@ -70,7 +107,7 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t genMapShift_ ) {
 
 		util::SumKeeper<glen_cM_t> cumRateSoFar;
 	
-		long lastStart = 0;
+		loc_bp_int_t lastStart = 0;
 		cosi_double lastRate = 0.0;
 		loc2cumRate.addPt( MIN_PLOC, MIN_GLOC );
 		cumRate2loc.addPt( MIN_GLOC, MIN_PLOC );
@@ -82,7 +119,8 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t genMapShift_ ) {
 			try {
 				std::getline( recombfp, line );
 			} catch( std::ios::failure f ) { break; }
-			if ( sscanf(line.c_str(), "%ld %lf", &start, &rate) == 2  && start <= rec_length ) {
+			//std::cerr << "line: " << line << "\n";
+			if ( sscanf(line.c_str(), "%ld %lf", &start, &rate) == 2  && ( start + genMapShift_ ) <= rec_length ) {
 		
 				if ( !ploc2gloc.empty() && start == lastStart ) {
 					std::cerr << "warning: skipping duplicate genetic map point at " << start << "\n";

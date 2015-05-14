@@ -50,7 +50,8 @@ CoSi::CoSi(): segfp( NULL ), logfp( NULL ), verbose( False ),
 #ifdef COSI_SUPPORT_COALAPX							
 						, maxCoalDist( plen_t( 1.0 ) ), maxCoalDistCvxHull( False )
 #endif
-						, genMapShift( 0 ), sweepFracSample( False ), outputARGedges( False )
+						, genMapShift( 0 ), sweepFracSample( False ), outputARGedges( False ),
+							genmapRandomRegions( False )
 {
 	seglist::seglist_init_module();
 }
@@ -93,10 +94,11 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
 	demography->dg_setNodePool( nodePool );
 			 
 	params = make_shared<ParamFileReader>( demography );
-	params->set_genMapShift( this->genMapShift );
 	params->set_recombfileFN( this->recombfileFN );
 
 	params->file_read(paramfile, segfp);
+
+	
 
 	RandGenP rgen;
 	if ( randGenToUse_ ) rgen = randGenToUse_;
@@ -113,7 +115,8 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
 	nodePool->setRandGen( getRandGen() );
 	params->getHistEvents()->setRandGen( getRandGen() );
 	
-	genMap = params->getGenMap();
+	genMap = boost::make_shared<GenMap>( params->get_recombfileFN(), params->getLength(), this->genMapShift,
+																			 genmapRandomRegions, getRandGen() );
 
 	nodePool->setGenMap( genMap );
 	if ( params->getGeneConv2RecombRateRatio() == ZERO_FACTOR ) nodePool->setEnableGeneConv( False );

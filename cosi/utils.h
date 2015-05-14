@@ -59,6 +59,7 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/exception/exception.hpp>
 #include <boost/exception/error_info.hpp>
+#include <boost/container/flat_map.hpp>
 #include <cosi/utildefs.h>
 
 #ifdef COSI_VALGRIND
@@ -903,6 +904,26 @@ ostream& operator<<( ostream& os, const ValRange<T>& valRange ) {
 	
 	return os;
 }
+
+namespace tsv {
+
+
+// ** Class TSVIdx - an index of a TSV file for quickly finding locations in it
+class TSVIdx {
+public:
+
+   // *** Typedef index_t - the type of values in the index column.
+	 typedef uint64_t index_t;
+	 
+	 TSVIdx( filename_t tsvFN, unsigned colNum, filename_t idxFN );
+
+	 std::istream::streampos getStreamPos( index_t idxVal );
+
+private:
+	 boost::container::flat_map<index_t, std::istream::streampos> idx2streamPos;
+};  // class TSVIdx
+
+}  // namespace tsv
 
 #undef ForEach
 

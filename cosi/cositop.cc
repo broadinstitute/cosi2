@@ -51,7 +51,7 @@ CoSiMain::CoSiMain():
 #endif
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
 							 outputARGedges( False ), freqsOnly( False ),
-							 dropSingletonsFrac( 0 )
+							 dropSingletonsFrac( 0 ), genmapRandomRegions( False )
 {
 }
 
@@ -90,6 +90,8 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 	main_options.add_options()
 		 ( "paramfile,p", po::value(&paramfile)->required(), "parameter file" )
 		 ( "recombfile,R", po::value(&recombfileFN), "genetic map file (if specified, overrides the one in paramfile)" )
+		 ( "genmapRandomRegions", po::bool_switch(&genmapRandomRegions),
+			 "for each simulation use a randomly chosen subregion of the genetic map" )
 		 ( "trajfile,J", po::value(&trajFN), "file from which to read sweep trajectory" )
 		 ( "nsims,n", po::value(&nsims)->default_value(1), "number of simulations to output" )
 		 ( "seed,r", po::value(&randSeed)->default_value(0), "random seed (0 to use current time)" ) 
@@ -260,6 +262,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #endif
 		cosi.set_recombfileFN( this->recombfileFN );
 		cosi.set_outputARGedges( this->outputARGedges );
+		cosi.set_genmapRandomRegions( this->genmapRandomRegions );
 
 		cosi.setUpSim( paramfile, randGen );
 		if ( simNum == 0 ) {
@@ -292,7 +295,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
 			//PRINT( "freezing" );
 			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
-										params->getGenMap()->recomb_get_length() );
+										cosi.getGenMap()->recomb_get_length() );
 			//PRINT( "frozen" );
 
 			if ( cosi.getCondSnpMgr() ) cosi.getCondSnpMgr()->printResults( muts, cosi.getGenMap() );

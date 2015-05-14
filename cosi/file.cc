@@ -18,7 +18,6 @@
 #include <cosi/simulator.h>
 #include <cosi/output.h>
 #include <cosi/geneconversion.h>
-#include <cosi/genmap.h>
 #include <cosi/historical.h>
 #include <cosi/sweep.h>
 #include <cosi/utils.h>
@@ -34,7 +33,7 @@ typedef boost::error_info<struct errinfo_param_details_,std::string> errinfo_par
 static const size_t BUF_MAX = 1024;
 
 ParamFileReader::ParamFileReader( DemographyP demography_ ):
-	demography( demography_ ), genMapShift( 0 ) {
+	demography( demography_ ) {
 	init();
 }
 
@@ -106,9 +105,11 @@ ParamFileReader::file_proc_buff(char *var, char* buffer, FILE* segfp)
 		if ( !this->recombfileFN.empty() ) recombFilePath = this->recombfileFN;
 		fs::path paramFileDir( fs::canonical( this->paramFileName ).parent_path() );
 		recombFilePath = fs::absolute( recombFilePath /*, paramFileDir */ );
+
+		recombfileFN = recombFilePath;
 		
-		genMap = boost::make_shared<GenMap>( recombFilePath, length, this->genMapShift );
-		assert( genMap.get() );
+//		genMap = boost::make_shared<GenMap>( recombFilePath, length, this->genMapShift );
+//		assert( genMap.get() );
 	}
 	else if (strcmp(var, "mutation_rate") == 0) {
 		mu = prob_per_bp_per_gen_t( atof(buffer) );

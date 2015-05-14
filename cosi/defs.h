@@ -11,6 +11,7 @@
 
 #include <limits>
 #include <iostream>
+#include <cstdint>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/operators.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -382,7 +383,7 @@ typedef cosi_double loc_bp_t;
  *
  * A point location on the chromosome, represented as a base-pair integer coordinate.
  */
-typedef int loc_bp_int_t;
+typedef intmax_t loc_bp_int_t;
 
 /**
  * Type: len_t

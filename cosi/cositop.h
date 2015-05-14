@@ -1,3 +1,6 @@
+
+// * Header cositop.h - top-level 
+
 #ifndef __COSI_INCLUDE_COSITOP_H
 #define __COSI_INCLUDE_COSITOP_H
 
@@ -115,6 +118,10 @@ private:
 	 // Field: dropSingletonsFrac
 	 // Drop this fraction of SNPs which appear on only one chrom across all pops
 	 frac_t dropSingletonsFrac;
+
+	 // ** Field: genmapRandomRegions
+	 // Whether to take for each simulation a different random region from the genetic map.
+	 bool_t genmapRandomRegions;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

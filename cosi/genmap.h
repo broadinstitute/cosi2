@@ -11,6 +11,7 @@
 #include <cosi/defs.h>
 #include <cosi/utils.h>
 #include <cosi/generalmath.h>
+#include <cosi/decls.h>
 
 namespace cosi {
 
@@ -19,7 +20,8 @@ namespace cosi {
 // Keeps the correspondence between physical locations and genetic map locations. 
 class GenMap: boost::noncopyable {
 public:
-	 GenMap( const boost::filesystem::path& fname, len_bp_t length_, ploc_bp_diff_t genMapShift_ = 0 );
+	 GenMap( const boost::filesystem::path& fname, len_bp_t length_, ploc_bp_diff_t genMapShift_ = 0,
+					 bool_t genmapRandomRegions_ = False, RandGenP randGen_ = RandGenP() );
 	 GenMap( istream&, len_bp_t length_, ploc_bp_diff_t genMapShift_ = 0 );
 
 	 // Method: recomb_get_length
