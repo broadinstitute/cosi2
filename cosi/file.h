@@ -28,7 +28,6 @@ public:
 	 // Parse the specified parameter file.
 	 void file_read( boost::filesystem::path filename, FILE *segfp );
 	 
-	 GenMapP getGenMap() const { return genMap; }
 	 unsigned long getRandomSeed() const { return rseed; }
 	 len_bp_int_t getLength() const { return length; }
 	 prob_per_bp_per_gen_t getMu() const { return mu; }
@@ -40,8 +39,9 @@ public:
 	 bool_t getInfSites() const { return infSites; }
 
 	 void setPrintSeed( bool_t printSeed_ ) { printSeed = printSeed_; }
-	 void set_genMapShift( ploc_bp_diff_t genMapShift_ ) { this->genMapShift = genMapShift_; }
 	 void set_recombfileFN( filename_t recombfileFN_ ) { this->recombfileFN = recombfileFN_; }
+
+	 filename_t get_recombfileFN() const { return this->recombfileFN; }
 
 	 unsigned long getRandSeed() const { return rseed; }
 	 bool_t isSeeded() const { return seeded; }
@@ -77,16 +77,11 @@ private:
 	 // Private field: rseed
 	 // The random seed, if specified in the parameter file. 
 	 unsigned long rseed;
-	 GenMapP genMap;
 	 HistEventsP histEvents;
 	 bool_t infSites;
 	 bool_t printSeed;
 	 popid ignoreRecombsInPop;
 	 boost::filesystem::path paramFileName;
-
-	 // Field: genMapShift
-	 // A shift applied to the genetic map: added to all physical positions in the genetic map file.
-	 ploc_bp_diff_t genMapShift;
 
 	 // Field: recombfileFN
 	 // If non-empty, overrides the recomb file specified in the paramfile
@@ -100,7 +95,6 @@ private:
 	 int file_get_data (FILE * fileptr, FILE *);
 	 int file_proc_buff(char * var, char* buffer, FILE*);
 	 int file_killwhitespace(FILE * fileptr);
-	 void file_proc_recombfile (const char*  filename);
 	 void file_exit(const char* , const char*);
 	 void file_error_nonfatal(const char* , const char*);
 };

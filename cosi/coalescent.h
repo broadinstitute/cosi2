@@ -76,6 +76,7 @@ public:
 	 void set_condSnpDef( CondSnpDefP condSnpDef_ ) { this->condSnpDef = condSnpDef_; }
 	 void set_recombfileFN( filename_t recombfileFN_ ) { this->recombfileFN = recombfileFN_; }
 	 void set_outputARGedges( bool outputARGedges_ ) { outputARGedges = outputARGedges_; }
+	 void set_genmapRandomRegions( bool genmapRandomRegions_ ) { genmapRandomRegions = genmapRandomRegions_; }
 	 
 	 //
 	 // Group: Running the simulation
@@ -241,6 +242,10 @@ protected:
 	 // Field: outputARGedges
 	 // Whether to print ARG edges to stdout.
 	 bool_t outputARGedges;
+
+	 // ** Field: genmapRandomRegions
+	 // Whether to take for each simulation a different random region from the genetic map.
+	 bool_t genmapRandomRegions;
 
 };  // class CoSi
 
