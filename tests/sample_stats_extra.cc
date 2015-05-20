@@ -1,30 +1,30 @@
-/*
- * Program: sample_stats_extra
- *
- * Compute various summary statistics for a set of simulations in ms output format.
- * Some extensions of ms format are accepted.  Which statistics are gathered, can be configured
- * on the command line.
- *
- * For each simulation, one line of statistics is output.
- *
- * Adapted from the ms package by Richard Hudson.
- * See http://home.uchicago.edu/rhudson1/source/mksamples.html 
- *
- * Usage:
- *
- * sample_stats_extra MARGIN afsMax (dmin dmax)*
- *
- * Args:
- *
- *    MARGIN - margin of simulated region to ignore; this fraction from the start and from the end
- *       of the region will be ignored, stats will be gathered only from the middle portion of the region.
- *    afsMax - when gathering the allele frequency spectrum, gather the fraction of SNPs having 1, 2, ..., afsMax
- *       chroms with derived allele
- *    dmin dmax - gather parameters of the distribution of LD for pairs of SNPs at physical separation of between dmin and dmax
- *       (specified as fraction of total region length)
- */
+//
+// * Program: sample_stats_extra
+//
+// Compute various summary statistics for a set of simulations in ms output format.
+// Some extensions of ms format are accepted.  Which statistics are gathered, can be configured
+// on the command line.
+//
+// For each simulation, one line of statistics is output.
+//
+// Adapted from the ms package by Richard Hudson.
+// See http://home.uchicago.edu/rhudson1/source/mksamples.html 
+//
+// Usage:
+//
+// sample_stats_extra MARGIN afsMax (dmin dmax)*
+//
+// Args:
+//
+//    MARGIN - margin of simulated region to ignore; this fraction from the start and from the end
+//       of the region will be ignored, stats will be gathered only from the middle portion of the region.
+//    afsMax - when gathering the allele frequency spectrum, gather the fraction of SNPs having 1, 2, ..., afsMax
+//       chroms with derived allele
+//    dmin dmax - gather parameters of the distribution of LD for pairs of SNPs at physical separation of between dmin and dmax
+//       (specified as fraction of total region length)
+//
 
-
+// ** includes
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <limits>
 #include <stdexcept>
+#include <exception>
 #include <sstream>
 #include <ios>
 #include <iostream>
@@ -96,6 +97,11 @@
 #include <boost/accumulators/statistics/variates/covariate.hpp>
 #include <boost/accumulators/statistics/extended_p_square.hpp>
 #include <boost/array.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/exception/exception.hpp>
+#include <boost/exception/error_info.hpp>
+#include <boost/throw_exception.hpp>
+#include <boost/exception/all.hpp>
 //#include <Sequence/SimParams.hpp>
 
 #ifdef __GNUC__
@@ -125,6 +131,19 @@ using std::ctype;
 using std::string;
 
 typedef std::string filename_t;
+
+// ** utils
+
+
+//
+// cosi exceptions
+//
+
+struct cosi_error: virtual std::exception, virtual boost::exception { };
+struct cosi_io_error: virtual cosi_error { };
+
+typedef boost::error_info<struct tag_errno_code,int> errno_code;
+typedef boost::error_info<struct tag_error_msg,std::string> error_msg;
 
 double tajd(int, int, double) ;
 
@@ -189,6 +208,8 @@ string Date( )
 
 bool compute_LD( int site_A, int site_B, int nsam, char **list,
 								 double *r2, double *Dprime );
+
+// ** Class SumKeeper
 
 template <typename ValT = cosi_double, typename CountT = size_t>
 class SumKeeper {
@@ -278,8 +299,7 @@ private:
   
 };  // class SumKeeper
 
-//
-// Class: StatKeeper
+// ** Class StatKeeper
 //
 // Keeps a running sum and sum-of-squares without round-off errors,
 // allowing accurate computation of the mean and stddev.
@@ -329,6 +349,7 @@ private:
 
 //////////////////////////////////////////////////////
 
+// ** more utils
 
 double nucdiv(int, int, char **);
 double hfay(int, int, char **);
@@ -381,6 +402,8 @@ inline ostream& operator<<( ostream& s, const vector<T>& v) {
 	s << "]";
 	return s;
 }
+
+// *** string utils
 
 //
 // Function: Split
@@ -496,6 +519,8 @@ template <typename T> inline int isize( const vector<T>& v ) { return int( v.siz
 // End section: General utils
 //
 
+// ** logical types
+
 // Logical type: nchroms_t
 // A count of chromosomes.
 typedef int nchroms_t;
@@ -516,6 +541,10 @@ typedef double genid;
 // A probability.
 typedef double prob_t;
 typedef double freq_t;
+
+// Logical type: popid
+// Name of a population
+typedef int popid;
 
 template <typename T>
 T get_null() { throw std::logic_error( "unimpl" ); return T(); }
@@ -557,8 +586,7 @@ vector< nchroms_t > derCounts_DIND_der, derCounts_DIND_anc;
 // The location of each SNP
 loc_t *posit;
 
-//
-// Class: ValRange
+// ** Class ValRange
 //
 // A range of values.
 //
@@ -624,7 +652,7 @@ ostream& operator<<( ostream& os, const ValRange<T>& valRange ) {
 }
 
 //
-// Class: SNPCond
+// ** Class SNPCond
 //
 // A condition on SNPs.
 //
@@ -655,7 +683,7 @@ ostream& operator<<( ostream& os, const SNPCond& snpCond ) {
 
 
 //
-// Class: AFS
+// ** Class AFS
 //
 // Allele frequency spectrum for a specified subset of SNPs.
 //
@@ -810,7 +838,7 @@ ostream& operator<<( ostream& os, const AFS& afs ) {
 }
 
 //
-// Class: SNPPairCond
+// ** Class SNPPairCond
 //
 // A condition on pairs of SNPs.
 //
@@ -875,7 +903,7 @@ typedef acc::accumulator_set<double, acc::stats< acc::tag::sum_kahan, acc::tag::
 // typedef boost::shared_ptr< acc2_t > acc2_p;
 
 //
-// Class: LD
+// ** Class LD
 //
 // A subset of the possible SNP pairs, and LD info for it.
 //
@@ -962,6 +990,7 @@ ostream& operator<<( ostream& os, const LD& ld ) {
 	return os;
 }
 
+// ** Class TreeEdge
 class TreeEdge {
 public:
 	 TreeEdge( const char *line ) {
@@ -978,7 +1007,7 @@ public:
 };
 
 //
-// Class: TreeEdgeSet
+// ** Class TreeEdgeSet
 //
 // Gather stats for a collection of tree edges
 //
@@ -1041,13 +1070,12 @@ private:
 	 
 };  // class TreeEdgeSet
 
-
 /////////////////////////////
-// Section: Histograms
+// * Section: Histograms
 /////////////////////////////
 
 //
-// Concept: Binner
+// ** Concept: Binner
 //
 // A mapping from values to bins.
 //
@@ -1081,7 +1109,7 @@ template <typename TVal> struct DiffType {
 	 typedef BOOST_TYPEOF_TPL( boost::declval<TVal>() - boost::declval<TVal>()) type;
 };
 
-// Class: UniformBinner
+// ** Class: UniformBinner
 // Maps values to bins by subdividing a specified range into equal-sized bins, and providing
 // underflow and overflow bins for values below and above the range, respectively.
 template <typename ValT = double, typename BinIdType = size_t>
@@ -1119,7 +1147,7 @@ private:
 BOOST_CONCEPT_ASSERT((BinnerConcept< UniformBinner<> >));
 
 //
-// Class: Histogram1D
+// ** Class: Histogram1D
 //
 // A one-dimensional histogram.
 //
@@ -1176,7 +1204,7 @@ private:
 
 
 //
-// Class: Histogram2D
+// ** Class: Histogram2D
 // A two-dimensional histogram
 template <typename Binner1T, typename Binner2T, typename count_type = size_t>
 class Histogram2D {
@@ -1239,6 +1267,36 @@ void histogramTest() {
 	
 }
 
+// * fst computation
+
+// ** Function ~compute_fst_for_one_snp~ - compute a Weir-Hill estimator of Fst for one SNP
+//
+// Params:
+//
+//   - nai,naj :: counts of the two alleles in pop i,j
+//
+// Returns: estimator of Fst, or NAN if can't be computed
+//
+double compute_fst_for_one_snp( const nchroms_t nai[2], const nchroms_t naj[2] ) {
+	// adapted from jvitti's code
+	if ((nai[0] == 0 && naj[0] == 0) || (nai[1] == 0 && naj[1] == 0)) return NAN;
+	nchroms_t ni = nai[0] + nai[1], nj = naj[0] + naj[1];
+	if (ni == 0 || nj == 0) return NAN;
+	
+	// Weir-Hill estimator
+	freq_t p[2] = { (double) nai[0] / ni, (double) naj[0] / nj };
+	double pmean = (ni * p[0] + nj * p[1]) / (ni + nj);
+	double nic = ni - (double) ni * ni / (ni + nj);
+	double njc = nj - (double) nj * nj / (ni + nj);
+	nchroms_t nc = nic + njc;
+	double msp = ni * (p[0] - pmean) * (p[0] - pmean) + nj * (p[1] - pmean) * (p[1] - pmean);
+	double msg = (ni * p[0] * (1. - p[0]) + nj * p[1] * (1. - p[1])) / (ni - 1 + nj - 1);
+	double num = msp - msg;
+	double denom = msp + (nc - 1) * msg;
+
+	return denom == 0 ? NAN : ( num / denom );
+}  // double compute_fst_for_one_snp( const nchroms_t nai[2], const nchroms_t naj[2] )
+
 
 //////////////////////////////////////////
 
@@ -1246,9 +1304,12 @@ bool StartsWith( const char *s, const char *pfx ) { return strlen( s ) >= strlen
 
 int  segsub( int nsam, int segsites, char **list ) ;
 
+// * Main
 
 int sample_stats_main(int argc, char *argv[])
 {
+// ** var decls
+	
 	using std::map;
 	using std::string;
 	
@@ -1303,6 +1364,8 @@ int sample_stats_main(int argc, char *argv[])
 	boost::random::mt19937::result_type rng_seed;
 
 	bool addQuantiles = false;
+
+// ** program options
 	
 	po::options_description desc("Allowed options");
 	desc.add_options()
@@ -1410,6 +1473,35 @@ int sample_stats_main(int argc, char *argv[])
 	PRINT3( chromRange, nsam_orig, nsam );
 	
   chk( fgets( line, MAX_LINE_LEN, pfin) );
+
+	vector< popid > popNames;
+	vector< nchroms_t > sampleSizes;
+	
+	if ( boost::algorithm::starts_with( line, "pops" ) ) {
+		std::istringstream is( line );
+		is.exceptions( std::ios::failbit | std::ios::badbit );
+
+		std::string popsLineHeader;
+
+		try {
+		
+			size_t npops;
+			is >> popsLineHeader >> npops;
+
+			for ( size_t popNum = 0; popNum < npops; ++popNum ) {
+				popid popName;
+				nchroms_t sampleSize;
+				is >> popName >> sampleSize;
+				popNames.push_back( popName );
+				sampleSizes.push_back( sampleSize );
+				cerr << "got pop name " << popName << " size " << sampleSize << "\n";
+			}
+		} catch( std::ios_base::failure const& e ) {
+			 BOOST_THROW_EXCEPTION( cosi_io_error()
+															<< error_msg( "error parsing population info line" ) );
+		}
+		chk( fgets( line, MAX_LINE_LEN, pfin) );
+	}
 	cerr << line;
 
   list = cmatrix(nsam,maxsites+1);
@@ -1424,6 +1516,10 @@ int sample_stats_main(int argc, char *argv[])
 
 	Histogram1D<> globalAFS( UniformBinner<>( 0.0, 1.0, nsam ) );
 
+// ** main loop: for each sim
+
+// *** misc
+	
   count=0;
 	while( howmany-count++ ) {
 
@@ -1462,6 +1558,8 @@ int sample_stats_main(int argc, char *argv[])
 		set<loc_t> recombLocs, recombBegs, recombEnds;
 
 		ForEach( TreeEdgeSet& treeEdgeSet, treeEdgeSets ) treeEdgeSet.clear();
+
+// *** process simulation headers
 		
 		while( true ) {
 			chk( fgets( line, MAX_LINE_LEN, pfin) );
@@ -1470,7 +1568,9 @@ int sample_stats_main(int argc, char *argv[])
 				 break;
 			else if( StartsWith( line, "prob:" ) ) {
 				chk( sscanf( line, "  prob: %lf", &prob ) == 1 );
-			} else if ( StartsWith( line, "ARG" ) ) {
+			}
+// **** process ARG edges
+			else if ( StartsWith( line, "ARG" ) ) {
 
 				TreeEdge treeEdge( line );
 
@@ -1480,8 +1580,9 @@ int sample_stats_main(int argc, char *argv[])
 				recombLocs.insert( treeEdge.end );
 				recombBegs.insert( treeEdge.beg );
 				recombEnds.insert( treeEdge.end );
-
-			} else if ( StartsWith( line, "stat " ) ) {
+			}
+// **** process generic stats
+			else if ( StartsWith( line, "stat " ) ) {
 				string dummy, statName;
 				double statVal;
 				istringstream istrm( line );
@@ -1499,7 +1600,7 @@ int sample_stats_main(int argc, char *argv[])
 			} else
 				 throw std::logic_error( string("unknown input line: ") + string( line ) );
 		}
-		
+// *** read SNP locs
 		chk( sscanf( line, "  segsites: %d", &segsites ) == 1 );
 		if( segsites >= maxsites){
 			maxsites = segsites + 10 ;
@@ -1509,12 +1610,11 @@ int sample_stats_main(int argc, char *argv[])
 		}
 
 		boost::scoped_array<char> list_dummy( new char[ segsites + 1 ] );
-		
 
 		int first_snp = 0, last_snp = segsites-1, trimmed_segsites = segsites;
 		const loc_t *trimmed_posit = posit;
 
-
+// *** read SNP data
 		{
 			if ( segsites > 0 ) {
 				chk( fscanf(pfin," %s", astr) == 1 );
@@ -1587,8 +1687,11 @@ int sample_stats_main(int argc, char *argv[])
 				
 				//	 list[i][ last_snp+1 ] = '\0';
 			}  // if ( segsites > 0 )
-		}
-		/* analyse sample ( do stuff with segsites and list) */
+		}  // if ( segsites > 0 )
+
+		
+
+// *** analyse sample ( do stuff with segsites and list)
 
 		if ( !globalAFS_fname.empty() ) {
 			ForEach( nchroms_t thisSnpCount, derCounts ) globalAFS( ((double)thisSnpCount) / ((double)nsam), 1 );
@@ -1636,6 +1739,8 @@ int sample_stats_main(int argc, char *argv[])
 				}
 			}
 		}
+
+// *** if first sim, initialize stats keepers 
 		
 		if ( count == 1 && !summaryOnly ) {
 //			fout << "pi\tss\tD\ttheta\tH\tnrecombLocs\tnrecombBegs\tnrecombEnds";
@@ -1671,6 +1776,8 @@ int sample_stats_main(int argc, char *argv[])
 			fout << "\n";
 		}
 
+// *** compute basic stats
+		
 		double tajd_val( 0.0 );
 
 		pi = nucdiv(nsam, trimmed_segsites, trimmed_list) ;
@@ -1710,7 +1817,7 @@ int sample_stats_main(int argc, char *argv[])
 			ForEach( const TreeEdgeSet& treeEdgeSet, treeEdgeSets ) treeEdgeSet.writeData( fout );
 		}
 
-		// compute AFS
+// *** compute AFS
 
 		ForEach( AFS& afs, AFSs ) {
 			afs.clear();
@@ -1754,7 +1861,7 @@ int sample_stats_main(int argc, char *argv[])
 			}
 		}
 
-		// compute LD stats
+// *** compute LD stats
 		//PRINT( LDs.size() );
 		ForEach ( LD& ld, LDs ) {
 			//PRINT2( "computing LD", ld );
@@ -1776,7 +1883,9 @@ int sample_stats_main(int argc, char *argv[])
 
 		if ( !summaryOnly ) fout << "\n";
 		
-  }
+  }  // while( howmany-count++ )
+	
+// * post-loop processing
 
 	if ( !globalAFS_fname.empty() ) globalAFS.save( globalAFS_fname, /* dropEmptyBins= */ false );
 	if ( !globalLD_r2_fname.empty() ) {
@@ -1817,7 +1926,7 @@ int sample_stats_main(int argc, char *argv[])
 	return EXIT_SUCCESS;
 }
 
-	
+// * util impls
 
 /* allocates space for gametes (character strings) */
 char **
@@ -1993,11 +2102,17 @@ segsub( int nsub, int segsites, char **list )
 	
 }  // namespace ms
 
+// * top-level main
 int main( int argc, char *argv[] ) {
-	int exitCode = cosi::sample_stats_main( argc, argv );
+	int exitCode = EXIT_FAILURE;
+	try { 
+		exitCode = cosi::sample_stats_main( argc, argv );
+	} catch( const boost::exception& e ) {
+		std::cerr << "cosi error: " << boost::diagnostic_information( e ) << std::endl;
+	}
 #ifdef COSI_DEV_PRINT	
 	std::cerr << "exit code " << exitCode << std::endl;
-#endif	
+#endif
 	return exitCode;
 }
 
