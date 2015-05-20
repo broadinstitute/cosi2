@@ -17,6 +17,7 @@
 #include <boost/timer/timer.hpp>
 #endif
 #include <boost/filesystem/fstream.hpp>
+#include <boost/foreach.hpp>
 
 #include <cosi/defs.h>
 #include <cosi/mutlist.h>
@@ -51,7 +52,7 @@ CoSiMain::CoSiMain():
 #endif
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
 							 outputARGedges( False ), freqsOnly( False ),
-							 dropSingletonsFrac( 0 ), genmapRandomRegions( False )
+							 dropSingletonsFrac( 0 ), genmapRandomRegions( False ), outputPopInfo( False )
 {
 }
 
@@ -119,7 +120,9 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 	po::options_description output_options( "Specifying the output format" );
 	output_options.add_options()
 		 ( "outfilebase,o", po::value(&outfilebase), "base name for output files in cosi format" )
-		 ( "outms,m", po::bool_switch(&msOutput), "write output to stdout in ms format" );
+		 ( "outms,m", po::bool_switch(&msOutput), "write output to stdout in ms format" )
+		 ( "output-pop-info", po::bool_switch(&outputPopInfo), "output pop info in ms format" )
+		 ;
 
 	po::options_description output_details_options( "Specifying output details" );
 	output_details_options.add_options()
@@ -218,6 +221,8 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 
 int 
 CoSiMain::cosi_main(int argc, char *argv[]) {
+	using std::cout;
+	using std::cerr;
 
 	if ( parse_args( argc, argv ) == EXIT_FAILURE ) return EXIT_FAILURE;
 
@@ -231,15 +236,15 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 	for ( int simNum = 0; simNum < nsims; simNum++ ) {
 #ifndef COSI_NO_CPU_TIMER		
 		if ( stopAfterNs > 0 && overallTimer.elapsed().wall > stopAfterNs ) {
-			std::cout << "// cosi-early-exit\n";
-			std::cerr << "cosi: exiting after " << overallTimer.elapsed().wall << " ns; completed " <<
+			cout << "// cosi-early-exit\n";
+			cerr << "cosi: exiting after " << overallTimer.elapsed().wall << " ns; completed " <<
 				 simNum << " of " << nsims << " sims.\n";
 			break;
 		}
 		
 		boost::timer::cpu_timer cpuTimer;
 #endif		
-		if ( showProgress && !( simNum % showProgress ) ) { std::cerr << " sim " << simNum << " of " << nsims << std::endl; }
+		if ( showProgress && !( simNum % showProgress ) ) { cerr << " sim " << simNum << " of " << nsims << endl; }
 		CoSi cosi;
 
 		cosi.set_segfp( segfp );
@@ -265,13 +270,21 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		cosi.set_genmapRandomRegions( this->genmapRandomRegions );
 
 		cosi.setUpSim( paramfile, randGen );
+
 		if ( simNum == 0 ) {
 			randGen = cosi.getRandGen();
-			if ( !msOutput ) std::cerr << "coalescent seed: " << randGen->getSeed() << "\n";
+			if ( !msOutput ) cerr << "coalescent seed: " << randGen->getSeed() << "\n";
 			if ( msOutput ) {
-				std::cout.precision( outputPrecision );
-				std::cout << "ms " << cosi.getDemography()->getTotSamples() << " " << nsims << "\n";
-				std::cout << "cosi_rand " << randGen->getSeed() << "\n\n";
+				cout.precision( outputPrecision );
+				DemographyP dem = cosi.getDemography();
+				cout << "ms " << dem->getTotSamples() << " " << nsims << "\n";
+				if ( outputPopInfo ) {
+					cout << "pops " << dem->getPopNames().size();
+					for ( size_t popNum = 0; popNum < dem->getPopNames().size(); ++popNum )
+						 cout << " " << dem->getPopNames()[ popNum ] << " " << dem->getSampleSizes()[ popNum ];
+					cout << "\n";
+				}
+				cout << "cosi_rand " << randGen->getSeed() << "\n\n";
 			}
 		}
 
@@ -283,7 +296,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
 																																											 dropSingletonsFrac, randGen ) );
 
-		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << endl; }
+		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << "\n"; }
 	
 		ParamFileReaderP params = cosi.getParams();
 		cosi.getMutate()->setFreqsOnly( freqsOnly );
@@ -317,7 +330,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 
 			
 			if ( msOutput ) 
-				 muts->print_haps_ms( std::cout, cosi.getDemography()->getSampleSizes(), cosi.getTreeStatsHook(),
+				 muts->print_haps_ms( cout, cosi.getDemography()->getSampleSizes(), cosi.getTreeStatsHook(),
 															cosi.get_outputMutGens(),
 															outputRecombLocs ? &(cosi.getRecombRecorder()->getRecombLocs()) : NULL,
 															outputPrecision,
