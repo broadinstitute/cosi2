@@ -52,7 +52,8 @@ CoSiMain::CoSiMain():
 #endif
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
 							 outputARGedges( False ), freqsOnly( False ),
-							 dropSingletonsFrac( 0 ), genmapRandomRegions( False ), outputPopInfo( False )
+							 dropSingletonsFrac( 0 ), genmapRandomRegions( False ), outputPopInfo( False ),
+							 outputGenMap( False )
 {
 }
 
@@ -121,7 +122,8 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 	output_options.add_options()
 		 ( "outfilebase,o", po::value(&outfilebase), "base name for output files in cosi format" )
 		 ( "outms,m", po::bool_switch(&msOutput), "write output to stdout in ms format" )
-		 ( "output-pop-info", po::bool_switch(&outputPopInfo), "output pop info in ms format" )
+		 ( "output-pop-info", po::bool_switch(&outputPopInfo), "output pop info in ms format output" )
+		 ( "output-gen-map", po::bool_switch(&outputGenMap), "output genetic map in ms format output" )
 		 ;
 
 	po::options_description output_details_options( "Specifying output details" );
@@ -333,6 +335,8 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 				 muts->print_haps_ms( cout, cosi.getDemography()->getSampleSizes(), cosi.getTreeStatsHook(),
 															cosi.get_outputMutGens(),
 															outputRecombLocs ? &(cosi.getRecombRecorder()->getRecombLocs()) : NULL,
+															outputGenMap,
+															cosi.getGenMap(),
 															outputPrecision,
 #ifndef COSI_NO_CPU_TIMER
 															outputSimTimes ? &cpuTimer : NULL,

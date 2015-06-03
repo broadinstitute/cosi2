@@ -124,8 +124,12 @@ private:
 	 bool_t genmapRandomRegions;
 
 	 // ** Field: outputPopInfo
-	 // Whether to putput population info (in ms output mode).
+	 // Whether to output population info (in ms output mode).
 	 bool_t outputPopInfo;
+	 
+	 // ** Field: outputGenMap
+	 // Whether to output the genetic map (in ms output mode).
+	 bool_t outputGenMap;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

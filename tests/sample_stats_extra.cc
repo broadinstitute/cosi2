@@ -533,6 +533,10 @@ typedef int nsnps_t;
 // A location of a SNP (represented as a fraction of the simulated region).
 typedef double loc_t;
 
+// Logical type: gloc_t
+// A genetic position of a SNP
+typedef double gloc_t;
+
 // Logical type: genid
 // A generation (a time point).
 typedef double genid;
@@ -585,6 +589,9 @@ vector< nchroms_t > derCounts_DIND_der, derCounts_DIND_anc;
 // Var: posit
 // The location of each SNP
 loc_t *posit;
+
+// Var: posit_gloc - genetic positions of SNPs
+gloc_t *posit_gloc;
 
 // ** Class ValRange
 //
@@ -1348,6 +1355,9 @@ int sample_stats_main(int argc, char *argv[])
 
 	ValRange<nchroms_t> chromRange( 0, 100000 );
 
+	double regionLen_bp(-1);
+	double regionLen_cM(-1);
+
 	loc_t dindLoc = 0.0;
 	snp_id_t dindLocIdx = -1;
 
@@ -1507,8 +1517,9 @@ int sample_stats_main(int argc, char *argv[])
   list = cmatrix(nsam,maxsites+1);
 	char **trimmed_list = ( char **)malloc( nsam * sizeof( char * ) );
   posit = (loc_t *)malloc( maxsites*sizeof( loc_t ) ) ;
+  posit_gloc = (gloc_t *)malloc( maxsites*sizeof( gloc_t ) ) ;
 
-	chk( trimmed_list && posit );
+	chk( trimmed_list && posit && posit_gloc );
 
 	//boost::shared_ptr< vector< boost::shared_ptr< string > > > statNames = boost::make_shared< vector< boost::shared_ptr< string > > >();
 
@@ -1569,6 +1580,9 @@ int sample_stats_main(int argc, char *argv[])
 			else if( StartsWith( line, "prob:" ) ) {
 				chk( sscanf( line, "  prob: %lf", &prob ) == 1 );
 			}
+			else if( boost::algorithm::starts_with( line, "region_len_cM" ) ) {
+				chk( sscanf( line, "region_len_cM: %lf", &regionLen_cM ) == 1 );
+			}
 // **** process ARG edges
 			else if ( StartsWith( line, "ARG" ) ) {
 
@@ -1606,6 +1620,8 @@ int sample_stats_main(int argc, char *argv[])
 			maxsites = segsites + 10 ;
 			posit = (loc_t *)realloc( posit, maxsites*sizeof( loc_t ) ) ;
 			chk( posit );
+			posit_gloc = (gloc_t *)realloc( posit_gloc, maxsites*sizeof( gloc_t ) ) ;
+			chk( posit_gloc );
 			biggerlist(nsam,maxsites, list) ;
 		}
 
@@ -1613,6 +1629,7 @@ int sample_stats_main(int argc, char *argv[])
 
 		int first_snp = 0, last_snp = segsites-1, trimmed_segsites = segsites;
 		const loc_t *trimmed_posit = posit;
+		const gloc_t *trimmed_posit_gloc = posit_gloc;
 
 // *** read SNP data
 		{
@@ -1622,6 +1639,16 @@ int sample_stats_main(int argc, char *argv[])
 				for( i=0; i<segsites ; i++) {
 					chk( fscanf(pfin," %lf",posit+i) == 1 );
 					chk(0.0 <= *(posit+i) && *(posit+i) <= 1.0 );
+				}
+
+				if ( regionLen_cM > 0 ) {
+					chk( fscanf(pfin," %s", astr) == 1 );
+					chk( !strcmp( astr, "positions_genMap:" ) );
+					for( i=0; i<segsites ; i++) {
+						chk( fscanf(pfin," %lf",posit_gloc+i) == 1 );
+						chk(0.0 <= *(posit_gloc+i) && *(posit_gloc+i) <= 1.0 );
+					}
+					
 				}
 			}
 			first_snp = 0;
@@ -1634,6 +1661,7 @@ int sample_stats_main(int argc, char *argv[])
 			trimmed_segsites = last_snp - first_snp + 1;
 			
 			trimmed_posit = posit + first_snp;
+			trimmed_posit_gloc = posit_gloc + first_snp;
 			derCounts.clear();
 			derCounts.resize( trimmed_segsites, 0 );
 
@@ -1922,6 +1950,7 @@ int sample_stats_main(int argc, char *argv[])
 
 	free_cmatrix( list, nsam );
 	free( trimmed_list );
+	free( posit_gloc );
 	free( posit );
 	return EXIT_SUCCESS;
 }
