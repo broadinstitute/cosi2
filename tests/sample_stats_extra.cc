@@ -1363,7 +1363,6 @@ int sample_stats_main(int argc, char *argv[])
 	vector<LD> LDs;
 	vector<TreeEdgeSet> treeEdgeSets;
 
-	
 	po::positional_options_description positional_opts;
 
 	bool includeTreeStats = false;
@@ -1815,6 +1814,8 @@ int sample_stats_main(int argc, char *argv[])
 				afs.setSampleSize( nsam );
 			}
 
+			fout << "\tmeanFst";
+
 			BOOST_FOREACH( nsnps_t ldSep, ldSeps ) {
 				 fout
 						<< "\tld_sep" << ldSep << "_r2_mean"
@@ -1883,6 +1884,37 @@ int sample_stats_main(int argc, char *argv[])
 				 afs.processSNP( ii );
 			if ( !summaryOnly ) afs.writeData( fout, trimmed_segsites );
 		}
+
+// *** compute FSTs
+		{
+			acc_t FSTs;
+			double numPopPairs = popNames.size() * ( popNames.size() - 1 ) / 2.0; 
+			for ( snp_id_t snp = 0; snp < trimmed_segsites; snp++ ) {
+				double fstSum = 0.0;
+
+				static vector< nchroms_t > popDerCounts;
+				popDerCounts.clear();
+				popDerCounts.resize( popNames.size() );
+				for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) {
+					nchroms_t popStart = sampleStarts[ popNum ];
+					for ( nchroms_t chrom = 0; chrom < sampleSizes[ popNum ]; ++chrom ) {
+						if ( trimmed_list[ snp ][ popStart + chrom ] == '1' )
+							 ++popDerCounts[ popNum ];
+					}
+				}
+				
+				for ( size_t popNum1 = 0; popNum1 < popNames.size(); ++popNum1 ) {
+					for ( size_t popNum2 = popNum1+1; popNum2 < popNames.size(); ++popNum2 ) {
+						nchroms_t nai[2] = { popDerCounts[ popNum1 ], sampleSizes[ popNum1 ] - popDerCounts[ popNum1 ] };
+						nchroms_t naj[2] = { popDerCounts[ popNum2 ], sampleSizes[ popNum2 ] - popDerCounts[ popNum2 ] };
+						fstSum += compute_fst_for_one_snp( nai, naj );
+					}
+				}
+				FSTs( fstSum / numPopPairs );
+			}
+			fout << "\t" << acc::mean( FSTs );
+		}
+		
 
 		{
 			for ( size_t ii = 0; ii < ldSeps.size(); ++ii ) {
