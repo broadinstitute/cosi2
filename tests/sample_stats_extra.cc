@@ -55,6 +55,8 @@
 #include <boost/swap.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/range/concepts.hpp>
+#include <boost/range/algorithm/fill.hpp>
+#include <boost/range/numeric.hpp>
 #include <boost/concept/assert.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/smart_ptr/scoped_array.hpp>
@@ -205,9 +207,6 @@ string Date( )
 		 return "(date unavailable - strftime failed)";
 	return string(nowstr);
 }
-
-bool compute_LD( int site_A, int site_B, int nsam, char **list,
-								 double *r2, double *Dprime );
 
 // ** Class SumKeeper
 
@@ -593,6 +592,11 @@ loc_t *posit;
 // Var: posit_gloc - genetic positions of SNPs
 gloc_t *posit_gloc;
 
+bool compute_LD( int site_A, int site_B, int nsam, char **list,
+								 double *r2, double *Dprime );
+bool compute_LD( snp_id_t site_A, snp_id_t site_B, nchroms_t bsam, nchroms_t nsam, char **list,
+								 double *r2, double *Dprime );
+
 // ** Class ValRange
 //
 // A range of values.
@@ -909,6 +913,12 @@ typedef acc::accumulator_set<double, acc::stats< acc::tag::sum_kahan, acc::tag::
 
 // typedef boost::shared_ptr< acc2_t > acc2_p;
 
+std::vector< popid > popNames;
+std::vector< nchroms_t > sampleSizes;
+std::vector< nchroms_t > sampleStarts;
+bool perPopStats = false;
+
+
 //
 // ** Class LD
 //
@@ -916,49 +926,55 @@ typedef acc::accumulator_set<double, acc::stats< acc::tag::sum_kahan, acc::tag::
 //
 class LD {
 	 
-	 
 public:
 	 
 	 void init( string def ) { pairCond.init( def ); }
 	 
 	 void clear() {
-		 r2_stats = acc_t( acc::extended_p_square_probabilities = quantile_probs );
-		 Dprime_stats = acc_t( acc::extended_p_square_probabilities = quantile_probs );
+		 r2_stats.clear();
+		 r2_stats.resize( popNames.size() );
+		 Dprime_stats.clear();
+		 Dprime_stats.resize( popNames.size() );
 	 }
 	 
 	 const SNPPairCond& getPairCond() const { return pairCond; }
 	 
 	 void writeHeadings( ostream& s ) const {
 		 vector<string> statNames = MakeVec<string>( "mean", "var" );
-		 
-		 for ( int which = 0; which < 2; which++ ) {
-			 ForEach( string statName, statNames ) {
-				 string accName = ( which == 0 ? "r2" : "Dprime" );
-				 s << "\t" << MakeValidIdentifier( Join( "_", "ld", ToString( pairCond ), accName, statName ) );
-			 }
-		 }
+
+		 for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) 
+				for ( int which = 0; which < 2; which++ ) {
+					ForEach( string statName, statNames ) {
+						string accName = ( which == 0 ? "r2" : "Dprime" );
+						s << "\t" << MakeValidIdentifier( Join( "_", "ld", ToString( pairCond ), accName, statName ) );
+						if ( perPopStats ) s << popNames[ popNum ];
+					}
+				}
 	 }
 	 
 	 void writeData( ostream& s ) const {
-		 for ( int which = 0; which < 2; which++ ) {
-			 const acc_t *accum = ( which == 0 ? &r2_stats : &Dprime_stats );
-			 s << "\t" << acc::mean( *accum ); 
-			 s << "\t" << acc::variance( *accum ); 
-			 // s << "\t" << acc::extract::count( *accum ); 
-			 // s << "\t" << acc::sum_kahan( *accum ); 
-		 }
+		 for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) 
+				for ( int which = 0; which < 2; which++ ) {
+					const acc_t *accum = ( which == 0 ? &r2_stats[popNum] : &Dprime_stats[popNum] );
+					s << "\t" << acc::mean( *accum ); 
+					s << "\t" << acc::variance( *accum ); 
+					// s << "\t" << acc::extract::count( *accum ); 
+					// s << "\t" << acc::sum_kahan( *accum ); 
+				}
 	 }
 	 
 	 const SNPPairCond& getSNPPairCond() const { return pairCond; }
 
-	 void processSNPPair( snp_id_t snp1, snp_id_t snp2, nchroms_t nsam, char **snps ) {
+	 void processSNPPair( snp_id_t snp1, snp_id_t snp2, char **snps ) {
 		 // if ( ( fabs( posit[snp1] - .5 ) < 1e-5  ||
 		 // 				fabs( posit[snp2] - .5 ) < 1e-5 ) )
 		 if ( pairCond( snp1, snp2 ) ) {
-			 double r2, Dprime;
-			 if ( compute_LD( snp1, snp2, nsam, snps, &r2, &Dprime ) ) {
-				 r2_stats( r2 );
-				 Dprime_stats( Dprime );
+			 for ( size_t popNum = 0; popNum < sampleStarts.size(); ++popNum ) {
+				 double r2, Dprime;
+				 if ( compute_LD( snp1, snp2, sampleStarts[ popNum ], sampleSizes[ popNum ], snps, &r2, &Dprime ) ) {
+					 r2_stats[ popNum ]( r2 );
+					 Dprime_stats[ popNum ]( Dprime );
+				 }
 			 }
 		 }
 	 }
@@ -968,20 +984,21 @@ private:
 	 // Condition that must be satisfied by SNP pairs in the set
 	 SNPPairCond pairCond;
 
-
 	 // Field: r2_stats
 	 // Statistics on r2 for SNP pairs in the set.
-	 acc_t r2_stats;
+	 std::vector< acc_t > r2_stats;
 
 	 // Field: Dprime_stats
 	 // Statistics on D' for SNP pairs in the set.
-	 acc_t Dprime_stats;
+	 std::vector< acc_t > Dprime_stats;
 
-	 static const vector<prob_t> quantile_probs;
+
+//	 static const vector<prob_t> quantile_probs;
 	 
 };  // class LD
 
-const vector<prob_t> LD::quantile_probs = boost::assign::list_of(.1)(.5)(.9);
+
+//const vector<prob_t> LD::quantile_probs = boost::assign::list_of(.1)(.5)(.9);
 
 istream& operator>>( istream& is, LD& ld );
 istream& operator>>( istream& is, LD& ld ) {
@@ -1351,6 +1368,7 @@ int sample_stats_main(int argc, char *argv[])
 
 	bool includeTreeStats = false;
 	bool summaryOnly = false;
+	bool ld_use_cM = false;
 	int progressEvery = 0;
 
 	ValRange<nchroms_t> chromRange( 0, 100000 );
@@ -1391,6 +1409,7 @@ int sample_stats_main(int argc, char *argv[])
 		 
 		 ("afs,a", po::value(&AFSs)->composing(), "compute allele frequency spectrum")
 		 ("ld,l", po::value(&LDs)->composing(), "compute LD stats for these definitions")
+		 ("ld-use-cM", po::bool_switch(&ld_use_cM), "use cM for LD snp distances")
 
 		 ("ld-seps", po::value(&ldSepsDef), "snp count separation for LD stats" )
 		 
@@ -1398,6 +1417,7 @@ int sample_stats_main(int argc, char *argv[])
 		 
 		 ("tree,t", po::bool_switch(&includeTreeStats), "include tree stats")
 		 
+		("per-pop-stats", po::bool_switch(&perPopStats), "break down stats by pop")
 		("summary-only,s", po::bool_switch(&summaryOnly), "print summary only")
 		 ("global-afs", po::value(&globalAFS_fname), "save global AFS to this file")
 		 ("global-ld-r2", po::value(&globalLD_r2_fname), "save global LD histogram for r^2 to this file")
@@ -1481,13 +1501,17 @@ int sample_stats_main(int argc, char *argv[])
 
 	nsam = chromRange.getMax() - chromRange.getMin() + 1;
 	PRINT3( chromRange, nsam_orig, nsam );
+
+	popNames.push_back( popid(1) );
+	sampleStarts.push_back( 0 );
+	sampleSizes.push_back( nsam );
 	
   chk( fgets( line, MAX_LINE_LEN, pfin) );
-
-	vector< popid > popNames;
-	vector< nchroms_t > sampleSizes;
 	
 	if ( boost::algorithm::starts_with( line, "pops" ) ) {
+		popNames.clear();
+		sampleStarts.clear();
+		sampleSizes.clear();
 		std::istringstream is( line );
 		is.exceptions( std::ios::failbit | std::ios::badbit );
 
@@ -1498,12 +1522,15 @@ int sample_stats_main(int argc, char *argv[])
 			size_t npops;
 			is >> popsLineHeader >> npops;
 
+			nchroms_t sampleStart = 0;
 			for ( size_t popNum = 0; popNum < npops; ++popNum ) {
 				popid popName;
 				nchroms_t sampleSize;
 				is >> popName >> sampleSize;
 				popNames.push_back( popName );
 				sampleSizes.push_back( sampleSize );
+				sampleStarts.push_back( sampleStart );
+				sampleStart += sampleSize;
 				cerr << "got pop name " << popName << " size " << sampleSize << "\n";
 			}
 		} catch( std::ios_base::failure const& e ) {
@@ -1512,7 +1539,8 @@ int sample_stats_main(int argc, char *argv[])
 		}
 		chk( fgets( line, MAX_LINE_LEN, pfin) );
 	}
-	cerr << line;
+	//cerr << line;
+	chk( boost::accumulate( sampleSizes, 0 ) == nsam );
 
   list = cmatrix(nsam,maxsites+1);
 	char **trimmed_list = ( char **)malloc( nsam * sizeof( char * ) );
@@ -1530,7 +1558,9 @@ int sample_stats_main(int argc, char *argv[])
 // ** main loop: for each sim
 
 // *** misc
-	
+
+	PRINT( LDs.size() );
+
   count=0;
 	while( howmany-count++ ) {
 
@@ -1802,7 +1832,7 @@ int sample_stats_main(int argc, char *argv[])
 			
 			ForEach( const LD& ld, LDs ) ld.writeHeadings( fout );
 			fout << "\n";
-		}
+		}  // if first sim
 
 // *** compute basic stats
 		
@@ -1895,14 +1925,15 @@ int sample_stats_main(int argc, char *argv[])
 			//PRINT2( "computing LD", ld );
 			ld.clear();
 			ValRange<len_t> lenRange = ld.getSNPPairCond().getLenRange();
+			const double *pos = ( !ld_use_cM ? trimmed_posit : trimmed_posit_gloc );
 			int snp2 = 1;
 			for ( int snp1 = 0; snp1 < trimmed_segsites; snp1++ ) {
-				while( snp2 < trimmed_segsites && ( snp2 <= snp1 || trimmed_posit[snp2]-trimmed_posit[snp1] < lenRange.getMin() ) )
+				while( snp2 < trimmed_segsites && ( snp2 <= snp1 || pos[snp2]-pos[snp1] < lenRange.getMin() ) )
 					 snp2++;
 				int snp2_tmp = snp2;
-				while( snp2_tmp < trimmed_segsites && trimmed_posit[snp2_tmp]-trimmed_posit[snp1] < lenRange.getMax() ) {
+				while( snp2_tmp < trimmed_segsites && pos[snp2_tmp]-pos[snp1] < lenRange.getMax() ) {
 					chk( snp1 != snp2_tmp );
-					ld.processSNPPair( snp1, snp2_tmp, nsam, trimmed_list );
+					ld.processSNPPair( snp1, snp2_tmp, trimmed_list );
 					snp2_tmp++;
 				}
 			}
@@ -2084,6 +2115,57 @@ bool compute_LD( int site_A, int site_B, nchroms_t nsam, char **list,
 	freq_t p_1, q_1, x_11;
 	assert( r2 && Dprime && list );
 	get_freqs( site_A, site_B, nsam, list, &p_1, &q_1, &x_11 );
+	assert( 0.0 <= p_1 && p_1 <= 1.0 );
+	assert( 0.0 <= q_1 && q_1 <= 1.0 );
+	assert( x_11 <= p_1 && x_11 <= q_1 );
+
+	freq_t p_2 = 1.0 - p_1;
+	freq_t q_2 = 1.0 - q_1;
+
+	
+	if ( p_1 < 1e-10 || p_2 < 1e-10 || q_1 < 1e-10 || q_2 < 1e-10 ) {
+		*Dprime = std::numeric_limits<cosi_double>::quiet_NaN();
+		*r2 = std::numeric_limits<cosi_double>::quiet_NaN();
+		return false;
+	} else {
+
+		double D = x_11 - p_1 * q_1;
+		double D_max = ( D < 0 ) ?  std::min( p_1 * q_1, p_2 * q_2  )  : std::min( p_1 * q_2, p_2 * q_1 );
+		
+		*Dprime = std::abs( D / D_max );
+		*r2 = ( D * D ) / ( p_1 * p_2 * q_1 * q_2 );
+		//PRINT10( site_A, site_B, nsam, p_1, q_1, x_11, D, D_max, *r2, *Dprime );
+#ifndef NDEBUG		
+		double eps = 1e-6;
+		assert( -eps <= *Dprime && *Dprime <= ( 1.0 + eps ) );
+		assert( -eps <= *r2 && *r2 <= ( 1.0 + eps ) );
+#endif		
+		return true;
+	}
+}
+
+void get_freqs( nsnps_t site_A, nsnps_t site_B, nchroms_t bsam, nchroms_t nsam, char **list,
+								freq_t *p_1, freq_t *q_1, freq_t *x_11 ) {
+
+	nchroms_t n_11 = 0, n_A_1 = 0, n_B_1 = 0;
+	for ( nchroms_t s = bsam; s < nsam; s++ ) {
+		bool A_der = ( list[s][site_A] == '1' );
+		bool B_der = ( list[s][site_B] == '1' );
+		if ( A_der ) ++n_A_1;
+		if ( B_der ) ++n_B_1;
+		if ( A_der && B_der ) n_11++;
+	}
+
+	*p_1 = double( n_A_1 ) / double( nsam );
+  *q_1 = double( n_B_1 ) / double( nsam );
+	*x_11 = double( n_11 ) / double( nsam ); 
+}
+
+bool compute_LD( int site_A, int site_B, nchroms_t bsam, nchroms_t nsam, char **list,
+								 double *r2, double *Dprime ) {
+	freq_t p_1, q_1, x_11;
+	assert( r2 && Dprime && list );
+	get_freqs( site_A, site_B, bsam, nsam, list, &p_1, &q_1, &x_11 );
 	assert( 0.0 <= p_1 && p_1 <= 1.0 );
 	assert( 0.0 <= q_1 && q_1 <= 1.0 );
 	assert( x_11 <= p_1 && x_11 <= q_1 );
