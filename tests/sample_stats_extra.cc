@@ -1888,9 +1888,10 @@ int sample_stats_main(int argc, char *argv[])
 // *** compute FSTs
 		{
 			acc_t FSTs;
-			double numPopPairs = popNames.size() * ( popNames.size() - 1 ) / 2.0; 
+			//double numPopPairs = popNames.size() * ( popNames.size() - 1 ) / 2.0; 
 			for ( snp_id_t snp = 0; snp < trimmed_segsites; snp++ ) {
 				double fstSum = 0.0;
+				int fstCount = 0;
 
 				static vector< nchroms_t > popDerCounts;
 				popDerCounts.clear();
@@ -1907,10 +1908,15 @@ int sample_stats_main(int argc, char *argv[])
 					for ( size_t popNum2 = popNum1+1; popNum2 < popNames.size(); ++popNum2 ) {
 						nchroms_t nai[2] = { popDerCounts[ popNum1 ], sampleSizes[ popNum1 ] - popDerCounts[ popNum1 ] };
 						nchroms_t naj[2] = { popDerCounts[ popNum2 ], sampleSizes[ popNum2 ] - popDerCounts[ popNum2 ] };
-						fstSum += compute_fst_for_one_snp( nai, naj );
+						//PRINT4( nai[0], nai[1], naj[0], naj[1] );
+						double fstHere = compute_fst_for_one_snp( nai, naj );
+						if ( !(boost::math::isnan)( fstHere ) ) {
+							 fstSum += fstHere;
+							 fstCount += 1;
+						}
 					}
 				}
-				FSTs( fstSum / numPopPairs );
+				FSTs( fstSum / fstCount );
 			}
 			fout << "\t" << acc::mean( FSTs );
 		}
