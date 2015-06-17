@@ -300,10 +300,13 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( showNumRecombs ) { PRINT( cosi.getRecomb()->getNumRecombs() ); }
 
 		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
+#ifdef COSI_TREE_OUTPUT
 		if ( outputTrees ) {
 			output_trees();
 		}
-		else if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
+		else
+#endif			 
+			 if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
 			//PRINT( "freezing" );
 			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
 										cosi.getGenMap()->recomb_get_length() );
