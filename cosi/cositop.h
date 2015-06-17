@@ -122,6 +122,10 @@ private:
 	 // ** Field: genmapRandomRegions
 	 // Whether to take for each simulation a different random region from the genetic map.
 	 bool_t genmapRandomRegions;
+
+	 // ** Field: outputTrees
+	 // Whether to output trees in Newick format.
+	 bool_t outputTrees;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

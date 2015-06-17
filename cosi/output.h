@@ -72,6 +72,11 @@ private:
 	 
 }; // class ARGOutputHook
 
+#ifdef COSI_TREE_OUTPUT
+void output_trees();
+#endif
+
+
 }  // namespace cosi
 
 #endif // __INCLUDE_COSI_OUTPUT_H

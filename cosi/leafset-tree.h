@@ -55,13 +55,21 @@ public:
 	 // If this is a singleton leafset representing one leaf,
 	 // then LEAFSET_NULL, else the two leafsets whose disjoint
 	 // union equals this leafset.
-	 leafset_p childA,childB; 
+	 leafset_p childA,childB;
+
+#ifdef COSI_TREE_OUTPUT
+	 genid gen;
+#endif // #ifdef COSI_TREE_OUTPUT	 
 
    void* operator new (size_t size);
    void operator delete (void *p);
 
 	 leafset_struct( leaf_id_t leafId_ ):
-		 size( 1 ), leafId( leafId_ ) {}
+		 size( 1 ), leafId( leafId_ )
+#ifdef COSI_TREE_OUTPUT
+		 , gen( 0 )
+#endif		 
+			{}
 
 	 leafset_struct( leafset_p childA_, leafset_p childB_ ):
 		 size( childA_->size + childB_->size ), leafId( NULL_LEAF_ID ), childA( childA_ ), childB( childB_ ) { }
@@ -113,6 +121,14 @@ leafset_p leafset_intersection( leafset_p leafset1, leafset_p leafset2 );
 leafset_p leafset_difference( leafset_p leafset1, leafset_p leafset2 );
 
 const char *leafset_str( leafset_p  );
+
+inline bool_t leafset_is_singleton( leafset_p leafset ) { return !leafset_is_empty( leafset) && leafset->leafId != NULL_LEAF_ID; }
+
+inline leaf_id_t leafset_get_singleton_leaf( leafset_p leafset ) {
+	assert( leafset_is_singleton( leafset ) );
+	return leafset->leafId;
+}
+
 
 inline bool_t leafset_is_singleton( leafset_p leafset, leaf_id_t leaf ) { return leafset->leafId == leaf; }
 

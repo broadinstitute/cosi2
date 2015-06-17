@@ -22,6 +22,10 @@ namespace cosi {
 
 bool showOneSimProgress = false;
 
+#ifdef COSI_TREE_OUTPUT
+std::map< loc_t, leafset_p > loc2tree;
+#endif
+
 namespace seglist {
 
 namespace seglist_detail {
@@ -1218,8 +1222,14 @@ Seglist *seglist_union( Seglist **seglist1p, Seglist **seglistp,
 									seg_union_callback( other_seg->beg, other_seg->end, cur_seg->lastCoalGen, gen, cur_seg->leafset );
 								}
 								 seglist_seg_set_leafset( other_seg, leafset_union( other_seg->leafset, cur_seg->leafset ) );
+#ifdef COSI_TREE_OUTPUT
+								 other_seg->leafset->gen = gen;
+#endif								 
 								 if ( leafset_is_full( other_seg->leafset ) ) {
 									 dropSeg = True;
+#ifdef COSI_TREE_OUTPUT
+									 loc2tree.insert( std::make_pair( other_seg->end, other_seg->leafset ) );
+#endif									 
 									 if ( showOneSimProgress ) {
 										 static len_t totCoalLen(0.0);
 										 static len_t lastPrintedLen(0.0);

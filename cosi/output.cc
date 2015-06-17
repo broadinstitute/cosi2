@@ -171,4 +171,31 @@ char ARGOutputHook::edgeKind2code( edge_kind_t edgeKind ) {
 
 ARGOutputHook::~ARGOutputHook() { }
 
+#ifdef COSI_TREE_OUTPUT
+namespace {
+void write_tree( leafset_p t ) {
+	using std::cout;
+	if ( leafset_is_singleton( t ) )
+		 cout << leafset_get_singleton_leaf( t );
+	else {
+		cout << "(";
+		write_tree( t->childA );
+		cout << ":" << ( t->gen - t->childA->gen ) << ",";
+		write_tree( t->childB );
+		cout << ":" << ( t->gen - t->childA->gen ) << ")";
+	}
+}
+}
+
+void output_trees() {
+	typedef std::map< loc_t, leafset_p > m_t;
+	extern m_t loc2tree;
+	for ( m_t::const_iterator it = loc2tree.begin(); it != loc2tree.end(); ++it ) {
+		write_tree( it->second );
+		std::cout << ":" << get_ploc( it->first ) << " ;\n";
+	}
+	loc2tree.clear();
+}
+#endif  // #ifdef COSI_TREE_OUTPUT
+
 }  // namespace cosi

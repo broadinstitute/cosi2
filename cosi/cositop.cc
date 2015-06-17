@@ -28,6 +28,7 @@
 #include <cosi/recomb.h>
 #include <cosi/condsnp.h>
 #include <cosi/cosicfg.h>
+#include <cosi/output.h>
 
 
 namespace cosi {
@@ -51,7 +52,8 @@ CoSiMain::CoSiMain():
 #endif
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
 							 outputARGedges( False ), freqsOnly( False ),
-							 dropSingletonsFrac( 0 ), genmapRandomRegions( False )
+							 dropSingletonsFrac( 0 ), genmapRandomRegions( False ),
+							 outputTrees( False )
 {
 }
 
@@ -135,6 +137,9 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 			 "Edge kinds are: R, recombination; G, gene conversion; C, coalescence. "
 			 "seg_i_beg, seg_i_end give chromosomal segments inherited along the edge; locations are values in [0.0,1.0] representing locations "
 			 "within the simulated region.")
+#ifdef COSI_TREE_OUTPUT
+		 ( "output-trees", po::bool_switch(&outputTrees), "output trees" )
+#endif		 
 		 ( "write-mut-contexts,C", po::value(&outputMutContextsFor)->value_name( "position" ),
 			 "output mutation contexts for these locations" )
 		 ( "drop-singletons", po::value(&dropSingletonsFrac)->value_name("fraction"),
@@ -277,13 +282,16 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 
 		using boost::make_shared;
 		MutlistP muts = make_shared<Mutlist>();
-		if ( dropSingletonsFrac < 1e-10 )
+		if ( outputTrees ) {
+			cosi.setMutProcessor( MutProcessorP() );
+		}
+		else if ( dropSingletonsFrac < 1e-10 )
 			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist>( muts ) );
 		else
 			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
 																																											 dropSingletonsFrac, randGen ) );
 
-		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << endl; }
+		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << "\n"; }
 	
 		ParamFileReaderP params = cosi.getParams();
 		cosi.getMutate()->setFreqsOnly( freqsOnly );
@@ -292,7 +300,10 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( showNumRecombs ) { PRINT( cosi.getRecomb()->getNumRecombs() ); }
 
 		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
-		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
+		if ( outputTrees ) {
+			output_trees();
+		}
+		else if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
 			//PRINT( "freezing" );
 			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
 										cosi.getGenMap()->recomb_get_length() );

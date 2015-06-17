@@ -57,6 +57,7 @@ void Mutate::mutate_print_leafset (loc_t loc, leafset_p leaves, genid gen, popid
 #ifndef COSI_DISABLE_MUTS
 void Mutate::mutate_put_muts_on_seglist( const Seglist *seglist, gens_t edge_gens,
 																				 genid edgeMinGen, popid popName ) {
+	if ( !mutProcessor ) return;
 
 #ifdef COSI_FREQONLY
 	if ( freqsOnly ) {
