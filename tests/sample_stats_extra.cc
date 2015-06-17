@@ -549,6 +549,8 @@ typedef double freq_t;
 // Name of a population
 typedef int popid;
 
+typedef size_t popNum_t;
+
 template <typename T>
 T get_null() { throw std::logic_error( "unimpl" ); return T(); }
 
@@ -1816,7 +1818,9 @@ int sample_stats_main(int argc, char *argv[])
 				afs.setSampleSize( nsam );
 			}
 
-			fout << "\tmeanFst";
+			for ( size_t popNum1 = 0; popNum1 < popNames.size(); ++popNum1 )
+				for ( size_t popNum2 = popNum1+1; popNum2 < popNames.size(); ++popNum2 )
+					fout << "\tfst_" << popNum1 << "_" << popNum2;
 
 			BOOST_FOREACH( nsnps_t ldSep, ldSeps ) {
 				 fout
@@ -1889,8 +1893,8 @@ int sample_stats_main(int argc, char *argv[])
 
 // *** compute FSTs
 		{
-			acc_t FSTs;
-			//double numPopPairs = popNames.size() * ( popNames.size() - 1 ) / 2.0; 
+			size_t numPopPairs = popNames.size() * ( popNames.size() - 1 ) / 2; 
+			std::vector<acc_t> FSTs( numPopPairs );
 			for ( snp_id_t snp = 0; snp < trimmed_segsites; snp++ ) {
 				double fstSum = 0.0;
 				int fstCount = 0;
@@ -1905,7 +1909,8 @@ int sample_stats_main(int argc, char *argv[])
 							 ++popDerCounts[ popNum ];
 					}
 				}
-				
+
+				std::vector<acc_t>::iterator popPairIter = FSTs.begin();
 				for ( size_t popNum1 = 0; popNum1 < popNames.size(); ++popNum1 ) {
 					for ( size_t popNum2 = popNum1+1; popNum2 < popNames.size(); ++popNum2 ) {
 						nchroms_t nai[2] = { popDerCounts[ popNum1 ], sampleSizes[ popNum1 ] - popDerCounts[ popNum1 ] };
@@ -1913,14 +1918,17 @@ int sample_stats_main(int argc, char *argv[])
 						//PRINT4( nai[0], nai[1], naj[0], naj[1] );
 						double fstHere = compute_fst_for_one_snp( nai, naj );
 						if ( !(boost::math::isnan)( fstHere ) ) {
-							 fstSum += fstHere;
-							 fstCount += 1;
+							(*popPairIter)( fstHere );
 						}
+						++popPairIter;
 					}
 				}
-				FSTs( fstSum / fstCount );
 			}
-			fout << "\t" << acc::mean( FSTs );
+
+			std::vector<acc_t>::const_iterator popPairIter = FSTs.begin();
+			for ( size_t popNum1 = 0; popNum1 < popNames.size(); ++popNum1 )
+				for ( size_t popNum2 = popNum1+1; popNum2 < popNames.size(); ++popNum2 )
+					fout << "\t" << acc::mean( *popPairIter++ );
 		}
 		
 
