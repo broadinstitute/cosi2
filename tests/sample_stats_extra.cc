@@ -969,9 +969,11 @@ public:
 		 // if ( ( fabs( posit[snp1] - .5 ) < 1e-5  ||
 		 // 				fabs( posit[snp2] - .5 ) < 1e-5 ) )
 		 if ( pairCond( snp1, snp2 ) ) {
+			 //PRINT3( popNames.size(), sampleStarts.size(), sampleSizes.size() );
 			 for ( size_t popNum = 0; popNum < sampleStarts.size(); ++popNum ) {
 				 double r2, Dprime;
 				 if ( compute_LD( snp1, snp2, sampleStarts[ popNum ], sampleSizes[ popNum ], snps, &r2, &Dprime ) ) {
+					 //PRINT7( popNum, snp1, snp2, sampleStarts[popNum], sampleSizes[popNum], r2, Dprime );
 					 r2_stats[ popNum ]( r2 );
 					 Dprime_stats[ popNum ]( Dprime );
 				 }
@@ -2186,7 +2188,7 @@ void get_freqs( nsnps_t site_A, nsnps_t site_B, nchroms_t bsam, nchroms_t nsam, 
 								freq_t *p_1, freq_t *q_1, freq_t *x_11 ) {
 
 	nchroms_t n_11 = 0, n_A_1 = 0, n_B_1 = 0;
-	for ( nchroms_t s = bsam; s < nsam; s++ ) {
+	for ( nchroms_t s = bsam; s < bsam+nsam; s++ ) {
 		bool A_der = ( list[s][site_A] == '1' );
 		bool B_der = ( list[s][site_B] == '1' );
 		if ( A_der ) ++n_A_1;
