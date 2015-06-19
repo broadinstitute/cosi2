@@ -73,7 +73,7 @@ private:
 }; // class ARGOutputHook
 
 #ifdef COSI_TREE_OUTPUT
-void output_trees();
+void output_trees( len_bp_t region_len );
 #endif
 
 

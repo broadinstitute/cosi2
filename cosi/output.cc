@@ -187,12 +187,21 @@ void write_tree( leafset_p t ) {
 }
 }
 
-void output_trees() {
+void output_trees( len_bp_t region_len ) {
 	typedef std::map< loc_t, leafset_p > m_t;
 	extern m_t loc2tree;
+
 	for ( m_t::const_iterator it = loc2tree.begin(); it != loc2tree.end(); ++it ) {
-		write_tree( it->second );
-		std::cout << ":" << get_ploc( it->first ) << " ;\n";
+		m_t::const_iterator it_n = it;
+		++it_n;
+		loc_t loc_next = ( it_n == loc2tree.end() ? MAX_LOC : it_n->first );
+		len_bp_t seg_len_bp = region_len * ToDouble( loc_next - it->first );
+		if ( seg_len_bp > .5 ) {
+			std::cout << "[" << (long)( round( ToDouble( seg_len_bp ) ) ) << "] ";
+			write_tree( it->second );
+			std::cout << "\n";
+		}
+		//std::cout << ":" << get_ploc( it->first ) << " ;\n";
 	}
 	loc2tree.clear();
 }

@@ -282,10 +282,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 
 		using boost::make_shared;
 		MutlistP muts = make_shared<Mutlist>();
-		if ( outputTrees ) {
-			cosi.setMutProcessor( MutProcessorP() );
-		}
-		else if ( dropSingletonsFrac < 1e-10 )
+		if ( dropSingletonsFrac < 1e-10 )
 			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist>( muts ) );
 		else
 			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
@@ -302,11 +299,10 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
 #ifdef COSI_TREE_OUTPUT
 		if ( outputTrees ) {
-			output_trees();
+			output_trees( cosi.getGenMap()->recomb_get_length() );
 		}
-		else
 #endif			 
-			 if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
+		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
 			//PRINT( "freezing" );
 			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
 										cosi.getGenMap()->recomb_get_length() );
