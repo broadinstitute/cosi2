@@ -176,7 +176,7 @@ namespace {
 void write_tree( leafset_p t ) {
 	using std::cout;
 	if ( leafset_is_singleton( t ) )
-		 cout << leafset_get_singleton_leaf( t );
+		 cout << ( leafset_get_singleton_leaf( t ) + 1 );
 	else {
 		cout << "(";
 		write_tree( t->childA );
@@ -197,9 +197,9 @@ void output_trees( len_bp_t region_len ) {
 		loc_t loc_next = ( it_n == loc2tree.end() ? MAX_LOC : it_n->first );
 		len_bp_t seg_len_bp = region_len * ToDouble( loc_next - it->first );
 		if ( seg_len_bp > .5 ) {
-			std::cout << "[" << (long)( round( ToDouble( seg_len_bp ) ) ) << "] ";
+			std::cout << "[" << (long)( round( ToDouble( seg_len_bp ) ) ) << "]";
 			write_tree( it->second );
-			std::cout << "\n";
+			std::cout << ";\n";
 		}
 		//std::cout << ":" << get_ploc( it->first ) << " ;\n";
 	}
