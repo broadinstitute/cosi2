@@ -299,7 +299,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
 #ifdef COSI_TREE_OUTPUT
 		if ( outputTrees ) {
-			output_trees( cosi.getGenMap()->recomb_get_length() );
+			output_trees( cosi.getGenMap()->recomb_get_length(), cosi.getDemography()->get_N0_tot() );
 		}
 #endif			 
 		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {

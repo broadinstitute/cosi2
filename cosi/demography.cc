@@ -135,6 +135,10 @@ void Demography::dg_complete_initialization() {
 
 
 	dg_nodePool->finishLeaves();
+
+	N0_tot = 0;
+	BOOST_FOREACH( PopP p, pops )
+		 N0_tot += p->pop_get_size();
 }
 
 void Demography::setMaxCoalDist( plen_t maxCoalDist_ ) {

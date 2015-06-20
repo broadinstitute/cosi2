@@ -173,6 +173,8 @@ ARGOutputHook::~ARGOutputHook() { }
 
 #ifdef COSI_TREE_OUTPUT
 namespace {
+static double genFactor;
+
 void write_tree( leafset_p t ) {
 	using std::cout;
 	if ( leafset_is_singleton( t ) )
@@ -180,16 +182,18 @@ void write_tree( leafset_p t ) {
 	else {
 		cout << "(";
 		write_tree( t->childA );
-		cout << ":" << ( t->gen - t->childA->gen ) << ",";
+		cout << ":" << ( t->gen - t->childA->gen ) * genFactor << ",";
 		write_tree( t->childB );
-		cout << ":" << ( t->gen - t->childA->gen ) << ")";
+		cout << ":" <<  ( t->gen - t->childA->gen ) * genFactor << ")";
 	}
 }
 }
 
-void output_trees( len_bp_t region_len ) {
+void output_trees( len_bp_t region_len, nchroms_t N0_tot ) {
 	typedef std::map< loc_t, leafset_p > m_t;
 	extern m_t loc2tree;
+
+	genFactor = 1. / ( 4. * N0_tot );
 
 	for ( m_t::const_iterator it = loc2tree.begin(); it != loc2tree.end(); ++it ) {
 		m_t::const_iterator it_n = it;

@@ -182,6 +182,8 @@ public:
 			 });
 		 boost::copy( counts, it );
 	 }
+
+	 nchroms_t get_N0_tot() const { return N0_tot; }
 	 
 	 
 private:
@@ -235,6 +237,8 @@ private:
 	 
 	 void
 	 dg_populate_by_name_do (popid popname, int members, genid gen);
+
+	 nchroms_t N0_tot;
 
 };  // class Demography
 
