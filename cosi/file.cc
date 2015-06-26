@@ -144,9 +144,10 @@ ParamFileReader::file_proc_buff(char *var, char* buffer, FILE* segfp)
 		/* 
 		 * Throw a fatal error if pop [popname] does not exist.
 		 */		
-		if (! demography->dg_set_pop_size_by_name (ZERO_GEN, popname, intarg))
+		if (!demography->dg_get_pop_by_name (popname) )
 			 file_exit("file_proc_buff", 
 								 "parameter file - pop specified does not exist.");
+		demography->dg_set_pop_size_by_name (ZERO_GEN, popname, intarg);
 	}
 	else if (strcmp(var, "sample_size") == 0) {		
 		popname = popid( atoi(strtok (buffer, " ")) );

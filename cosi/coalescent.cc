@@ -144,6 +144,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
 			 
 	simulator->sim_setRecomb( recomb );
 	simulator->sim_setHistEvents( params->getHistEvents() );
+	this->histEvents = params->getHistEvents();
 
 	coalesce = make_shared<coal::Coalesce>( demography );
 	simulator->sim_setCoalesce( coalesce );
@@ -195,6 +196,11 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
 	}
 
 }  // CoSi::setUpSim()
+
+void CoSi::write_ms_flags( std::ostream& s ) const {
+	demography->write_ms_flags( s );
+	histEvents->write_ms_flags( s );
+}
 
 void CoSi::setMutProcessor( MutProcessorP mutProcessor_ )  { mutate->setMutProcessor( mutProcessor_ ); }
 

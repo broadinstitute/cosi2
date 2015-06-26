@@ -100,6 +100,9 @@ public:
 	 RecombRecorderP getRecombRecorder() const { return recombRecorder; }
 	 CondSnpMgrP getCondSnpMgr() const { return condSnpMgr; }
 	 GenMapP getGenMap() const { return genMap; }
+	 HistEventsP getHistEvents() { return histEvents; }
+
+	 void write_ms_flags( std::ostream& ) const;
 
 protected:
 

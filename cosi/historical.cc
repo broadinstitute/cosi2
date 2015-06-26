@@ -38,6 +38,20 @@ HistEvents::HistEvents( DemographyP demography_ ):
 
 HistEvents::Event::~Event() {}
 
+
+double HistEvents::Event::to_4N0( genid gen ) const { return ToDouble( gen / ToDouble( 4 * getDemography()->get_N0_tot() ) ); }
+
+void HistEvents::write_ms_flags( ostream& s ) const {
+	BOOST_FOREACH( events_type::value_type e, events ) {
+		e.second->write_ms_flags( s );
+	}
+}
+
+void HistEvents::processSimEnd( genid simEndTime ) {
+	BOOST_FOREACH( events_type::value_type e, events )
+		 e.second->processSimEnd( simEndTime );
+}
+
 namespace histevents {
 
 // Class: Event_PopSize
@@ -204,6 +218,12 @@ public:
 	 static const char *typeStr() { return "split"; }
 
 	 virtual genid execute();
+
+	 virtual void write_ms_flags( std::ostream& s ) const {
+		 s << " -ej " << to_4N0( gen ) << " " << ( getDemography()->dg_get_pop_index_by_name( newPop ) + 1 )
+			 << " " << ( getDemography()->dg_get_pop_index_by_name( fromPop ) + 1 );
+   }
+	 
 			
 private:
 	 // Field: fromPop

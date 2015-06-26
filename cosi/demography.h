@@ -72,27 +72,26 @@ public:
 	 void dg_create_pop (popid popname, const std::string& label, 
 											 genid gen);
 	 void dg_populate_by_name (popid popname, 
-														 int members,  genid gen = ZERO_GEN );
+														 nchroms_t members,  genid gen = ZERO_GEN );
 
-	 int dg_get_num_pops(void) const { return pops.size(); }
+	 size_t dg_get_num_pops(void) const { return pops.size(); }
 
 	 popid find_unused_popname() const;
 
 	 const char* dg_get_pop_label_by_name (popid popname) const;
 	 popid dg_get_pop_name_by_label (const char* label) const;
-	 popid dg_get_pop_name_by_index (int popindex) const;
-	 int dg_get_pop_index_by_name (popid popname) const;
-	 Pop* dg_get_pop_by_index (int index1) const;
+	 popid dg_get_pop_name_by_index (pop_idx_t popindex) const;
+	 pop_idx_t dg_get_pop_index_by_name (popid popname) const;
+	 Pop* dg_get_pop_by_index (pop_idx_t index1) const;
 	 Pop* dg_get_pop_by_name(popid popname) const;
 
 	 /* POP_SIZE FUNCTIONS */
 
 	 nchroms_t dg_get_num_nodes (void) const;
 	 
-	 nchroms_t dg_get_pop_size_by_index(int popindex) const { return pops[popindex]->pop_get_size(); }
+	 nchroms_t dg_get_pop_size_by_index(pop_idx_t popindex) const { return pops[popindex]->pop_get_size(); }
 
-	 int dg_set_pop_size_by_name (genid gen, popid popname, 
-																nchroms_t newsize);
+	 void dg_set_pop_size_by_name (genid gen, popid popname, nchroms_t newsize);
 
 	 /* POISSON EVENTS */
 
@@ -106,7 +105,7 @@ public:
 	 //
 	 //    popindex - the <pop index> of the population in which to do coalescence
 	 //    gen - the <generation> in which the coalescence happens
-	 void dg_coalesce_by_index (int popindex, genid gen);
+	 void dg_coalesce_by_index (pop_idx_t popindex, genid gen);
 	 
 	 // Method: dg_coalesce_by_pop
 	 //
@@ -132,7 +131,7 @@ public:
 
 	 /* NODE FUNCTIONS */
 
-	 nchroms_t dg_get_num_nodes_in_pop_by_index(int popindex) const {
+	 nchroms_t dg_get_num_nodes_in_pop_by_index(pop_idx_t popindex) const {
 		 return pops[popindex]->pop_get_num_nodes();
 	 }
 
@@ -164,6 +163,8 @@ public:
 	 const vector< nchroms_t >& getSampleSizes() const { return sampleSizes; }
 	 const vector< popid >& getLeaf2PopName() const { return leaf2popName; }
 
+	 void write_ms_flags( std::ostream& ) const;
+
 #ifndef COSI_FREQONLY	 
 	 std::map< popid, nchroms_t > getLeafsetPopCounts( leafset_p leafset ) const {
 		 std::map< popid, nchroms_t > result;
@@ -183,7 +184,10 @@ public:
 		 boost::copy( counts, it );
 	 }
 
-	 nchroms_t get_N0_tot() const { return N0_tot; }
+	 nchroms_t get_N0_tot() const {
+		 util::chkCond( N0_tot > 0 );
+		 return N0_tot;
+	 }
 	 
 	 
 private:
@@ -216,11 +220,11 @@ private:
 	 int LOGGING;
 	 FILE* logfp;
 
-	 Pop *dg_get_pop_from_list(int index) const;
+	 Pop *dg_get_pop_from_list(pop_idx_t index) const;
 
 	 typedef struct populate_request {
 			popid popname;
-			int members;
+			nchroms_t members;
 			genid gen;
 	 } populate_request_t;
 	 
@@ -236,7 +240,7 @@ private:
 	 bool_t maxCoalDistCvxHull;
 	 
 	 void
-	 dg_populate_by_name_do (popid popname, int members, genid gen);
+	 dg_populate_by_name_do (popid popname, nchroms_t members, genid gen);
 
 	 nchroms_t N0_tot;
 

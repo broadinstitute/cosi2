@@ -11,8 +11,10 @@
 #include <cstdarg>
 #include <cassert>
 #include <vector>
+#include <iterator>
+#include <iostream>
 #include <boost/make_shared.hpp>
-#include <boost/range/algorithm/find_if.hpp>
+#include <boost/range/algorithm/copy.hpp>
 #include <cosi/defs.h>
 #include <cosi/pop.h>
 #include <cosi/node.h>
@@ -32,7 +34,7 @@ using util::chkCond;
 using util::isize;
 
 Demography::Demography():
-  LOGGING( False ), logfp( NULL ), verbose( True ), maxCoalDist( plen_t( 1.0 ) ), maxCoalDistCvxHull( False ) {
+  LOGGING( False ), logfp( NULL ), verbose( True ), maxCoalDist( plen_t( 1.0 ) ), maxCoalDistCvxHull( False ), N0_tot( 0 ) {
 
 }
 
@@ -76,7 +78,7 @@ Demography::dg_create_pop (popid popname, const std::string& label, genid gen) {
 
 
 void
-Demography::dg_populate_by_name (popid popname, int members, genid gen) {
+Demography::dg_populate_by_name (popid popname, nchroms_t members, genid gen) {
   populate_request_t req;
   req.popname = popname;
   req.members = members;
@@ -85,12 +87,11 @@ Demography::dg_populate_by_name (popid popname, int members, genid gen) {
 }
 
 void
-Demography::dg_populate_by_name_do (popid popname, int members, genid gen) {
+Demography::dg_populate_by_name_do (popid popname, nchroms_t members, genid gen) {
   Pop *popptr = dg_get_pop_by_name(popname);
   Node *tempnode;
-  int i;	
 
-  for (i = 0; i < members; i++) {
+  for (nchroms_t i = 0; i < members; i++) {
 		tempnode = dg_nodePool->make_new_leaf();
 		popptr->pop_add_node (tempnode);
 
@@ -100,7 +101,7 @@ Demography::dg_populate_by_name_do (popid popname, int members, genid gen) {
 }
 
 void Demography::dg_complete_initialization() {
-  int totmembers = 0;
+  nchroms_t totmembers = 0;
 
   ForVec( populate_request, req, populate_requests )
 		 totmembers += req->members;
@@ -171,20 +172,20 @@ Demography::dg_get_pop_name_by_label (const char *label) const
 /*
  * Returns zero if the population specified does not exist.
  */
-int 
+void
 Demography::dg_set_pop_size_by_name (genid gen, popid popname, nchroms_t newsize) 
 {
   Pop *popptr =  dg_get_pop_by_name(popname);
-  if (popptr == NULL) {
-		dg_error_nonfatal("dg_set_pop_size_by_name", 
-											"pop does not exist");
-		return 0;
-  }
+	util::chk( popptr, "pop does not exist" );
+  // if (popptr == NULL) {
+	// 	dg_error_nonfatal("dg_set_pop_size_by_name", 
+	// 										"pop does not exist");
+	// 	return
+  // }
 	//PRINT6( "change_size", gen, popname, popptr->pop_get_size(), popptr->pop_get_num_nodes(), newsize );
 	//chkCond( 2*newsize >= popptr->pop_get_num_nodes(), "setting invalid pop size: %d;%d", 2*newsize, popptr->pop_get_num_nodes() );
   popptr->pop_set_size(newsize);
   dg_log(CHANGE_SIZE, gen, popptr);
-  return 1;
 }
 
 /* COALESCE */
@@ -198,7 +199,7 @@ Demography::dg_set_pop_size_by_name (genid gen, popid popname, nchroms_t newsize
 //    popindex - the <pop index> of the population in which to do coalescence
 //    gen - the <generation> in which the coalescence happens
 void
-Demography::dg_coalesce_by_index (int popindex, genid gen) 
+Demography::dg_coalesce_by_index (pop_idx_t popindex, genid gen) 
 {
   Pop *popptr = dg_get_pop_by_index (popindex);
   assert(popindex >= 0);
@@ -386,7 +387,7 @@ void Demography::dg_gc(Node *node, genid gen, loc_t loc1, loc_t loc2, Node** nod
 	 */
 
   /* STEP 1 */
-  int node_idx_in_pop = node->get_idx_in_pop();
+  nchroms_t node_idx_in_pop = node->get_idx_in_pop();
 	genid node_gen = node->getGen();
   gens_t edge_len = gen - node->getGen();
   Node *node_address = node;
@@ -433,7 +434,7 @@ void
 Demography::dg_migrate_one_chrom (Pop* from_popptr, Pop* to_popptr, genid gen) 
 {
   Node *tempnode;
-  int node_index;
+  nchroms_t node_index;
 
 	
   node_index = (int) (random_double() * from_popptr->pop_get_num_nodes());
@@ -458,7 +459,7 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
 		 *to_popptr;
   Node *tempnode;
   nchroms_t num_to_move;
-  int node_index, i;
+  nchroms_t node_index, i;
 
   from_popptr = dg_get_pop_by_name (frompop);
   to_popptr = dg_get_pop_by_name(topop);
@@ -482,10 +483,10 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
 /* NODE FUNCTIONS */
 
 /* GET_NUM_NODES */
-int 
+nchroms_t
 Demography::dg_get_num_nodes (void) const
 {
-  int     total = 0;
+  nchroms_t     total = 0;
 
   for (size_t i = 0; i < pops.size(); i++)
 		 total = dg_get_num_nodes_in_pop_by_index (i);
@@ -760,7 +761,7 @@ Demography::dg_get_pop_by_name(popid popname) const {
 }
 
 popid 
-Demography::dg_get_pop_name_by_index (int popindex) const {
+Demography::dg_get_pop_name_by_index (pop_idx_t popindex) const {
   return dg_get_pop_by_index(popindex)->pop_get_name();
 }
 
@@ -771,13 +772,21 @@ pop_idx_t Demography::dg_get_pop_index_by_name (popid popname) const {
 
 
 Pop * 
-Demography::dg_get_pop_by_index (int index1) const { 
+Demography::dg_get_pop_by_index (pop_idx_t index1) const { 
   return dg_get_pop_from_list(index1);
 }
 
 Pop *
-Demography::dg_get_pop_from_list(int index1) const {
+Demography::dg_get_pop_from_list(pop_idx_t index1) const {
   return pops[index1].get();
+}
+
+void Demography::write_ms_flags( std::ostream& s ) const {
+	if ( pops.size() > 1 ) {
+		cout << " -I " << pops.size();
+		BOOST_FOREACH( nchroms_t sampleSize, sampleSizes )
+			 s << " " << sampleSize;
+	}
 }
 
 }  // namespace cosi

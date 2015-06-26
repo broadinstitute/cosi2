@@ -16,6 +16,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/foreach.hpp>
@@ -82,75 +83,9 @@ public:
 	 //   but a few are not.
 	 genid historical_event_execute (genid historical_event_time);
 
-	 void processSimEnd( genid simEndTime ) {
-		 typedef std::pair<genid,EventP> pair_t;
-		 BOOST_FOREACH( pair_t p, events )
-			 p.second->processSimEnd( simEndTime );
-	 }
+	 void write_ms_flags( ostream& ) const;
 
-	 // Abstract class: Event
-	 // Base class for historical events.
-	 class Event: virtual public boost::enable_shared_from_this<Event> {
-	 public:
-
-			// Method: getGen
-			// Returns the time when this events occurs (for instantenous events),
-			// or -- for events taking place over a time interval -- the time when the event
-			// starts (going pastward ) / ends (going forward).
-			genid getGen() const { return gen; }
-
-			// Method: getLabel
-			// Returns the human-readable label of the event.  This is a comment used for messages,
-			// does not affect the simulation.
-			const string& getLabel() const { return label; }
-
-			// Pure virtual method: execute
-			// Execute the event (going pastward), modifying the state of the simulation (demography, migration rates etc) according
-			// to the particular historical event.
-			// Returns: the generation after the execution of the event (moving pastward), i.e. the generation at which the
-			// backwards simulation should continue after this event has completed.
-			virtual genid execute() = 0;
-
-			virtual void processSimEnd( genid /*gen*/ ) { }
-			
-	 private:
-			// Field: histEventsP
-			// The HistEvents object to which this event belongs.  Provides access
-			// to <HistEvents::demography>, <HistEvents::migrate> etc, which can be used
-			// in implementations of <Event::execute()>.
-			HistEvents *histEvents;
-			
-			// Field: label
-			// A human-readable description of this event; does not affect the simulation.
-			string label;
-
-	 protected:
-			// Field: gen
-			// When does this event occur (for instantaneous events), or -- for events taking place over a time interval --
-			// when does it start (going pastward ) / end (going forward)?
-			genid gen;
-			
-			Event( HistEvents *histEvents_, const string& label_, genid gen_ ): histEvents( histEvents_ ), label( label_ ), gen( gen_ ) {}
-			Event( HistEvents *histEvents_, istream& is ): histEvents( histEvents_ ), gen( NULL_GEN ) {
-				char quote;
-				is >> quote;
-				std::getline( is, label, '\"' );
-			}
-			virtual ~Event();
-
-			// Method group: Forwarding methods
-			// Methods used by concrete implementations of Event to affect the state of the simulation.
-			DemographyP getDemography() const { return histEvents->getDemography(); }
-			MigrateP getMigrate() const { return histEvents->getMigrate(); }
-			SweepP getSweep() const { return histEvents->getSweep(); }
-			
-			void addEvent( EventP event ) { histEvents->addEvent( event ); }
-			
-			double poisson_get_next( double rate ) { return histEvents->poisson_get_next( rate ); }
-			double random_double() { return histEvents->random_double(); }
-			RandGenP getRandGen() { return histEvents->getRandGen(); }
-			
-	 };  // class Event
+	 void processSimEnd( genid simEndTime );
 	 
 private:
 	 DemographyP demography;
@@ -165,7 +100,8 @@ private:
 	 // (in the moving-pastward sense) to the <Event> object.  Note that several historical events may in principle
 	 // happen at the same time point, so this must be a multimap; although, what happens in that case has not been
 	 // fully checked out, so ideally should be avoided.  FIXME
-	 std::multimap<genid, EventP> events;
+	 typedef std::multimap<genid, EventP> events_type;
+	 events_type events;
 
 	 EventP getCurEvent() const { chkCond( !events.empty(), "events empty!" ); return events.begin()->second; }
 
@@ -174,6 +110,73 @@ private:
 	 SweepP getSweep() const { return sweep; }
 	 
 };  // class HistEvents
+
+// Abstract class: HistEvents::Event
+// Base class for historical events.
+class HistEvents::Event: virtual public boost::enable_shared_from_this<Event> {
+public:
+
+	 // Method: getGen
+	 // Returns the time when this events occurs (for instantenous events),
+	 // or -- for events taking place over a time interval -- the time when the event
+	 // starts (going pastward ) / ends (going forward).
+	 genid getGen() const { return gen; }
+
+	 // Method: getLabel
+	 // Returns the human-readable label of the event.  This is a comment used for messages,
+	 // does not affect the simulation.
+	 const string& getLabel() const { return label; }
+
+	 // Pure virtual method: execute
+	 // Execute the event (going pastward), modifying the state of the simulation (demography, migration rates etc) according
+	 // to the particular historical event.
+	 // Returns: the generation after the execution of the event (moving pastward), i.e. the generation at which the
+	 // backwards simulation should continue after this event has completed.
+	 virtual genid execute() = 0;
+
+	 virtual void processSimEnd( genid /*gen*/ ) { }
+
+	 virtual void write_ms_flags( ostream& ) const {  }
+			
+private:
+	 // Field: histEventsP
+	 // The HistEvents object to which this event belongs.  Provides access
+	 // to <HistEvents::demography>, <HistEvents::migrate> etc, which can be used
+	 // in implementations of <Event::execute()>.
+	 HistEvents *histEvents;
+			
+	 // Field: label
+	 // A human-readable description of this event; does not affect the simulation.
+	 string label;
+
+protected:
+	 // Field: gen
+	 // When does this event occur (for instantaneous events), or -- for events taking place over a time interval --
+	 // when does it start (going pastward ) / end (going forward)?
+	 genid gen;
+			
+	 Event( HistEvents *histEvents_, const string& label_, genid gen_ ): histEvents( histEvents_ ), label( label_ ), gen( gen_ ) {}
+	 Event( HistEvents *histEvents_, istream& is ): histEvents( histEvents_ ), gen( NULL_GEN ) {
+		 char quote;
+		 is >> quote;
+		 std::getline( is, label, '\"' );
+	 }
+	 virtual ~Event();
+
+	 // Method group: Forwarding methods
+	 // Methods used by concrete implementations of Event to affect the state of the simulation.
+	 DemographyP getDemography() const { return histEvents->getDemography(); }
+	 MigrateP getMigrate() const { return histEvents->getMigrate(); }
+	 SweepP getSweep() const { return histEvents->getSweep(); }
+
+	 double to_4N0( genid gen ) const;
+	 void addEvent( EventP event ) { histEvents->addEvent( event ); }
+			
+	 double poisson_get_next( double rate ) { return histEvents->poisson_get_next( rate ); }
+	 double random_double() { return histEvents->random_double(); }
+	 RandGenP getRandGen() { return histEvents->getRandGen(); }
+			
+};  // class HistEvents::Event
 
 }  // namespace cosi
 

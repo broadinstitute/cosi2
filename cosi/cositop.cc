@@ -10,6 +10,7 @@
 #include <sstream>
 #include <ios>
 #include <string>
+#include <iterator>
 #include <boost/program_options.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/optional/optional_io.hpp>
@@ -26,6 +27,7 @@
 #include <cosi/demography.h>
 #include <cosi/genmap.h>
 #include <cosi/recomb.h>
+#include <cosi/historical.h>
 #include <cosi/condsnp.h>
 #include <cosi/cosicfg.h>
 #include <cosi/output.h>
@@ -223,6 +225,8 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 
 int 
 CoSiMain::cosi_main(int argc, char *argv[]) {
+	using std::cout;
+	using std::cerr;
 
 	if ( parse_args( argc, argv ) == EXIT_FAILURE ) return EXIT_FAILURE;
 
@@ -272,11 +276,19 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		cosi.setUpSim( paramfile, randGen );
 		if ( simNum == 0 ) {
 			randGen = cosi.getRandGen();
-			if ( !msOutput ) std::cerr << "coalescent seed: " << randGen->getSeed() << "\n";
+			if ( !msOutput ) cerr << "coalescent seed: " << randGen->getSeed() << "\n";
 			if ( msOutput ) {
-				std::cout.precision( outputPrecision );
-				std::cout << "ms " << cosi.getDemography()->getTotSamples() << " " << nsims << "\n";
-				std::cout << "cosi_rand " << randGen->getSeed() << "\n\n";
+				cout.precision( outputPrecision );
+				cout << "ms " << cosi.getDemography()->getTotSamples() << " " << nsims;
+#ifdef COSI_TREE_OUTPUT
+				//-T -I 5 200 200 200 200 1 -ej .024 5 1
+				if ( outputTrees ) {
+					 cout << " -T";
+					 cosi.write_ms_flags( cout );
+				}
+#endif				
+				cout << "\n";
+				cout << "cosi_rand " << randGen->getSeed() << "\n\n";
 			}
 		}
 
