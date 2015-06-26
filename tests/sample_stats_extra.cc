@@ -1322,7 +1322,7 @@ double compute_fst_for_one_snp( const nchroms_t nai[2], const nchroms_t naj[2] )
 	double num = msp - msg;
 	double denom = msp + (nc - 1) * msg;
 
-	return denom == 0 ? NAN : ( num / denom );
+	return denom == 0 ? static_cast<double>( NAN ) : ( num / denom );
 }  // double compute_fst_for_one_snp( const nchroms_t nai[2], const nchroms_t naj[2] )
 
 
@@ -1376,7 +1376,7 @@ int sample_stats_main(int argc, char *argv[])
 
 	ValRange<nchroms_t> chromRange( 0, 100000 );
 
-	double regionLen_bp(-1);
+	//double regionLen_bp(-1);
 	double regionLen_cM(-1);
 
 	loc_t dindLoc = 0.0;
@@ -1820,7 +1820,7 @@ int sample_stats_main(int argc, char *argv[])
 
 			for ( size_t popNum1 = 0; popNum1 < popNames.size(); ++popNum1 )
 				for ( size_t popNum2 = popNum1+1; popNum2 < popNames.size(); ++popNum2 )
-					fout << "\tfst_" << popNum1 << "_" << popNum2;
+					fout << "\tfst_" << popNames[ popNum1 ] << "_" << popNames[ popNum2 ];
 
 			BOOST_FOREACH( nsnps_t ldSep, ldSeps ) {
 				 fout
@@ -1896,8 +1896,6 @@ int sample_stats_main(int argc, char *argv[])
 			size_t numPopPairs = popNames.size() * ( popNames.size() - 1 ) / 2; 
 			std::vector<acc_t> FSTs( numPopPairs );
 			for ( snp_id_t snp = 0; snp < trimmed_segsites; snp++ ) {
-				double fstSum = 0.0;
-				int fstCount = 0;
 
 				static vector< nchroms_t > popDerCounts;
 				popDerCounts.clear();
