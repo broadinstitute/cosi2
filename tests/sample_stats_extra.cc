@@ -1,3 +1,4 @@
+// *
 //
 // * Program: sample_stats_extra
 //
@@ -134,8 +135,73 @@ using std::string;
 
 typedef std::string filename_t;
 
-// ** utils
 
+// ** logical types
+
+// Logical type: nchroms_t
+// A count of chromosomes.
+typedef int nchroms_t;
+
+// Logical type: nsnps_t
+// A count of SNPs.
+typedef int nsnps_t;
+
+// Logical type: allele_t
+// Represents an allele
+typedef char allele_t;
+
+// Logical type: loc_t
+// A location of a SNP (represented as a fraction of the simulated region).
+typedef double loc_t;
+
+// Logical type: gloc_t
+// A genetic position of a SNP
+typedef double gloc_t;
+
+// Logical type: genid
+// A generation (a time point).
+typedef double genid;
+
+// Logical type: prob_t
+// A probability.
+typedef double prob_t;
+typedef double freq_t;
+
+// Logical type: popid
+// Name of a population
+typedef int popid;
+
+typedef size_t popNum_t;
+
+template <typename T>
+T get_null() { throw std::logic_error( "unimpl" ); return T(); }
+
+template <>
+inline loc_t get_null<loc_t>() { return std::numeric_limits<loc_t>::quiet_NaN(); }
+template <>
+inline int get_null<int>() { return -1; }
+
+template <typename T>
+inline bool is_null( const T& val ) { return val == get_null<T>(); }
+
+template <>
+inline bool is_null<double>( const double& loc ) { return (boost::math::isnan)( loc ); }
+
+// Logical type: len_t
+// A length of a segment of the simulated region; a difference of two loc_t's.
+typedef double len_t;
+
+// Logical type: gens_t
+// Length of a time interval, in generations.
+typedef double gens_t;
+
+//const loc_t NULL_LEN = std::numeric_limits<loc_t>::quiet_NaN();
+
+// Logical type: snp_id_t;
+// Identifies a specific SNP.
+typedef int snp_id_t;
+
+// ** utils
 
 //
 // cosi exceptions
@@ -350,11 +416,18 @@ private:
 
 // ** more utils
 
-double nucdiv(int, int, char **);
+double nucdiv(nchroms_t nsam, nsnps_t segsites, char **list);
+double nucdiv(nchroms_t bsam, nchroms_t nsam, nsnps_t segsites, char **list);
 double hfay(int, int, char **);
 double thetah(int, int, char **);
 void
 biggerlist(int nsam, unsigned nmax, char **list );
+
+nchroms_t
+frequency( allele_t allele,snp_id_t site,nchroms_t nsam,  char **list);
+
+nchroms_t
+frequency( allele_t allele,snp_id_t site,nchroms_t bsam, nchroms_t nsam,  char **list);
 
 void chk_helper( bool cond, const char *file, int line, const char *msg );
 void chk_helper( bool cond, const char *file, int line, const char *msg ) {
@@ -518,66 +591,6 @@ template <typename T> inline int isize( const vector<T>& v ) { return int( v.siz
 // End section: General utils
 //
 
-// ** logical types
-
-// Logical type: nchroms_t
-// A count of chromosomes.
-typedef int nchroms_t;
-
-// Logical type: nsnps_t
-// A count of SNPs.
-typedef int nsnps_t;
-
-// Logical type: loc_t
-// A location of a SNP (represented as a fraction of the simulated region).
-typedef double loc_t;
-
-// Logical type: gloc_t
-// A genetic position of a SNP
-typedef double gloc_t;
-
-// Logical type: genid
-// A generation (a time point).
-typedef double genid;
-
-// Logical type: prob_t
-// A probability.
-typedef double prob_t;
-typedef double freq_t;
-
-// Logical type: popid
-// Name of a population
-typedef int popid;
-
-typedef size_t popNum_t;
-
-template <typename T>
-T get_null() { throw std::logic_error( "unimpl" ); return T(); }
-
-template <>
-inline loc_t get_null<loc_t>() { return std::numeric_limits<loc_t>::quiet_NaN(); }
-template <>
-inline int get_null<int>() { return -1; }
-
-template <typename T>
-inline bool is_null( const T& val ) { return val == get_null<T>(); }
-
-template <>
-inline bool is_null<double>( const double& loc ) { return (boost::math::isnan)( loc ); }
-
-// Logical type: len_t
-// A length of a segment of the simulated region; a difference of two loc_t's.
-typedef double len_t;
-
-// Logical type: gens_t
-// Length of a time interval, in generations.
-typedef double gens_t;
-
-//const loc_t NULL_LEN = std::numeric_limits<loc_t>::quiet_NaN();
-
-// Logical type: snp_id_t;
-// Identifies a specific SNP.
-typedef int snp_id_t;
 
 // Var: derCounts
 // Number of derived alleles of each SNP.  Indexed by <snp_id>.
@@ -1805,7 +1818,12 @@ int sample_stats_main(int argc, char *argv[])
 		
 		if ( count == 1 && !summaryOnly ) {
 //			fout << "pi\tss\tD\ttheta\tH\tnrecombLocs\tnrecombBegs\tnrecombEnds";
-			fout << "pi\tss\tD\ttheta\tH\tnucdiv";
+			fout << "pi\tss\tD\ttheta\tH";
+			if ( !perPopStats ) fout << "\tnucdiv";
+			else {
+				for ( size_t popNum = 0; popNum < popNames.size(); ++popNum )
+					 fout << "\tnucdiv_" << popNames[ popNum ];
+			}
 			BOOST_FOREACH( const StatKeeper<>& sk, statKeepers )
 				fout << "\t" << sk.getName();
 
@@ -1870,7 +1888,15 @@ int sample_stats_main(int argc, char *argv[])
 
 		if ( !summaryOnly )
 			fout << pi << "\t" << trimmed_segsites << "\t" << tajd_val << "\t"
-					 << th << "\t"  << h << "\t" << Frac( pi, trimmed_segsites ); // << "\t" << recombLocs.size() << "\t" << recombBegs.size() << "\t" << recombEnds.size();
+					 << th << "\t"  << h;
+		if ( !perPopStats ) fout << "\t" << Frac( pi, trimmed_segsites );
+		else {
+			nchroms_t bsam = 0;
+			for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) {
+				fout << "\t" << Frac( nucdiv(bsam, nsam, trimmed_segsites, trimmed_list), trimmed_segsites );
+			}
+		}
+// << "\t" << recombLocs.size() << "\t" << recombBegs.size() << "\t" << recombEnds.size();
 
 		piStats.add( pi );
 		nsitesStats.add( static_cast< cosi_double >( trimmed_segsites ) );
@@ -2073,7 +2099,7 @@ biggerlist(int nsam, unsigned nmax, char **list )
 
 
 double
-nucdiv( int nsam, int segsites, char **list)
+nucdiv( nchroms_t nsam, nsnps_t segsites, char **list)
 {
 	int s, frequency( char, int, int, char**);
 	double pi, p1, nd, nnm1  ;
@@ -2088,6 +2114,24 @@ nucdiv( int nsam, int segsites, char **list)
 	}
 	return( pi ) ;
 }
+
+double
+nucdiv( nchroms_t bsam, nchroms_t nsam, nsnps_t segsites, char **list)
+{
+	//nchroms_t frequency( allele_t, nchroms_t, nchroms_t, char**);
+	double pi, p1, nd, nnm1  ;
+
+	pi = 0.0 ;
+
+	nd = nsam;
+	nnm1 = nd/(nd-1.0) ;
+	for( nsnps_t s = 0; s <segsites; s++){
+		p1 = frequency('1', s,bsam, nsam,list)/nd ;
+		pi += 2.0*p1*(1.0 -p1)*nnm1 ;
+	}
+	return( pi ) ;
+}
+
 
 /*   thetah - pi   */
 double
@@ -2129,6 +2173,10 @@ thetah( int nsam, int segsites, char **list)
 int
 frequency( char allele,int site,int nsam,  char **list);
 
+int
+frequency( char allele,int site,nchroms_t bsam, nchroms_t nsam,  char **list);
+
+
 void get_freqs( int site_i, int site_j, int nsam, char **list,
 								double *p_i, double *p_j, double *p_ij );
 int
@@ -2138,6 +2186,15 @@ frequency( char allele,int site,int nsam,  char **list)
 	for( i=0; i<nsam; i++) count += ( list[i][site] == allele ? 1: 0 ) ;
 	return( count);
 }
+
+int
+frequency( char allele,int site, nchroms_t bsam, nchroms_t nsam,  char **list)
+{
+	int i, count=0;
+	for( i=bsam; i<bsam+nsam; i++) count += ( list[i][site] == allele ? 1: 0 ) ;
+	return( count);
+}
+
 
 void get_freqs( nsnps_t site_A, nsnps_t site_B, nchroms_t nsam, char **list,
 								freq_t *p_1, freq_t *q_1, freq_t *x_11 ) {
