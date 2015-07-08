@@ -1385,12 +1385,14 @@ int sample_stats_main(int argc, char *argv[])
 	bool includeTreeStats = false;
 	bool summaryOnly = false;
 	bool ld_use_cM = false;
+	bool ld_use_bp = false;
 	int progressEvery = 0;
 
 	ValRange<nchroms_t> chromRange( 0, 100000 );
 
-	//double regionLen_bp(-1);
+	double regionLen_bp(-1);
 	double regionLen_cM(-1);
+	bool useAbsRegionLen = false;
 
 	loc_t dindLoc = 0.0;
 	snp_id_t dindLocIdx = -1;
@@ -1426,7 +1428,7 @@ int sample_stats_main(int argc, char *argv[])
 		 ("afs,a", po::value(&AFSs)->composing(), "compute allele frequency spectrum")
 		 ("ld,l", po::value(&LDs)->composing(), "compute LD stats for these definitions")
 		 ("ld-use-cM", po::bool_switch(&ld_use_cM), "use cM for LD snp distances")
-
+		 ("ld-use-bp", po::bool_switch(&ld_use_bp), "use bp for LD snp distances")
 		 ("ld-seps", po::value(&ldSepsDef), "snp count separation for LD stats" )
 		 
 		 ("DIND,D", po::value(&dindLoc), "compute DIND for this loc" )
@@ -1442,6 +1444,7 @@ int sample_stats_main(int argc, char *argv[])
 		 //("seed", po::value( &rng_seed )->default_value( 373737 ), "seed for random choices" )
 		 ("max-sims", po::value( &maxSims )->default_value( 0 ), "max sims to consider" )
 		 ("quantiles,q", po::bool_switch( &addQuantiles), "add quantiles" )
+		 ("region-len-bp", po::value( &regionLen_bp )->default_value( -1 ), "length of simulated region (bp)")
 		 
 		("progress-every,g", po::value(&progressEvery), "print progress every N sims")
 		 ;
@@ -1457,6 +1460,9 @@ int sample_stats_main(int argc, char *argv[])
 	}
 
 	if ( vm.count( "help" ) ) { cerr << desc; return EXIT_FAILURE; }
+
+	chk( !ld_use_bp || regionLen_bp > 0 );
+	
 
 	vector<string> ldSepParts = Split( ldSepsDef, "," );
 	BOOST_FOREACH( string ldSepPart, ldSepParts )
@@ -1516,7 +1522,7 @@ int sample_stats_main(int argc, char *argv[])
 	chromRange.setMax( std::min( chromRange.getMax(), nsam-1 ) );
 
 	nsam = chromRange.getMax() - chromRange.getMin() + 1;
-	PRINT3( chromRange, nsam_orig, nsam );
+	//PRINT3( chromRange, nsam_orig, nsam );
 
 	popNames.push_back( popid(1) );
 	sampleStarts.push_back( 0 );
@@ -1547,7 +1553,7 @@ int sample_stats_main(int argc, char *argv[])
 				sampleSizes.push_back( sampleSize );
 				sampleStarts.push_back( sampleStart );
 				sampleStart += sampleSize;
-				cerr << "got pop name " << popName << " size " << sampleSize << "\n";
+				//cerr << "got pop name " << popName << " size " << sampleSize << "\n";
 			}
 		} catch( std::ios_base::failure const& e ) {
 			 BOOST_THROW_EXCEPTION( cosi_io_error()
@@ -1575,7 +1581,7 @@ int sample_stats_main(int argc, char *argv[])
 
 // *** misc
 
-	PRINT( LDs.size() );
+	//PRINT( LDs.size() );
 
   count=0;
 	while( howmany-count++ ) {
@@ -1628,6 +1634,9 @@ int sample_stats_main(int argc, char *argv[])
 			}
 			else if( boost::algorithm::starts_with( line, "region_len_cM" ) ) {
 				chk( sscanf( line, "region_len_cM: %lf", &regionLen_cM ) == 1 );
+			}
+			else if( boost::algorithm::starts_with( line, "region_len_bp" ) ) {
+				chk( sscanf( line, "region_len_bp: %lf", &regionLen_bp ) == 1 );
 			}
 // **** process ARG edges
 			else if ( StartsWith( line, "ARG" ) ) {
@@ -1991,12 +2000,19 @@ int sample_stats_main(int argc, char *argv[])
 			}
 		}
 
+		chk( !ld_use_cM || regionLen_cM > 0);
+
 // *** compute LD stats
 		//PRINT( LDs.size() );
 		ForEach ( LD& ld, LDs ) {
 			//PRINT2( "computing LD", ld );
 			ld.clear();
 			ValRange<len_t> lenRange = ld.getSNPPairCond().getLenRange();
+			double regionLen = ( !ld_use_cM ? regionLen_bp : regionLen_cM );
+			if ( ld_use_cM || ld_use_bp ) {
+				lenRange.setMin( lenRange.getMin() / regionLen );
+				lenRange.setMax( lenRange.getMax() / regionLen );
+			}
 			const double *pos = ( !ld_use_cM ? trimmed_posit : trimmed_posit_gloc );
 			int snp2 = 1;
 			for ( int snp1 = 0; snp1 < trimmed_segsites; snp1++ ) {
