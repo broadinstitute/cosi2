@@ -281,7 +281,7 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 #endif	
 	if ( endGen ) strm << "stat endGen " << *endGen << "\n";
 	if ( outputMutGlocs )
-		 strm << "region_len_cM: " << genMap->getRegionRecombRateAbs() << "\n";
+		 strm << "region_len_cM: " << ( genMap->getRegionRecombRateAbs() * 100. ) << "\n";
 			 
 	strm << "segsites: " << nmuts << "\n";
 	
