@@ -983,7 +983,8 @@ public:
 	 void processSNPPair( snp_id_t snp1, snp_id_t snp2, char **snps ) {
 		 // if ( ( fabs( posit[snp1] - .5 ) < 1e-5  ||
 		 // 				fabs( posit[snp2] - .5 ) < 1e-5 ) )
-		 if ( pairCond( snp1, snp2 ) ) {
+//		 if ( pairCond( snp1, snp2 ) )
+		 {
 			 //PRINT3( popNames.size(), sampleStarts.size(), sampleSizes.size() );
 			 for ( size_t popNum = 0; popNum < sampleStarts.size(); ++popNum ) {
 				 double r2, Dprime;
@@ -1833,6 +1834,7 @@ int sample_stats_main(int argc, char *argv[])
 				for ( size_t popNum = 0; popNum < popNames.size(); ++popNum )
 					 fout << "\tnucdiv_" << popNames[ popNum ];
 			}
+			if ( ld_use_cM ) fout << "\tregionLen_cM";
 			BOOST_FOREACH( const StatKeeper<>& sk, statKeepers )
 				fout << "\t" << sk.getName();
 
@@ -1905,6 +1907,8 @@ int sample_stats_main(int argc, char *argv[])
 				fout << "\t" << Frac( nucdiv(bsam, nsam, trimmed_segsites, trimmed_list), trimmed_segsites );
 			}
 		}
+
+		if ( ld_use_cM ) fout << "\t" << regionLen_cM;
 // << "\t" << recombLocs.size() << "\t" << recombBegs.size() << "\t" << recombEnds.size();
 
 		piStats.add( pi );
@@ -2010,8 +2014,10 @@ int sample_stats_main(int argc, char *argv[])
 			ValRange<len_t> lenRange = ld.getSNPPairCond().getLenRange();
 			double regionLen = ( !ld_use_cM ? regionLen_bp : regionLen_cM );
 			if ( ld_use_cM || ld_use_bp ) {
+				//PRINT4( "bef", ld_use_cM, regionLen, lenRange );
 				lenRange.setMin( lenRange.getMin() / regionLen );
 				lenRange.setMax( lenRange.getMax() / regionLen );
+				//PRINT4( "aft", ld_use_cM, regionLen, lenRange );
 			}
 			const double *pos = ( !ld_use_cM ? trimmed_posit : trimmed_posit_gloc );
 			int snp2 = 1;
@@ -2021,6 +2027,7 @@ int sample_stats_main(int argc, char *argv[])
 				int snp2_tmp = snp2;
 				while( snp2_tmp < trimmed_segsites && pos[snp2_tmp]-pos[snp1] < lenRange.getMax() ) {
 					chk( snp1 != snp2_tmp );
+					//PRINT( pos[snp2_tmp]-pos[snp1] );
 					ld.processSNPPair( snp1, snp2_tmp, trimmed_list );
 					snp2_tmp++;
 				}
