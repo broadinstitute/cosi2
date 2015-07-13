@@ -597,6 +597,12 @@ template <typename T> inline int isize( const vector<T>& v ) { return int( v.siz
 vector< nchroms_t > derCounts;
 
 
+std::vector< popid > popNames;
+std::vector< nchroms_t > sampleSizes;
+std::vector< nchroms_t > sampleStarts;
+bool perPopStats = false;
+
+
 vector< nchroms_t > derCounts_DIND_der, derCounts_DIND_anc;
 
 
@@ -748,6 +754,8 @@ public:
 			
 	 };  // class Bin
 
+	 AFS(): bsam(-1), nsam(-1) { }
+
 	 // Method: init
 	 // Initialize an AFS from a string definition.
 	 // Definition looks like:
@@ -758,9 +766,9 @@ public:
 	 // The optional part after the semicolon specifies the range of locations from which we take SNPs.
 	 void init( const string& afsDef ) {
 
-		 string binsDef, snpCondDef;
-		 Split( afsDef, "/",  binsDef, snpCondDef );
-		 snpCond.init( snpCondDef );
+		 string binsDef, popDef;
+		 Split( afsDef, "/",  binsDef, popDef );
+
 		 vector<string> binDefs = Split( binsDef, "," );
 		 ForEach( string binDef, binDefs ) {
 			 string binRange, binStep;
@@ -790,15 +798,19 @@ public:
 		 }  // for binDef in binDefs
 	 }  // init()
 
-	 void setSampleSize( nchroms_t nsam ) {
-		 if ( nsam+1 >= isize( derCount2bin ) ) derCount2bin.resize( nsam+2, -1 );
+	 void setSampleBase( nchroms_t bsam_ ) { bsam = bsam_; }
+	 void setSampleSize( nchroms_t nsam_ ) {
+		 nsam = nsam_;
+		 if ( nsam_+1 >= isize( derCount2bin ) ) derCount2bin.resize( nsam_+2, -1 );
+		 
 	 }
 
 	 void clear() { ForEach( Bin& bin, bins ) bin.clear(); }
 
-	 void processSNP( snp_id_t snpId ) {
-		 if ( snpCond( snpId ) ) {
-			 nchroms_t derCount = derCounts[ snpId ];
+	 void processSNP( snp_id_t snpId, char **list = NULL ) {
+//		 if ( snpCond( snpId ) )
+		 {
+			 nchroms_t derCount = bsam==-1 ? derCounts[ snpId ] : frequency( '1', snpId, bsam, nsam, list );
 			 chk( 0 <= derCount && derCount < int(derCount2bin.size()) );
 			 int bin = derCount2bin[ derCount ];
 			 if ( bin != -1 ) {
@@ -808,9 +820,9 @@ public:
 		 }
 	 }
 
-	 void writeHeadings( ostream& s ) const {
+	 void writeHeadings( ostream& s, std::string sfx = "" ) const {
 		 ForEach( const Bin& bin, bins )
-				s << "\t" << MakeValidIdentifier( Join( "_", "afs", snpCond.getColSfx(), bin.getColSfx() ) );
+				s << "\t" << MakeValidIdentifier( Join( "_", "afs", snpCond.getColSfx(), bin.getColSfx(), sfx ) );
 	 }
 
 	 void writeData( ostream& s, nsnps_t totSnps ) {
@@ -838,6 +850,10 @@ private:
 	 // Field: snpCond
 	 // Condition on SNPs going into this AFS
 	 SNPCond snpCond;
+
+	 nchroms_t bsam;
+	 nchroms_t nsam;
+	 
 	 
 };  // class AFS
 
@@ -928,10 +944,6 @@ typedef acc::accumulator_set<double, acc::stats< acc::tag::sum_kahan, acc::tag::
 
 // typedef boost::shared_ptr< acc2_t > acc2_p;
 
-std::vector< popid > popNames;
-std::vector< nchroms_t > sampleSizes;
-std::vector< nchroms_t > sampleStarts;
-bool perPopStats = false;
 
 
 //
@@ -1842,9 +1854,25 @@ int sample_stats_main(int argc, char *argv[])
 				treeEdgeSet.writeHeadings( fout );
 			}
 
-			ForEach( AFS& afs, AFSs ) {
-				afs.writeHeadings( fout );
-				afs.setSampleSize( nsam );
+			if ( perPopStats ) {
+				vector<AFS> AFSs2;
+				for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) {
+					std::ostringstream sfxStrm;
+					sfxStrm << popNames[ popNum ];
+					std::string sfxStr = sfxStrm.str();
+					BOOST_FOREACH( AFS& afs, AFSs ) {
+						afs.setSampleBase( sampleStarts[ popNum ] );
+						afs.setSampleSize( sampleSizes[ popNum ] );
+						afs.writeHeadings( fout, sfxStr );
+					}
+					AFSs2.insert( AFSs2.end(), AFSs.begin(), AFSs.end() );
+				}
+				AFSs.swap( AFSs2 );
+			} else {
+				ForEach( AFS& afs, AFSs ) {
+					afs.writeHeadings( fout );
+					afs.setSampleSize( nsam );
+				}
 			}
 
 			for ( size_t popNum1 = 0; popNum1 < popNames.size(); ++popNum1 )
@@ -1926,7 +1954,7 @@ int sample_stats_main(int argc, char *argv[])
 		ForEach( AFS& afs, AFSs ) {
 			afs.clear();
 			for ( snp_id_t ii = 0; ii < trimmed_segsites; ii++ )
-				 afs.processSNP( ii );
+				 afs.processSNP( ii, trimmed_list );
 			if ( !summaryOnly ) afs.writeData( fout, trimmed_segsites );
 		}
 
