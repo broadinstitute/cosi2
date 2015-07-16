@@ -1930,9 +1930,8 @@ int sample_stats_main(int argc, char *argv[])
 					 << th << "\t"  << h;
 		if ( !perPopStats ) fout << "\t" << Frac( pi, trimmed_segsites );
 		else {
-			nchroms_t bsam = 0;
 			for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) {
-				fout << "\t" << Frac( nucdiv(bsam, nsam, trimmed_segsites, trimmed_list), trimmed_segsites );
+				fout << "\t" << Frac( nucdiv(sampleStarts[popNum], sampleSizes[popNum], trimmed_segsites, trimmed_list), trimmed_segsites );
 			}
 		}
 
