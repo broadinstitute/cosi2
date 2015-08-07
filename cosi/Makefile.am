@@ -83,6 +83,7 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $
 	$(SD)/coalrate.h $(SD)/condsnp.h $(SD)/condsnp.cc \
 	$(SD)/mutcontext.h $(SD)/hullmgr.h $(SD)/hullmgr.cc \
 	$(SD)/cosicfg.h $(SD)/coalescent.h $(SD)/mutlist.h $(SD)/output_coal_data_cosi.cc $(SD)/coal_data_cosi.h $(SD)/customstats.h \
+	$(SD)/calc_pop_stats_cosi.cc \
 	$(COSIUTILHEADERS)
 
 libcosi_la_CPPFLAGS = $(COSI_CPPFLAGS)

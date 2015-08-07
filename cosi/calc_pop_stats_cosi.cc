@@ -12,7 +12,7 @@
 #include "coal_data_cosi.h"
 #define NPOPS 5
 
-int main(int argc, char **argv){
+int customstats_main(int argc, char **argv){
     //const int maxdist = 70000; //only calculate LD for 70kb
     const int min_minor = 3; //don't calculate LD at singletons or doubletons
     const double min_freq = .2; 
@@ -64,10 +64,10 @@ int main(int argc, char **argv){
     *****************************************/
     
     //Freq spectrum and P(ancestral|freq bin)
-    mafHist = malloc(nhist * sizeof(int));
-    ancHist = malloc(nhist * sizeof(int));
-    start_fbin = malloc(nhist * sizeof(double));
-    end_fbin = malloc(nhist * sizeof(double));
+    mafHist = (int *)malloc(nhist * sizeof(int));
+    ancHist = (int *)malloc(nhist * sizeof(int));
+    start_fbin = (double *)malloc(nhist * sizeof(double));
+    end_fbin = (double *)malloc(nhist * sizeof(double));
     start_fbin[0] = end_fbin[0] = -1;   // singletons
     start_fbin[1] = 1e-9;
     start_fbin[2] = end_fbin[1] = .1;
@@ -77,10 +77,10 @@ int main(int argc, char **argv){
     end_fbin[5] = .5;
 
     //r2 vs. phys distance
-    physDistHist = malloc(nDistHist * sizeof(int));
-    r2sums = malloc(nDistHist * sizeof(double));
-    start_distBins = malloc(nDistHist * sizeof(int));
-    end_distBins = malloc(nDistHist * sizeof(int));
+    physDistHist = (int *)malloc(nDistHist * sizeof(int));
+    r2sums = (double *)malloc(nDistHist * sizeof(double));
+    start_distBins = (int *)malloc(nDistHist * sizeof(int));
+    end_distBins = (int *)malloc(nDistHist * sizeof(int));
     start_distBins[0] = 0;
     start_distBins[1] = end_distBins[0] = 5000;
     start_distBins[2] = end_distBins[1] = 10000;
@@ -98,10 +98,10 @@ int main(int argc, char **argv){
     end_distBins[13] = 70000;
 
     //D'=1 vs gen distance
-    compLDHist = malloc(nGenDistHist * sizeof(int));
-    genDistHist = malloc(nGenDistHist * sizeof(int));
-    start_genDistBins = malloc(nGenDistHist * sizeof(double));
-    end_genDistBins = malloc(nGenDistHist * sizeof(double));
+    compLDHist = (int *)malloc(nGenDistHist * sizeof(int));
+    genDistHist = (int *)malloc(nGenDistHist * sizeof(int));
+    start_genDistBins = (double *)malloc(nGenDistHist * sizeof(double));
+    end_genDistBins = (double *)malloc(nGenDistHist * sizeof(double));
     start_genDistBins[0] = 0;
     start_genDistBins[1] = end_genDistBins[0] = .001;
     start_genDistBins[2] = end_genDistBins[1] = .002;
@@ -134,27 +134,27 @@ int main(int argc, char **argv){
         if (ipop == 2){continue;} //ANI; dummy population
 
         //reset arrays to sum up summary statistics across replicates and get average, sd
-        reps_sfs = malloc(nhist * sizeof(double*));
-        reps_p_anc = malloc(nhist * sizeof(double*));
-        reps_r2 = malloc(nDistHist * sizeof(double*));
-        reps_dprime = malloc(nGenDistHist * sizeof(double*));
-        reps_pi = malloc(NPOPS * sizeof(double*));
+        reps_sfs = (double **)malloc(nhist * sizeof(double*));
+        reps_p_anc = (double **)malloc(nhist * sizeof(double*));
+        reps_r2 = (double **)malloc(nDistHist * sizeof(double*));
+        reps_dprime = (double **)malloc(nGenDistHist * sizeof(double*));
+        reps_pi = (double **)malloc(NPOPS * sizeof(double*));
         
         for (ibin = 0; ibin < nhist; ibin++){
-            reps_sfs[ibin] = calloc(numReps, sizeof(double));
-            reps_p_anc[ibin] = calloc(numReps, sizeof(double));
+					reps_sfs[ibin] = (double *)calloc(numReps, sizeof(double));
+					reps_p_anc[ibin] = (double *)calloc(numReps, sizeof(double));
         }
         
         for (ibin = 0; ibin < nDistHist; ibin++){
-            reps_r2[ibin] = calloc(numReps, sizeof(double));
+					reps_r2[ibin] = (double *)calloc(numReps, sizeof(double));
         }
         
         for (ibin = 0; ibin < nGenDistHist; ibin++){
-            reps_dprime[ibin] = calloc(numReps, sizeof(double));
+					reps_dprime[ibin] = (double *)calloc(numReps, sizeof(double));
         }
         
         for (ibin = 0; ibin < (NPOPS); ibin++){
-            reps_pi[ibin] = calloc(numReps, sizeof(double));
+					reps_pi[ibin] = (double *)calloc(numReps, sizeof(double));
         }
         
         /*********************************
@@ -205,8 +205,8 @@ int main(int argc, char **argv){
             if (data.nsample == 0) {continue;}
 
             
-            nminor = calloc(data.nsnp, sizeof(int));
-            nmajor = calloc(data.nsnp, sizeof(int));
+            nminor = (int *)calloc(data.nsnp, sizeof(int));
+            nmajor = (int *)calloc(data.nsnp, sizeof(int));
             nmarker = npoly = 0;
             
             //loop over SNPs
@@ -406,10 +406,10 @@ int main(int argc, char **argv){
         
         
         //SFS
-        sfs_total = calloc(nhist, sizeof(double));
-        sfs_ave = calloc(nhist, sizeof(double));
-        sfs_var_total = calloc(nhist, sizeof(double));
-        sfs_var = calloc(nhist, sizeof(double));
+        sfs_total = (double *)calloc(nhist, sizeof(double));
+        sfs_ave = (double *)calloc(nhist, sizeof(double));
+        sfs_var_total = (double *)calloc(nhist, sizeof(double));
+        sfs_var = (double *)calloc(nhist, sizeof(double));
         for (ibin = 0; ibin < nhist; ibin++) {
             for (jbin = 0; jbin < numReps; jbin++){
                 sfs_total[ibin] += reps_sfs[ibin][jbin];
@@ -428,10 +428,10 @@ int main(int argc, char **argv){
         }
 
         //P(ANCESTRAL|FREQ)
-        p_anc_total = calloc(nhist, sizeof(double));
-        p_anc_ave = calloc(nhist, sizeof(double));
-        p_anc_var_total = calloc(nhist, sizeof(double));
-        p_anc_var = calloc(nhist, sizeof(double));
+        p_anc_total = (double *)calloc(nhist, sizeof(double));
+        p_anc_ave = (double *)calloc(nhist, sizeof(double));
+        p_anc_var_total = (double *)calloc(nhist, sizeof(double));
+        p_anc_var = (double *)calloc(nhist, sizeof(double));
         for (ibin = 0; ibin < nhist; ibin++) {
             for (irep = 0; irep < numReps; irep++){
                 p_anc_total[ibin] += reps_p_anc[ibin][irep];
@@ -450,10 +450,10 @@ int main(int argc, char **argv){
         }
         
         //R2 VS PHYS DIST
-        r2_total = calloc(nDistHist, sizeof(double));
-        r2_ave = calloc(nDistHist, sizeof(double));
-        r2_var_total = calloc(nDistHist, sizeof(double));
-        r2_var = calloc(nDistHist, sizeof(double));
+        r2_total = (double *)calloc(nDistHist, sizeof(double));
+        r2_ave = (double *)calloc(nDistHist, sizeof(double));
+        r2_var_total = (double *)calloc(nDistHist, sizeof(double));
+        r2_var = (double *)calloc(nDistHist, sizeof(double));
         for (ibin = 0; ibin < nDistHist; ibin++) {
             for (jbin = 0; jbin < numReps; jbin++){
                 r2_total[ibin] += reps_r2[ibin][jbin];
@@ -472,10 +472,10 @@ int main(int argc, char **argv){
         }
         
         //DPRIME VS GEN DIST
-        dprime_total = calloc(nGenDistHist, sizeof(double));
-        dprime_ave = calloc(nGenDistHist, sizeof(double));
-        dprime_var_total = calloc(nGenDistHist, sizeof(double));
-        dprime_var = calloc(nGenDistHist, sizeof(double));
+        dprime_total = (double *)calloc(nGenDistHist, sizeof(double));
+        dprime_ave = (double *)calloc(nGenDistHist, sizeof(double));
+        dprime_var_total = (double *)calloc(nGenDistHist, sizeof(double));
+        dprime_var = (double *)calloc(nGenDistHist, sizeof(double));
         for (ibin = 0; ibin < nGenDistHist; ibin++) {
             for (jbin = 0; jbin < numReps; jbin++){
                 dprime_total[ibin] += reps_dprime[ibin][jbin];

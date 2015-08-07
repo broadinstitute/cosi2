@@ -220,7 +220,9 @@ am_libcosi_la_OBJECTS = libcosi_la-coalesce.lo \
 	libcosi_la-genmap.lo libcosi_la-stats.lo libcosi_la-hooks.lo \
 	libcosi_la-traj.lo libcosi_la-cositop.lo libcosi_la-ehh.lo \
 	libcosi_la-leafset-sizeonly.lo libcosi_la-mutcontext.lo \
-	libcosi_la-condsnp.lo libcosi_la-hullmgr.lo $(am__objects_1) \
+	libcosi_la-condsnp.lo libcosi_la-hullmgr.lo \
+	libcosi_la-output_coal_data_cosi.lo \
+	libcosi_la-calc_pop_stats_cosi.lo $(am__objects_1) \
 	libcosi_la-leafset-tree.lo libcosi_la-leafset-counts.lo
 libcosi_la_OBJECTS = $(am_libcosi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -1078,8 +1080,10 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc \
 	$(SD)/decls.h $(SD)/hooks.h $(SD)/coalrate.h $(SD)/condsnp.h \
 	$(SD)/condsnp.cc $(SD)/mutcontext.h $(SD)/hullmgr.h \
 	$(SD)/hullmgr.cc $(SD)/cosicfg.h $(SD)/coalescent.h \
-	$(SD)/mutlist.h $(COSIUTILHEADERS) $(SD)/leafset-tree.cc \
-	$(SD)/leafset-counts.cc
+	$(SD)/mutlist.h $(SD)/output_coal_data_cosi.cc \
+	$(SD)/coal_data_cosi.h $(SD)/customstats.h \
+	$(SD)/calc_pop_stats_cosi.cc $(COSIUTILHEADERS) \
+	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
 libcosi_la_CPPFLAGS = $(COSI_CPPFLAGS)
 libcosi_la_CXXFLAGS = $(COSI_CXXFLAGS)
 libcosi_la_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
@@ -1389,6 +1393,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/funcs_test-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_recomap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ldhist-ldhist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-calc_pop_stats_cosi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-coalesce.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-coalescent.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-condsnp.Plo@am__quote@
@@ -1410,6 +1415,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-mutlist.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-output.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-output_coal_data_cosi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-pop.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-recomb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-seglist.Plo@am__quote@
@@ -1956,6 +1962,20 @@ libcosi_la-hullmgr.lo: $(SD)/hullmgr.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/hullmgr.cc' object='libcosi_la-hullmgr.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-hullmgr.lo `test -f '$(SD)/hullmgr.cc' || echo '$(srcdir)/'`$(SD)/hullmgr.cc
+
+libcosi_la-output_coal_data_cosi.lo: $(SD)/output_coal_data_cosi.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -MT libcosi_la-output_coal_data_cosi.lo -MD -MP -MF $(DEPDIR)/libcosi_la-output_coal_data_cosi.Tpo -c -o libcosi_la-output_coal_data_cosi.lo `test -f '$(SD)/output_coal_data_cosi.cc' || echo '$(srcdir)/'`$(SD)/output_coal_data_cosi.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_la-output_coal_data_cosi.Tpo $(DEPDIR)/libcosi_la-output_coal_data_cosi.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/output_coal_data_cosi.cc' object='libcosi_la-output_coal_data_cosi.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-output_coal_data_cosi.lo `test -f '$(SD)/output_coal_data_cosi.cc' || echo '$(srcdir)/'`$(SD)/output_coal_data_cosi.cc
+
+libcosi_la-calc_pop_stats_cosi.lo: $(SD)/calc_pop_stats_cosi.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -MT libcosi_la-calc_pop_stats_cosi.lo -MD -MP -MF $(DEPDIR)/libcosi_la-calc_pop_stats_cosi.Tpo -c -o libcosi_la-calc_pop_stats_cosi.lo `test -f '$(SD)/calc_pop_stats_cosi.cc' || echo '$(srcdir)/'`$(SD)/calc_pop_stats_cosi.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_la-calc_pop_stats_cosi.Tpo $(DEPDIR)/libcosi_la-calc_pop_stats_cosi.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/calc_pop_stats_cosi.cc' object='libcosi_la-calc_pop_stats_cosi.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-calc_pop_stats_cosi.lo `test -f '$(SD)/calc_pop_stats_cosi.cc' || echo '$(srcdir)/'`$(SD)/calc_pop_stats_cosi.cc
 
 libcosi_la-leafset-tree.lo: $(SD)/leafset-tree.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -MT libcosi_la-leafset-tree.lo -MD -MP -MF $(DEPDIR)/libcosi_la-leafset-tree.Tpo -c -o libcosi_la-leafset-tree.lo `test -f '$(SD)/leafset-tree.cc' || echo '$(srcdir)/'`$(SD)/leafset-tree.cc
