@@ -8,7 +8,7 @@ namespace cosi {
 
 namespace customstats {
 
-void init( DemographyP demography, size_t nsims_ );
+void init( DemographyP demography, size_t nsims_, int seqlen_ );
 
 void record_sim(DemographyP demography, GenMapP genMap, len_bp_int_t length, MutlistP mutlist,
 								bool_t inf_sites );

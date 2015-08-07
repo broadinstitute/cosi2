@@ -289,7 +289,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 				}
 				cout << "cosi_rand " << randGen->getSeed() << "\n\n";
 			}
-			customstats::init( cosi.getDemography(), nsims );
+			customstats::init( cosi.getDemography(), nsims, cosi.getParams()->getLength() );
 		}
 
 		using boost::make_shared;

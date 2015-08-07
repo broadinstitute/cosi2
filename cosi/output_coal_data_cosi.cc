@@ -12,6 +12,8 @@
 #include <cosi/genmap.h>
 #include <cosi/demography.h>
 
+int customstats_main(int numReps, int seqlen, int NPOPS, void (*get_coal_data_from_cosi)( coal_data *, int, int )  );
+
 namespace cosi {
 
 namespace customstats {
@@ -22,14 +24,24 @@ size_t nsims;
 size_t simNum;
 std::vector<popid> popNames;
 coal_data *data;
+int seqlen;
 }  // namespace anon
 
-void init( DemographyP demography, size_t nsims_ ) {
+void init( DemographyP demography, size_t nsims_, int seqlen_ ) {
 	popNames = demography->getPopNames();
 	data = coal_datas = new coal_data[ ( nsims = nsims_ ) * popNames.size() ];
 }
 
+
+void my_get_coal_data_from_cosi( coal_data *d, int irep, int ipop ) {
+	//std::cerr << "getting coal data: irep=" << irep << " ipop=" << ipop << "popNames.size=" << popNames.size() << "\n";
+	*d = coal_datas[ irep * popNames.size() + ipop - 1 ];
+}
+
 void finish() {
+	std::cerr << "computing stats...\n";
+	customstats_main( nsims, seqlen, popNames.size(), my_get_coal_data_from_cosi );
+	std::cerr << "done computing stats...\n";
 }
 
 void record_sim(DemographyP demography, GenMapP genMap, len_bp_int_t length, MutlistP mutlist,
@@ -67,8 +79,8 @@ void record_sim(DemographyP demography, GenMapP genMap, len_bp_int_t length, Mut
 			data->gdPos = (double *)malloc(data->nsnp * sizeof(double));
 			data->nallele = (int *)malloc(data->nsnp * sizeof(int));
 			fill( data->nallele, data->nallele + data->nsnp, 2 );
-			data->genPos = (double *)malloc(data->nRecom * sizeof(double));
-			data->physPos = (int *)malloc(data->nRecom * sizeof(int));
+			data->genPos = NULL;//(double *)malloc(data->nRecom * sizeof(double));
+			data->physPos = NULL; //(int *)malloc(data->nRecom * sizeof(int));
 
 			//vector< nchroms_t > mutcount( nmuts );
 

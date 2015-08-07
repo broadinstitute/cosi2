@@ -10,13 +10,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include "coal_data_cosi.h"
-#define NPOPS 5
+//#define NPOPS 5
 
-int customstats_main(int argc, char **argv){
+int customstats_main(int numReps, int seqlen, int NPOPS, void (*get_coal_data_from_cosi)( coal_data *, int, int )  ){
     //const int maxdist = 70000; //only calculate LD for 70kb
     const int min_minor = 3; //don't calculate LD at singletons or doubletons
     const double min_freq = .2; 
-    int seqlen; //must be consistent with cosi param file
+    //int seqlen; //must be consistent with cosi param file
     char outfilename[264];
     char filebase[100];
     char basefile[999];
@@ -29,7 +29,7 @@ int customstats_main(int argc, char **argv){
     double pi, pi_sum=0.;
     double dprime, ddenom, r2denom, r2, genDist;
     int hap[2][2], dist, ai, aj, *nminor, *nmajor;
-    int nanc, npoly, numReps;
+    int nanc, npoly;
     const int nhist = 6;
     const int nDistHist = 14;
     const int nGenDistHist = 17;
@@ -47,17 +47,17 @@ int customstats_main(int argc, char **argv){
     double d;
     double freqi, freqj;
     
-    if (argc != 5) {
-        fprintf(stderr, "Usage: ./calc_pop_stats_cosi <filebase> <# replicates> <outfilename> <seqlen>\n");
-        exit(0);
-      }
+    // if (argc != 5) {
+    //     fprintf(stderr, "Usage: ./calc_pop_stats_cosi <filebase> <# replicates> <outfilename> <seqlen>\n");
+    //     exit(0);
+    //   }
 
-    strcpy(filebase, argv[1]);
-    //fprintf(stderr, "filebase (arg): \t");
-    //fprintf(stderr, filebase);
-    numReps = atoi(argv[2]);
-    strcpy(outfilename, argv[3]);
-    seqlen = atoi(argv[4]);
+    // strcpy(filebase, argv[1]);
+    // //fprintf(stderr, "filebase (arg): \t");
+    // //fprintf(stderr, filebase);
+    // numReps = atoi(argv[2]);
+    // strcpy(outfilename, argv[3]);
+    // seqlen = atoi(argv[4]);
 
     /****************************************
     MEMORY ALLOCATION AND ARRAY INITIALIZATION
@@ -124,7 +124,7 @@ int customstats_main(int argc, char **argv){
     /************
      OUTFILE PREP
      ************/
-    outf = fopen(outfilename, "w");
+    outf = stdout; //fopen(outfilename, "w");
     assert(outf != NULL);
 
     /*********************************
@@ -189,18 +189,18 @@ int customstats_main(int argc, char **argv){
             //fprintf(stderr, basefile);
             //fprintf(stderr,"\n");
             //fprintf(basefile, "");
-            strcpy(basefile, argv[1]);
+//            strcpy(basefile, argv[1]);
             //fprintf(stderr, basefile);
                        // fprintf(stderr,"\n");
-            sprintf(repstr, "%d", irep);
-            strcat(basefile, repstr);
+						//          sprintf(repstr, "%d", irep);
+//            strcat(basefile, repstr);
             //fprintf(stderr, basefile);
               //          fprintf(stderr,"\n");
             
             //fprintf(stderr, "getting coal data with basefile:\t");
             //fprintf(stderr, basefile);
             //fprintf(stderr, "\n");
-            get_coal_data(&data, basefile, ipop);            
+            get_coal_data_from_cosi(&data, irep, ipop);            
             //fprintf(stderr, "pop: %d  nsnp: %d\n  nsample: %d\n", ipop, data.nsnp, data.nsample);
             if (data.nsample == 0) {continue;}
 
@@ -300,7 +300,7 @@ int customstats_main(int argc, char **argv){
                     
                     dist = data.pos[jsnp] - data.pos[isnp];
                     //if (dist > maxdist) {break;}
-                    genDist = getGenDist(&data, data.pos[isnp], data.pos[jsnp]);
+                    genDist = data.gdPos[jsnp] - data.gdPos[isnp];  //getGenDist(&data, data.gdPos[isnp], data.pos[jsnp]);
                     //fprintf(stderr, "%d\t%d\t%f\n", data.pos[isnp], data.pos[jsnp], genDist);
                     
                     //loop over samples at these two SNPs and count haplotypes
@@ -382,7 +382,7 @@ int customstats_main(int argc, char **argv){
             
             free(nminor);
             free(nmajor);
-            free_coal_data(&data);
+            //free_coal_data(&data);
         } //end replicate
     
     
