@@ -130,6 +130,10 @@ private:
 	 // ** Field: outputGenMap
 	 // Whether to output the genetic map (in ms output mode).
 	 bool_t outputGenMap;
+
+	 // ** Field: customStats
+	 // Whether to compute custom stats.
+	 bool_t customStats;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

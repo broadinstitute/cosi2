@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cassert>
 #include <algorithm>
+#include <vector>
 #include <boost/foreach.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <cosi/coal_data_cosi.h>
@@ -13,12 +14,29 @@
 
 namespace cosi {
 
-void print_haps_coaldata(DemographyP demography, GenMapP genMap, len_bp_int_t length, MutlistP mutlist,
-												 bool_t inf_sites,
-												 coal_data *cdata ) {
+namespace customstats {
+
+namespace {
+coal_data *coal_datas;
+size_t nsims;
+size_t simNum;
+std::vector<popid> popNames;
+coal_data *data;
+}  // namespace anon
+
+void init( DemographyP demography, size_t nsims_ ) {
+	popNames = demography->getPopNames();
+	data = coal_datas = new coal_data[ ( nsims = nsims_ ) * popNames.size() ];
+}
+
+void finish() {
+}
+
+void record_sim(DemographyP demography, GenMapP genMap, len_bp_int_t length, MutlistP mutlist,
+								bool_t inf_sites ) {
 	using std::fill;
 
-  freq_t freq;
+//  freq_t freq;
 
   size_t nmuts = mutlist->size();
   // char *p = blank_line;
@@ -31,11 +49,10 @@ void print_haps_coaldata(DemographyP demography, GenMapP genMap, len_bp_int_t le
 	leaf_id_t leaf = 0;
 	const vector< popid >& popNames = demography->getPopNames();
 	const vector< nchroms_t >& sampleSizes = demography->getSampleSizes();
-  for (size_t ipop = 0; ipop < popNames.size(); ipop++) {
-		coal_data *data = cdatas + ipop;
+  for (size_t ipop = 0; ipop < popNames.size(); ipop++, ++data) {
 		data->nsample = sampleSizes[ ipop ];
 		data->samp_id = data->snp_id = NULL;
-		for ( int i=0; i<4; ++i ) data->snp_base[i] = NULL;
+		fill( data->snp_base, data->snp_base+4, (int *)NULL );
 		
     if ( sampleSizes[ipop] > 0) {
 			data->nsnp = nmuts;
@@ -371,4 +388,6 @@ double getGenDist(coal_data* data, int pos_i, int pos_j){
 }
 #endif // if 0
 
+
+} // namespace customstats
 } // namespace cosi

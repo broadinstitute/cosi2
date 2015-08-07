@@ -29,7 +29,7 @@
 #include <cosi/recomb.h>
 #include <cosi/condsnp.h>
 #include <cosi/cosicfg.h>
-
+#include <cosi/customstats.h>
 
 namespace cosi {
 
@@ -53,7 +53,7 @@ CoSiMain::CoSiMain():
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
 							 outputARGedges( False ), freqsOnly( False ),
 							 dropSingletonsFrac( 0 ), genmapRandomRegions( False ), outputPopInfo( False ),
-							 outputGenMap( False )
+							 outputGenMap( False ), customStats( False )
 {
 }
 
@@ -167,6 +167,7 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 		 ( "output-sim-times", po::bool_switch(&outputSimTimes), "for each sim output the time it took" )
 		 ( "output-end-gens", po::bool_switch(&outputEndGens), "for each sim output the generation at which it ended" )
 		 ( "stop-after-minutes", po::value(&stopAfterMinutes)->default_value(0.0), "stop simulation after this many minutes" )
+		 ( "custom-stats", po::bool_switch(&customStats), "compute custom stats" )
 		 ;
 
 	po::options_description cosi_options;
@@ -288,6 +289,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 				}
 				cout << "cosi_rand " << randGen->getSeed() << "\n\n";
 			}
+			customstats::init( cosi.getDemography(), nsims );
 		}
 
 		using boost::make_shared;
@@ -307,7 +309,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( showNumRecombs ) { PRINT( cosi.getRecomb()->getNumRecombs() ); }
 
 		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
-		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
+		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() || customStats ) {
 			//PRINT( "freezing" );
 			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
 										cosi.getGenMap()->recomb_get_length() );
@@ -330,6 +332,10 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #endif				 
 			}
 
+			if ( customStats ) {
+				customstats::record_sim( cosi.getDemography(), cosi.getGenMap(), params->getLength(),
+																 muts, params->getInfSites() );
+			}
 			
 			if ( msOutput ) 
 				 muts->print_haps_ms( cout, cosi.getDemography()->getSampleSizes(), cosi.getTreeStatsHook(),
@@ -350,6 +356,8 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 
 	if ( segfp ) fclose( segfp );
 	if ( logfp ) fclose( logfp );
+
+	if ( customStats ) customstats::finish();
 
   return EXIT_SUCCESS;
 }  // CoSiMain::cosi_main()

@@ -1,3 +1,5 @@
+#ifndef INCLUDE_COAL_DATA_COSI_H
+#define INCLUDE_COAL_DATA_COSI_H
 
 //
 // * Struct coal_data
@@ -34,3 +36,5 @@ typedef struct coal_data {
 void get_coal_data(coal_data* data, char filebase[], int pop);
 void free_coal_data(coal_data* data);
 double getGenDist(coal_data* data, int pos_i, int pos_j);
+
+#endif // #ifndef INCLUDE_COAL_DATA_COSI_H

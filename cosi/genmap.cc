@@ -18,6 +18,7 @@
 #include <boost/io/ios_state.hpp>
 #include <boost/foreach.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/exception/errinfo_at_line.hpp>
 #include <cosi/utils.h>
 #include <cosi/cosirand.h>
 #include <cosi/genmap.h>
@@ -65,7 +66,7 @@ GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_, pl
 				if ( sscanf(line.c_str(), "%ld %lf", &begPos, &rate) != 2 )
 					 BOOST_THROW_EXCEPTION( cosi_io_error()
 																	<< boost::errinfo_file_name( fname.string() ) <<
-																	error_msg( "Error reading genetic map file" ) );
+																	error_msg( "Error reading genetic map file - could not parse line: " + line ) );
 
 				if ( endPos - begPos >= length_ ) {
 					genMapShift_ = -begPos;
