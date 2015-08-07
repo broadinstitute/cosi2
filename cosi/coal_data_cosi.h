@@ -1,9 +1,18 @@
+
+//
+// * Struct coal_data
+//
+// Simulation output for one replica, for one population.
 typedef struct coal_data {
+	 // Number of samples from the population
     int nsample;
     char **samp_id;
+	 // Number of SNPs in the replica
     int nsnp;
     char **snp_id;
+	 // The position of each SNP
     int *pos;
+	  double *gdPos;
     int *chrom;
     int **genotype;   // haploid
     int *snp_base[4];

@@ -1,9 +1,106 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <algorithm>
+#include <boost/foreach.hpp>
+#include <boost/typeof/typeof.hpp>
 #include <cosi/coal_data_cosi.h>
+#include <cosi/mutlist.h>
+#include <cosi/utils.h>
+#include <cosi/genmap.h>
+#include <cosi/demography.h>
 
 namespace cosi {
-namespace customstats {
 
-void get_coal_data(coal_data* data, char filebase[], int pop) {
+void print_haps_coaldata(DemographyP demography, GenMapP genMap, len_bp_int_t length, MutlistP mutlist,
+												 bool_t inf_sites,
+												 coal_data *cdata ) {
+	using std::fill;
+
+  freq_t freq;
+
+  size_t nmuts = mutlist->size();
+  // char *p = blank_line;
+  // for ( size_t i = 0; i < nmuts; i++ ) {
+	// 	*p++ = '2';
+	// 	*p++ = ' ';
+  // }
+  // *p = 0;
+
+	leaf_id_t leaf = 0;
+	const vector< popid >& popNames = demography->getPopNames();
+	const vector< nchroms_t >& sampleSizes = demography->getSampleSizes();
+  for (size_t ipop = 0; ipop < popNames.size(); ipop++) {
+		coal_data *data = cdatas + ipop;
+		data->nsample = sampleSizes[ ipop ];
+		data->samp_id = data->snp_id = NULL;
+		for ( int i=0; i<4; ++i ) data->snp_base[i] = NULL;
+		
+    if ( sampleSizes[ipop] > 0) {
+			data->nsnp = nmuts;
+			data->genotype = (int **)malloc(data->nsample * sizeof(int*));
+			for (int isamp = 0; isamp < data->nsample; isamp++) {
+				data->genotype[isamp] = (int *)malloc(data->nsnp * sizeof(int));
+				fill( data->genotype[isamp], data->genotype[isamp] + data->nsnp, 2 );
+			}
+			data->anc_base = (int *)malloc(data->nsnp * sizeof(int));
+			fill( data->anc_base, data->anc_base + data->nsnp, 2 );
+			data->pos = (int *)malloc(data->nsnp * sizeof(int));
+			data->gdPos = (double *)malloc(data->nsnp * sizeof(double));
+			data->nallele = (int *)malloc(data->nsnp * sizeof(int));
+			fill( data->nallele, data->nallele + data->nsnp, 2 );
+			data->genPos = (double *)malloc(data->nRecom * sizeof(double));
+			data->physPos = (int *)malloc(data->nRecom * sizeof(int));
+
+			//vector< nchroms_t > mutcount( nmuts );
+
+			//string filename( (boost::format( "%s.hap-%d" ) % filebase % popNames[ipop]).str() );
+
+			leaf_id_t popEndLeaf = leaf + sampleSizes[ipop];
+
+			for ( int isamp = 0; leaf < popEndLeaf; leaf++, ++isamp) {
+				
+				//fprintf(outf, "%d\t%d\t", leaf, ToInt( popNames[ipop] ) );
+				//memcpy( line, blank_line, line_size ); 
+			
+				const vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
+				BOOST_FOREACH( Mutlist::const_iterator m, leafMuts ) {
+					int mutId = m->mutId;
+					data->genotype[isamp][mutId] = 1;
+					//mutcount[ mutId ]++;
+				}
+				// fputs( line, outf );
+				// fputs( "\n", outf);
+			}  // write out haps for this pop
+
+			//string pos_filename( (boost::format( "%s.pos-%d" ) % filebase % popNames[ipop]).str() );
+
+      //if (outf == NULL) {fprintf(stderr, "Could not open %s\n", pos_filename.c_str());}
+      //fprintf(outf, "SNP     CHROM   CHROM_POS       ALLELE1 FREQ1   ALLELE2 FREQ2\n");
+      BOOST_AUTO( it, mutlist->getMuts().begin() );
+      for (size_t im = 0; im < nmuts; im++, it++) {
+				int mutId = it->mutId;
+				data->pos[mutId] = (int) (length * get_loc( it->loc ) );
+				data->gdPos[mutId] = ToDouble( genMap->getGdPos( it->loc ) ) * 100.0 *
+					 ToDouble( genMap->getRegionRecombRateAbs() );
+				
+				// freq = (freq_t) mutcount[im] / sampleSizes[ipop];
+				// if (inf_sites) {
+				// 	fprintf(outf, "%d\t1\t%.4f\t1\t%.4f\t2\t%.4f\n", (int)(it->mutIdOrig+1), double( length * get_loc( it->loc ) ), 
+				// 					double( freq ), double( 1 - freq ) );
+				// }
+				// else {
+				// 	fprintf(outf, "%d\t1\t%d\t1\t%.4f\t2\t%.4f\n", (int)(it->mutIdOrig+1), (int) (length * get_loc( it->loc ) ), 
+				// 					double( freq ), double( 1 - freq ) );
+				// }
+			}
+		}  // if this pop is nonempty
+  }  // for each pop
+}
+
+#if 0
+void get_coal_data(coal_data* data, , int pop) {
   const int line_size = 200000;
   char filename[999], recomfilename[999];
   FILE *inf=NULL;
@@ -272,6 +369,6 @@ double getGenDist(coal_data* data, int pos_i, int pos_j){
     }
     return 0.;
 }
+#endif // if 0
 
-} // namespace customstats
 } // namespace cosi
