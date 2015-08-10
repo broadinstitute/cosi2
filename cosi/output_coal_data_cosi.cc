@@ -30,6 +30,8 @@ int seqlen;
 void init( DemographyP demography, size_t nsims_, int seqlen_ ) {
 	popNames = demography->getPopNames();
 	data = coal_datas = new coal_data[ ( nsims = nsims_ ) * popNames.size() ];
+	seqlen = seqlen_;
+	std::cerr << "nsims is now " << nsims << "\n";
 }
 
 
@@ -111,8 +113,8 @@ void record_sim(DemographyP demography, GenMapP genMap, len_bp_int_t length, Mut
       for (size_t im = 0; im < nmuts; im++, it++) {
 				int mutId = it->mutId;
 				data->pos[mutId] = (int) (length * get_loc( it->loc ) );
-				data->gdPos[mutId] = ToDouble( genMap->getGdPos( it->loc ) ) * 100.0 *
-					 ToDouble( genMap->getRegionRecombRateAbs() );
+				data->gdPos[mutId] = ToDouble( genMap->getGdPos( loc_t( util::getFrac( data->pos[mutId], length ) ) ) )
+					 * 100.0 * ToDouble( genMap->getRegionRecombRateAbs() );
 				
 				// freq = (freq_t) mutcount[im] / sampleSizes[ipop];
 				// if (inf_sites) {
