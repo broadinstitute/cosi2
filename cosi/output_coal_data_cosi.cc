@@ -13,6 +13,8 @@
 #include <cosi/demography.h>
 
 int customstats_main(int numReps, int seqlen, int NPOPS, void (*get_coal_data_from_cosi)( coal_data *, int, int )  );
+void calc_Fst_main( int numReps, int NPOPS,
+										void (*get_coal_data_from_cosi)( coal_data *, int /* irep */, int /* ipop */ ) );
 
 namespace cosi {
 
@@ -43,6 +45,8 @@ void my_get_coal_data_from_cosi( coal_data *d, int irep, int ipop ) {
 void finish() {
 	std::cerr << "computing stats...\n";
 	customstats_main( nsims, seqlen, popNames.size(), my_get_coal_data_from_cosi );
+	std::cerr << "computing Fst...\n";
+	calc_Fst_main( nsims, popNames.size(), my_get_coal_data_from_cosi );
 	std::cerr << "done computing stats...\n";
 }
 

@@ -346,7 +346,7 @@ int customstats_main(int numReps, int seqlen, int NPOPS,
                         if (freqi > min_freq && freqj > min_freq){ 
                             for (ibin = 0; ibin < nGenDistHist; ibin++) {
                                 if (genDist >= start_genDistBins[ibin] && genDist < end_genDistBins[ibin]) {
-																	fprintf(stderr, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%e\t%f\n", ipop, irep, data.pos[isnp], data.pos[jsnp], ibin, genDistHist[ibin], compLDHist[ibin], genDist, dprime);
+//																	fprintf(stderr, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%e\t%f\n", ipop, irep, data.pos[isnp], data.pos[jsnp], ibin, genDistHist[ibin], compLDHist[ibin], genDist, dprime);
 																	
                                     genDistHist[ibin]++;
                                     if (dprime == 1) {compLDHist[ibin]++;}
@@ -376,8 +376,8 @@ int customstats_main(int numReps, int seqlen, int NPOPS,
             }
             
             for (ibin = 0; ibin < nGenDistHist; ibin++){
-							fprintf( stderr, "pop=%d\trep=%d\tbin=%d\tldhist=%d\tgenDistHist=%d\n", ipop, irep, ibin,
-											 compLDHist[ibin], genDistHist[ibin] );							
+							// fprintf( stderr, "pop=%d\trep=%d\tbin=%d\tldhist=%d\tgenDistHist=%d\n", ipop, irep, ibin,
+							// 				 compLDHist[ibin], genDistHist[ibin] );							
                 rep_dprime = ((double) compLDHist[ibin] / (double) genDistHist[ibin]);
                 if (!isnan(rep_dprime)){
                 reps_dprime[ibin][irep] = rep_dprime;}
