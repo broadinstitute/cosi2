@@ -33,6 +33,8 @@
 
 namespace cosi {
 
+int curSimNum;
+
 using util::ToString;
 
 void on_print(const std::string& str);
@@ -237,6 +239,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 	double stopAfterNs = stopAfterMinutes * 1e9 * 60.0;
 #endif	
 	for ( int simNum = 0; simNum < nsims; simNum++ ) {
+		curSimNum = simNum;
 #ifndef COSI_NO_CPU_TIMER		
 		if ( stopAfterNs > 0 && overallTimer.elapsed().wall > stopAfterNs ) {
 			cout << "// cosi-early-exit\n";
