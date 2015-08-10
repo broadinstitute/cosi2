@@ -9,18 +9,19 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
-#include "coal_data_cosi.h"
+#include <cosi/coal_data_cosi.h>
 //#define NPOPS 5
 
-int customstats_main(int numReps, int seqlen, int NPOPS, void (*get_coal_data_from_cosi)( coal_data *, int, int )  ){
+int customstats_main(int numReps, int seqlen, int NPOPS,
+										 void (*get_coal_data_from_cosi)( coal_data *, int /* irep */, int /* ipop */ )  ){
     //const int maxdist = 70000; //only calculate LD for 70kb
     const int min_minor = 3; //don't calculate LD at singletons or doubletons
     const double min_freq = .2; 
     //int seqlen; //must be consistent with cosi param file
-    char outfilename[264];
-    char filebase[100];
-    char basefile[999];
-    char repstr[3];
+    // char outfilename[264];
+    // char filebase[100];
+    // char basefile[999];
+    // char repstr[3];
     coal_data data;
     //char filename[264];
     FILE *outf=NULL;
@@ -300,8 +301,9 @@ int customstats_main(int numReps, int seqlen, int NPOPS, void (*get_coal_data_fr
                     
                     dist = data.pos[jsnp] - data.pos[isnp];
                     //if (dist > maxdist) {break;}
-                    genDist = data.gdPos[jsnp] - data.gdPos[isnp];  //getGenDist(&data, data.gdPos[isnp], data.pos[jsnp]);
+                    genDist = data.gdPos[jsnp] - data.gdPos[isnp];  //getGenDist(&data, data.pos[isnp], data.pos[jsnp]);
                     //fprintf(stderr, "%d\t%d\t%f\n", data.pos[isnp], data.pos[jsnp], genDist);
+										
                     
                     //loop over samples at these two SNPs and count haplotypes
                     hap[0][0] = hap[0][1] = hap[1][0] = hap[1][1] = 0;
@@ -338,13 +340,14 @@ int customstats_main(int numReps, int seqlen, int NPOPS, void (*get_coal_data_fr
                         }
                         
                         dprime = d / ddenom;
-                        //fprintf(stderr, "%f\n", dprime);
 
                         freqi = (double)nminor[isnp]/data.nsample;
                         freqj = (double)nminor[jsnp]/data.nsample;
                         if (freqi > min_freq && freqj > min_freq){ 
                             for (ibin = 0; ibin < nGenDistHist; ibin++) {
                                 if (genDist >= start_genDistBins[ibin] && genDist < end_genDistBins[ibin]) {
+																	fprintf(stderr, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%e\t%f\n", ipop, irep, data.pos[isnp], data.pos[jsnp], ibin, genDistHist[ibin], compLDHist[ibin], genDist, dprime);
+																	
                                     genDistHist[ibin]++;
                                     if (dprime == 1) {compLDHist[ibin]++;}
                                     break;
@@ -373,6 +376,8 @@ int customstats_main(int numReps, int seqlen, int NPOPS, void (*get_coal_data_fr
             }
             
             for (ibin = 0; ibin < nGenDistHist; ibin++){
+							fprintf( stderr, "pop=%d\trep=%d\tbin=%d\tldhist=%d\tgenDistHist=%d\n", ipop, irep, ibin,
+											 compLDHist[ibin], genDistHist[ibin] );							
                 rep_dprime = ((double) compLDHist[ibin] / (double) genDistHist[ibin]);
                 if (!isnan(rep_dprime)){
                 reps_dprime[ibin][irep] = rep_dprime;}
