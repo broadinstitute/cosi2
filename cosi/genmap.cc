@@ -99,6 +99,14 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t genMapShift_ ) {
 	boost::io::ios_exception_saver save_exceptions( recombfp );
 	recombfp.exceptions( ios::failbit | ios::badbit );
 
+	FILE *recombOut = NULL;
+	if ( getenv( "COSI_SAVE_RECOMB" ) ) {
+		extern int curSimNum;
+		char fnbuf[1024];
+		sprintf( fnbuf, "%s_%d.recom", getenv( "COSI_SAVE_RECOMB" ), curSimNum );
+		recombOut = fopen( fnbuf, "wt" );
+	}
+	
 	try {
 		loc_bp_int_t start;
 		double rate;
@@ -112,6 +120,7 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t genMapShift_ ) {
 		cosi_double lastRate = 0.0;
 		loc2cumRate.addPt( MIN_PLOC, MIN_GLOC );
 		cumRate2loc.addPt( MIN_GLOC, MIN_PLOC );
+
 
 		vector< pair< ploc_t, gloc_cM_t > > ploc2gloc;
 		while ( True ) {
@@ -134,6 +143,12 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t genMapShift_ ) {
 				// ignore locations outside the simulated region; these would normally appear if genMapShift_ != 0
 				if ( start < 0 ) continue;
 				if ( start > rec_length ) break;
+
+				if ( recombOut ) {
+					if ( lastStart == 0 && start > 1 ) 
+						 fprintf( recombOut, "1\t%e\n", rate );
+					fprintf( recombOut, "%ld\t%e\n", start, rate );
+				}
 		
 				ploc_t ploc( ((cosi_double)start) / rec_length );
 
@@ -167,6 +182,8 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t genMapShift_ ) {
 	} catch( const std::ios_base::failure& e ) {
 		throw cosi_io_error() << boost::errinfo_nested_exception( boost::current_exception() );
 	}
+	if ( recombOut ) fclose( recombOut );
+	
 }  // GenMap::readFrom()
   
 
