@@ -99,7 +99,12 @@ struct cosi_error: virtual std::exception, virtual boost::exception { };
 struct cosi_io_error: virtual cosi_error { };
 
 typedef boost::error_info<struct tag_errno_code,int> errno_code;
+typedef boost::error_info<struct tag_error_bad_line,std::string> error_bad_line;
 typedef boost::error_info<struct tag_error_msg,std::string> error_msg;
+typedef boost::error_info<struct tag_error_msg2,std::string> error_msg2;
+typedef boost::error_info<struct tag_error_msg3,std::string> error_msg3;
+typedef boost::error_info<struct tag_error_msg4,std::string> error_msg4;
+typedef boost::error_info<struct tag_error_msg5,std::string> error_msg5;
 
 namespace util {
 

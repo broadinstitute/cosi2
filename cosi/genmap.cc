@@ -86,7 +86,7 @@ GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_, pl
 		}			
 	} catch( boost::exception& e ) {
 		e << boost::errinfo_file_name( fname.string() )
-			<< error_msg( "Error reading genetic map file" );
+			<< error_msg3( "Error reading genetic map file" );
 		throw;
 	}
 }
@@ -108,6 +108,7 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t /* genMapShift_ */ ) {
 	//std::cerr.precision(15);
 
 	int lineNum = 0;
+	std::string line;
 	try {
 		try {
 			util::SumKeeper<gd_orig_len_t> gd_orig_so_far;
@@ -115,7 +116,6 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t /* genMapShift_ */ ) {
 			double lastRate = -1;
 
 			while ( recombfp ) {
-				std::string line;
 				try {
 					std::getline( recombfp, line );
 				} catch( std::ios::failure f ) { break; }
@@ -125,13 +125,13 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t /* genMapShift_ */ ) {
 				double rate;
 			
 				int nread = sscanf(line.c_str(), "%ld %lf", &start, &rate);
+				if ( nread != 2 )
+					 BOOST_THROW_EXCEPTION( cosi_io_error() );
+				
 				if ( !pd_locs.empty() && start == lastStart ) {
 					std::cerr << "warning: skipping duplicate genetic map point at " << start << "\n";
 					continue;
 				}
-				if ( nread != 2 )
-					 BOOST_THROW_EXCEPTION( cosi_io_error() <<
-																	error_msg( "malformed genetic map file line " + line ) );
 				if ( !( start > lastStart ) )
 					 BOOST_THROW_EXCEPTION( cosi_io_error() <<
 																	error_msg( "genetic map locations must be increasing" ) );
@@ -166,7 +166,7 @@ void GenMap::readFrom( istream& recombfp, ploc_bp_diff_t /* genMapShift_ */ ) {
 				);
 		}
 	} catch( boost::exception& e ) {
-		e << boost::errinfo_at_line( lineNum );
+		e << error_bad_line( line ) << boost::errinfo_at_line( lineNum );
 		throw;
 	}
 	pd_locs_range = pd_locs;
