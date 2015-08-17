@@ -1693,7 +1693,7 @@ int sample_stats_main(int argc, char *argv[])
 			biggerlist(nsam,maxsites, list) ;
 		}
 
-		boost::scoped_array<char> list_dummy( new char[ segsites + 1 ] );
+		boost::scoped_array<char> list_dummy( new char[ 2 * ( segsites + 1 ) ] );
 
 		int first_snp = 0, last_snp = segsites-1, trimmed_segsites = segsites;
 		const loc_t *trimmed_posit = posit;
@@ -1969,7 +1969,7 @@ int sample_stats_main(int argc, char *argv[])
 				for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) {
 					nchroms_t popStart = sampleStarts[ popNum ];
 					for ( nchroms_t chrom = 0; chrom < sampleSizes[ popNum ]; ++chrom ) {
-						if ( trimmed_list[ snp ][ popStart + chrom ] == '1' )
+						if ( trimmed_list[ popStart + chrom ][ snp ] == '1' )
 							 ++popDerCounts[ popNum ];
 					}
 				}
