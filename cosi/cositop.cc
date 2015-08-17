@@ -237,7 +237,8 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #ifndef COSI_NO_CPU_TIMER
 	boost::timer::cpu_timer overallTimer;
 	double stopAfterNs = stopAfterMinutes * 1e9 * 60.0;
-#endif	
+#endif
+	GenMapP genMap;
 	for ( int simNum = 0; simNum < nsims; simNum++ ) {
 		curSimNum = simNum;
 #ifndef COSI_NO_CPU_TIMER		
@@ -275,7 +276,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		cosi.set_outputARGedges( this->outputARGedges );
 		cosi.set_genmapRandomRegions( this->genmapRandomRegions );
 
-		cosi.setUpSim( paramfile, randGen );
+		cosi.setUpSim( paramfile, randGen, genMap );
 
 		if ( simNum == 0 ) {
 			randGen = cosi.getRandGen();
@@ -354,6 +355,8 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #endif															
 															outputEndGens ? &endGen : NULL );
 		}  // output simulation results
+
+		genMap = cosi.getGenMap();
 		
 	}  // for each simulation
 

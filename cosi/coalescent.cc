@@ -66,7 +66,7 @@ CoSi::~CoSi() {
 // There are several singleton objects handling different aspects of the simulation.
 // (Singleton as in, one per CoSi object).  They need to share some state and refer to each other.
 // This method allocates them all and connects them to each other as needed.
-void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
+void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMapToUse_ ) {
 	using boost::make_shared;
 
 	hooks = make_shared<Hooks>();
@@ -114,9 +114,10 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
 #endif	
 	nodePool->setRandGen( getRandGen() );
 	params->getHistEvents()->setRandGen( getRandGen() );
-	
-	genMap = boost::make_shared<GenMap>( params->get_recombfileFN(), params->getLength(), this->genMapShift,
-																			 genmapRandomRegions, getRandGen() );
+
+	genMap = genMapToUse_ ? genMapToUse_ :
+		 boost::make_shared<GenMap>( params->get_recombfileFN(), params->getLength(), this->genMapShift,
+																 genmapRandomRegions, getRandGen() );
 
 	nodePool->setGenMap( genMap );
 	if ( params->getGeneConv2RecombRateRatio() == ZERO_FACTOR ) nodePool->setEnableGeneConv( False );

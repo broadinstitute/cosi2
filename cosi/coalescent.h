@@ -40,7 +40,7 @@ public:
 	 // MethodP: setUpSim
 	 // Set up the simulator.  This allocates the various sub-objects representing parts of the simulator,
 	 // and connects them together properly.
-	 void setUpSim( filename_t paramfile, RandGenP randGenToUse_ = RandGenP() );
+	 void setUpSim( filename_t paramfile, RandGenP randGenToUse_ = RandGenP(), GenMapP genMapToUse_ = GenMapP() );
 
 	 // Method: setMutProcessor
 	 // Set the object that will process mutations as they are generated.  Call after <setUpSim()>.
