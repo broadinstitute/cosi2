@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <string>
+//#include <ctime>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/exception/error_info.hpp>
 #include <boost/exception/exception.hpp>
@@ -134,7 +135,25 @@ void GenMap::readFrom( istream& recombfp ) {
 	setStart( static_cast<pd_orig_loc_t>( 0 ) );
 }  // GenMap::readFrom()
 
+// time_t tot_sec;
+// long tot_nsec;
+// long callCount;
+// std::clock_t totClock;
+
+// struct ShowTime {
+// 	 ShowTime() { };
+// 	 ~ShowTime() {
+// //		 if ( btm ) delete btm;
+// 		 std::cerr << "clockSec=" << ( ((double)totClock)/((double)CLOCKS_PER_SEC) ) << " tot_sec=" << tot_sec << " tot_nsec=" << tot_nsec << " callCount=" << callCount << "\n";
+// 	 }
+// } showTime;
+
+
 void GenMap::setStart( pd_orig_loc_t start ) {
+	// std::clock_t startTime = std::clock();
+	// ++callCount;
+	// struct timespec tm;
+	// clock_gettime( CLOCK_REALTIME, &tm );
 	BOOST_AUTO( pd_beg_it, boost::lower_bound( pd_locs, start ) );
 	chkCond( pd_beg_it != pd_locs.end() && *pd_beg_it >= start );
 	BOOST_AUTO( pd_end_it, std::upper_bound( pd_beg_it, pd_locs.end(), start + pd_range_len ) );
@@ -148,7 +167,7 @@ void GenMap::setStart( pd_orig_loc_t start ) {
 
 	if ( *pd_beg_it > start ) {
 		pd_locs_range.push_back( start );
-		gd_locs_range.push_back( pd2gd( start ) );
+		gd_locs_range.push_back( util::interp( pd_locs, gd_locs, start ) );
 	}
 
 	pd_locs_range.insert( pd_locs_range.end(), pd_beg_it, pd_end_it );
@@ -156,12 +175,19 @@ void GenMap::setStart( pd_orig_loc_t start ) {
 
 	if ( pd_locs_range.back() != start + pd_range_len ) {
 		pd_locs_range.push_back( start + pd_range_len );
-		gd_locs_range.push_back( pd2gd( start + pd_range_len ) );
+		gd_locs_range.push_back( util::interp( pd_locs, gd_locs, start + pd_range_len ) );
 	}
 	
 	gd_range_len = gd_locs_range.back() - gd_locs_range.front();
+	
 	if ( gd_range_len <= static_cast< gd_orig_len_t >( 1e-16) )
 		 BOOST_THROW_EXCEPTION( cosi_io_error() << error_msg( "genetic map length is zero!" ) );
+
+	// totClock += ( std::clock() - startTime );
+	// struct timespec tm2;
+	// clock_gettime( CLOCK_REALTIME, &tm2 );
+	// tot_sec += ( tm2.tv_sec - tm.tv_sec );
+	// tot_nsec += ( tm2.tv_nsec - tm.tv_nsec );
 }
 
 

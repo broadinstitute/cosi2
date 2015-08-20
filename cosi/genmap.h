@@ -58,6 +58,8 @@ public:
 		 return pd_range_len;
 	 }
 
+	 len_bp_t recomb_get_map_length() const { return pd_locs.back(); }
+
 	 // MethodP: get_one_chrom_recomb_rate
 	 // Return the probability, per generation, of recombination _somewhere_ on one chromosome
 	 // (i.e. the total absolute genetic length of the simulated region).
