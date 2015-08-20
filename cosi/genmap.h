@@ -8,6 +8,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/range/join.hpp>
 #include <cosi/defs.h>
 #include <cosi/utils.h>
 #include <cosi/decls.h>
@@ -33,22 +34,35 @@ typename scale_loc_type<TScaleOut>::type cvt( TScaleIn& scaleIn, TScaleOut& scal
 //
 // Keeps the correspondence between physical locations and genetic map locations. 
 class GenMap: boost::noncopyable {
+	 // Types for representing physical distance (pd) and genetic distance (pd),
+	 // as locations (loc) or lengths (len), and in the original untis (orig: bp for pd,
+	 // cM for gd) or in normalized units (norm: fraction of the physical or genetic length
+	 // of the whole simulated region).
+
+	 typedef loc_bp_t  pd_orig_loc_t;
+	 typedef len_bp_t  pd_orig_len_t;
+	 typedef gloc_cM_t gd_orig_loc_t;
+	 typedef glen_cM_t gd_orig_len_t;
+	 typedef gloc_t gd_norm_loc_t;
+	 typedef glen_t gd_norm_len_t;
+	 typedef ploc_t pd_norm_loc_t;
+	 typedef plen_t pd_norm_len_t;
+
 public:
-	 GenMap( const boost::filesystem::path& fname, len_bp_t length_, ploc_bp_diff_t genMapShift_ = 0,
-					 bool_t genmapRandomRegions_ = False, RandGenP randGen_ = RandGenP() );
-	 GenMap( istream&, len_bp_t length_, ploc_bp_diff_t genMapShift_ = 0 );
+	 GenMap( const boost::filesystem::path& fname, len_bp_t length_ );
+	 GenMap( istream&, len_bp_t length_ );
 
 	 // Method: recomb_get_length
 	 // Returns the physical length of the simulated region, in basepairs.
 	 len_bp_t recomb_get_length () const {
-		 return rec_length;
+		 return pd_range_len;
 	 }
 
 	 // MethodP: get_one_chrom_recomb_rate
 	 // Return the probability, per generation, of recombination _somewhere_ on one chromosome
 	 // (i.e. the total absolute genetic length of the simulated region).
 	 glen_cM_t getRegionRecombRateAbs(void) const {
-		 return rec_recombrate;
+		 return gd_range_len;
 	 }
 
 	 // Func: recomb_get_gdPos_at
@@ -72,33 +86,12 @@ public:
 		 return make_loc( result_ploc, orig2norm_gd( pd2gd( norm2orig_pd( result_ploc ) ) ) );
 	 }
 
-	 void pickRandomRegion( RandGenP randGen_ );
+//	 void pickRandomRegion( RandGenP randGen_ );
+
+	 void setStart( pd_orig_loc_t start );
 	 
 private:
 	 
-	 // Field: rec_recombrate
-	 // The total per-chromosome recombination rate per generation.
-	 glen_cM_t rec_recombrate;
-
-	 // Field: rec_length
-	 // Length in basepairs of the simulated region.
-	 const len_bp_t rec_length;
-
-
-	 // Types for representing physical distance (pd) and genetic distance (pd),
-	 // as locations (loc) or lengths (len), and in the original untis (orig: bp for pd,
-	 // cM for gd) or in normalized units (norm: fraction of the physical or genetic length
-	 // of the whole simulated region).
-
-	 typedef loc_bp_t  pd_orig_loc_t;
-	 typedef len_bp_t  pd_orig_len_t;
-	 typedef gloc_cM_t gd_orig_loc_t;
-	 typedef glen_cM_t gd_orig_len_t;
-	 typedef gloc_t gd_norm_loc_t;
-	 typedef glen_t gd_norm_len_t;
-	 typedef ploc_t pd_norm_loc_t;
-	 typedef plen_t pd_norm_len_t;
-
 	 // Representation of the entire genetic map, as two parallel arrays of physical and genetic distance
 	 // from the start of the map.
 	 
@@ -106,8 +99,8 @@ private:
 	 std::vector< gd_orig_loc_t > gd_locs;
 
 	 // The sub-ranges of the genetic map, used for the currently simulated region.
-	 boost::sub_range< std::vector< pd_orig_loc_t > > pd_locs_range;
-	 boost::sub_range< std::vector< gd_orig_loc_t > > gd_locs_range;
+	 std::vector< pd_orig_loc_t > pd_locs_range;
+	 std::vector< gd_orig_loc_t > gd_locs_range;
 
 	 // The length of the current simulated region, in cM
 	 gd_orig_len_t gd_range_len;
@@ -122,7 +115,7 @@ private:
 	 // math::InterpFn<ploc_t,gloc_t> loc2cumRate;
 	 // math::InterpFn<gloc_t,ploc_t> cumRate2loc;
 
-	 void readFrom( istream& recombfp, ploc_bp_diff_t genMapShift_ );
+	 void readFrom( istream& recombfp );
 
 	 ploc_t forceLocOntoBpBoundary( ploc_t loc ) const {
 		 return loc;

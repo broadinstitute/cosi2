@@ -116,8 +116,9 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	params->getHistEvents()->setRandGen( getRandGen() );
 
 	genMap = genMapToUse_ ? genMapToUse_ :
-		 boost::make_shared<GenMap>( params->get_recombfileFN(), params->getLength(), this->genMapShift,
-																 genmapRandomRegions, getRandGen() );
+		 boost::make_shared<GenMap>( params->get_recombfileFN(), params->getLength()
+																 /*, this->genMapShift,
+																	 genmapRandomRegions, getRandGen()*/ );
 
 	nodePool->setGenMap( genMap );
 	if ( params->getGeneConv2RecombRateRatio() == ZERO_FACTOR ) nodePool->setEnableGeneConv( False );
