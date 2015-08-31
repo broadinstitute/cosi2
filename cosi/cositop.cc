@@ -263,6 +263,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		cosi.set_outputMutGens( outputMutGens );
 		cosi.set_outputRecombLocs( outputRecombLocs );
 		cosi.set_deltaTfactor( deltaTfactor );
+		cosi.set_genMapShift( genMapShift );
 #ifdef COSI_SUPPORT_COALAPX		
 		cosi.set_maxCoalDist( plen_t( maxCoalDist ) );
 		cosi.set_maxCoalDistCvxHull( maxCoalDistCvxHull );
@@ -355,6 +356,11 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #endif															
 															outputEndGens ? &endGen : NULL );
 		}  // output simulation results
+		// {
+		// 	boost::timer::cpu_times elapsed = cpuTimer.elapsed();
+		// 	std::cerr << (static_cast<double>( elapsed.user + elapsed.system ) / 1e8 ) << "\n";
+		// }
+		
 
 		genMap = cosi.getGenMap();
 		
