@@ -294,11 +294,13 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 
 		using boost::make_shared;
 		MutlistP muts = make_shared<Mutlist>();
-		if ( dropSingletonsFrac < 1e-10 )
-			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist>( muts ) );
-		else
-			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
-																																											 dropSingletonsFrac, randGen ) );
+		if ( !outputTrees ) {
+			if ( dropSingletonsFrac < 1e-10 )
+				 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist>( muts ) );
+			else
+				 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
+																																												 dropSingletonsFrac, randGen ) );
+		}
 
 		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << "\n"; }
 	
