@@ -171,6 +171,8 @@ const gens_t NULL_GENS(NAN);
  */
 typedef int nodeid;
 
+const nodeid NULL_NODEID( -1 );
+
 /**
  * Type: popid
  *
