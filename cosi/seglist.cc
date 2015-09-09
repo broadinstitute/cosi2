@@ -23,7 +23,7 @@ namespace cosi {
 bool showOneSimProgress = false;
 
 #ifdef COSI_TREE_OUTPUT
-std::map< std::pair< loc_t, loc_t >, leafset_p > loc2tree;
+std::map< loc_t, leafset_p > loc2tree;
 #endif
 
 namespace seglist {
@@ -1139,6 +1139,9 @@ public:
  *    seglist1p, seglist2p - the input seglists
  */
 Seglist *seglist_union( Seglist **seglist1p, Seglist **seglistp,
+												nodeid node1id, nodeid node2id,
+												genid node1gen, genid node2gen,
+												nodeid ancestorId,
 												genid gen,
 												seglist_seg_union_callback_t seg_union_callback ) {
 
@@ -1168,6 +1171,8 @@ Seglist *seglist_union( Seglist **seglist1p, Seglist **seglistp,
   seglist_chk_builder( &builder );
 
   Seglist **seglists[2] = { &seglist1, &seglist };
+	nodeid nodeids[2] = { node1id, node2id };
+	genid gens[2] = { node1gen, node2gen };
 
   if ( !segsumm_is_empty( &( builder.seglist->segsumm ) ) ) {
 
@@ -1217,18 +1222,23 @@ Seglist *seglist_union( Seglist **seglist1p, Seglist **seglistp,
 						bool_t dropSeg = False;
 						/* if ( other_seg->leafset && cur_seg->leafset && !leafset_is_subset( other_seg->leafset, cur_seg->leafset ) ) */ {
 							{
+//								std::cerr << "other_seg=" << other_seg << " cur_seg=" << cur_seg << "\n";
 								if ( seg_union_callback ) {
 									seg_union_callback( other_seg->beg, other_seg->end, other_seg->lastCoalGen, gen, other_seg->leafset );
 									seg_union_callback( other_seg->beg, other_seg->end, cur_seg->lastCoalGen, gen, cur_seg->leafset );
 								}
 								 seglist_seg_set_leafset( other_seg, leafset_union( other_seg->leafset, cur_seg->leafset ) );
 #ifdef COSI_TREE_OUTPUT
+								 other_seg->leafset->nodeId = ancestorId;
+								 other_seg->leafset->nodeIdA = nodeids[ other ];
+								 other_seg->leafset->nodeIdB = nodeids[ which ];
 								 other_seg->leafset->gen = gen;
 #endif								 
 								 if ( leafset_is_full( other_seg->leafset ) ) {
 									 dropSeg = True;
 #ifdef COSI_TREE_OUTPUT
-									 loc2tree.insert( std::make_pair( std::make_pair( other_seg->beg, other_seg->end ), other_seg->leafset ) );
+									 loc2tree.insert( std::make_pair( other_seg->end, other_seg->leafset ) );
+//									 std::cerr << "DROPSEG! " << loc2tree.size() << "\n";
 #endif									 
 									 if ( showOneSimProgress ) {
 										 static len_t totCoalLen(0.0);

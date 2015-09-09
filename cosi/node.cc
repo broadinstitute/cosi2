@@ -90,7 +90,7 @@ NodePool::make_new_leaf ( )
 #ifdef COSI_FREQONLY
   leafset_p leafset = make_singleton_leafset( newnodeptr->name );
 #else
-  leafset_p leafset = make_singleton_leafset( outputMuts ? newnodeptr->name : ((leaf_id_t)1) );
+  leafset_p leafset = make_singleton_leafset( outputMuts ? newnodeptr->name : ((leaf_id_t)1));
 #endif	
 
   newnodeptr->segs = seglist::seglist_make_full( leafset, /* lastCoalGen= */ genid(0) );
@@ -149,7 +149,11 @@ NodePool::node_coalesce (Node ** node1p, Node ** node2p, genid gen)
 
 	Node *newnodeptr = NULL;
 														 
-  Seglist *segs = seglist_union( &( node1->segs ), &( node2->segs ), gen
+  Seglist *segs = seglist_union( &( node1->segs ), &( node2->segs ),
+																 node1->name, node2->name,
+																 node1->gen, node2->gen,
+																 /* ancestorId= */ node_index,
+																 gen
 																 //IF_COSI_TRACK_LAST_COAL(, /* seg_union_callback= */ boost::bind( &Hooks::fire_tree_edge, hooks, _1, _2, _3, _4, _5 ) )
 																 );
 

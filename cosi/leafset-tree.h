@@ -59,6 +59,7 @@ public:
 
 #ifdef COSI_TREE_OUTPUT
 	 genid gen;
+	 nodeid nodeId, nodeIdA, nodeIdB;
 #endif // #ifdef COSI_TREE_OUTPUT	 
 
    void* operator new (size_t size);
@@ -67,7 +68,7 @@ public:
 	 leafset_struct( leaf_id_t leafId_ ):
 		 size( 1 ), leafId( leafId_ )
 #ifdef COSI_TREE_OUTPUT
-		 , gen( 0 )
+		 , gen( 0 ), nodeId( NULL_NODEID ), nodeIdA( NULL_NODEID ), nodeIdB( NULL_NODEID )
 #endif		 
 			{}
 

@@ -175,41 +175,47 @@ ARGOutputHook::~ARGOutputHook() { }
 namespace {
 static double genFactor;
 
-void write_tree( leafset_p t ) {
+void write_tree( leafset_p t, nodeid nodeId ) {
 	using std::cout;
 	if ( leafset_is_singleton( t ) )
 		 cout << ( leafset_get_singleton_leaf( t ) + 1 );
 	else {
 		cout << "(";
-		write_tree( t->childA );
+		write_tree( t->childA, t->nodeIdA );
 		cout << ":" << ( t->gen - t->childA->gen ) * genFactor << ",";
-		write_tree( t->childB );
-		cout << ":" <<  ( t->gen - t->childA->gen ) * genFactor << ")";
+		write_tree( t->childB, t->nodeIdB );
+		cout << ":" <<  ( t->gen - t->childA->gen ) * genFactor
+				 << ")" << nodeId;
 	}
 }
-}
+}  // anonymous namespace
 
 void output_trees( len_bp_t region_len, nchroms_t N0_tot ) {
-	typedef std::map< std::pair< loc_t, loc_t >, leafset_p > m_t;
+	typedef std::map< loc_t, leafset_p > m_t;
 	extern m_t loc2tree;
+
+	//std::cerr << "output_trees: " << loc2tree.size() << " segs.\n";
 
 	genFactor = 1. / ( 2. * N0_tot );
 	//std::cerr.precision(15);
 
 	loc_t lastEnd( MIN_LOC );
+	//bool isFirst = True;
 	for ( m_t::const_iterator it = loc2tree.begin(); it != loc2tree.end(); ++it ) {
-		//std::cerr << "seg: " << it->first.first << "-" << it->first.second << "\n";
-		len_bp_t seg_len_bp = region_len * ToDouble( it->first.second - it->first.first );
+		len_bp_t seg_len_bp = region_len * ToDouble( it->first - lastEnd );
+		// std::cerr << "seg: " << it->first << ": " << it->second << " seg_len_bp=" << seg_len_bp <<
+		// 	 " lastEnd=" << lastEnd << " isFirst=" << isFirst << "\n";
 		if ( seg_len_bp > .5 ) {
 			std::cout << "[" << (long)( round( ToDouble( seg_len_bp ) ) ) << "]";
-			write_tree( it->second );
+			write_tree( it->second, it->second->nodeId );
 			std::cout << ";\n";
 		}
-		util::chkCond( it->first.first == lastEnd );
-		lastEnd = it->first.second;
+		//util::chkCond( isFirst || it->first == lastEnd );
+		lastEnd = it->first;
+		//isFirst = False;
 		//std::cout << ":" << get_ploc( it->first ) << " ;\n";
 	}
-	util::chkCond( lastEnd == MAX_LOC );
+	//util::chkCond( isFirst || lastEnd == MAX_LOC );
 	loc2tree.clear();
 }
 #endif  // #ifdef COSI_TREE_OUTPUT
