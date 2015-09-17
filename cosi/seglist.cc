@@ -1139,7 +1139,6 @@ public:
  *    seglist1p, seglist2p - the input seglists
  */
 Seglist *seglist_union( Seglist **seglist1p, Seglist **seglistp,
-												nodeid node1id, nodeid node2id,
 												genid node1gen, genid node2gen,
 												nodeid ancestorId,
 												genid gen,
@@ -1171,7 +1170,6 @@ Seglist *seglist_union( Seglist **seglist1p, Seglist **seglistp,
   seglist_chk_builder( &builder );
 
   Seglist **seglists[2] = { &seglist1, &seglist };
-	nodeid nodeids[2] = { node1id, node2id };
 	genid gens[2] = { node1gen, node2gen };
 
   if ( !segsumm_is_empty( &( builder.seglist->segsumm ) ) ) {
@@ -1230,8 +1228,6 @@ Seglist *seglist_union( Seglist **seglist1p, Seglist **seglistp,
 								 seglist_seg_set_leafset( other_seg, leafset_union( other_seg->leafset, cur_seg->leafset ) );
 #ifdef COSI_TREE_OUTPUT
 								 other_seg->leafset->nodeId = ancestorId;
-								 other_seg->leafset->nodeIdA = nodeids[ other ];
-								 other_seg->leafset->nodeIdB = nodeids[ which ];
 								 other_seg->leafset->gen = gen;
 #endif								 
 								 if ( leafset_is_full( other_seg->leafset ) ) {

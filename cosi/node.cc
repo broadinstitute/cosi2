@@ -150,7 +150,6 @@ NodePool::node_coalesce (Node ** node1p, Node ** node2p, genid gen)
 	Node *newnodeptr = NULL;
 														 
   Seglist *segs = seglist_union( &( node1->segs ), &( node2->segs ),
-																 node1->name, node2->name,
 																 node1->gen, node2->gen,
 																 /* ancestorId= */ node_index,
 																 gen

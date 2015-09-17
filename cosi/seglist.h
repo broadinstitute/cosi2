@@ -288,7 +288,6 @@ void seglist_delete( Seglist **seglistp );
 typedef boost::function<void (loc_t beg, loc_t end, genid genMoreRecent, genid genLessRecent, leafset_p leafset)> seglist_seg_union_callback_t;
 
 Seglist *seglist_union( Seglist **seglist1p, Seglist **seglistp,
-												nodeid node1id, nodeid node2id,
 												genid node1gen, genid node2gen,
 												nodeid ancestorId,
 												genid gen = NULL_GEN, seglist_seg_union_callback_t seg_union_callback = 0 );

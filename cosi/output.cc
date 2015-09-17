@@ -148,12 +148,32 @@ void print_mut_contexts( DemographyP demography, const string& filebase, len_bp_
 // Class impl: ARGOutputHook
 //
 
+// namespace {
+
+// struct MyClass {
+// 	 std::ofstream g;
+
+// 	 MyClass(): g( "/dev/null" ) {
+// 		 g << "digraph ARG {\n";
+// 		 g << "  node [ shape=box ];\n";
+// 	 }
+// 	 ~MyClass() { g << "}\n"; }
+// } myInst;
+
+// }  // anon namespace
+
 void ARGOutputHook::handle_add_edge( nodeid nodeId_moreRecent,
 																		 nodeid nodeId_lessRecent,
 																		 genid genId_moreRecent,
 																		 genid genId_lessRecent, const Seglist *seglist,
 																		 edge_kind_t edgeKind ) {
-	std::cout << "E " << edgeKind2code( edgeKind ) << " " << nodeId_moreRecent << " " << nodeId_lessRecent << " "
+
+	// myInst.g << (nodeId_lessRecent+1) << " -> " << (nodeId_moreRecent+1) ;
+	// if ( getenv( "COSI_LOC" ) && seglist_contains_loc( seglist, loc_t( atoi( getenv( "COSI_LOC" ) ) / 100000.0 ) ) )
+	// 	 myInst.g << " [ color=green, label=\"" << ( ( genId_lessRecent - genId_moreRecent ) * ( 1. / (2. * 5000) ) ) << "\" ]";
+	// myInst.g << " ;\n";														 
+	std::cout << "E " << edgeKind2code( edgeKind ) << " " << ( nodeId_moreRecent + 1 ) << " " <<
+		 ( nodeId_lessRecent + 1 ) << " "
 						<< genId_moreRecent << " " << genId_lessRecent;
 
 	BOOST_FOREACH( const seglist::Seg& s, *seglist )
@@ -174,18 +194,31 @@ ARGOutputHook::~ARGOutputHook() { }
 #ifdef COSI_TREE_OUTPUT
 namespace {
 static double genFactor;
+static int treeNum = 0;
 
-void write_tree( leafset_p t, nodeid nodeId ) {
+void write_tree( leafset_p t ) {
+
 	using std::cout;
 	if ( leafset_is_singleton( t ) )
 		 cout << ( leafset_get_singleton_leaf( t ) + 1 );
 	else {
 		cout << "(";
-		write_tree( t->childA, t->nodeIdA );
+		write_tree( t->childA );
 		cout << ":" << ( t->gen - t->childA->gen ) * genFactor << ",";
-		write_tree( t->childB, t->nodeIdB );
-		cout << ":" <<  ( t->gen - t->childA->gen ) * genFactor
-				 << ")" << nodeId;
+		write_tree( t->childB );
+		cout << ":" <<  ( t->gen - t->childB->gen ) * genFactor
+				 << ")";
+		cout << (t->nodeId+1);
+
+		// if ( getenv( "COSI_TREENUM" ) && atoi( getenv( "COSI_TREENUM" ) ) == treeNum ) {
+		// 	myInst.g << (t->nodeId+1) << " -> " <<
+		// 		 ( ( leafset_is_singleton( t->childA ) ? ( leafset_get_singleton_leaf( t->childA ) ) : t->childA->nodeId ) + 1 )
+		// 					 << " [ color=\"red\" ];\n";
+		// 	myInst.g << (t->nodeId+1) << " -> " <<
+		// 		 ( ( leafset_is_singleton( t->childB ) ? ( leafset_get_singleton_leaf( t->childB ) ) : t->childB->nodeId ) + 1 )
+		// 					 << " [ color=\"red\" ];\n";
+		// }
+			 
 	}
 }
 }  // anonymous namespace
@@ -197,6 +230,7 @@ void output_trees( len_bp_t region_len, nchroms_t N0_tot ) {
 	//std::cerr << "output_trees: " << loc2tree.size() << " segs.\n";
 
 	genFactor = 1. / ( 2. * N0_tot );
+	//std::cerr << "genFactor=" << genFactor << "\n";
 	//std::cerr.precision(15);
 
 	loc_t lastEnd( MIN_LOC );
@@ -207,8 +241,9 @@ void output_trees( len_bp_t region_len, nchroms_t N0_tot ) {
 		// 	 " lastEnd=" << lastEnd << " isFirst=" << isFirst << "\n";
 		if ( seg_len_bp > .5 ) {
 			std::cout << "[" << (long)( round( ToDouble( seg_len_bp ) ) ) << "]";
-			write_tree( it->second, it->second->nodeId );
+			write_tree( it->second );
 			std::cout << ";\n";
+			++treeNum;
 		}
 		//util::chkCond( isFirst || it->first == lastEnd );
 		lastEnd = it->first;
