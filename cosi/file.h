@@ -8,6 +8,7 @@
 #include <cosi/decls.h>
 #include <cosi/geneconversion.h>
 #include <cosi/generalmath.h>
+#include <cosi/cosirand.h>
 
 namespace cosi {
 
@@ -18,17 +19,16 @@ namespace cosi {
 // as needed to construct a programmatic representation of the demographic model
 // to be simulated, and stores some parameters inside itself for later retrieval.
 //
-class ParamFileReader {
+class ParamFileReader: public HasRandGen {
 public:
-	 ParamFileReader( DemographyP demography_ );
-
-	 
+	 ParamFileReader( DemographyP demography_, RandGenP randGen_ );
 
 	 // MethodP: file_read
 	 // Parse the specified parameter file.
 	 void file_read( boost::filesystem::path filename, FILE *segfp );
 	 
-	 unsigned long getRandomSeed() const { return rseed; }
+	 //unsigned long getRandomSeed() const { return rseed; }
+	 //RandGenP getRandGen() const { return randGen; }
 	 len_bp_int_t getLength() const { return length; }
 	 prob_per_bp_per_gen_t getMu() const { return mu; }
 	 factor_t getGeneConv2RecombRateRatio() const { return geneConv2RecombRateRatio; }
@@ -38,13 +38,13 @@ public:
 	 HistEventsP getHistEvents() const { return histEvents; }
 	 bool_t getInfSites() const { return infSites; }
 
-	 void setPrintSeed( bool_t printSeed_ ) { printSeed = printSeed_; }
+//	 void setPrintSeed( bool_t printSeed_ ) { printSeed = printSeed_; }
 	 void set_recombfileFN( filename_t recombfileFN_ ) { this->recombfileFN = recombfileFN_; }
 
 	 filename_t get_recombfileFN() const { return this->recombfileFN; }
 
-	 unsigned long getRandSeed() const { return rseed; }
-	 bool_t isSeeded() const { return seeded; }
+	 //unsigned long getRandSeed() const { return rseed; }
+//	 bool_t isSeeded() const { return seeded; }
 
 	 popid getIgnoreRecombsInPop() const { return this->ignoreRecombsInPop; }
 
@@ -62,7 +62,7 @@ private:
 
 	 // Field: seeded
 	 // Whether a random seed has been specified in the parameter file.
-	 bool_t seeded;
+//	 bool_t seeded;
 
 	 
 	 int popsize;
@@ -74,12 +74,9 @@ private:
 	 len_bp_int_t geneConversionMeanTractLength;
 	 len_bp_int_t geneConversionMinTractLength;
 	 GeneConversion::GCModel geneConversionModel;
-	 // Private field: rseed
-	 // The random seed, if specified in the parameter file. 
-	 unsigned long rseed;
 	 HistEventsP histEvents;
 	 bool_t infSites;
-	 bool_t printSeed;
+//	 bool_t printSeed;
 	 popid ignoreRecombsInPop;
 	 boost::filesystem::path paramFileName;
 
@@ -97,6 +94,8 @@ private:
 	 int file_killwhitespace(FILE * fileptr);
 	 void file_exit(const char* , const char*);
 	 void file_error_nonfatal(const char* , const char*);
+
+	 void sample_distribution_values( char *buf );
 };
 
 typedef boost::shared_ptr<ParamFileReader> ParamFileReaderP;

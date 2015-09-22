@@ -93,20 +93,19 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	//if ( treeSizeOnly ) nodePool->setOutputMuts( False );
 	demography->dg_setNodePool( nodePool );
 			 
-	params = make_shared<ParamFileReader>( demography );
+	params = make_shared<ParamFileReader>( demography, randGenToUse_ );
 	params->set_recombfileFN( this->recombfileFN );
 
 	params->file_read(paramfile, segfp);
+	setRandGen( params->getRandGen() );
 
-	
-
-	RandGenP rgen;
-	if ( randGenToUse_ ) rgen = randGenToUse_;
-	else if ( params->isSeeded() ) {
-		unsigned long rseed = params->getRandSeed();
-		rgen = make_shared<RandGen>( rseed );
-	} else rgen = make_shared<RandGen>();
-	setRandGen( rgen );
+	// RandGenP rgen;
+	// if ( randGenToUse_ ) rgen = randGenToUse_;
+	// else if ( params->isSeeded() ) {
+	// 	unsigned long rseed = params->getRandSeed();
+	// 	rgen = make_shared<RandGen>( rseed );
+	// } else rgen = make_shared<RandGen>();
+ //	setRandGen( rgen );
 	demography->setRandGen( getRandGen() );
 #ifdef COSI_SUPPORT_COALAPX
 	demography->setMaxCoalDist( this->maxCoalDist );
@@ -163,7 +162,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		len_bp_int_t geneConversionMeanTractLength = params->getGeneConversionMeanTractLength();
 		len_bp_int_t geneConversionMinTractLength = params->getGeneConversionMinTractLength();
 		GeneConversion::GCModel geneConversionModel = params->getGeneConversionModel();
-		geneConversion = make_shared<GeneConversion>( rgen, demography, genMap, len,
+		geneConversion = make_shared<GeneConversion>( getRandGen(), demography, genMap, len,
 																									geneConv2RecombRateRatio,
 																									geneConversionMeanTractLength,
 																									geneConversionMinTractLength,
