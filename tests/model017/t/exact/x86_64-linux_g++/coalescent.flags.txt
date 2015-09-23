@@ -1,5 +1,5 @@
-coalescent  -I../../../cosi/.. -isystem ../../../cosi/boost -DNDEBUG -DCOSI_TRACK_LAST_COAL -DCOSI_SUPPORT_COALAPX -DNDEBUG -std=gnu++11 -O3 --param max-inline-insns-single=1000 -Werror -Wall -Wextra -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op -Wmissing-declarations -Wdouble-promotion -Winit-self -O3
-libcosi  -I../../../cosi/.. -isystem ../../../cosi/boost -DNDEBUG -DCOSI_TRACK_LAST_COAL -DCOSI_SUPPORT_COALAPX -DNDEBUG -std=gnu++11 -O3 --param max-inline-insns-single=1000 -Werror -Wall -Wextra -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op -Wmissing-declarations -Wdouble-promotion -Winit-self -O3
+coalescent  -I../.. -isystem ../../ext/boost -DNDEBUG -DCOSI_TRACK_LAST_COAL -DCOSI_SUPPORT_COALAPX -std=gnu++11 -O3 -g -O2
+libcosi  -I../.. -isystem ../../ext/boost -DNDEBUG -DCOSI_TRACK_LAST_COAL -DCOSI_SUPPORT_COALAPX -std=gnu++11 -O3 -g -O2
 g++ (GCC) 4.9.1
 Copyright (C) 2014 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
