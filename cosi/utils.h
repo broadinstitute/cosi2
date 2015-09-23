@@ -926,12 +926,13 @@ interp( const TXRange& xs, const TYRange& ys, typename boost::range_value<TXRang
 	assert( !boost::empty( xs ) );
 	assert( boost::size( xs ) == boost::size( ys ) );
 	typename boost::range_iterator<const TXRange>::type x_it = boost::lower_bound( xs, x );
-	assert( x_it != boost::begin( xs ) );
 	assert( x_it != boost::end( xs ) );
+	if ( x_it == boost::begin( xs ) ) return *boost::begin( ys );
 	typename boost::range_iterator<const TXRange>::type x_it_p = boost::prior( x_it );
 	assert( *x_it_p <= x && x <= *x_it );
 	typename boost::range_iterator<const TYRange>::type y_it = boost::next( boost::begin( ys ),
 																																					std::distance( boost::begin( xs ), x_it ) );
+	assert( y_it != boost::begin( ys ) );
 	typename boost::range_iterator<const TYRange>::type y_it_p = boost::prior( y_it );
 	return interpolate( *x_it_p, *y_it_p, *x_it, *y_it, x );
 }
