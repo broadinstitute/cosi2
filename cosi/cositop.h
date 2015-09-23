@@ -134,6 +134,10 @@ private:
 	 // ** Field: customStats
 	 // Whether to compute custom stats.
 	 bool_t customStats;
+
+	 // ** Field: customStatsExcludePop
+	 // Whether to exclude a given pop from custom stats output
+	 popid customStatsExcludePop;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

@@ -13,6 +13,7 @@
 //#define NPOPS 5
 
 int customstats_main(int numReps, int seqlen, int NPOPS,
+										 int excludePopIdx,
 										 void (*get_coal_data_from_cosi)( coal_data *, int /* irep */, int /* ipop */ )  ){
     //const int maxdist = 70000; //only calculate LD for 70kb
     const int min_minor = 3; //don't calculate LD at singletons or doubletons
@@ -131,8 +132,9 @@ int customstats_main(int numReps, int seqlen, int NPOPS,
     /*********************************
      LOOP ALL ANALYSIS OVER POPULATIONS
      *********************************/
-    for (ipop = 1; ipop <= NPOPS; ipop++){
-        if (ipop == 2){continue;} //ANI; dummy population
+    for (ipop = 1; ipop <= NPOPS; ipop++){  // loop over opops
+			// skip excluded pop
+        if (ipop-1 == excludePopIdx){continue;} //ANI; dummy population
 
         //reset arrays to sum up summary statistics across replicates and get average, sd
         reps_sfs = (double **)malloc(nhist * sizeof(double*));

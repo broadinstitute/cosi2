@@ -55,7 +55,7 @@ CoSiMain::CoSiMain():
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
 							 outputARGedges( False ), freqsOnly( False ),
 							 dropSingletonsFrac( 0 ), genmapRandomRegions( False ), outputPopInfo( False ),
-							 outputGenMap( False ), customStats( False )
+							 outputGenMap( False ), customStats( False ), customStatsExcludePop( NULL_POPID )
 {
 }
 
@@ -170,6 +170,7 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 		 ( "output-end-gens", po::bool_switch(&outputEndGens), "for each sim output the generation at which it ended" )
 		 ( "stop-after-minutes", po::value(&stopAfterMinutes)->default_value(0.0), "stop simulation after this many minutes" )
 		 ( "custom-stats", po::bool_switch(&customStats), "compute custom stats" )
+		 ( "custom-stats-exclude-pop", po::value(&customStatsExcludePop)->default_value(NULL_POPID), "when computing custom stats, exclude this pop" )
 		 ;
 
 	po::options_description cosi_options;
@@ -294,7 +295,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 				}
 				cout << "cosi_rand " << randGen->getSeed() << "\n\n";
 			}
-			customstats::init( cosi.getDemography(), nsims, cosi.getParams()->getLength() );
+			customstats::init( cosi.getDemography(), nsims, cosi.getParams()->getLength(), customStatsExcludePop );
 		}
 
 		using boost::make_shared;

@@ -12,8 +12,8 @@
 #include <cosi/genmap.h>
 #include <cosi/demography.h>
 
-int customstats_main(int numReps, int seqlen, int NPOPS, void (*get_coal_data_from_cosi)( coal_data *, int, int )  );
-void calc_Fst_main( int numReps, int NPOPS,
+int customstats_main(int numReps, int seqlen, int NPOPS, int excludePopIdx, void (*get_coal_data_from_cosi)( coal_data *, int, int )  );
+void calc_Fst_main( int numReps, int NPOPS, int excludePopIdx,
 										void (*get_coal_data_from_cosi)( coal_data *, int /* irep */, int /* ipop */ ) );
 
 namespace cosi {
@@ -27,12 +27,14 @@ size_t simNum;
 std::vector<popid> popNames;
 coal_data *data;
 int seqlen;
+pop_idx_t excludePopIdx = NULL_POP_IDX;
 }  // namespace anon
 
-void init( DemographyP demography, size_t nsims_, int seqlen_ ) {
+void init( DemographyP demography, size_t nsims_, int seqlen_, popid excludePop_ ) {
 	popNames = demography->getPopNames();
 	data = coal_datas = new coal_data[ ( nsims = nsims_ ) * popNames.size() ];
 	seqlen = seqlen_;
+	if ( !is_null( excludePop_ ) ) excludePopIdx = demography->dg_get_pop_index_by_name( excludePop_ );
 	std::cerr << "nsims is now " << nsims << "\n";
 }
 
@@ -44,9 +46,9 @@ void my_get_coal_data_from_cosi( coal_data *d, int irep, int ipop ) {
 
 void finish() {
 	std::cerr << "computing stats...\n";
-	customstats_main( nsims, seqlen, popNames.size(), my_get_coal_data_from_cosi );
+	customstats_main( nsims, seqlen, popNames.size(), excludePopIdx, my_get_coal_data_from_cosi );
 	std::cerr << "computing Fst...\n";
-	calc_Fst_main( nsims, popNames.size(), my_get_coal_data_from_cosi );
+	calc_Fst_main( nsims, popNames.size(), excludePopIdx, my_get_coal_data_from_cosi );
 	std::cerr << "done computing stats...\n";
 }
 
