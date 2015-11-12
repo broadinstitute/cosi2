@@ -156,7 +156,7 @@ void GenMap::setStart( pd_orig_loc_t start ) {
 	// clock_gettime( CLOCK_REALTIME, &tm );
 	BOOST_AUTO( pd_beg_it, boost::lower_bound( pd_locs, start ) );
 	chkCond( pd_beg_it != pd_locs.end() && *pd_beg_it >= start );
-	BOOST_AUTO( pd_end_it, std::upper_bound( pd_beg_it, pd_locs.end(), start + pd_range_len ) );
+	BOOST_AUTO( pd_end_it, std::upper_bound( boost::next( pd_beg_it ), pd_locs.end(), start + pd_range_len ) );
 	chkCond( pd_beg_it != pd_end_it );
 
 	BOOST_AUTO( gd_beg_it, gd_locs.begin() + ( pd_beg_it - pd_locs.begin() ) );
