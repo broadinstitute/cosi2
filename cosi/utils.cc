@@ -98,8 +98,8 @@ void chkCond(int cond, const char *fmt, ...) {
   
   printf( "\n" );
   //exit(EXIT_FAILURE);
-  throw std::logic_error( "error" );
   fflush(stdout);
+  BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "cosi error" ) );
 }
 
 /// Func: fopenChk

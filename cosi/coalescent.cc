@@ -66,7 +66,7 @@ CoSi::~CoSi() {
 // There are several singleton objects handling different aspects of the simulation.
 // (Singleton as in, one per CoSi object).  They need to share some state and refer to each other.
 // This method allocates them all and connects them to each other as needed.
-void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
+void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMapToUse_ ) {
 	using boost::make_shared;
 
 	hooks = make_shared<Hooks>();
@@ -93,20 +93,19 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
 	//if ( treeSizeOnly ) nodePool->setOutputMuts( False );
 	demography->dg_setNodePool( nodePool );
 			 
-	params = make_shared<ParamFileReader>( demography );
+	params = make_shared<ParamFileReader>( demography, randGenToUse_ );
 	params->set_recombfileFN( this->recombfileFN );
 
 	params->file_read(paramfile, segfp);
+	setRandGen( params->getRandGen() );
 
-	
-
-	RandGenP rgen;
-	if ( randGenToUse_ ) rgen = randGenToUse_;
-	else if ( params->isSeeded() ) {
-		unsigned long rseed = params->getRandSeed();
-		rgen = make_shared<RandGen>( rseed );
-	} else rgen = make_shared<RandGen>();
-	setRandGen( rgen );
+	// RandGenP rgen;
+	// if ( randGenToUse_ ) rgen = randGenToUse_;
+	// else if ( params->isSeeded() ) {
+	// 	unsigned long rseed = params->getRandSeed();
+	// 	rgen = make_shared<RandGen>( rseed );
+	// } else rgen = make_shared<RandGen>();
+ //	setRandGen( rgen );
 	demography->setRandGen( getRandGen() );
 #ifdef COSI_SUPPORT_COALAPX
 	demography->setMaxCoalDist( this->maxCoalDist );
@@ -114,9 +113,17 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
 #endif	
 	nodePool->setRandGen( getRandGen() );
 	params->getHistEvents()->setRandGen( getRandGen() );
-	
-	genMap = boost::make_shared<GenMap>( params->get_recombfileFN(), params->getLength(), this->genMapShift,
-																			 genmapRandomRegions, getRandGen() );
+
+	if ( genMapToUse_ ) {
+		genMap = genMapToUse_;
+		if ( genmapRandomRegions )
+			 genMap->setStart( static_cast<len_bp_t>( getRandGen()->random_idx( genMapToUse_->recomb_get_map_length() - params->getLength() ) ) );
+	}
+	else {
+		 genMap = boost::make_shared<GenMap>( params->get_recombfileFN(), params->getLength() );
+		 if ( genMapShift > 0 ) genMap->setStart( genMapShift );
+	}
+
 
 	nodePool->setGenMap( genMap );
 	if ( params->getGeneConv2RecombRateRatio() == ZERO_FACTOR ) nodePool->setEnableGeneConv( False );
@@ -155,7 +162,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_ ) {
 		len_bp_int_t geneConversionMeanTractLength = params->getGeneConversionMeanTractLength();
 		len_bp_int_t geneConversionMinTractLength = params->getGeneConversionMinTractLength();
 		GeneConversion::GCModel geneConversionModel = params->getGeneConversionModel();
-		geneConversion = make_shared<GeneConversion>( rgen, demography, genMap, len,
+		geneConversion = make_shared<GeneConversion>( getRandGen(), demography, genMap, len,
 																									geneConv2RecombRateRatio,
 																									geneConversionMeanTractLength,
 																									geneConversionMinTractLength,

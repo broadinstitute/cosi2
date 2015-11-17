@@ -17,6 +17,7 @@
 #include <boost/timer/timer.hpp>
 #endif
 #include <boost/filesystem/fstream.hpp>
+#include <boost/foreach.hpp>
 
 #include <cosi/defs.h>
 #include <cosi/mutlist.h>
@@ -28,9 +29,11 @@
 #include <cosi/recomb.h>
 #include <cosi/condsnp.h>
 #include <cosi/cosicfg.h>
-
+#include <cosi/customstats.h>
 
 namespace cosi {
+
+int curSimNum;
 
 using util::ToString;
 
@@ -51,7 +54,8 @@ CoSiMain::CoSiMain():
 #endif
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
 							 outputARGedges( False ), freqsOnly( False ),
-							 dropSingletonsFrac( 0 ), genmapRandomRegions( False )
+							 dropSingletonsFrac( 0 ), genmapRandomRegions( False ), outputPopInfo( False ),
+							 outputGenMap( False ), customStats( False ), customStatsExcludePop( NULL_POPID )
 {
 }
 
@@ -119,7 +123,10 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 	po::options_description output_options( "Specifying the output format" );
 	output_options.add_options()
 		 ( "outfilebase,o", po::value(&outfilebase), "base name for output files in cosi format" )
-		 ( "outms,m", po::bool_switch(&msOutput), "write output to stdout in ms format" );
+		 ( "outms,m", po::bool_switch(&msOutput), "write output to stdout in ms format" )
+		 ( "output-pop-info", po::bool_switch(&outputPopInfo), "output pop info in ms format output" )
+		 ( "output-gen-map", po::bool_switch(&outputGenMap), "output genetic map in ms format output" )
+		 ;
 
 	po::options_description output_details_options( "Specifying output details" );
 	output_details_options.add_options()
@@ -162,6 +169,8 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 		 ( "output-sim-times", po::bool_switch(&outputSimTimes), "for each sim output the time it took" )
 		 ( "output-end-gens", po::bool_switch(&outputEndGens), "for each sim output the generation at which it ended" )
 		 ( "stop-after-minutes", po::value(&stopAfterMinutes)->default_value(0.0), "stop simulation after this many minutes" )
+		 ( "custom-stats", po::bool_switch(&customStats), "compute custom stats" )
+		 ( "custom-stats-exclude-pop", po::value(&customStatsExcludePop)->default_value(NULL_POPID), "when computing custom stats, exclude this pop" )
 		 ;
 
 	po::options_description cosi_options;
@@ -218,6 +227,8 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 
 int 
 CoSiMain::cosi_main(int argc, char *argv[]) {
+	using std::cout;
+	using std::cerr;
 
 	if ( parse_args( argc, argv ) == EXIT_FAILURE ) return EXIT_FAILURE;
 
@@ -227,19 +238,21 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #ifndef COSI_NO_CPU_TIMER
 	boost::timer::cpu_timer overallTimer;
 	double stopAfterNs = stopAfterMinutes * 1e9 * 60.0;
-#endif	
+#endif
+	GenMapP genMap;
 	for ( int simNum = 0; simNum < nsims; simNum++ ) {
+		curSimNum = simNum;
 #ifndef COSI_NO_CPU_TIMER		
 		if ( stopAfterNs > 0 && overallTimer.elapsed().wall > stopAfterNs ) {
-			std::cout << "// cosi-early-exit\n";
-			std::cerr << "cosi: exiting after " << overallTimer.elapsed().wall << " ns; completed " <<
+			cout << "// cosi-early-exit\n";
+			cerr << "cosi: exiting after " << overallTimer.elapsed().wall << " ns; completed " <<
 				 simNum << " of " << nsims << " sims.\n";
 			break;
 		}
 		
 		boost::timer::cpu_timer cpuTimer;
 #endif		
-		if ( showProgress && !( simNum % showProgress ) ) { std::cerr << " sim " << simNum << " of " << nsims << std::endl; }
+		if ( showProgress && !( simNum % showProgress ) ) { cerr << " sim " << simNum << " of " << nsims << endl; }
 		CoSi cosi;
 
 		cosi.set_segfp( segfp );
@@ -251,6 +264,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		cosi.set_outputMutGens( outputMutGens );
 		cosi.set_outputRecombLocs( outputRecombLocs );
 		cosi.set_deltaTfactor( deltaTfactor );
+		cosi.set_genMapShift( genMapShift );
 #ifdef COSI_SUPPORT_COALAPX		
 		cosi.set_maxCoalDist( plen_t( maxCoalDist ) );
 		cosi.set_maxCoalDistCvxHull( maxCoalDistCvxHull );
@@ -264,15 +278,24 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		cosi.set_outputARGedges( this->outputARGedges );
 		cosi.set_genmapRandomRegions( this->genmapRandomRegions );
 
-		cosi.setUpSim( paramfile, randGen );
+		cosi.setUpSim( paramfile, randGen, genMap );
+
 		if ( simNum == 0 ) {
 			randGen = cosi.getRandGen();
-			if ( !msOutput ) std::cerr << "coalescent seed: " << randGen->getSeed() << "\n";
+			if ( !msOutput ) cerr << "coalescent seed: " << randGen->getSeed() << "\n";
 			if ( msOutput ) {
-				std::cout.precision( outputPrecision );
-				std::cout << "ms " << cosi.getDemography()->getTotSamples() << " " << nsims << "\n";
-				std::cout << "cosi_rand " << randGen->getSeed() << "\n\n";
+				cout.precision( outputPrecision );
+				DemographyP dem = cosi.getDemography();
+				cout << "ms " << dem->getTotSamples() << " " << nsims << "\n";
+				if ( outputPopInfo ) {
+					cout << "pops " << dem->getPopNames().size();
+					for ( size_t popNum = 0; popNum < dem->getPopNames().size(); ++popNum )
+						 cout << " " << dem->getPopNames()[ popNum ] << " " << dem->getSampleSizes()[ popNum ];
+					cout << "\n";
+				}
+				cout << "cosi_rand " << randGen->getSeed() << "\n\n";
 			}
+			customstats::init( cosi.getDemography(), nsims, cosi.getParams()->getLength(), customStatsExcludePop );
 		}
 
 		using boost::make_shared;
@@ -283,7 +306,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
 																																											 dropSingletonsFrac, randGen ) );
 
-		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << endl; }
+		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << "\n"; }
 	
 		ParamFileReaderP params = cosi.getParams();
 		cosi.getMutate()->setFreqsOnly( freqsOnly );
@@ -292,7 +315,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( showNumRecombs ) { PRINT( cosi.getRecomb()->getNumRecombs() ); }
 
 		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
-		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() ) {
+		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() || customStats ) {
 			//PRINT( "freezing" );
 			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
 										cosi.getGenMap()->recomb_get_length() );
@@ -315,11 +338,17 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #endif				 
 			}
 
+			if ( customStats ) {
+				customstats::record_sim( cosi.getDemography(), cosi.getGenMap(), params->getLength(),
+																 muts, params->getInfSites() );
+			}
 			
 			if ( msOutput ) 
-				 muts->print_haps_ms( std::cout, cosi.getDemography()->getSampleSizes(), cosi.getTreeStatsHook(),
+				 muts->print_haps_ms( cout, cosi.getDemography()->getSampleSizes(), cosi.getTreeStatsHook(),
 															cosi.get_outputMutGens(),
 															outputRecombLocs ? &(cosi.getRecombRecorder()->getRecombLocs()) : NULL,
+															outputGenMap,
+															cosi.getGenMap(),
 															outputPrecision,
 #ifndef COSI_NO_CPU_TIMER
 															outputSimTimes ? &cpuTimer : NULL,
@@ -328,11 +357,20 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #endif															
 															outputEndGens ? &endGen : NULL );
 		}  // output simulation results
+		// {
+		// 	boost::timer::cpu_times elapsed = cpuTimer.elapsed();
+		// 	std::cerr << (static_cast<double>( elapsed.user + elapsed.system ) / 1e8 ) << "\n";
+		// }
+		
+
+		genMap = cosi.getGenMap();
 		
 	}  // for each simulation
 
 	if ( segfp ) fclose( segfp );
 	if ( logfp ) fclose( logfp );
+
+	if ( customStats ) customstats::finish();
 
   return EXIT_SUCCESS;
 }  // CoSiMain::cosi_main()

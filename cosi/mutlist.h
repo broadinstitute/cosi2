@@ -150,6 +150,8 @@ public:
 	 //   outputPrecision - number of decimal places in the output
 	 void print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSizes, TreeStatsHookP treeStatsHook,
 											 bool_t outputMutGens, const vector< loc_t > *recombLocs,
+											 bool_t outputMutGlocs,
+											 GenMapP genMap,
 											 int outputPrecision,
 #ifndef COSI_NO_CPU_TIMER											 
 											 boost::timer::cpu_timer

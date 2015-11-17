@@ -122,6 +122,22 @@ private:
 	 // ** Field: genmapRandomRegions
 	 // Whether to take for each simulation a different random region from the genetic map.
 	 bool_t genmapRandomRegions;
+
+	 // ** Field: outputPopInfo
+	 // Whether to output population info (in ms output mode).
+	 bool_t outputPopInfo;
+	 
+	 // ** Field: outputGenMap
+	 // Whether to output the genetic map (in ms output mode).
+	 bool_t outputGenMap;
+
+	 // ** Field: customStats
+	 // Whether to compute custom stats.
+	 bool_t customStats;
+
+	 // ** Field: customStatsExcludePop
+	 // Whether to exclude a given pop from custom stats output
+	 popid customStatsExcludePop;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

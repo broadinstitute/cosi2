@@ -21,6 +21,7 @@
 #include <cosi/utils.h>
 #include <cosi/mutlist.h>
 #include <cosi/stats.h>
+#include <cosi/genmap.h>
 
 namespace cosi {
 
@@ -250,7 +251,10 @@ MutlistP Mutlist::loadFromMs( istream& is ) {
 //
 void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSizes,
 														 TreeStatsHookP treeStatsHook, bool_t outputMutGens,
-														 const vector< loc_t > *recombLocs, int outputPrecision,
+														 const vector< loc_t > *recombLocs,
+														 bool_t outputMutGlocs,
+														 GenMapP genMap,
+														 int outputPrecision,
 #ifndef COSI_NO_CPU_TIMER
 														 boost::timer::cpu_timer
 #else														 
@@ -276,6 +280,8 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 	}
 #endif	
 	if ( endGen ) strm << "stat endGen " << *endGen << "\n";
+	if ( outputMutGlocs )
+		 strm << "region_len_cM: " << ( genMap->getRegionRecombRateAbs() * 100. ) << "\n";
 			 
 	strm << "segsites: " << nmuts << "\n";
 	
@@ -288,6 +294,12 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 		strm << "positions:";
 		ForEach( const Mut& m, mutlist->getMuts() ) strm << " " << get_loc( m.loc );
 		strm << "\n";
+
+		if ( outputMutGlocs ) {
+			strm << "positions_genMap:";
+			ForEach( const Mut& m, mutlist->getMuts() ) strm << " " << genMap->getGdPos( m.loc );
+			strm << "\n";
+		}
 
 		if ( outputMutGens ) {
 			strm << "muttimes:";

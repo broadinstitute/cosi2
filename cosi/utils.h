@@ -60,6 +60,9 @@
 #include <boost/exception/exception.hpp>
 #include <boost/exception/error_info.hpp>
 #include <boost/container/flat_map.hpp>
+#include <boost/range/algorithm/lower_bound.hpp>
+#include <boost/range/sub_range.hpp>
+#include <boost/next_prior.hpp>
 #include <cosi/utildefs.h>
 
 #ifdef COSI_VALGRIND
@@ -96,7 +99,12 @@ struct cosi_error: virtual std::exception, virtual boost::exception { };
 struct cosi_io_error: virtual cosi_error { };
 
 typedef boost::error_info<struct tag_errno_code,int> errno_code;
+typedef boost::error_info<struct tag_error_bad_line,std::string> error_bad_line;
 typedef boost::error_info<struct tag_error_msg,std::string> error_msg;
+typedef boost::error_info<struct tag_error_msg2,std::string> error_msg2;
+typedef boost::error_info<struct tag_error_msg3,std::string> error_msg3;
+typedef boost::error_info<struct tag_error_msg4,std::string> error_msg4;
+typedef boost::error_info<struct tag_error_msg5,std::string> error_msg5;
 
 namespace util {
 
@@ -903,6 +911,30 @@ ostream& operator<<( ostream& os, const ValRange<T>& valRange ) {
 	if ( valRange.getMax() && !( valRange.getMin() == valRange.getMax() ) ) os << "-" << valRange.getMax();
 	
 	return os;
+}
+
+// ** Function: interpolate - linearly interpolate between two points.
+template <typename TX, typename TY>
+TY interpolate( TX x1, TY y1, TX x2, TY y2, TX x ) {
+	assert( x1 <= x && x <= x2 );
+	return y1 + ( y2 - y1 ) * ( ( x - x1 ) / ( x2 - x1 ) );
+}
+
+template <typename TXRange, typename TYRange>
+typename boost::range_value<TYRange>::type
+interp( const TXRange& xs, const TYRange& ys, typename boost::range_value<TXRange>::type x ) {
+	assert( !boost::empty( xs ) );
+	assert( boost::size( xs ) == boost::size( ys ) );
+	typename boost::range_iterator<const TXRange>::type x_it = boost::lower_bound( xs, x );
+	assert( x_it != boost::end( xs ) );
+	if ( x_it == boost::begin( xs ) ) return *boost::begin( ys );
+	typename boost::range_iterator<const TXRange>::type x_it_p = boost::prior( x_it );
+	assert( *x_it_p <= x && x <= *x_it );
+	typename boost::range_iterator<const TYRange>::type y_it = boost::next( boost::begin( ys ),
+																																					std::distance( boost::begin( xs ), x_it ) );
+	assert( y_it != boost::begin( ys ) );
+	typename boost::range_iterator<const TYRange>::type y_it_p = boost::prior( y_it );
+	return interpolate( *x_it_p, *y_it_p, *x_it, *y_it, x );
 }
 
 namespace tsv {
