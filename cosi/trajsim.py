@@ -57,7 +57,7 @@ from simuOpt import simuOptions
 
 from simuPOP import moduleInfo, MALE, FEMALE, Population, PointMutator, getRNG,\
     ALL_AVAIL, PyOperator, stat
-import collections
+import collections, copy
 
 def viewVars(var, gui=None):
     '''
@@ -1031,7 +1031,7 @@ class TrajectorySimulator:
     al (PLoS Genetics 3(3), 2007).
     '''
 
-    def __init__(self, N, nLoci=1, fitness=None, logger=None):
+    def __init__(self, N, nLoci=1, fitness=None, logger=None, migrations=None):
         '''Create a trajectory Simulator using provided demographic and genetic
         (natural selection) parameters. Member functions *simuForward* and
         *simuBackward* can then be used to simulate trajectories within certain
@@ -1068,6 +1068,10 @@ class TrajectorySimulator:
         logger
             A logging object (see Python module ``logging``) that can be used
             to output intermediate results with debug information.
+
+        migrations
+            An optional function from generation to list of migration rates, given as triples
+            of the form (fromPopIdx, toPopIdx, migrationRatePerChromPerGen)
         '''
         # a vector of subpopulation sizes is needed
         if type(N) in [type(1), type(1)]:
@@ -1085,6 +1089,7 @@ class TrajectorySimulator:
         self.nLoci = nLoci
         self.maxMutAge = 0
         self.minMutAge = 0
+        self.migrations = migrations
     
     def _Nt(self, gen):
         'Get Nt(gen) depending on the type of N'
@@ -1297,9 +1302,14 @@ class TrajectorySimulator:
             else:
                 # current Xt is the frequency at the previous generation.
                 beginXt = xt._freq(gen - 1)
+
             # _Ne(gen) is the population size at the end of this generation.
             Nt = self._Nt(gen)
             #
+
+            if self.logger:
+                self.logger.debug( 'gen=%(gen)s Nt=%(Nt)s beginXt=%(beginXt)s' % locals() )
+            
             if len(Nt) > len(beginXt):
                 # split (forward sense) from one population to nSP subpopulations
                 if len(beginXt) != 1:
@@ -1337,6 +1347,54 @@ class TrajectorySimulator:
                     for sp in range(len(Nt))]
             #
             assert len(endingXt) == len(Nt)
+
+            if self.logger:
+                self.logger.debug( 'gen=%(gen)s Nt=%(Nt)s endingXt=%(endingXt)s' % locals() )
+                
+            # handle migrations
+            if self.migrations:
+                assert all( len( freqs ) == 1 for freqs in endingXt ), "migrations currently only supported with one locus"
+                loc=0
+                migs = self.migrations( gen )
+                for srcPop, dstPop, migRate in migs:
+
+                    if self.logger: self.logger.debug( 'srcPop=%(srcPop)s dstPop=%(dstPop)s migRate=%(migRate)s Nt=%(Nt)s' % locals() )
+
+                    if endingXt[ srcPop ][ loc ] == 0 or endingXt[ dstPop ][ loc ] == 1: continue
+
+                    endingXt_befmig = copy.deepcopy( endingXt )
+                    
+                    # find the number of chroms bearing the selected allele in the source population
+                    # what if fixed or lost?
+                    # check also for small pop size.
+                    nSrcSel = int( 2 * Nt[ srcPop ] * endingXt[ srcPop ][ loc ] )
+
+                    if nSrcSel < 1: continue
+                    
+                    nSrcUns = 2 * Nt[ srcPop ] - nSrcSel
+
+                    # so, for each src chrom, there's a chance of migration; the number of migrators
+                    # is then binomial.  note that we're treating this as a collection of haploids;
+                    # more correctly might be to assume it's randomly mixing and see how many diploids
+                    # of each type migrate?  on the other hand these are probs of haploid chroms migrating?
+                    # so, if there's a fixed chance of a diploid _individual_ migrating, then
+                    # a chrom's chance of migrating is : there are p*p chance of being in an aa indiv.
+                    # would we get the same migration rates?
+                    
+                    nMigSel = getRNG().randBinomial( int( nSrcSel ), migRate )
+                    nMigUns = getRNG().randBinomial( int( nSrcUns ), migRate )
+
+                    nMig = nMigSel + nMigUns
+                    if self.logger: self.logger.debug( 'nSrcSel=%(nSrcSel)s nSrcUns=%(nSrcUns)s nMigSel=%(nMigSel)s nMigUns=%(nMigUns)s nMig=%(nMig)s' % locals() )
+                    endingXt[ srcPop ][ loc ] = float( nSrcSel - nMigSel ) / float( 2*Nt[ srcPop ] - nMig )
+
+                    nDstSel = int( 2 * Nt[ dstPop ] * endingXt[ dstPop ][ loc ] )
+                    endingXt[ dstPop ][ loc ] = float( nDstSel + nMigSel ) / float( 2*Nt[ dstPop ] + nMig )
+
+                    if self.logger:
+                        self.logger.debug( 'AFT MIG: gen=%(gen)s Nt=%(Nt)s endingXt=%(endingXt)s endingXt_befmig=%(endingXt_befmig)s' % locals() )
+                    
+            
             # set frequency at the end of this generation
             #if self.logger:
             #    self.logger.debug('Gen=%d, xt=%s'  % (gen, endingXt))           
@@ -1657,7 +1715,7 @@ class TrajectorySimulator:
 
 
 def simulateForwardTrajectory(N, beginGen, endGen, beginFreq, endFreq, nLoci=1,
-        fitness=None, maxAttempts=10000, logger=None):
+        fitness=None, maxAttempts=10000, logger=None, migrations=None ):
     '''Given a demographic model (*N*) and the fitness of genotype at one or
     more loci (*fitness*), this function simulates a trajectory of one or more
     unlinked loci (*nLoci*) from allele frequency *freq* at generation
@@ -1672,7 +1730,7 @@ def simulateForwardTrajectory(N, beginGen, endGen, beginFreq, endFreq, nLoci=1,
     can be used to adjust your fitness model and/or ending allele frequency
     if a trajectory is difficult to obtain because of parameter mismatch.
     '''
-    return TrajectorySimulator(N, nLoci, fitness, logger).simuForward(
+    return TrajectorySimulator(N, nLoci, fitness, logger, migrations).simuForward(
         beginGen, endGen, beginFreq, endFreq, maxAttempts)
 
 def simulateBackwardTrajectory(N, endGen, endFreq, nLoci=1, fitness=None,
