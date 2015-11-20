@@ -13,6 +13,12 @@ We use the git-flow branching model described at http://nvie.com/posts/a-success
 
 		When running multiple simulations in one cosi run, add the ability to randomly choose a different chunk of
 		the genetic map for the simulation.
+
+* Bugfix branches
+
+*** bugfixes
+
+		Bugfixes, especially serious ones, will be made on this long-running branch.
 		
 
 

@@ -459,6 +459,14 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
   from_popptr = dg_get_pop_by_name (frompop);
   to_popptr = dg_get_pop_by_name(topop);
 
+	util::chk( from_popptr, "move_nodes: unknown frompop" );
+	util::chk( to_popptr, "move_nodes: unknown topop" );
+
+	if ( to_popptr->isInactive() ) {
+		std::cerr << "WARNING: moving nodes to inactive pop " << topop << " at gen " << gen << " - ignored\n";
+		return;
+	}
+
   num_to_move = exactFraction ? nchroms_t( fractionToMove * from_popptr->pop_get_num_nodes() ) : ranbinom(from_popptr->pop_get_num_nodes(), fractionToMove);
 	PRINT11( "moving_nodes", gen, frompop, topop, fractionToMove, bool_t(exactFraction), num_to_move,
 					 from_popptr->pop_get_size(), from_popptr->pop_get_num_nodes(), to_popptr->pop_get_size(), to_popptr->pop_get_num_nodes() );

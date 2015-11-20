@@ -393,8 +393,11 @@ int Event_PopSizeExp2::procCount = 0;
 
 genid Event_PopSizeExp2::execute() {
 
+
 	genid oldgen = gen;
 	Pop *popPtr = getDemography()->dg_get_pop_by_name( pop );
+	util::chk( popPtr, "exp2: unknown pop!" );
+	//std::cerr << "exp2 exec: gen=" << gen << " procName=" << procName << " pop=" << pop << " nodes=" << popPtr->pop_get_num_nodes() << "\n";
 	if ( procName == -1 ) {
 		procName = ++procCount;
 		std::ostringstream procNameStrm;
@@ -417,7 +420,7 @@ genid Event_PopSizeExp2::execute() {
 
 		BOOST_AUTO( coalRateFn, ( Function< genid, double, Const<> >( .5 ) * ( f ) ) );
 
-#ifndef NDEBUG		
+#if 0
 		{
 			std::cerr.precision( 15 );
 			const genid g_beg( 10.0 ), g_end( 150.0 );
@@ -487,7 +490,13 @@ genid Event_Sweep::execute() {
 }
 
 genid Event_MigrationRate::execute() {
-	getMigrate()->migrate_set_rate (fromPop, toPop, rate);
+	Pop *fromPopPtr = getDemography()->dg_get_pop_by_name( fromPop );
+	Pop *toPopPtr = getDemography()->dg_get_pop_by_name( toPop );
+	util::chk( fromPopPtr, "migrate::execute - unknown pop" );
+	util::chk( toPopPtr, "migrate::execute - unknown pop" );
+	//std::cerr << "migration rate setting: gen=" << gen << " fromPop=" << fromPop << " toPop=" << toPop << "\n";
+	if ( !fromPopPtr->isInactive() && !toPopPtr->isInactive() )
+		 getMigrate()->migrate_set_rate (fromPop, toPop, rate);
 	return gen;
 }
 
@@ -501,11 +510,22 @@ genid Event_Admix::execute() {
 								currentevent->popindex[1],
 								currentevent->params[0]);  */
 		  
-	getDemography()->dg_move_nodes_by_name (admixedPop, sourcePop, admixFrac, gen );
+	Pop *admixedPopPtr = getDemography()->dg_get_pop_by_name( admixedPop );
+	Pop *sourcePopPtr = getDemography()->dg_get_pop_by_name( sourcePop );
+	util::chk( admixedPopPtr, "admix::execute - unknown admixed pop" );
+	util::chk( sourcePopPtr, "admix::execute - unknown source" );
+
+	if ( !admixedPopPtr->isInactive() && !sourcePopPtr->isInactive() )
+		 getDemography()->dg_move_nodes_by_name (admixedPop, sourcePop, admixFrac, gen );
 	return gen;
 }
 
 genid Event_Split::execute() {
+	Pop *fromPopPtr = getDemography()->dg_get_pop_by_name( fromPop );
+	Pop *newPopPtr = getDemography()->dg_get_pop_by_name( newPop );
+	util::chk( fromPopPtr, "split: unknown from pop!" );
+	util::chk( newPopPtr, "split: unknown new pop!" );
+	//std::cerr << "bef split: gen=" << gen << " from=" << fromPop << " new=" << newPop << " fromPopNodes=" << fromPopPtr->pop_get_num_nodes() << " newPopNodes=" << newPopPtr->pop_get_num_nodes() << "\n";
 	/* split two pops forward = join pops backwards */
 	getDemography()->dg_move_nodes_by_name ( /* going backwards, move all nodes from */ newPop,
 																					 /* into */ fromPop,
@@ -513,6 +533,8 @@ genid Event_Split::execute() {
 																					 gen, /* exactFraction= */ true );
 	getMigrate()->migrate_delete_all_for_pop( newPop );
 	/*		  demography->dg_end_pop_by_name (currentevent->popindex[1]); */
+	newPopPtr->makeInactive();
+	//std::cerr << "aft split: gen=" << gen << " from=" << fromPop << " new=" << newPop << " fromPopNodes=" << fromPopPtr->pop_get_num_nodes() << " newPopNodes=" << newPopPtr->pop_get_num_nodes() << "\n";
 	return gen;
 }
 
