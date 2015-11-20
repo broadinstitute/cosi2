@@ -60,13 +60,16 @@ Migrate::migrate_delete (popid from, popid to) {
 void 
 Migrate::migrate_delete_all_for_pop (popid pop) {
 	PRINT2( "deleting_all_migrations_involving", pop );
-  for ( MigrateRate **cur = &migrations; *cur; cur = &( (*cur)->next ) ) {
+	//std::cerr << "deleting_all_migrations_involving " << pop << "\n";
+  for ( MigrateRate **cur = &migrations; *cur; ) {
+		//std::cerr << " looking migration from " << (*cur)->frompop->pop_get_name() << " to " << (*cur)->topop->pop_get_name() << "\n";
 		if ( (*cur)->frompop->pop_get_name() == pop || (*cur)->topop->pop_get_name() == pop ) {
 			MigrateRate *to_del = *cur;
 			*cur = (*cur)->next;
+			//std::cerr << " deleting migration from " << to_del->frompop->pop_get_name() << " to " << to_del->topop->pop_get_name() << "\n";
 			free( to_del );
-			return;
-		}
+		} else
+			 cur = &( (*cur)->next );
   }
 }
 
@@ -82,6 +85,10 @@ Migrate::migrate_get_all_nodes_rate () const
 		 mig_lastrate = prob_per_gen_t( 0.0 );
   else {
     while (tempmigrate != NULL) {
+			// if ( tempmigrate->frompop->isInactive() || tempmigrate->topop->isInactive() )
+			// 	 std::cerr << " looking migration from " << tempmigrate->frompop->pop_get_name() << " to " << tempmigrate->topop->pop_get_name() << "\n";
+			util::chkCond( !tempmigrate->frompop->isInactive(), "migration on inactive node!" );
+			util::chkCond( !tempmigrate->topop->isInactive(), "migration on inactive node!" );
       numnodes = tempmigrate->frompop->pop_get_num_nodes();
       rate += numnodes * tempmigrate->rate;
       tempmigrate = tempmigrate->next;

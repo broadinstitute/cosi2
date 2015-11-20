@@ -108,6 +108,12 @@ public:
 					 )));
 	 }
 
+	 bool isInactive() const { return _isInactive; }
+	 void makeInactive() {
+		 util::chkCond( empty(), "error: pop must be empty before being inactivated" );
+		 _isInactive = true;
+	 }
+
 #ifdef COSI_DEV	 
 	 prob_t getCoalRate() const { return coalRate; }
 	 void setCoalRate( prob_t coalRate_ ) { coalRate = coalRate_; }
@@ -162,6 +168,10 @@ private:
 #ifdef COSI_DEV	 
 	 prob_t coalRate;
 #endif
+
+	 // Field: isInactive
+	 // Is this population inactive, i.e. has it been merged into its parent population (in the backward sense)?
+	 bool _isInactive;
 
 	 bool useCoalApx() const;
 
