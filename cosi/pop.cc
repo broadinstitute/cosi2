@@ -23,6 +23,7 @@ Pop::Pop(popid name_, int popsize_, const string& label_) :
 #ifdef COSI_DEV	
 	, coalRate( 0.0 )
 #endif
+	, _isInactive( false )
 {
 	chkCond( popsize >= 0, "creating pop with negative size" );
 }
