@@ -27,6 +27,10 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
+#include <boost/type_traits/has_multiplies.hpp>
+#include <boost/type_traits/has_divides.hpp>
+#include <boost/type_traits/has_minus.hpp>
+#include <boost/type_traits/has_plus.hpp>
 #include <boost/concept_check.hpp>
 #include <boost/proto/functional/std/utility.hpp>
 #include <boost/utility/enable_if.hpp>
@@ -460,8 +464,134 @@ operator/( const Function< TDomain, TRange1, Const<TConstSpec1> >& f1,
   return Function< TDomain, typename DivOp<TRange1,TRange2>::result_type, Const<> >( evalConst( f1 ) / evalConst( f2 ) );
 }
 
+// *** cval: convenience wrapper for const values
 //
-// *** Unary operations on functions: specificaly, negation.
+// We define a convenience wrapper cval(x), which saves the value and its type.
+// The result can then be used in binary operations with functions, without worrying about specifying
+// the domain and range: the domain is assumed the same as the function with which we're operating,
+// and the range is the saved type of the value.
+
+template <typename TVal>
+struct CVal {
+	 TVal val;
+
+	 explicit CVal( TVal val_ ): val( val_ ) { }
+};
+
+template <typename TVal>
+inline CVal<TVal> cval( TVal x ) { return CVal<TVal>( x ); }
+
+namespace detail {
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+struct result_of_factor_mult {
+	 typedef
+	 BOOST_TYPEOF_TPL(( boost::declval< Function< TDomain, TVal, Const<> > >() *
+											boost::declval< Function< TDomain, TRange, TSpec> >() )) type;
+};
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+struct result_of_factor_sub {
+	 typedef
+	 BOOST_TYPEOF_TPL(( boost::declval< Function< TDomain, TVal, Const<> > >() -
+											boost::declval< Function< TDomain, TRange, TSpec> >() )) type;
+};
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+struct result_of_factor_sub_r {
+	 typedef
+	 BOOST_TYPEOF_TPL(( boost::declval< Function< TDomain, TRange, TSpec> >() -
+											boost::declval< Function< TDomain, TVal, Const<> > >() )) type;
+};
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+struct result_of_factor_div {
+	 typedef
+	 BOOST_TYPEOF_TPL(( boost::declval< Function< TDomain, TVal, Const<> > >() /
+											boost::declval< Function< TDomain, TRange, TSpec> >() )) type;
+};
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+struct result_of_factor_div_r {
+	 typedef
+	 BOOST_TYPEOF_TPL(( boost::declval< Function< TDomain, TRange, TSpec> >() /
+											boost::declval< Function< TDomain, TVal, Const<> > >() )) type;
+};
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+struct result_of_factor_add {
+	 typedef
+	 BOOST_TYPEOF_TPL(( boost::declval< Function< TDomain, TVal, Const<> > >() +
+											boost::declval< Function< TDomain, TRange, TSpec> >() )) type;
+};
+
+}  // namespace detail
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+typename boost::enable_if< boost::has_multiplies< TVal, TRange>,
+													 typename detail::result_of_factor_mult<TVal,TDomain,TRange,TSpec>::type >::type
+operator*( CVal<TVal> v,
+           const Function< TDomain, TRange, TSpec >& f ) {
+  return Function< TDomain, TVal, Const<> >( v.val ) * f;
+}
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+typename boost::enable_if< boost::has_multiplies< TVal, TRange>,
+													 typename detail::result_of_factor_mult<TVal,TDomain,TRange,TSpec>::type >::type
+operator*( const Function< TDomain, TRange, TSpec >& f, CVal<TVal> v ) {
+  return Function< TDomain, TVal, Const<> >( v.val ) * f;
+}
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+typename boost::enable_if< boost::has_minus< TVal, TRange>,
+													 typename detail::result_of_factor_sub<TVal,TDomain,TRange,TSpec>::type >::type
+operator-( CVal<TVal> v,
+           Function< TDomain, TRange, TSpec > const& f ) {
+  return Function< TDomain, TVal, Const<> >( v.val ) - f;
+}
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+typename boost::enable_if< boost::has_minus< TRange, TVal >,
+													 typename detail::result_of_factor_sub_r<TVal,TDomain,TRange,TSpec>::type >::type
+operator-( const Function< TDomain, TRange, TSpec >& f, CVal<TVal> v ) {
+  return f - Function< TDomain, TVal, Const<> >( v.val );
+}
+
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+typename boost::enable_if< boost::has_divides< TVal, TRange>,
+													 typename detail::result_of_factor_div<TVal,TDomain,TRange,TSpec>::type >::type
+operator/( CVal<TVal> v,
+           const Function< TDomain, TRange, TSpec >& f ) {
+  return Function< TDomain, TVal, Const<> >( v.val ) / f;
+}
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+typename boost::enable_if< boost::has_divides< TRange, TVal>,
+													 typename detail::result_of_factor_div_r<TVal,TDomain,TRange,TSpec>::type >::type
+operator/( const Function< TDomain, TRange, TSpec >& f, CVal<TVal> v ) {
+  return f / Function< TDomain, TVal, Const<> >( v.val );
+}
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+typename boost::enable_if< boost::has_plus< TVal, TRange>,
+													 typename detail::result_of_factor_add<TVal,TDomain,TRange,TSpec>::type >::type
+operator+( CVal<TVal> v,
+           const Function< TDomain, TRange, TSpec >& f ) {
+  return Function< TDomain, TVal, Const<> >( v.val ) + f;
+}
+
+template <typename TVal, typename TDomain, typename TRange, typename TSpec>
+typename boost::enable_if< boost::has_plus< TRange, TVal >,
+													 typename detail::result_of_factor_add<TVal,TDomain,TRange,TSpec>::type >::type
+operator+( const Function< TDomain, TRange, TSpec >& f, CVal<TVal> v ) {
+  return Function< TDomain, TVal, Const<> >( v.val ) + f;
+}
+
+
+
+//
+// *** Unary operations on functions
 //
 //  For a function f, -f is a function that for value x returns -f(x).
 //
