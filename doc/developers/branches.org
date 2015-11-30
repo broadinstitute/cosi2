@@ -2,6 +2,10 @@
 
 We use the git-flow branching model described at http://nvie.com/posts/a-successful-git-branching-model/
 
+* long-running branches for various aspects of development
+
+*** f-test - code related to the test harness
+
 * Feature branches
 
 	
