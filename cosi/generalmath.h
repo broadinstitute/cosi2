@@ -63,6 +63,31 @@
 namespace cosi {
 namespace math {
 
+template <typename TDomain, typename TRange, typename TSpec> class Function;
+
+template <typename TFunc> struct DomainType;
+template <typename TFunc> struct RangeType;
+template <typename TFunc> struct SpecType;
+
+template <typename TDomain, typename TRange, typename TSpec, typename TArg>
+typename boost::enable_if< boost::is_convertible< TArg, TDomain >,
+													 TRange >::type
+eval( Function<TDomain, TRange, TSpec> const&, TArg val );
+
+template <typename TDomain, typename TRange, typename TSpec>
+struct result_of_indefiniteIntegral;
+
+template <typename TDomain, typename TRange, typename TSpec>
+typename result_of_indefiniteIntegral<TDomain, TRange, TSpec>::type
+indefiniteIntegral( const Function< TDomain, TRange, TSpec >& f);
+
+template <typename TDomain, typename TRange, typename TSpec> struct result_of_differentiate;
+
+template <typename TDomain, typename TRange, typename TSpec>
+typename result_of_differentiate<TDomain, TRange, TSpec>::type
+differentiate( const Function< TDomain, TRange, TSpec >& f);
+
+
 //
 // ** Utility metafunctions
 //
@@ -174,16 +199,24 @@ template <typename TFunc> struct SpecType {
 // Default implementation of eval(f,x) to evaluate a Function at a given point in its domain;
 // just calls the function's operator() .
 // 
-template <typename TFunc, typename TArg>
-typename boost::enable_if< boost::is_convertible< TArg, typename DomainType<TFunc>::type >,
-                           typename RangeType<TFunc>::type >::type
-eval( const TFunc& f, TArg x ) { return f( x ); }
+// template <typename TFunc, typename TArg>
+// typename boost::enable_if< boost::is_convertible< TArg, typename DomainType<TFunc>::type >,
+//                            typename RangeType<TFunc>::type >::type
+// eval( const TFunc& f, TArg x ) { return f( x ); }
 
+// template <typename TDomain, typename TRange, typename TSpec, typename TArg>
+// typename boost::enable_if< boost::is_convertible< TArg, TDomain >,
+//                            TRange >::type
+// eval( Function<TDomain, TRange, TSpec> const& f, TArg x ) { return f( x ); }
 
 // ** Particular function kinds
 // *** Constant functions
 //    We support run-time constant functions and compile-time constant functions.
-            
+
+template <typename TDomain, typename TRange, typename TSpec, typename TArg>
+typename boost::enable_if< boost::is_convertible< TArg, TDomain >,
+													 TRange >::type
+eval( Function<TDomain, TRange, TSpec> const& f, TArg x ) { return f(x); }
 
 struct RunTime;
 template <typename TConstSpec = RunTime> struct Const;
@@ -194,7 +227,8 @@ template <int N> struct CompileTime { static const int value = N; };
 template <int N> struct IsFunctionSpec< Const< CompileTime<N> > >: public boost::true_type {};
 
 template <typename TDomain, typename TRange, typename TSpec>
-TRange evalConst( const Function< TDomain, TRange, Const< TSpec > >& f ) { return eval( f, TDomain() ); }
+TRange evalConst( const Function< TDomain, TRange, Const< TSpec > >& f ) { return eval<TDomain, TRange, Const<TSpec>,
+																																											 TDomain>( f, TDomain() ); }
 
 // template <typename TDomain, typename TRange, typename TSpec>
 // std::ostream& operator<<( std::ostream& s, const Function<TDomain, TRange, TSpec>& f ) {
@@ -720,7 +754,9 @@ make_line_through( TDomain x1, TRange y1, TDomain x2, TRange y2 ) {
 #endif
 
 template <typename TPieceSpec> struct Piecewise;
-template <typename TPieceSpec> struct IsFunctionSpec< Piecewise<TPieceSpec>, typename boost::enable_if< IsFunctionSpec<TPieceSpec> >::type >: public boost::true_type {};
+template <typename TPieceSpec> struct IsFunctionSpec< Piecewise<TPieceSpec>,
+																											typename boost::enable_if< IsFunctionSpec<TPieceSpec> >::type >:
+ public boost::true_type {};
 
 template <typename TDomain, typename TRange, typename TPieceSpec>
 class Function<TDomain, TRange, Piecewise< TPieceSpec > > {
@@ -764,7 +800,7 @@ public:
 	 // The map is mutable; change it to change the definition of this piecewise function.
 	 const pieces_type& getPieces() const { return pieces; }
 	 pieces_type& getPieces() { return pieces; }
-   
+
 	 TRange operator()( TDomain x ) const {
 		 typename pieces_type::const_iterator it = pieces.lower_bound( x );
 		 return it == pieces.end() ? std::numeric_limits<TRange>::quiet_NaN() :
@@ -1116,6 +1152,17 @@ struct result_of_indefiniteIntegral<TDomain, typename MultOp<TRange1,TRange2>::r
    typedef BOOST_TYPEOF_TPL(( boost::declval<f_const_t>() * boost::declval<f_t>() )) type;
 };
 
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
+struct result_of_indefiniteIntegral<TDomain, typename MultOp<TRange1,TRange2>::result_type,
+                                    BinOp< TSpec, Const<>, MultOp<TRange1,TRange2> > >  {
+   BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+   typedef Function< TDomain, TRange1, Const<> > f_const_t;
+   typedef typename result_of_indefiniteIntegral<TDomain, TRange2, TSpec>::type f_t;
+   typedef BOOST_TYPEOF_TPL(( boost::declval<f_const_t>() * boost::declval<f_t>() )) type;
+};
+
+
 //
 // *** Linearity of integration
 //
@@ -1133,7 +1180,7 @@ indefiniteIntegral( const Function< TDomain, typename MultOp<TRange1,TRange2>::r
 
 template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
 typename result_of_indefiniteIntegral<TDomain, typename MultOp<TRange1, TRange2>::result_type,
-                                      BinOp< Const<>, TSpec,
+                                      BinOp< TSpec, Const<>,
                                              MultOp<TRange1,TRange2> > >::type
 indefiniteIntegral( const Function< TDomain, typename MultOp<TRange1,TRange2>::result_type,
                     BinOp< TSpec, Const<>,
