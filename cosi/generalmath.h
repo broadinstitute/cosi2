@@ -31,6 +31,7 @@
 #include <boost/type_traits/has_divides.hpp>
 #include <boost/type_traits/has_minus.hpp>
 #include <boost/type_traits/has_plus.hpp>
+#include <boost/tti/has_type.hpp>
 #include <boost/concept_check.hpp>
 #include <boost/proto/functional/std/utility.hpp>
 #include <boost/utility/enable_if.hpp>
@@ -63,7 +64,7 @@
 namespace cosi {
 namespace math {
 
-template <typename TDomain, typename TRange, typename TSpec> class Function;
+template <typename TDomain, typename TRange, typename TSpec, typename Enable=void> class Function;
 
 template <typename TFunc> struct DomainType;
 template <typename TFunc> struct RangeType;
@@ -74,7 +75,7 @@ typename boost::enable_if< boost::is_convertible< TArg, TDomain >,
 													 TRange >::type
 eval( Function<TDomain, TRange, TSpec> const&, TArg val );
 
-template <typename TDomain, typename TRange, typename TSpec>
+template <typename TDomain, typename TRange, typename TSpec, typename Enable=void>
 struct result_of_indefiniteIntegral;
 
 template <typename TDomain, typename TRange, typename TSpec>
@@ -87,6 +88,7 @@ template <typename TDomain, typename TRange, typename TSpec>
 typename result_of_differentiate<TDomain, TRange, TSpec>::type
 differentiate( const Function< TDomain, TRange, TSpec >& f);
 
+BOOST_TTI_HAS_TYPE(type)
 
 //
 // ** Utility metafunctions
@@ -121,14 +123,29 @@ struct DerivType {
 
 // Metafunction: AreaType
 // The type for an area, i.e. the result of integrating a function with given domain and range.
+
+
 template <typename TDomain, typename TRange>
-struct AreaType {
+struct has_area: public boost::mpl::and_< boost::has_minus< TDomain >,
+																					boost::has_minus< TRange >,
+																					boost::has_multiplies< typename DiffType<TDomain>::type,
+																																 typename DiffType<TRange>::type > > { };
+
+template <typename TDomain, typename TRange, typename TSpec>
+struct can_integrate: public boost::mpl::and_< has_area<TDomain, TRange>,
+																							 has_type_type< result_of_indefiniteIntegral<TDomain,TRange,TSpec> > > {
+};
+
+
+template <typename TDomain, typename TRange, typename Enable=void>
+struct AreaType;
+
+template <typename TDomain, typename TRange>
+struct AreaType<TDomain, TRange, typename boost::enable_if< has_area< TDomain, TRange > >::type > {
    typedef typename DiffType<TDomain>::type domain_diff_type;
    typedef typename DiffType<TRange>::type range_diff_type;
    typedef typename MultType<domain_diff_type, range_diff_type>::type type;
 };
-
-
 
 // * Functions
 // ** Generic function concept
@@ -169,7 +186,7 @@ private:
 //template <typename T> std::string getLabel( const T& );
 
 // *** GenericClass Function - A mathematical function of one variable.
-template <typename TDomain, typename TRange, typename TSpec> class Function;
+//template <typename TDomain, typename TRange, typename TSpec> class Function;
         
 // Template params:
 
@@ -391,10 +408,9 @@ struct DivOp {
 template <typename TSpec1, typename TSpec2, typename Op> struct BinOp;
 template <typename TSpec1, typename TSpec2, typename Op>
 struct IsFunctionSpec< BinOp< TSpec1, TSpec2, Op >,
-                       typename boost::enable_if< typename boost::mpl::and_< IsFunctionSpec< TSpec1 >,
-                                                                             IsFunctionSpec< TSpec2 > > >::type >: public boost::true_type {};
-
-
+                       typename boost::enable_if< boost::mpl::and_< IsFunctionSpec< TSpec1 >,
+																																		IsFunctionSpec< TSpec2 > > >::type >:
+		 public boost::true_type {};
 
 template <typename TDomain, typename TRange1, typename TRange2,
           typename TSpec1, typename TSpec2, template <typename,typename> class Op>
@@ -962,9 +978,9 @@ operator-( const Function<TDomain,TRange1,TSpec1>& f1, const Function<TDomain,TR
 
 // *** Definition of indefiniteIntegral function
 
-template <typename TDomain, typename TRange, typename TSpec> struct result_of_indefiniteIntegral {
-	 BOOST_STATIC_ASSERT_MSG( sizeof( TDomain ) == 0, "don't know how to get type of indef integral of f" );
-};
+// template <typename TDomain, typename TRange, typename TSpec> struct result_of_indefiniteIntegral {
+// 	 BOOST_STATIC_ASSERT_MSG( sizeof( TDomain ) == 0, "don't know how to get type of indef integral of f" );
+// };
 
 template <typename TDomain, typename TRange, typename TSpec>
 void indefiniteIntegral( const Function< TDomain, TRange, TSpec >& f) {
@@ -1096,8 +1112,12 @@ definiteIntegral( const Function< TDomain, TRange, TSpec >& f, TDomain a, TDomai
   return eval( f_int, b ) - eval( f_int, a );
 }
 
+template <typename TDomain, typename TRange, typename TSpec, typename Enable = void>
+struct result_of_integralFromPoint;
+
 template <typename TDomain, typename TRange, typename TSpec>
-struct result_of_integralFromPoint {
+struct result_of_integralFromPoint< TDomain, TRange, TSpec,
+																		typename boost::enable_if< can_integrate< TDomain, TRange, TSpec > >::type > {
    BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
    typedef Function< TDomain, TRange, TSpec > function_type;
    typedef typename result_of_indefiniteIntegral< TDomain, TRange, TSpec >::type f_int;
@@ -1124,8 +1144,8 @@ integralFromPoint( const Function< TDomain, TRange, TSpec >& f, TDomain x ) {
 //
 
 template <typename TDomain, typename TRange>
-struct result_of_indefiniteIntegral<TDomain, TRange, Const<> > {
-	 typedef typename DiffType<TDomain>::type domain_diff_type;
+struct result_of_indefiniteIntegral<TDomain, TRange, Const<>,
+																		typename boost::enable_if< has_area< TDomain, TRange > >::type > {
 	 typedef typename DiffType<TRange>::type range_diff_type;
 	 typedef typename AreaType<TDomain,TRange>::type integral_type;
 	 typedef Function< TDomain, integral_type, X_To<1, range_diff_type> > type;
@@ -1145,7 +1165,8 @@ indefiniteIntegral( const Function< TDomain, TRange, Const<> >& f ) {
 //
 
 template <typename TDomain, typename TRange, typename TFactor>
-struct result_of_indefiniteIntegral<TDomain, TRange, X_To<1,TFactor> > {
+struct result_of_indefiniteIntegral<TDomain, TRange, X_To<1,TFactor>,
+																		typename boost::enable_if< has_area< TDomain, TRange > >::type > {
 
    typedef Function< TDomain,
 										 typename AreaType<TDomain,TRange>::type,X_To<2,TFactor> > type;
@@ -1161,7 +1182,8 @@ indefiniteIntegral( const Function< TDomain, TRange, X_To<1,TFactor> >& f ) {
 
 template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
 struct result_of_indefiniteIntegral<TDomain, typename MultOp<TRange1,TRange2>::result_type,
-                                    BinOp< Const<>, TSpec, MultOp<TRange1,TRange2> > >  {
+                                    BinOp< Const<>, TSpec, MultOp<TRange1,TRange2> >,
+																		typename boost::enable_if< can_integrate< TDomain, TRange2, TSpec > >::type >  {
    BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
    typedef Function< TDomain, TRange1, Const<> > f_const_t;
    typedef typename result_of_indefiniteIntegral<TDomain, TRange2, TSpec>::type f_t;
@@ -1171,7 +1193,8 @@ struct result_of_indefiniteIntegral<TDomain, typename MultOp<TRange1,TRange2>::r
 
 template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
 struct result_of_indefiniteIntegral<TDomain, typename MultOp<TRange1,TRange2>::result_type,
-                                    BinOp< TSpec, Const<>, MultOp<TRange1,TRange2> > >  {
+                                    BinOp< TSpec, Const<>, MultOp<TRange1,TRange2> >,
+																		typename boost::enable_if< can_integrate< TDomain, TRange2, TSpec > >::type >  {
    BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
    typedef Function< TDomain, TRange1, Const<> > f_const_t;
    typedef typename result_of_indefiniteIntegral<TDomain, TRange2, TSpec>::type f_t;
@@ -1207,7 +1230,9 @@ indefiniteIntegral( const Function< TDomain, typename MultOp<TRange1,TRange2>::r
 
 template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
 struct result_of_indefiniteIntegral<TDomain, typename AddOp<TRange1,TRange2>::result_type,
-                                    BinOp<TSpec1, TSpec2, AddOp<TRange1,TRange2> > >  {
+                                    BinOp<TSpec1, TSpec2, AddOp<TRange1,TRange2> >,
+																		typename boost::enable_if< boost::mpl::and_< can_integrate< TDomain, TRange1, TSpec1 >,
+																																								 can_integrate< TDomain, TRange2, TSpec2 > > >::type >  {
    BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec1> ));
    BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec2> ));
    typedef typename result_of_indefiniteIntegral<TDomain, TRange1, TSpec1>::type f1_t;
@@ -1230,7 +1255,9 @@ indefiniteIntegral( const Function< TDomain, typename AddOp<TRange1,TRange2>::re
 
 template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
 struct result_of_indefiniteIntegral<TDomain, typename SubOp<TRange1,TRange2>::result_type,
-                                    BinOp<TSpec1, TSpec2, SubOp<TRange1,TRange2> > >  {
+                                    BinOp<TSpec1, TSpec2, SubOp<TRange1,TRange2> >,
+																		typename boost::enable_if< boost::mpl::and_< can_integrate< TDomain, TRange1, TSpec1 >,
+																																								 can_integrate< TDomain, TRange2, TSpec2 > > >::type >  {
    BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec1> ));
    BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec2> ));
    typedef typename result_of_indefiniteIntegral<TDomain, TRange1, TSpec1>::type f1_t;
@@ -1259,7 +1286,12 @@ indefiniteIntegral( const Function< TDomain, typename SubOp<TRange1,TRange2>::re
 
 
 template <typename TDomain, typename TSpec>
-struct result_of_indefiniteIntegral<TDomain,double, UnaryOp<TSpec,Exp> > {
+struct result_of_indefiniteIntegral<TDomain,double, UnaryOp<TSpec,Exp>,
+																		typename boost::enable_if< boost::is_same<
+														 typename SpecType< typename result_of_differentiate<TDomain,double,TSpec>::type >::type,
+														 Const<>
+																																 > >::type
+																		> {
 	 typedef typename result_of_differentiate<TDomain, double, TSpec>::type deriv_type;
 	 typedef typename DivType< Function< TDomain, double, Const< CompileTime< 1 > > >, deriv_type >::type fctr_type;
 	 typedef Function<TDomain,double,TSpec> exponent_type;
@@ -1269,11 +1301,7 @@ struct result_of_indefiniteIntegral<TDomain,double, UnaryOp<TSpec,Exp> > {
 
 
 template <typename TDomain, typename TSpec>
-typename boost::enable_if< boost::is_same<
-														 typename SpecType< typename result_of_differentiate<TDomain,double,TSpec>::type >::type,
-														 Const<>
-														 >,
- 													 typename result_of_indefiniteIntegral<TDomain,double, UnaryOp< TSpec, Exp > >::type >::type
+typename result_of_indefiniteIntegral<TDomain,double, UnaryOp< TSpec, Exp > >::type
 //typename result_of_indefiniteIntegral<TDomain,double, UnaryOp< TSpec, Exp > >::type
 indefiniteIntegral( const Function< TDomain, double, UnaryOp< TSpec, Exp > >& f ) {
 	BOOST_AUTO_TPL( d, differentiate( f.getFunction() ) );
@@ -1289,8 +1317,10 @@ indefiniteIntegral( const Function< TDomain, double, UnaryOp< TSpec, Exp > >& f 
 //
 
 
-template <typename TDomain, typename TRange, typename TPieceSpec>
-struct result_of_indefiniteIntegral<TDomain, TRange, Piecewise< TPieceSpec > > {
+template <typename TDomain, typename TRange, typename TPieceSpec >
+struct result_of_indefiniteIntegral<TDomain, TRange, Piecewise< TPieceSpec >,
+																		typename boost::enable_if< can_integrate< TDomain, TRange, TPieceSpec > >::type
+> {
    BOOST_MPL_ASSERT(( IsFunctionSpec<TPieceSpec> ));
    typedef typename result_of_indefiniteIntegral<TDomain,TRange,TPieceSpec>::type piece_integral_type;
    typedef typename DomainType<piece_integral_type>::type piece_integral_domain_type;
@@ -1420,36 +1450,163 @@ template <typename TSpec = void> struct Any;
 template <> struct IsFunctionSpec< Any<> >: public boost::true_type {};
 
 template <typename TDomain, typename TRange>
+struct result_of_indefiniteIntegral< TDomain, TRange, Any<>,
+																		 typename boost::enable_if< has_area< TDomain, TRange > >::type > {
+	 typedef typename AreaType<TDomain,TRange>::type integral_type;
+	 typedef Function< TDomain, integral_type, Any<> > type;
+};
+
+
+// template <typename TDomain, typename TRange, typename TSpec, typename Enable=void> struct WithIntegralConcept { };
+
+// template <typename TDomain, typename TRange>
+// struct WithIntegralConcept< TDomain, TRange,
+// 														typename boost::enable_if< has_area< TDomain, TRange > >::type > {
+// 	 virtual typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type
+// 	 do_indefiniteIntegral() const = 0;
+// };
+
+
+template <typename TDomain, typename TRange, typename Enable = void>
+struct FunctionObjectConcept {
+	 virtual ~FunctionObjectConcept() {}
+	 virtual TRange doEval( TDomain ) const = 0;
+	 virtual void doOutput( std::ostream& ) const = 0;	 
+};
+
+template <typename TDomain, typename TRange>
+struct FunctionObjectConcept<TDomain, TRange, typename boost::enable_if< has_area< TDomain, TRange > >::type > {
+	 virtual ~FunctionObjectConcept() {}
+	 virtual TRange doEval( TDomain ) const = 0;
+	 virtual void doOutput( std::ostream& ) const = 0;	 
+	 virtual Function< TDomain, typename AreaType< TDomain, TRange >::type, Any<> >
+	 do_indefiniteIntegral() const = 0;
+};
+
+// template <typename TDomain, typename TRange, typename Enable=void>
+// struct FunctionObjectConcept_integrable;
+
+// template <typename TDomain, typename TRange>
+// struct FunctionObjectConcept_integrable<TDomain,TRange, typename boost::enable_if< has_area< TDomain, TRange > >::type >
+// 	: public FunctionObjectConcept< TDomain, TRange > {
+//  	 virtual typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type
+//  	 do_indefiniteIntegral() const = 0;
+// };
+
+// template <typename TDomain, typename TRange>
+// struct FunctionObjectConcept_integrable<TDomain,TRange, typename boost::disable_if< has_area< TDomain, TRange > >::type >
+// 	: public FunctionObjectConcept< TDomain, TRange > {
+// 	 // typedef typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type integr_fn_type;
+//  	 // virtual integr_fn_type
+//  	 // do_indefiniteIntegral() const { return integr_fn_type(); }
+// };
+
+// template< typename TDomain, typename TRange, typename TSpec, typename Enable=void>
+// class FunctionObjectModel_integrable;
+
+template< typename TDomain, typename TRange, typename TSpec, typename Enable=void>
+class FunctionObjectModel:
+		 public FunctionObjectConcept< TDomain, TRange > {
+	 BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+public:
+	 FunctionObjectModel( const Function<TDomain, TRange, TSpec>& f_ ) : f( f_ ) {}
+	 virtual ~FunctionObjectModel() {}
+	 virtual TRange doEval( TDomain x ) const { return eval( f, x ); }
+	 virtual void doOutput( std::ostream& s ) const { s << f; }
+	 
+protected:
+	 Function<TDomain, TRange, TSpec> f;
+};
+
+template <typename TDomain, typename TRange, typename TSpec, typename Enable=void> struct do_intgrl {
+	 static Function< TDomain, typename AreaType< TDomain, TRange >::type, Any<> > get_integral( const Function< TDomain, TRange, TSpec >& ) {
+		 return Function< TDomain, typename AreaType< TDomain, TRange >::type, Any<> >();
+	 }
+};
+
+template <typename TDomain, typename TRange, typename TSpec>
+struct do_intgrl< TDomain, TRange, TSpec, typename boost::enable_if< can_integrate< TDomain, TRange, TSpec > >::type > {
+	 static Function< TDomain, typename AreaType< TDomain, TRange >::type, Any<> > get_integral( const Function< TDomain, TRange, TSpec >& f ) {
+		 return indefiniteIntegral( f );
+	 }
+};
+
+
+template< typename TDomain, typename TRange, typename TSpec>
+class FunctionObjectModel< TDomain, TRange, TSpec, typename boost::enable_if< has_area< TDomain, TRange > >::type  >:
+		 public FunctionObjectConcept< TDomain, TRange > {
+	 BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+public:
+	 FunctionObjectModel( const Function<TDomain, TRange, TSpec>& f_ ) : f( f_ ) {}
+	 virtual ~FunctionObjectModel() {}
+	 virtual TRange doEval( TDomain x ) const { return eval( f, x ); }
+	 virtual void doOutput( std::ostream& s ) const { s << f; }
+
+	 
+	 virtual Function< TDomain, typename AreaType< TDomain, TRange >::type, Any<> >
+	 do_indefiniteIntegral() const { return do_intgrl<TDomain,TRange,TSpec>::get_integral( f ); }
+
+protected:
+	 Function<TDomain, TRange, TSpec> f;
+};
+
+
+	 //typedef typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type integr_fn_type;
+	 
+
+
+// template< typename TDomain, typename TRange, typename TSpec, typename Enable=void>
+// class FunctionObjectModel;
+// template< typename TDomain, typename TRange, typename TSpec>
+// class FunctionObjectModel<TDomain, TRange, TSpec, typename boost::disable_if< can_integrate< TDomain, TRange, TSpec > >::type > :
+// 		 public FunctionObjectConcept_integrable< TDomain, TRange > {
+// 	 BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+// public:
+// 	 FunctionObjectModel( const Function<TDomain, TRange, TSpec>& f_ ) : f( f_ ) {}
+// 	 virtual ~FunctionObjectModel() {}
+// 	 virtual TRange doEval( TDomain x ) const { return eval( f, x ); }
+// 	 virtual void doOutput( std::ostream& s ) const { s << f; }
+	 
+// protected:
+// 	 Function<TDomain, TRange, TSpec> f;
+// };
+
+// template <typename TDomain, typename TRange, typename TSpec, typename Enable = void >
+// class FunctionObjectModel_integrable;
+
+// template <typename TDomain, typename TRange, typename TSpec >
+// class FunctionObjectModel_integrable< TDomain, TRange, TSpec,
+// 																			typename boost::enable_if< can_integrate< TDomain, TRange, TSpec > >::type >
+// 	: public FunctionObjectModel< TDomain, TRange, TSpec > {
+// 	 FunctionObjectModel_integrable( const Function< TDomain, TRange, TSpec >& f_ ):
+//      FunctionObjectModel< TDomain, TRange, TSpec >( f_ ) { }
+
+// 	 virtual typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type
+// 	 do_indefiniteIntegral() const { return indefiniteIntegral( this->FunctionObjectModel<TDomain,TRange,TSpec>::f ); }
+// };
+
+
+template <typename TDomain, typename TRange>
 class Function<TDomain, TRange, Any<> > {
 public:
    typedef TDomain argument_type;
    typedef TRange result_type;
    typedef Any<> spec_type;
-   
-private:
-   struct FunctionObjectConcept {
-      virtual ~FunctionObjectConcept() {}
-      virtual TRange doEval( TDomain ) const = 0;
-			virtual void doOutput( std::ostream& ) const = 0;
-   };
 
-   template< typename TSpec > class FunctionObjectModel : public FunctionObjectConcept {
-      BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
-   public:
-      FunctionObjectModel( const Function<TDomain, TRange, TSpec>& f_ ) : f( f_ ) {}
-      virtual ~FunctionObjectModel() {}
-      virtual TRange doEval( TDomain x ) const { return eval( f, x ); }
-			virtual void doOutput( std::ostream& s ) const { s << f; }
-   private:
-      Function<TDomain, TRange, TSpec> f;
-   };
-
-   boost::shared_ptr<FunctionObjectConcept> object;
+public:
+   boost::shared_ptr< FunctionObjectConcept<TDomain, TRange> > object;
 
 public:
    Function()  { }
-   template< typename TSpec > Function( const Function<TDomain, TRange, TSpec>& obj ) :
-     object( new FunctionObjectModel<TSpec>( obj ) ) {}
+   // template< typename TSpec > Function( typename boost::enable_if< can_integrate< TDomain, TRange, TSpec >,
+	 // 																			const Function<TDomain, TRange, TSpec>& >::type obj ) :
+   template< typename TSpec > Function( const Function<TDomain, TRange, TSpec>&  obj ) :
+     object( new FunctionObjectModel<TDomain, TRange, TSpec>( obj ) ) {}
+
+   // template< typename TSpec > Function( typename boost::disable_if< can_integrate< TDomain, TRange, TSpec >,
+	 // 																			const Function<TDomain, TRange, TSpec>& >::type obj ) :
+   //   object( new FunctionObjectModel_integrable<TDomain, TRange, TSpec>( obj ) ) {}
+	 
 
    template <typename TSpec>
    Function& operator=( const Function<TDomain, TRange, TSpec>& obj ) {
@@ -1459,7 +1616,7 @@ public:
 
    template <typename TSpec>
    void reset( const Function<TDomain, TRange, TSpec>& obj ) {
-     object.reset( new FunctionObjectModel<TSpec>( obj ) );
+     object.reset( new FunctionObjectModel<TDomain, TRange, TSpec>( obj ) );
    }
 
    bool empty() const { return !object.get(); }
@@ -1475,9 +1632,18 @@ public:
 	 
 };  // end: type erasure of a Function
 
+template <typename TDomain, typename TRange>
+	 typename boost::lazy_enable_if< has_area< TDomain, TRange  >,
+																	 result_of_indefiniteIntegral< TDomain, TRange, Any<> > >::type
+indefiniteIntegral( const Function< TDomain, TRange, Any<> >& f ) {
+		 return f.object->do_indefiniteIntegral();
+}
+
+
 template <typename TDomain, typename TRange, typename TSpec> inline
 Function< TDomain, TRange, Any<> >
 fn_any( Function< TDomain, TRange, TSpec > const& f ) { return Function< TDomain, TRange, Any<> >( f ); }
+
 
 
 // * Arrival processes
@@ -1939,7 +2105,7 @@ BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::RangeType,1)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::SpecType,1)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::IsFunctionSpec,2)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::FunctionConcept,1)
-BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Function,3)
+BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Function,4)
 
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Const,1)
 BOOST_TYPEOF_REGISTER_TYPE(cosi::math::RunTime)
