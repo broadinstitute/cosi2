@@ -58,6 +58,8 @@ public:
 	 EventP parseEvent( const char *buffer );
 	 void addEvent( EventP event );
 
+	 void constructBaseModel( BaseModelP ) const;
+
 	 void historical_setMigrate( MigrateP migrate_ ) { migrate = migrate_; }
 	 void historical_setSweep( SweepP sweep_ ) { sweep = sweep_; }
 

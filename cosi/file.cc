@@ -55,6 +55,7 @@ void ParamFileReader::init() {
 //  rseed = 0;
 
 	histEvents = boost::make_shared<HistEvents>( demography );
+	baseModel = boost::make_shared<BaseModel>();
 	infSites = False;
 //	printSeed = True;
 	ignoreRecombsInPop = NULL_POPID;
@@ -81,6 +82,9 @@ void ParamFileReader::file_read(boost::filesystem::path filename, FILE *segfp)
 		}
 		file_get_data (infileptr, segfp);
 		fclose(infileptr);
+		histEvents->constructBaseModel( baseModel );
+		std::cerr.precision(16);
+		std::cerr << *baseModel << "\n";
 	} catch( boost::exception& e ) {
 		e << boost::errinfo_file_name( filename.string() );
 		throw;
@@ -198,7 +202,7 @@ ParamFileReader::file_proc_buff(char *var, char* buffer, FILE* segfp)
 			 file_exit("file_proc_buff", 
 								 "parameter file - pop specified does not exist.");
 		
-		baseModel.popInfos[ popname ].setSizeFrom( ZERO_GEN, popsize_float_t( intarg ) );
+		baseModel->popInfos[ popname ].setSizeFrom( ZERO_GEN, popsize_float_t( intarg ) );
 	}
 	else if (strcmp(var, "sample_size") == 0) {		
 		popname = popid( atoi(strtok (buffer, " ")) );
@@ -280,7 +284,7 @@ ParamFileReader::file_get_data (FILE *fileptr, FILE *segfp)
 	char c,
 		 buffer[BUF_MAX],
 		 var[50];
-	unsigned lineNum = 0;
+	unsigned lineNum = 1;
 
 	c = getc(fileptr);
 	while (c != EOF) {

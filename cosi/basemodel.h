@@ -4,9 +4,13 @@
 #include <utility>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <boost/typeof/typeof.hpp>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/generalmath.h>
+
+#include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()
 
 namespace cosi {
 
@@ -54,9 +58,23 @@ struct BaseModel {
 	 std::map< popid, PopInfo > popInfos;
 };  // struct BaseModel
 
+inline
+std::ostream& operator<<( std::ostream& s, BaseModel const& baseModel ) {
+	s << "[BaseModel:\n";
+	for( BOOST_AUTO( pi, baseModel.popInfos.begin() );
+			 pi != baseModel.popInfos.end(); ++pi ) {
+		s << "pop " << pi->first << "\n";
+		s << "  size fn: " << pi->second.popSizeFn << "\n";
+	}
+	s << "]\n";
+	return s;
+}
 
 //std::map< genid, ModelState > getBaseModel( DemographyP demography, HistEventsP histEvents );
 
 }  // namespace cosi
+
+BOOST_TYPEOF_REGISTER_TYPE(cosi::BaseModel)
+BOOST_TYPEOF_REGISTER_TYPE(cosi::BaseModel::PopInfo)
 
 #endif  // #ifndef INCLUDE_COSI_BASEMODEL_H

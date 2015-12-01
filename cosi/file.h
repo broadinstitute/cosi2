@@ -37,6 +37,7 @@ public:
 	 len_bp_int_t getGeneConversionMinTractLength() const { return geneConversionMinTractLength; }
 	 GeneConversion::GCModel getGeneConversionModel() const { return geneConversionModel; }
 	 HistEventsP getHistEvents() const { return histEvents; }
+	 BaseModelP getBaseModel() const { return baseModel; }
 	 bool_t getInfSites() const { return infSites; }
 
 //	 void setPrintSeed( bool_t printSeed_ ) { printSeed = printSeed_; }
@@ -91,7 +92,7 @@ private:
 
 	 // Field: baseModel
 	 // The demographic model, expressed in terms of basic primitives.
-	 BaseModel baseModel;
+	 BaseModelP baseModel;
 
 	 void init();
 	 int file_get_data (FILE * fileptr, FILE *);

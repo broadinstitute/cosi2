@@ -10,6 +10,8 @@
  *
  */
 
+//#define COSI_DEV_PRINT
+
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
@@ -20,6 +22,7 @@
 #include <algorithm>
 #include <boost/make_shared.hpp>
 #include <boost/next_prior.hpp>
+#include <boost/exception/all.hpp>
 #include <cosi/utils.h>
 #include <cosi/pop.h>
 #include <cosi/historical.h>
@@ -33,6 +36,9 @@
 #include <cosi/basemodel.h>
 
 namespace cosi {
+
+struct cosi_hist_event_error: virtual cosi_io_error {};
+typedef boost::error_info<struct errinfo_hist_err_detail_,std::string> errinfo_hist_err_detail;
 
 HistEvents::HistEvents( DemographyP demography_ ):
 	demography( demography_ ) { }
@@ -49,9 +55,12 @@ namespace histevents {
 class Event_PopSize: public HistEvents::Event {
 public:
 	 Event_PopSize( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, nchroms_t popsize_ ):
-		 Event( histEvents_, label_, gen_ ), pop( pop_ ), popsize( popsize_ ) { }
+		 Event( histEvents_, label_, gen_ ), pop( pop_ ), popsize( popsize_ ) {
+		 chkRep();
+	 }
 	 Event_PopSize( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
 		 is >> pop >> gen >> popsize;
+		 chkRep();
 	 }
 	 virtual ~Event_PopSize();
 
@@ -75,6 +84,12 @@ private:
 	 // Field: popsize
 	 // The new population size
 	 nchroms_t popsize;
+
+	 void chkRep() const {
+		 if ( popsize < nchroms_t(0) )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+															 << error_msg( "pop size negative" ) );
+	 }
 };  // class Event_PopSize
 
 // Class: Event_PopSizeExp
@@ -84,10 +99,12 @@ public:
 	 Event_PopSizeExp( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, nchroms_t popsize_,
 										 genid genBeg_, nchroms_t popSizeBeg_ ):
 		 Event( histEvents_, label_, gen_ ), pop( pop_ ) , popsize( popsize_ ), genBeg( genBeg_ ), popSizeBeg( popSizeBeg_ ) {
+		 PRINT6( pop, gen, genBeg, popsize, popSizeBeg, expansionRate );
 		 calcExpansionRate();
 	 }
 	 Event_PopSizeExp( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
 		 is >> pop >> gen >> genBeg >> popsize >> popSizeBeg;
+		 PRINT6( pop, gen, genBeg, popsize, popSizeBeg, expansionRate );
 		 calcExpansionRate();
 		 PRINT6( pop, gen, genBeg, popsize, popSizeBeg, expansionRate );
 	 }
@@ -131,7 +148,15 @@ private:
 	 // The expansion rate at each step
 	 gensInv_t expansionRate;
 
-	 void calcExpansionRate() { expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen ); }
+	 void calcExpansionRate() {
+		 if ( genBeg <= gen )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+															 << error_msg( "pop size expansion ends before it starts" ) );
+		 if ( popSizeBeg >= popsize ) 
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+															 << error_msg( "pop size expansion: size does not increase" ) );
+		 expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen );
+	 }
 
 };  // class Event_PopSizeExp 
 
@@ -191,7 +216,16 @@ private:
 	 int procName;
 	 std::string procNameStr;
 
-	 void calcExpansionRate() { expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen ); }
+	 void calcExpansionRate() {
+		 if ( genBeg <= gen )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+															 << error_msg( "pop size expansion ends before it starts" ) );
+		 if ( popSizeBeg >= popsize ) 
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+															 << error_msg( "pop size expansion: size does not increase" ) );
+		 
+		 expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen );
+	 }
 
 };  // class Event_PopSizeExp2 
 
@@ -399,7 +433,7 @@ void Event_PopSize::addToBaseModel( BaseModel& baseModel ) const {
 const gens_t Event_PopSizeExp::STEP( getenv( "COSI_POPSIZEEXP_STEP" ) ? atof( getenv( "COSI_POPSIZEEXP_STEP" ) ) : 10.0 );
 
 genid Event_PopSizeExp::execute() {
-	PRINT( STEP );
+	//	PRINT( STEP );
 	getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( ToDouble( popsize + static_cast< popsize_float_t >( .5 ) ) ) );
 	genid oldgen = gen;
 	if ( gen < genBeg ) {
@@ -428,6 +462,8 @@ void Event_PopSizeExp::addToBaseModel( BaseModel& baseModel ) const {
 	// and that if there already is a size specified at gen, it equals the size here?
 
 	BOOST_AUTO( &pieces, baseModel.popInfos[ pop ].popSizeFn.getPieces() );
+
+	PRINT5( pop, genBeg, popSizeBeg, gen, popsize );
 
 	pieces[ gen ] =
 			cval( popSizeBeg ) *
@@ -634,8 +670,25 @@ void Event_Split::addToBaseModel( BaseModel& baseModel ) const {
 	baseModel.popInfos[ newPop ].setMigrRate( fromPop, gen, prob_per_chrom_per_gen_t( 1.0 ) );
 }
 
+////////////////////////
 
 }  // namespace histevents
+
+void HistEvents::constructBaseModel( BaseModelP baseModel ) const {
+	typedef std::pair<genid,EventP> pair_t;
+	BOOST_FOREACH( pair_t e, events )
+		 if ( e.second->getEventKind() != Event::E_BOTTLENECK &&
+					e.second->getEventKind() != Event::E_ADMIX )
+				e.second->addToBaseModel( *baseModel );
+
+	std::cerr << "\nb4 bnecks:" << *baseModel << "\n";
+
+	BOOST_FOREACH( pair_t e, events )
+		 if ( e.second->getEventKind() == Event::E_BOTTLENECK ||
+					e.second->getEventKind() == Event::E_ADMIX )
+				e.second->addToBaseModel( *baseModel );
+	
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
