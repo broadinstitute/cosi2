@@ -93,6 +93,9 @@ public:
 	 class Event: virtual public boost::enable_shared_from_this<Event> {
 	 public:
 
+			enum eventKind_t { E_POPSIZE, E_POPSIZEEXP, E_SPLIT, E_MIGRATIONRATE,
+												 E_BOTTLENECK, E_ADMIX, E_SWEEP };
+
 			// Method: getGen
 			// Returns the time when this events occurs (for instantenous events),
 			// or -- for events taking place over a time interval -- the time when the event
@@ -111,7 +114,11 @@ public:
 			// backwards simulation should continue after this event has completed.
 			virtual genid execute() = 0;
 
+			virtual eventKind_t getEventKind() const = 0;
+
 			virtual void processSimEnd( genid /*gen*/ ) { }
+
+			virtual void addToBaseModel( BaseModel& ) const { }
 			
 	 private:
 			// Field: histEventsP

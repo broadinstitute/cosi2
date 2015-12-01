@@ -95,6 +95,7 @@ public:
 		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq;
 	 }
 	 static const char *typeStr() { return "sweep1"; }
+	 virtual eventKind_t getEventKind() const { return E_SWEEP; }	 
 				
 	 virtual ~Event_SweepOnePop();
 

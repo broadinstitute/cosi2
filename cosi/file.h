@@ -9,6 +9,7 @@
 #include <cosi/geneconversion.h>
 #include <cosi/generalmath.h>
 #include <cosi/cosirand.h>
+#include <cosi/basemodel.h>
 
 namespace cosi {
 
@@ -87,6 +88,10 @@ private:
 	 // Field: pop2sizeTraj
 	 // Map from pop to trajectory specification for that pop.
 	 pop2sizeTraj_t pop2sizeTraj;
+
+	 // Field: baseModel
+	 // The demographic model, expressed in terms of basic primitives.
+	 BaseModel baseModel;
 
 	 void init();
 	 int file_get_data (FILE * fileptr, FILE *);

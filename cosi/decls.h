@@ -100,6 +100,8 @@ class CondSnpMgr;
 typedef boost::shared_ptr<CondSnpDef> CondSnpDefP;  // defined in condsnp.h
 typedef boost::shared_ptr<CondSnpMgr> CondSnpMgrP;  // defined in condsnp.h
 
+class BaseModel;  // defined in basemodel.h
+
 }  // namespace cosi
 
 

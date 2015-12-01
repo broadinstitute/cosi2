@@ -260,6 +260,10 @@ private:
    TRange val;
 };
 
+template <typename TDomain, typename TRange> inline
+Function< TDomain, TRange, Const<> >
+fn_const( TRange v ) { return Function< TDomain, TRange, Const<> >( v ); }
+
 
 template <typename TDomain, typename TRange, int val>
 class Function<TDomain, TRange, Const< CompileTime<val> > > {
@@ -320,6 +324,9 @@ public:
 private:
    factor_type factor;
 };
+
+template <typename TDomain, typename TRange>
+Function< TDomain, TRange, X_To<1> > fn_x() { return Function< TDomain, TRange, X_To<1> >(); }
 
 template <typename TDomain, typename FactorType>
 class Function<TDomain, typename MultType< FactorType,
@@ -510,10 +517,15 @@ struct CVal {
 	 TVal val;
 
 	 explicit CVal( TVal val_ ): val( val_ ) { }
+
+	 template <typename TDomain>
+	 operator Function< TDomain, TVal, Const<> >() const {
+		 return Function< TDomain, TVal, Const<> >( val );
+	 }
 };
 
 template <typename TVal>
-inline CVal<TVal> cval( TVal x ) { return CVal<TVal>( x ); }
+ inline CVal<TVal> cval( TVal x ) { return CVal<TVal>( x ); }
 
 namespace detail {
 
@@ -1434,6 +1446,12 @@ public:
      object( new FunctionObjectModel<TSpec>( obj ) ) {}
 
    template <typename TSpec>
+   Function& operator=( const Function<TDomain, TRange, TSpec>& obj ) {
+     reset( obj );
+		 return *this;
+   }
+
+   template <typename TSpec>
    void reset( const Function<TDomain, TRange, TSpec>& obj ) {
      object.reset( new FunctionObjectModel<TSpec>( obj ) );
    }
@@ -1443,6 +1461,10 @@ public:
 
    TRange operator()( TDomain x ) const { assert( object.get() ); return object->doEval( x ); }
 };  // end: type erasure of a Function
+
+template <typename TDomain, typename TRange, typename TSpec> inline
+Function< TDomain, TRange, Any<> >
+fn_any( Function< TDomain, TRange, TSpec > const& f ) { return Function< TDomain, TRange, Any<> >( f ); }
 
 
 // * Arrival processes
@@ -1938,6 +1960,8 @@ BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::InterpBiFun,2)
 
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Exp,1)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Log,1)
+
+BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::CVal,1)
 
 #endif  // #ifndef __INCLUDE_COSI_GENERALMATH_H
 // Postamble:1 ends here
