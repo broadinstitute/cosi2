@@ -64,7 +64,8 @@ std::ostream& operator<<( std::ostream& s, BaseModel const& baseModel ) {
 	for( BOOST_AUTO( pi, baseModel.popInfos.begin() );
 			 pi != baseModel.popInfos.end(); ++pi ) {
 		s << "pop " << pi->first << "\n";
-		s << "  size fn: " << pi->second.popSizeFn << "\n";
+		s << "  size fn         : " << pi->second.popSizeFn << "\n";
+		s << "  size fn integral: " << indefiniteIntegral( pi->second.popSizeFn ) << "\n";
 	}
 	s << "]\n";
 	return s;
