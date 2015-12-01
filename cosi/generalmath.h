@@ -1432,10 +1432,6 @@ evalInverse( const Function<TDomain, TRange, TSpec>& f, TDomain a, TDomain b, TR
   }
 }
 
-// template <typename TDomain, typename TRange, typename TPieceSpec>
-// indefiniteIntegral< const Function< TDomain, TRange, Piecewise< TPieceSpec > >& f ) {
-  
-// }
 
 // template <typename TDomain, typename TRange, typename TSpec>
 // typename IntegrationResultType<TDomain,TRange>::type
@@ -1456,16 +1452,7 @@ struct result_of_indefiniteIntegral< TDomain, TRange, Any<>,
 	 typedef Function< TDomain, integral_type, Any<> > type;
 };
 
-
-// template <typename TDomain, typename TRange, typename TSpec, typename Enable=void> struct WithIntegralConcept { };
-
-// template <typename TDomain, typename TRange>
-// struct WithIntegralConcept< TDomain, TRange,
-// 														typename boost::enable_if< has_area< TDomain, TRange > >::type > {
-// 	 virtual typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type
-// 	 do_indefiniteIntegral() const = 0;
-// };
-
+namespace detail_fn_any {
 
 template <typename TDomain, typename TRange, typename Enable = void>
 struct FunctionObjectConcept {
@@ -1482,27 +1469,6 @@ struct FunctionObjectConcept<TDomain, TRange, typename boost::enable_if< has_are
 	 virtual Function< TDomain, typename AreaType< TDomain, TRange >::type, Any<> >
 	 do_indefiniteIntegral() const = 0;
 };
-
-// template <typename TDomain, typename TRange, typename Enable=void>
-// struct FunctionObjectConcept_integrable;
-
-// template <typename TDomain, typename TRange>
-// struct FunctionObjectConcept_integrable<TDomain,TRange, typename boost::enable_if< has_area< TDomain, TRange > >::type >
-// 	: public FunctionObjectConcept< TDomain, TRange > {
-//  	 virtual typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type
-//  	 do_indefiniteIntegral() const = 0;
-// };
-
-// template <typename TDomain, typename TRange>
-// struct FunctionObjectConcept_integrable<TDomain,TRange, typename boost::disable_if< has_area< TDomain, TRange > >::type >
-// 	: public FunctionObjectConcept< TDomain, TRange > {
-// 	 // typedef typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type integr_fn_type;
-//  	 // virtual integr_fn_type
-//  	 // do_indefiniteIntegral() const { return integr_fn_type(); }
-// };
-
-// template< typename TDomain, typename TRange, typename TSpec, typename Enable=void>
-// class FunctionObjectModel_integrable;
 
 template< typename TDomain, typename TRange, typename TSpec, typename Enable=void>
 class FunctionObjectModel:
@@ -1550,41 +1516,7 @@ protected:
 	 Function<TDomain, TRange, TSpec> f;
 };
 
-
-	 //typedef typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type integr_fn_type;
-	 
-
-
-// template< typename TDomain, typename TRange, typename TSpec, typename Enable=void>
-// class FunctionObjectModel;
-// template< typename TDomain, typename TRange, typename TSpec>
-// class FunctionObjectModel<TDomain, TRange, TSpec, typename boost::disable_if< can_integrate< TDomain, TRange, TSpec > >::type > :
-// 		 public FunctionObjectConcept_integrable< TDomain, TRange > {
-// 	 BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
-// public:
-// 	 FunctionObjectModel( const Function<TDomain, TRange, TSpec>& f_ ) : f( f_ ) {}
-// 	 virtual ~FunctionObjectModel() {}
-// 	 virtual TRange doEval( TDomain x ) const { return eval( f, x ); }
-// 	 virtual void doOutput( std::ostream& s ) const { s << f; }
-	 
-// protected:
-// 	 Function<TDomain, TRange, TSpec> f;
-// };
-
-// template <typename TDomain, typename TRange, typename TSpec, typename Enable = void >
-// class FunctionObjectModel_integrable;
-
-// template <typename TDomain, typename TRange, typename TSpec >
-// class FunctionObjectModel_integrable< TDomain, TRange, TSpec,
-// 																			typename boost::enable_if< can_integrate< TDomain, TRange, TSpec > >::type >
-// 	: public FunctionObjectModel< TDomain, TRange, TSpec > {
-// 	 FunctionObjectModel_integrable( const Function< TDomain, TRange, TSpec >& f_ ):
-//      FunctionObjectModel< TDomain, TRange, TSpec >( f_ ) { }
-
-// 	 virtual typename result_of_indefiniteIntegral< TDomain, TRange, Any<> >::type
-// 	 do_indefiniteIntegral() const { return indefiniteIntegral( this->FunctionObjectModel<TDomain,TRange,TSpec>::f ); }
-// };
-
+}  // namespace detail_fn_any
 
 template <typename TDomain, typename TRange>
 class Function<TDomain, TRange, Any<> > {
@@ -1594,19 +1526,12 @@ public:
    typedef Any<> spec_type;
 
 public:
-   boost::shared_ptr< FunctionObjectConcept<TDomain, TRange> > object;
+   boost::shared_ptr< detail_fn_any::FunctionObjectConcept<TDomain, TRange> > object;
 
 public:
    Function()  { }
-   // template< typename TSpec > Function( typename boost::enable_if< can_integrate< TDomain, TRange, TSpec >,
-	 // 																			const Function<TDomain, TRange, TSpec>& >::type obj ) :
    template< typename TSpec > Function( const Function<TDomain, TRange, TSpec>&  obj ) :
-     object( new FunctionObjectModel<TDomain, TRange, TSpec>( obj ) ) {}
-
-   // template< typename TSpec > Function( typename boost::disable_if< can_integrate< TDomain, TRange, TSpec >,
-	 // 																			const Function<TDomain, TRange, TSpec>& >::type obj ) :
-   //   object( new FunctionObjectModel_integrable<TDomain, TRange, TSpec>( obj ) ) {}
-	 
+     object( new detail_fn_any::FunctionObjectModel<TDomain, TRange, TSpec>( obj ) ) {}
 
    template <typename TSpec>
    Function& operator=( const Function<TDomain, TRange, TSpec>& obj ) {
@@ -1616,7 +1541,7 @@ public:
 
    template <typename TSpec>
    void reset( const Function<TDomain, TRange, TSpec>& obj ) {
-     object.reset( new FunctionObjectModel<TDomain, TRange, TSpec>( obj ) );
+     object.reset( new detail_fn_any::FunctionObjectModel<TDomain, TRange, TSpec>( obj ) );
    }
 
    bool empty() const { return !object.get(); }
