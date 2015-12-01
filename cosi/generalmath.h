@@ -248,7 +248,7 @@ public:
    TRange operator()( TDomain ) const { return val; }
 
    friend ostream& operator<<( ostream& s, const Function& f ) {
-     s << "ConstRuntime[" << f.val << "]"; return s;
+     s << f.val; return s;
    }
 
 	 bool operator==( const Function& f ) const { return val == f.val; }
@@ -317,7 +317,11 @@ public:
    factor_type getFactor() const { return factor; }
 
    friend ostream& operator<<( ostream& s, const Function& f ) {
-     s << "(" << f.factor << " * x" << ")"; return s; 
+		 typedef BOOST_TYPEOF_TPL( f.factor ) f_t;
+		 if ( f.factor == f_t(1.0) ) s << "x";
+		 else
+				s << "(" << f.factor << " * x" << ")";
+		 return s; 
    }
 
    
@@ -1426,6 +1430,7 @@ private:
    struct FunctionObjectConcept {
       virtual ~FunctionObjectConcept() {}
       virtual TRange doEval( TDomain ) const = 0;
+			virtual void doOutput( std::ostream& ) const = 0;
    };
 
    template< typename TSpec > class FunctionObjectModel : public FunctionObjectConcept {
@@ -1434,6 +1439,7 @@ private:
       FunctionObjectModel( const Function<TDomain, TRange, TSpec>& f_ ) : f( f_ ) {}
       virtual ~FunctionObjectModel() {}
       virtual TRange doEval( TDomain x ) const { return eval( f, x ); }
+			virtual void doOutput( std::ostream& s ) const { s << f; }
    private:
       Function<TDomain, TRange, TSpec> f;
    };
@@ -1460,6 +1466,13 @@ public:
    operator bool() const { return !empty(); }
 
    TRange operator()( TDomain x ) const { assert( object.get() ); return object->doEval( x ); }
+
+	 friend ostream& operator<<( ostream& s, const Function& f ) {
+		 assert( f.object.get() );
+		 f.object->doOutput( s );
+		 return s;
+	 }
+	 
 };  // end: type erasure of a Function
 
 template <typename TDomain, typename TRange, typename TSpec> inline
