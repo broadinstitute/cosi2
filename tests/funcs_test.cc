@@ -288,9 +288,16 @@ int main( int /*argc*/, char ** /*argv */ ) {
 //	BOOST_AUTO( f0, exp_( c_2 * ( c_3 - c_x ) ) );
 	BOOST_AUTO( f0, c_3 * exp_( c_x ) );
 	PRINT( f0 );
-	BOOST_AUTO( f, ( pow( f0, c_m1 ) ) );
+	BOOST_AUTO( f, fn_any( cval(1.0) / f0  ) );
 	PRINT( f );
-	//PRINT( indefiniteIntegral( f ) );
+	PRINT( indefiniteIntegral( f ) );
+
+	std::map< genid, Function< genid, popsize_float_t, Any<> > > v;
+	v.insert( std::make_pair( 0., f ) );
+	v.insert( std::make_pair(  1., fn_any( Function< genid, popsize_float_t, Const<> >( 239.0 ) ) ) );
+	Function< genid, popsize_float_t, Piecewise< Any<> > > pw( v );
+	PRINT( pw );
+	PRINT( indefiniteIntegral( pw ) );
 
 	BOOST_AUTO( g, exp_( c_m1 * f ) );
 	PRINT( g );

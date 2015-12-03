@@ -578,11 +578,11 @@ void Event_Bottleneck::addToBaseModel( BaseModel& baseModel ) const {
 
 	BOOST_AUTO( &popInfo, baseModel.popInfos[ pop ] );
 	BOOST_AUTO( &pieces, popInfo.popSizeFn.getPieces() );
-	BOOST_AUTO( &pieces_coalRateIntegral, popInfo.coalRateIntegralFn.getPieces() );
+	BOOST_AUTO( &pieces_coalRate, popInfo.coalRateFn.getPieces() );
 
   popsize_float_t effective_N( - 1.0 / ( 2.0 * log (1.0 - inbreedingCoefficient)) );
 	pieces[ gen + gens_t( 1 ) ] = pieces.lower_bound( gen )->second;
-	pieces_coalRateIntegral[ gen + gens_t( 1 ) ] = pieces_coalRateIntegral.lower_bound( gen )->second;
+	pieces_coalRate[ gen + gens_t( 1 ) ] = pieces_coalRate.lower_bound( gen )->second;
 	popInfo.setSizeFrom( gen, math::fn_const< genid >( effective_N ) );
 
 	// baseModel.popInfos[ pop ].setSizeFrom( gen + gens_t(1),

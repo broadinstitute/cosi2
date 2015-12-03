@@ -31,7 +31,7 @@ struct BaseModel {
 
 			// Field: coalRateIntegralFn - the integral of the coalescence rate, equal to
 			// indefiniteIntegral( 1/2*popSizeFn )
-			math::Function< genid, popsizeInv_float_integral_t, math::Piecewise< math::Any<> > > coalRateIntegralFn;
+			math::Function< genid, popsizeInv_float_t, math::Piecewise< math::Any<> > > coalRateFn;
 
 			// Field: migrRateTo - for each target pop, migration rate from this pop to the target pop.
 			std::map< popid, math::Function< genid, prob_per_chrom_per_gen_t,
@@ -45,12 +45,12 @@ struct BaseModel {
 				std::cerr << "setSizeFrom: f=" << f << "\n";
 				std::cerr << "setSizeFrom: coalrate=" << ( c_1 / ( c_2 * f ) ) << "\n";
 				popSizeFn.getPieces()[ fromGen ] = f;
-				coalRateIntegralFn.getPieces()[ fromGen ] =
-					 indefiniteIntegral( Function< genid, double, Const<> >( 1.0 ) /
-															 ( Function< genid, double, Const<> >( 2.0 ) * f ) );
+				coalRateFn.getPieces()[ fromGen ] =
+					 Function< genid, double, Const<> >( 1.0 ) /
+					 ( Function< genid, double, Const<> >( 2.0 ) * f );
 				
 
-				std::cerr << "gen=" << fromGen << " rateIntegral=" << coalRateIntegralFn.getPieces()[ fromGen ] << "\n";
+				std::cerr << "gen=" << fromGen << " coalRateFn=" << coalRateFn.getPieces()[ fromGen ] << "\n";
 				// 	 indefiniteIntegral( Function< genid, double, Const<> >( 0.5 ) *
 				// 											 pow( f, math::Function< genid, double, math::Const<> >( -1. ) ) );
 			}
@@ -81,8 +81,9 @@ std::ostream& operator<<( std::ostream& s, BaseModel const& baseModel ) {
 	for( BOOST_AUTO( pi, baseModel.popInfos.begin() );
 			 pi != baseModel.popInfos.end(); ++pi ) {
 		s << "pop " << pi->first << "\n";
-		s << "  size fn         : " << pi->second.popSizeFn << "\n";
-		s << "  size fn integral: " << indefiniteIntegral( pi->second.popSizeFn ) << "\n";
+		s << "  size fn      : " << pi->second.popSizeFn << "\n";
+		s << "  coal rate fn:           " << pi->second.coalRateFn << "\n";
+		s << "  coal rate fn integral: " << indefiniteIntegral( pi->second.coalRateFn ) << "\n";
 	}
 	s << "]\n";
 	return s;
