@@ -447,32 +447,20 @@ genid Event_PopSizeExp::execute() {
 }
 
 void Event_PopSizeExp::addToBaseModel( BaseModel& baseModel ) const {
+	using namespace math;
 
-		// baseModel.popInfos[ pop ].popSizeFn.getPieces().insert( std::make_pair(
-		// 																												gen,
-		// 																												math::Function< genid, popsize_float_t,
-		// 																												math::Any<> >
-		// 																												( 
-		// 																													math::Function< genid, popsize_float_t,
-		// 																													math::Const<> >( popsize_float_t( popsize ) ) ) ) );
+	BOOST_AUTO( &popInfo, baseModel.popInfos[ pop ] );
+	BOOST_AUTO( &pieces, popInfo.popSizeFn.getPieces() );
 
-	using math::cval;
-
-	// check that nothing else specifies the size for ( gen, genBeg )
-	// and that if there already is a size specified at gen, it equals the size here?
-
-	BOOST_AUTO( &pieces, baseModel.popInfos[ pop ].popSizeFn.getPieces() );
-
-	PRINT5( pop, genBeg, popSizeBeg, gen, popsize );
-
-	pieces[ gen ] =
-			cval( popSizeBeg ) *
+	popInfo.setSizeFrom( gen, 
+		 Function< genid, popsize_float_t, Const <> >( popSizeBeg ) *
 			exp_(
-					cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
-					( cval( genBeg - ZERO_GEN ) - math::fn_x< genid, gens_t>() ) );
-
+				cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
+				( ( Function< genid, gens_t, Const<> >( genBeg - ZERO_GEN ) -
+						Function< genid, gens_t, X_To<1> >() ) ) ) );
+											 
 	if ( pieces.find( genBeg ) == pieces.end() )
-		 pieces[ genBeg ] = math::fn_const<genid>( popSizeBeg );
+		 popInfo.setSizeFrom( genBeg, math::fn_const<genid>( popSizeBeg ) );
 }
 
 int Event_PopSizeExp2::procCount = 0;
@@ -588,11 +576,14 @@ genid Event_Bottleneck::execute() {
 
 void Event_Bottleneck::addToBaseModel( BaseModel& baseModel ) const {
 
-	BOOST_AUTO( &pieces, baseModel.popInfos[ pop ].popSizeFn.getPieces() );
+	BOOST_AUTO( &popInfo, baseModel.popInfos[ pop ] );
+	BOOST_AUTO( &pieces, popInfo.popSizeFn.getPieces() );
+	BOOST_AUTO( &pieces_coalRateIntegral, popInfo.coalRateIntegralFn.getPieces() );
 
   popsize_float_t effective_N( - 1.0 / ( 2.0 * log (1.0 - inbreedingCoefficient)) );
 	pieces[ gen + gens_t( 1 ) ] = pieces.lower_bound( gen )->second;
-	pieces[ gen ] = math::fn_const< genid >( effective_N );
+	pieces_coalRateIntegral[ gen + gens_t( 1 ) ] = pieces_coalRateIntegral.lower_bound( gen )->second;
+	popInfo.setSizeFrom( gen, math::fn_const< genid >( effective_N ) );
 
 	// baseModel.popInfos[ pop ].setSizeFrom( gen + gens_t(1),
 	// 																			 baseModel.popInfos[ pop ].popSizeFn
@@ -646,8 +637,8 @@ void Event_Admix::addToBaseModel( BaseModel& baseModel ) const {
 		 pieces[ ZERO_GEN ] =
 				math::fn_const< genid >( prob_per_chrom_per_gen_t( 0. ) );
 	
-	pieces[ gen + gens_t( 1 ) ] = pieces.lower_bound( gen )->second;
-	pieces[ gen ] = math::fn_const< genid >( prob_per_chrom_per_gen_t( admixFrac ) );
+	pieces.insert( std::make_pair( gen + gens_t( 1 ), pieces.lower_bound( gen )->second ) );
+	pieces.insert( std::make_pair( gen, math::fn_const< genid >( prob_per_chrom_per_gen_t( admixFrac ) ) ) );
 }
 
 genid Event_Split::execute() {

@@ -260,6 +260,7 @@ public:
    typedef TRange result_type;
    typedef Const<RunTime> spec_type;
 
+	 Function( ): val( std::numeric_limits<TRange>::quiet_NaN() ) { }
    Function( TRange val_ ): val( val_ ) { }
 
    TRange operator()( TDomain ) const { return val; }

@@ -35,7 +35,7 @@ struct BaseModel {
 
 			// Field: migrRateTo - for each target pop, migration rate from this pop to the target pop.
 			std::map< popid, math::Function< genid, prob_per_chrom_per_gen_t,
-																			 math::Piecewise< math::Any<> > > > migrRateTo;
+																			 math::Piecewise< math::Const<> > > > migrRateTo;
 
 			template <typename TSpec>
 			void setSizeFrom( genid fromGen, math::Function< genid, popsize_float_t, TSpec> const& f ) {
@@ -45,7 +45,12 @@ struct BaseModel {
 				std::cerr << "setSizeFrom: f=" << f << "\n";
 				std::cerr << "setSizeFrom: coalrate=" << ( c_1 / ( c_2 * f ) ) << "\n";
 				popSizeFn.getPieces()[ fromGen ] = f;
-				// coalRateIntegralFn.getPieces()[ fromGen ] =
+				coalRateIntegralFn.getPieces()[ fromGen ] =
+					 indefiniteIntegral( Function< genid, double, Const<> >( 1.0 ) /
+															 ( Function< genid, double, Const<> >( 2.0 ) * f ) );
+				
+
+				std::cerr << "gen=" << fromGen << " rateIntegral=" << coalRateIntegralFn.getPieces()[ fromGen ] << "\n";
 				// 	 indefiniteIntegral( Function< genid, double, Const<> >( 0.5 ) *
 				// 											 pow( f, math::Function< genid, double, math::Const<> >( -1. ) ) );
 			}
