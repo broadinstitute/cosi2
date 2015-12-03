@@ -291,7 +291,7 @@ public:
    TRange operator()( TDomain ) const { return static_cast<TRange>( val ); }
 
    friend ostream& operator<<( ostream& s, const Function& f ) {
-     s << "ConstCompiletime[" << val << "]"; return s;
+     s << val; return s;
    }
    
 };
@@ -437,7 +437,7 @@ public:
                                                              eval( this->second(), x ) ); }
 
    friend ostream& operator<<( ostream& s, const Function& f ) {
-     s << "(" << f.first() << " " << f.binop << f.second() << ")"; return s;
+     s << "(" << f.first() << " " << f.binop << " " << f.second() << ")"; return s;
    }
    
 private:
@@ -524,6 +524,47 @@ operator/( const Function< TDomain, TRange1, Const<TConstSpec1> >& f1,
            const Function< TDomain, TRange2, Const<TConstSpec2> >& f2 ) {
   return Function< TDomain, typename DivOp<TRange1,TRange2>::result_type, Const<> >( evalConst( f1 ) / evalConst( f2 ) );
 }
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TRange3, typename TSpec>
+struct multAresult {
+	 typedef Function< TDomain, TRange1, Const<> > f1_t;
+	 typedef Function< TDomain, typename MultOp<TRange2,TRange3>::result_type,
+										 BinOp< Const<>,
+														TSpec,
+														MultOp< TRange2, TRange3 >
+														>
+										 > f2_t;
+	 typedef BOOST_TYPEOF_TPL(( ( boost::declval<f1_t>() * boost::declval<f2_t>().first() ) *
+															boost::declval<f2_t>().second() )) type;
+};
+
+// template <typename TDomain, typename TRange1, typename TRange2, typename TRange3, typename TSpec>
+// // Function< TDomain, typename MultOp< typename MultOp<TRange1,TRange2>::result_type, TRange3 >::result_type,
+// // 					BinOp< Const<>, TSpec, MultOp< typename MultOp< TRange1, TRange2 >::result_type, TRange3 >
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TRange3, typename TSpec>
+typename multAresult<TDomain, TRange1, TRange2, TRange3, TSpec>::type
+operator*( Function< TDomain, TRange1, Const<> > const& f1,
+					 Function< TDomain, typename MultOp<TRange2,TRange3>::result_type,
+										 BinOp< Const<>,
+														TSpec,
+														MultOp< TRange2, TRange3 >
+														>
+										 > const& f2
+	) {
+	return ( f1 * f2.first() ) * f2.second();
+}
+
+
+
+// template <typename TDomain, typename TRange1, typename TRange2, typename TConstSpec1, typename TConstSpec2>
+// Function<TDomain, typename DivOp<TRange1,TRange2>::result_type, Const<> >
+// operator/( const Function< TDomain, TRange1, Const<TConstSpec1> >& f1,
+//            const Function< TDomain, TRange2, BinConst<TConstSpec2> >& f2 ) {
+//   return Function< TDomain, typename DivOp<TRange1,TRange2>::result_type, Const<> >( evalConst( f1 ) / evalConst( f2 ) );
+// }
+
+
 
 // *** cval: convenience wrapper for const values
 //
@@ -741,11 +782,101 @@ exp_( const Function<TDomain,double,TSpec>& f ) {
 	return Function<TDomain, double, UnaryOp<TSpec,Exp> >( f );
 }
 
+template <typename TDomain, typename ConstKind>
+Function< TDomain, double, Const<> >
+exp_( const Function<TDomain, double, Const<ConstKind> >& f ) {
+	return Function< TDomain, double, Const<> >( exp( evalConst( f ) ) );
+}
+
 template <typename TDomain, typename TSpec>
 Function<TDomain, double, UnaryOp<TSpec,Log> >
 log_( const Function<TDomain,double,TSpec>& f ) {
 	return Function<TDomain, double, UnaryOp<TSpec,Log> >( f );
 }
+
+template <typename TDomain, typename TSpec>
+Function<TDomain, double, TSpec>
+exp_( const Function<TDomain, double, UnaryOp<TSpec,Log> >& f ) {
+	return f.getFunction();
+}
+
+template <typename TDomain, typename TSpec>
+Function<TDomain, double, TSpec>
+log_( const Function<TDomain, double, UnaryOp<TSpec,Exp> >& f ) {
+	return f.getFunction();
+}
+
+template <typename TDomain, typename TRange, typename TSpec>
+struct result_of_exp;
+#if 0
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
+struct result_of_exp<TDomain, double,
+										 BinOp<TSpec1, TSpec2, MultOp<TRange1,TRange2> > > {
+   BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec1> ));
+   BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec2> ));
+	 typedef Function< TDomain, TRange1, TSpec1 > f1_t;
+	 typedef Function< TDomain, TRange2, TSpec2 > f2_t;
+
+	 typedef BOOST_TYPEOF_TPL(( exp_( boost::declval<f1_t>() ) * exp_( boost::declval<f2_t>() ) ) ) type;
+
+   // typedef BOOST_TYPEOF_TPL(( exp_( boost::declval< typename result_of_indefiniteIntegral<TDomain, TRange1, TSpec1>::type f1_t;
+   // typedef typename result_of_indefiniteIntegral<TDomain, TRange2, TSpec2>::type f2_t;
+   // typedef BOOST_TYPEOF_TPL(( boost::declval<f1_t>() + boost::declval<f2_t>() )) type;
+};
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
+typename result_of_exp< TDomain, double, 
+												BinOp< TSpec1, TSpec2, MultOp<TRange1,TRange2> > >::type
+exp_( const Function< TDomain, double,
+			BinOp< TSpec1, TSpec2, MultOp<TRange1, TRange2> > >& f ) {
+	return exp_( f.first() ) * exp_( f.second() );
+}
+#endif
+
+template <typename TDomain, typename TRange1, typename TSpec1,
+					typename TRange2, typename TSpec2> struct result_of_pow {
+	 //typedef Function< TDomain, double, UnaryOp< BinOp< TSpec2, UnaryOp< Log, TSpec1 >, MultOp
+	 typedef Function< TDomain, TRange1, TSpec1 > f_base_t;
+	 typedef Function< TDomain, TRange2, TSpec2 > f_exponent_t;
+	 typedef BOOST_TYPEOF_TPL( exp_( boost::declval<f_exponent_t>() * log_( boost::declval<f_base_t>() ) ) ) type;
+};
+
+template< typename TDomain, typename TRange1, typename TSpec1, typename TRange2, typename TSpec2 >
+typename result_of_pow< TDomain, TRange1, TSpec1, TRange2, TSpec2>::type
+pow( Function< TDomain, TRange1, TSpec1 > const& f_base,
+		 Function< TDomain, TRange2, TSpec2 > const& f_exponent ) {
+	return exp_( f_exponent * log_( f_base ) );
+}
+
+template <typename TDomain, typename TRange1, typename TSpec1, typename TRange2, typename TSpec2>
+struct result_of_pow< TDomain, typename MultOp<TRange1,TRange2>::result_type,
+											BinOp< TSpec1, TSpec2, MultOp<TRange1,TRange2> >,
+											int, Const< CompileTime< -1 > > > {
+	typedef Function< TDomain, TRange1, TSpec1 > f1_t;
+	typedef Function< TDomain, TRange2, TSpec2 > f2_t;
+	typedef Function< TDomain, double, Const< CompileTime< -1 > > > f_exponent_t;
+	typedef BOOST_TYPEOF_TPL(( pow( boost::declval<f1_t>(), boost::declval<f_exponent_t>() ) *
+														 pow( boost::declval<f2_t>(), boost::declval<f_exponent_t>() ) )) type;
+};
+
+// template <typename TDomain, typename TRange1, typename TSpec1, typename TRange2, typename TSpec2>
+// typename result_of_pow< TDomain, typename MultOp<TRange1,TRange2>::result_type,
+// 												BinOp< TSpec1, TSpec2, MultOp<TRange1,TRange2> >,
+// 												int, Const< CompileTime< -1 > > >::type
+// pow( Function< TDomain, typename MultOp<TRange1,TRange2>::result_type,
+// 		 BinOp< TSpec1, TSpec2, MultOp<TRange1,TRange2> > > const& f_base,
+// 		 Function< TDomain, double, Const< CompileTime< -1 > > > const& f_exponent ) {
+// 	return pow( f_base.first(), f_exponent ) * pow( f_base.second(), f_exponent );
+// }
+
+// template <typename TDomain, typename TSpec>
+// Function< TDomain, double, UnaryOp< UnaryOp<TSpec,Exp>, std::negate<double> >
+// pow( Function< TDomain, double, UnaryOp<TSpec,Exp> > const& f_base,
+// 		 Function< TDomain, int, Const< CompileTime< -1 > > > const& f_exponent ) {
+// 	return exp_( -f_base.getFunction() );
+// }
+
+
 
 
 // ** Linear functions: creating a linear function from two points through which it passes.
@@ -971,6 +1102,47 @@ operator-( const Function<TDomain,TRange1,TSpec1>& f1, const Function<TDomain,TR
 		 f_result.getPieces().insert( std::make_pair( it->first, f1 - it->second ) );
 	return f_result;
 }
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TPieceSpec2>
+struct result_of_log {
+	 typedef BOOST_TYPEOF_TPL(( boost::declval< Function<TDomain,TRange1,TSpec1> >() *
+															boost::declval< Function<TDomain,TRange2,TPieceSpec2> >() )) piece_function_type;
+	 typedef typename RangeType< piece_function_type >::type range_type;
+	 typedef typename SpecType< piece_function_type >::type piece_spec_type;
+	 typedef Function< TDomain, range_type, Piecewise< piece_spec_type > > type;
+};
+
+
+template <typename TDomain, typename TPieceSpec>
+Function< TDomain, double, Piecewise< UnaryOp< TPieceSpec, Log > > >
+log_( const Function<TDomain,double,Piecewise<TPieceSpec> >& f ) {
+	Function< TDomain, double, Piecewise< UnaryOp< TPieceSpec, Log > > > f_result;
+ 
+	for ( typename Function< TDomain, double, Piecewise<TPieceSpec> >::pieces_type::const_iterator it =
+					 f.getPieces().begin(); it != f.getPieces().end(); it++ )
+		 f_result.getPieces().insert( std::make_pair( it->first, log_( it->second ) ) );
+	return f_result;
+}
+
+
+template <typename TDomain, typename TPieceSpec>
+Function< TDomain, double, Piecewise< UnaryOp< TPieceSpec, Exp > > >
+exp_( const Function<TDomain,double,Piecewise<TPieceSpec> >& f ) {
+	Function< TDomain, double, Piecewise< UnaryOp< TPieceSpec, Exp > > > f_result;
+ 
+	for ( typename Function< TDomain, double, Piecewise<TPieceSpec> >::pieces_type::const_iterator it =
+					 f.getPieces().begin(); it != f.getPieces().end(); it++ )
+		 f_result.getPieces().insert( std::make_pair( it->first, exp_( it->second ) ) );
+	return f_result;
+}
+
+// template <typename TDomain, typename TPieceSpec>
+// exp_( Function< TDomain, double, UnaryOp< Piecewise<TPieceSpec>, Exp> const& f ) {
+// 	typename result_of_exp< TDomain, TPieceSpec >::type f_result;
+	
+// }
+
+
 
 
 // ** Integrals
@@ -1458,7 +1630,7 @@ template <typename TDomain, typename TRange, typename Enable = void>
 struct FunctionObjectConcept {
 	 virtual ~FunctionObjectConcept() {}
 	 virtual TRange doEval( TDomain ) const = 0;
-	 virtual void doOutput( std::ostream& ) const = 0;	 
+	 virtual void doOutput( std::ostream& ) const = 0;
 };
 
 template <typename TDomain, typename TRange>
@@ -1563,7 +1735,6 @@ template <typename TDomain, typename TRange>
 indefiniteIntegral( const Function< TDomain, TRange, Any<> >& f ) {
 		 return f.object->do_indefiniteIntegral();
 }
-
 
 template <typename TDomain, typename TRange, typename TSpec> inline
 Function< TDomain, TRange, Any<> >
@@ -2009,6 +2180,47 @@ T findWhere( const std::vector<T>& f, T c ) {
   // f never crosses c
   return -1;
 }
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
+struct divAresult {
+	 typedef Function< TDomain, TRange1, Const<> > f1_t;
+	 typedef Function< TDomain, typename MultOp<TRange2,double>::result_type,
+										 BinOp< Const<>,
+														UnaryOp< TSpec, Exp >,
+														MultOp< TRange2, double >
+														>
+										 > f2_t;
+	 typedef BOOST_TYPEOF_TPL(( ( boost::declval<f1_t>() / boost::declval<f2_t>().first() ) *
+															exp_( Function< TDomain, double, Const<> >( -1.0 ) *
+																		boost::declval<f2_t>().second().getFunction() )) ) type;
+};
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
+typename divAresult<TDomain,TRange1,TRange2,TSpec>::type
+operator/( Function< TDomain, TRange1, Const<> > const& f1,
+					 Function< TDomain, typename MultOp<TRange2,double>::result_type,
+										 BinOp< Const<>,
+														UnaryOp< TSpec, Exp >,
+														MultOp< TRange2, double >
+														>
+					 > const& f2 ) {
+	return ( f1 / f2.first() ) * exp_( Function< TDomain, double, Const<> >( -1.0 ) * f2.second().getFunction() );
+}
+
+// template <typename TDomain, typename TRange1, typename TRange2, typename TSpec>
+// typename divAresult<TDomain, TRange1, TRange2, TSpec>::type
+// operator/( Function< TDomain, TRange1, Const<> > const& f1,
+// 					 Function< TDomain, typename MultOp<TRange2,double>::result_type,
+// 										 BinOp< Const<>,
+// 					                  UnaryOp< TSpec, Exp >,
+// 														MultOp< TRange2, double >
+// 														>
+// 										 > const& f2
+// 	) {
+// 	return ( f1 / f2.first() ) * exp_( -f2.second().getFunction() ) ;
+// }
+
+
 
 // * Postamble
 

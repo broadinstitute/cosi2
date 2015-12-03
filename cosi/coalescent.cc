@@ -8,6 +8,9 @@
 // parts of simulator behavior; <CoSi::runSim()> then runs the simulation.
 //
 
+#define COSI_DEV_PRINT
+
+#include <cstdlib>
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
 #include <cosi/hooks.h>
@@ -186,6 +189,24 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		Pop *pop = demography->dg_get_pop_by_name( it->first );
 		if ( !pop ) throw std::runtime_error( "trajectory specified for unknown population" );
 		pop->setSizeTraj( it->second, genid( 0.0 ) );
+	}
+
+	if ( getenv( "COSI_NEWSIM" ) ) {
+		BaseModelP baseModel = params->getBaseModel();
+		for( BOOST_AUTO( it, baseModel->popInfos.begin() ); it != baseModel->popInfos.end(); it++ ) {
+			Pop *pop = demography->dg_get_pop_by_name( it->first );
+			if ( !pop ) throw std::runtime_error( "trajectory specified for unknown population" );
+			BaseModel::PopInfo const& popInfo = it->second;
+			//pop->setSizeTraj( popInfo.popSizeFn, genid( 0.0 ) );
+			BOOST_AUTO( base, ( math::Function< genid, double, math::Const<> >( 2.0 ) * popInfo.popSizeFn ) );
+			PRINT( base );
+			// BOOST_AUTO( coalRateFn,
+			// 						(math::Function< genid, double, math::Const<> >( .5 ) *
+			// 						 math::pow( base,
+			// 												math::fn_const<double>(-1.) ) ) );
+			// PRINT( coalRateFn );
+			// PRINT2( it->first, coalRateFn );
+		}
 	}
 	
 	mutate.reset( new Mutate( getRandGen(), params->getMu(), params->getLength() ) );

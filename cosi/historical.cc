@@ -545,18 +545,20 @@ genid Event_PopSizeExp2::execute() {
 }
 
 void Event_PopSizeExp2::addToBaseModel( BaseModel& baseModel ) const {
-	using math::cval;
+	using namespace math;
 
-	BOOST_AUTO( &pieces, baseModel.popInfos[ pop ].popSizeFn.getPieces() );
+	BOOST_AUTO( &popInfo, baseModel.popInfos[ pop ] );
+	BOOST_AUTO( &pieces, popInfo.popSizeFn.getPieces() );
 
-	pieces[ gen ] =
-			cval( popSizeBeg ) *
+	popInfo.setSizeFrom( gen, 
+		 Function< genid, popsize_float_t, Const <> >( popSizeBeg ) *
 			exp_(
-					cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
-					( cval( genBeg - ZERO_GEN ) - math::fn_x< genid, gens_t>() ) );
-
+				cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
+				( ( Function< genid, gens_t, Const<> >( genBeg - ZERO_GEN ) -
+						Function< genid, gens_t, X_To<1> >() ) ) ) );
+											 
 	if ( pieces.find( genBeg ) == pieces.end() )
-		 pieces[ genBeg ] = math::fn_const<genid>( popSizeBeg );
+		 popInfo.setSizeFrom( genBeg, math::fn_const<genid>( popSizeBeg ) );
 }
 
 genid Event_Bottleneck::execute() {
