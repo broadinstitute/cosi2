@@ -379,7 +379,8 @@ am__DEPENDENCIES_1 =
 am_funcs_test_OBJECTS = funcs_test-funcs_test.$(OBJEXT) \
 	funcs_test-utils.$(OBJEXT)
 funcs_test_OBJECTS = $(am_funcs_test_OBJECTS)
-funcs_test_DEPENDENCIES = $(BOOST_SYSTEM_LIBS)
+funcs_test_DEPENDENCIES = $(BOOST_FILESYSTEM_LIBS) \
+	$(BOOST_SYSTEM_LIBS)
 am_get_recomap_OBJECTS = get_recomap.$(OBJEXT)
 get_recomap_OBJECTS = $(am_get_recomap_OBJECTS)
 get_recomap_DEPENDENCIES = $(LIBRAND)
@@ -447,11 +448,13 @@ seglist_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 am_test_arrproc_OBJECTS = test_arrproc-test_arrproc.$(OBJEXT) \
 	test_arrproc-utils.$(OBJEXT)
 test_arrproc_OBJECTS = $(am_test_arrproc_OBJECTS)
-test_arrproc_DEPENDENCIES = $(BOOST_SYSTEM_LIBS)
+test_arrproc_DEPENDENCIES = $(BOOST_FILESYSTEM_LIBS) \
+	$(BOOST_SYSTEM_LIBS)
 am_test_funcs_OBJECTS = test_funcs-test_funcs.$(OBJEXT) \
 	test_funcs-utils.$(OBJEXT)
 test_funcs_OBJECTS = $(am_test_funcs_OBJECTS)
-test_funcs_DEPENDENCIES = $(BOOST_SYSTEM_LIBS)
+test_funcs_DEPENDENCIES = $(BOOST_FILESYSTEM_LIBS) \
+	$(BOOST_SYSTEM_LIBS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -1127,15 +1130,15 @@ seglist_test_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
 seglist_test_LDADD = $(builddir)/libcosi_rand_noinst.la $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)
 funcs_test_SOURCES = $(TD)/funcs_test.cc $(SD)/generalmath.h $(SD)/utils.h $(SD)/utils.cc
 funcs_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
-funcs_test_LDADD = $(BOOST_SYSTEM_LIBS)
+funcs_test_LDADD = $(BOOST_FILESYSTEM_LIBS) $(BOOST_SYSTEM_LIBS)
 test_funcs_SOURCES = $(TD)/test_funcs.cc $(SD)/generalmath.h $(SD)/utils.h $(SD)/utils.cc
 test_funcs_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG -DCOSI_DEV_PRINT
-test_funcs_LDADD = $(BOOST_SYSTEM_LIBS)
+test_funcs_LDADD = $(BOOST_FILESYSTEM_LIBS) $(BOOST_SYSTEM_LIBS)
 test_arrproc_SOURCES = $(TD)/test_arrproc.cc $(SD)/generalmath.h $(SD)/utils.h $(SD)/utils.cc $(SD)/arrproc.h \
 	$(SD)/typeutil.h
 
 test_arrproc_CPPFLAGS = $(COSI_CPPFLAGS) -DCOSI_DEV_PRINT -UNDEBUG
-test_arrproc_LDADD = $(BOOST_SYSTEM_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
+test_arrproc_LDADD = $(BOOST_FILESYSTEM_LIBS) $(BOOST_SYSTEM_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
 ost_test_SOURCES = $(TD)/ost_test.cpp $(SD)/order_statistics.hpp $(SD)/utils.h $(SD)/utils.cc
 ost_test_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(builddir)/libcosi_rand.la
 ost_test_CPPFLAGS = $(AM_CPPFLAGS) -UNDEBUG
