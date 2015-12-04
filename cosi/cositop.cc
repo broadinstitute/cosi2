@@ -330,7 +330,8 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 			    fbase << "_" << simNum;
 			  print_haps( cosi.getDemography(), fbase.str(),
 										 params->getLength(), muts,
-										 params->getInfSites() );
+										params->getInfSites(),
+										outputPrecision );
 #ifdef COSI_DEV_MUTCONTEXT				 
 				 if ( !outputMutContextsFor.empty() )
 				   print_mut_contexts( cosi.getDemography(), fbase.str(), params->getLength(),
