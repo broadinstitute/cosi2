@@ -40,19 +40,10 @@ struct BaseModel {
 			template <typename TSpec>
 			void setSizeFrom( genid fromGen, math::Function< genid, popsize_float_t, TSpec> const& f ) {
 				using namespace math;
-				Function< genid, double, math::Const<> > c_1( 1.0 ) ;
-				Function< genid, double, math::Const<> > c_2( 2.0 ) ;
-				std::cerr << "setSizeFrom: f=" << f << "\n";
-				std::cerr << "setSizeFrom: coalrate=" << ( c_1 / ( c_2 * f ) ) << "\n";
 				popSizeFn.getPieces()[ fromGen ] = f;
 				coalRateFn.getPieces()[ fromGen ] =
-					 Function< genid, double, Const<> >( 1.0 ) /
-					 ( Function< genid, double, Const<> >( 2.0 ) * f );
-				
-
-				std::cerr << "gen=" << fromGen << " coalRateFn=" << coalRateFn.getPieces()[ fromGen ] << "\n";
-				// 	 indefiniteIntegral( Function< genid, double, Const<> >( 0.5 ) *
-				// 											 pow( f, math::Function< genid, double, math::Const<> >( -1. ) ) );
+					 cval( 1. ) /
+					 ( cval( 2. ) * f );
 			}
 
 			void setSizeFrom( genid fromGen, popsize_float_t sz ) {

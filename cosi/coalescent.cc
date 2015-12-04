@@ -8,7 +8,7 @@
 // parts of simulator behavior; <CoSi::runSim()> then runs the simulation.
 //
 
-#define COSI_DEV_PRINT
+//#define COSI_DEV_PRINT
 
 #include <cstdlib>
 #include <boost/foreach.hpp>
@@ -197,7 +197,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 			Pop *pop = demography->dg_get_pop_by_name( it->first );
 			if ( !pop ) throw std::runtime_error( "trajectory specified for unknown population" );
 			BaseModel::PopInfo const& popInfo = it->second;
-			//pop->setSizeTraj( popInfo.popSizeFn, genid( 0.0 ) );
+			pop->setCoalRateFn( popInfo.coalRateFn, genid( 0.0 ) );
 			BOOST_AUTO( base, ( math::Function< genid, double, math::Const<> >( 2.0 ) * popInfo.popSizeFn ) );
 			PRINT( base );
 			// BOOST_AUTO( coalRateFn,

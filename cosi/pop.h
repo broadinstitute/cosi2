@@ -108,6 +108,16 @@ public:
 					 )));
 	 }
 
+	 template <typename TSpec>
+	 void setCoalRateFn( const math::Function< genid, popsizeInv_float_t, TSpec >& coalRateFn, genid gen ) {
+		 setCoalArrivalProcess(
+			 math::ArrivalProcess< genid, math::Any< RandGen > >(
+				 math::makeNonHomogeneousPoissonProcess (
+					 coalRateFn, gen, std::string( "coal in pop " + label )
+					 )));
+	 }
+	 
+
 	 bool isInactive() const { return _isInactive; }
 	 void makeInactive() {
 		 util::chkCond( empty(), "error: pop must be empty before being inactivated" );

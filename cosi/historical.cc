@@ -667,19 +667,35 @@ void Event_Split::addToBaseModel( BaseModel& baseModel ) const {
 
 }  // namespace histevents
 
-void HistEvents::constructBaseModel( BaseModelP baseModel ) const {
+void HistEvents::constructBaseModel( BaseModelP baseModel ) {
 	typedef std::pair<genid,EventP> pair_t;
 	BOOST_FOREACH( pair_t e, events )
 		 if ( e.second->getEventKind() != Event::E_BOTTLENECK &&
 					e.second->getEventKind() != Event::E_ADMIX )
 				e.second->addToBaseModel( *baseModel );
 
-	std::cerr << "\nb4 bnecks:" << *baseModel << "\n";
+	//std::cerr << "\nb4 bnecks:" << *baseModel << "\n";
 
 	BOOST_FOREACH( pair_t e, events )
 		 if ( e.second->getEventKind() == Event::E_BOTTLENECK ||
 					e.second->getEventKind() == Event::E_ADMIX )
 				e.second->addToBaseModel( *baseModel );
+
+	size_t prevSize;
+	do {
+		prevSize = events.size();
+
+		for( BOOST_AUTO( e, events.begin() ); e != events.end();  ++e )  {
+			if ( e->second->getEventKind() == Event::E_BOTTLENECK ||
+					 e->second->getEventKind() == Event::E_POPSIZEEXP ) {
+				events.erase( e );
+				break;
+			}
+		}
+		
+	} while ( events.size() < prevSize );
+
+	
 	
 }
 
