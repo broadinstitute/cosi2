@@ -75,6 +75,8 @@ std::ostream& operator<<( std::ostream& s, BaseModel const& baseModel ) {
 		s << "  size fn      : " << pi->second.popSizeFn << "\n";
 		s << "  coal rate fn:           " << pi->second.coalRateFn << "\n";
 		s << "  coal rate fn integral: " << indefiniteIntegral( pi->second.coalRateFn ) << "\n";
+		for ( BOOST_AUTO( mi, pi->second.migrRateTo.begin() ); mi != pi->second.migrRateTo.end(); ++mi )
+			 s << "  migration rates to " << mi->first << ": " << mi->second << "\n";
 	}
 	s << "]\n";
 	return s;

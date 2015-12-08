@@ -82,9 +82,11 @@ void ParamFileReader::file_read(boost::filesystem::path filename, FILE *segfp)
 		}
 		file_get_data (infileptr, segfp);
 		fclose(infileptr);
-		if ( getenv( "COSI_NEWSIM" ) ) histEvents->constructBaseModel( baseModel );
-		std::cerr.precision(16);
-		//std::cerr << *baseModel << "\n";
+		if ( getenv( "COSI_NEWSIM" ) ) {
+			histEvents->constructBaseModel( baseModel );
+			// std::cerr.precision(16);
+			// std::cerr << *baseModel << "\n";
+		}
 	} catch( boost::exception& e ) {
 		e << boost::errinfo_file_name( filename.string() );
 		throw;

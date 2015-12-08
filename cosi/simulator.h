@@ -46,7 +46,7 @@ private:
 	 MutateP mutate;
 	 CoalesceP coalesce;
 
-	 prob_t sim_get_poisson_rate(void);
+	 prob_t sim_get_poisson_rate( genid gen );
 	 int sim_do_poisson (genid gen);
 	 bool_t sim_complete (void) const;
 	 gens_t sim_get_time_till_next_hist_event (genid gen);

@@ -7,6 +7,7 @@
 #include <cosi/decls.h>
 #include <cosi/hooks.h>
 #include <cosi/cosirand.h>
+#include <cosi/basemodel.h>
 
 namespace cosi {
 
@@ -37,17 +38,22 @@ public:
 	 
 	 // MethodP: migrate_get_all_nodes_rate
 	 // Return the probability of one of the active nodes (chroms) migrating to another pop.
-	 prob_per_gen_t migrate_get_all_nodes_rate (void) const;
+	 gensInv_t migrate_get_all_nodes_rate (genid) const;
 
 	 // MethodP: migrate_execute
 	 // Pick one node to migrate based on the current migration rates, and migrate it.
 	 void migrate_execute (genid gen);
 
+	 void setBaseModel( BaseModelP baseModel_ ) { baseModel = baseModel_; }
+
+	 
+
 private:
 	 DemographyP demography;
+	 BaseModelP baseModel;
 
 	 MigrateRate *migrations;
-	 mutable prob_per_gen_t mig_lastrate;
+	 mutable gensInv_t mig_lastrate;
 
 	 void migrate_add (popid from, popid to, prob_per_chrom_per_gen_t rate);
 	 void migrate_delete (popid from, popid to);

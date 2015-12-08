@@ -64,7 +64,7 @@
 namespace cosi {
 namespace math {
 
-template <typename TDomain, typename TRange, typename TSpec, typename Enable=void> class Function;
+template <typename TDomain, typename TRange, typename TSpec> class Function;
 
 template <typename TFunc> struct DomainType;
 template <typename TFunc> struct RangeType;
@@ -203,12 +203,20 @@ template <typename T> struct SpecType;
 // Tests whether a given type is a valid function specialization.
 template <typename T, typename Enabler = void> struct IsFunctionSpec: public boost::false_type { };
 
-template <typename TFunc> struct DomainType { typedef typename TFunc::argument_type type; };
-template <typename TFunc> struct RangeType { typedef typename TFunc::result_type type; };
-template <typename TFunc> struct SpecType {
-	 typedef typename TFunc::spec_type type;
-   BOOST_MPL_ASSERT(( IsFunctionSpec<type> ));
+template <typename TDomain, typename TRange, typename TSpec>
+struct DomainType< Function<TDomain, TRange, TSpec> > { typedef TDomain type; };
+template <typename TDomain, typename TRange, typename TSpec>
+struct RangeType< Function<TDomain, TRange, TSpec> > { typedef TRange type; };
+template <typename TDomain, typename TRange, typename TSpec>
+struct SpecType< Function<TDomain, TRange, TSpec> > { typedef TSpec type;
+	    BOOST_MPL_ASSERT(( IsFunctionSpec<type> ));
 };
+
+// template <typename TFunc> struct RangeType { typedef typename TFunc::result_type type; };
+// template <typename TFunc> struct SpecType {
+// 	 typedef typename TFunc::spec_type type;
+//    BOOST_MPL_ASSERT(( IsFunctionSpec<type> ));
+// };
 
 //
 // *** Generic function: eval
@@ -946,6 +954,8 @@ public:
 		 BOOST_STATIC_ASSERT(( boost::is_convertible< range_value_type,
 													 typename pieces_type::value_type >::value ));
 	 }
+	 Function( Function const& f ):
+		 pieces( f.pieces ) { }
    
 	 // template <typename TDomain2>
 	 // void addPiece( TDomain2 x,
@@ -2243,7 +2253,7 @@ BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::RangeType,1)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::SpecType,1)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::IsFunctionSpec,2)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::FunctionConcept,1)
-BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Function,4)
+BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Function,3)
 
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Const,1)
 BOOST_TYPEOF_REGISTER_TYPE(cosi::math::RunTime)

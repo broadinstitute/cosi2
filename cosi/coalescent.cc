@@ -198,15 +198,8 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 			if ( !pop ) throw std::runtime_error( "trajectory specified for unknown population" );
 			BaseModel::PopInfo const& popInfo = it->second;
 			pop->setCoalRateFn( popInfo.coalRateFn, genid( 0.0 ) );
-			BOOST_AUTO( base, ( math::Function< genid, double, math::Const<> >( 2.0 ) * popInfo.popSizeFn ) );
-			PRINT( base );
-			// BOOST_AUTO( coalRateFn,
-			// 						(math::Function< genid, double, math::Const<> >( .5 ) *
-			// 						 math::pow( base,
-			// 												math::fn_const<double>(-1.) ) ) );
-			// PRINT( coalRateFn );
-			// PRINT2( it->first, coalRateFn );
 		}
+		migrate->setBaseModel( baseModel );
 	}
 	
 	mutate.reset( new Mutate( getRandGen(), params->getMu(), params->getLength() ) );

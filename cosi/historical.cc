@@ -686,7 +686,7 @@ void HistEvents::constructBaseModel( BaseModelP baseModel ) {
 		prevSize = events.size();
 
 		for( BOOST_AUTO( e, events.begin() ); e != events.end();  ++e )  {
-			if ( e->second->getEventKind() == Event::E_BOTTLENECK ||
+			if ( true || e->second->getEventKind() == Event::E_BOTTLENECK ||
 					 e->second->getEventKind() == Event::E_POPSIZEEXP ) {
 				events.erase( e );
 				break;

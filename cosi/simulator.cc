@@ -104,7 +104,7 @@ Simulator::sim_get_time_till_next_hist_event (genid gen)
 gens_t
 Simulator::sim_get_time_till_next_pois_event (genid gen, gens_t maxWaitTime) 
 {
-	gens_t time_till_homog_poisson = gens_t( poisson_get_next (sim_get_poisson_rate()) );
+	gens_t time_till_homog_poisson = gens_t( poisson_get_next (sim_get_poisson_rate( gen )) );
 	gens_t waitTimeBound = time_till_homog_poisson;
 	if ( !is_null( maxWaitTime) && maxWaitTime < time_till_homog_poisson )
 		 waitTimeBound = maxWaitTime;
@@ -129,10 +129,10 @@ Simulator::sim_get_time_till_next_pois_event (genid gen, gens_t maxWaitTime)
 }
 
 prob_t
-Simulator::sim_get_poisson_rate(void)
+Simulator::sim_get_poisson_rate( genid gen )
 {
 	coalesce_rate = coalesce->coalesce_get_rate();
-	migrate_rate = ToDouble( migrate->migrate_get_all_nodes_rate() );
+	migrate_rate = ToDouble( migrate->migrate_get_all_nodes_rate( gen ) );
 	recombination_rate = ToDouble( recomb->getAllNodesRecombRate() * genMap->getRegionRecombRateAbs() );
 	geneconv_rate = ToDouble( geneConversion->getAllNodesGeneConvRate() * genMap->getRegionRecombRateAbs() );
 
