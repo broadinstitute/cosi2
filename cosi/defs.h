@@ -63,7 +63,9 @@ namespace cosi {
 // Logical type: nchroms_t
 // A count of chromosome instances: for example, the size of a population or a sample,
 // or a subset of either.
-typedef int nchroms_t;
+//typedef int nchroms_t;
+
+COSI_DEFINE_TYPEDVAL_REL_REP(nchroms_t,int);
 
 // Logical type: popsize_float_t
 // A floating-point representation of population size.  Real populations of course have integer
@@ -76,7 +78,9 @@ COSI_DEFINE_TYPEDVAL_MULT( popsizeInv_float_t, popsize_float_t, factor_t );
 
 // Logical type: nchromPairs_t
 // A count of chromosome pairs; has dimensions of nchroms_t * nchroms_t.
-typedef int nchromPairs_t;
+COSI_DEFINE_TYPEDVAL_REL_REP(nchromPairs_t,int);
+inline nchromPairs_t operator*( nchroms_t a, nchroms_t b ) { return nchromPairs_t( a.val * b.val ) ; }
+//typedef int nchromPairs_t;
 
 // Logical type: nsims_t
 // A count of simulations
@@ -180,7 +184,7 @@ const gens_t NULL_GENS(NAN);
  * 
  * Identifier of one ARG <Node>.
  */
-typedef int nodeid;
+typedef nchroms_t nodeid;
 
 /**
  * Type: popid

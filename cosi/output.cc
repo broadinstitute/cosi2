@@ -48,11 +48,11 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
 
   size_t the_buf_size = 16777216;
   char *the_buf = (char *)malloc( the_buf_size );
-	leaf_id_t leaf = 0;
+	leaf_id_t leaf( 0 );
 	const vector< popid >& popNames = demography->getPopNames();
 	const vector< nchroms_t >& sampleSizes = demography->getSampleSizes();
   for (size_t ipop = 0; ipop < popNames.size(); ipop++) {
-    if ( sampleSizes[ipop] > 0) {
+    if ( sampleSizes[ipop] > nchroms_t(0) ) {
 
 			vector< nchroms_t > mutcount( nmuts );
 
@@ -94,7 +94,7 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
       fprintf(outf, "SNP     CHROM   CHROM_POS       ALLELE1 FREQ1   ALLELE2 FREQ2\n");
       BOOST_AUTO( it, mutlist->getMuts().begin() );
       for (size_t im = 0; im < nmuts; im++, it++) {
-				freq = (freq_t) mutcount[im] / sampleSizes[ipop];
+				freq = (freq_t) ( ToDouble( mutcount[im] ) / ToDouble( sampleSizes[ipop] ) );
 				if (inf_sites) {
 					fprintf(outf, "%d\t1\t%.4f\t1\t%.4f\t2\t%.4f\n", (int)(it->mutIdOrig+1), double( length * get_loc( it->loc ) ), 
 									double( freq ), double( 1 - freq ) );
@@ -120,9 +120,9 @@ void print_mut_contexts( DemographyP demography, const string& filebase, len_bp_
 
 	const vector< popid >& popNames = demography->getPopNames();
 	const vector< nchroms_t >& sampleSizes = demography->getSampleSizes();
-	leaf_id_t leaf = 0;
+	leaf_id_t leaf( 0 );
   for (size_t ipop = 0; ipop < popNames.size(); ipop++) {
-    if ( sampleSizes[ipop] > 0) {
+    if ( sampleSizes[ipop] > nchroms_t(0) ) {
 			string filename( (boost::format( "%s.mutContexts-%d.tsv" ) % filebase % popNames[ipop]).str() );
 			std::ofstream out( filename.c_str() );
 
@@ -136,8 +136,8 @@ void print_mut_contexts( DemographyP demography, const string& filebase, len_bp_
 				out << leaf << "\t" << ToInt( popNames[ipop] );
 				ForEach( mutContexts_t::value_type mc, mutContexts )
 					 out <<
-					 "\t" << static_cast<int>( length * ToDouble( mc.second[ leaf ].getBeg() ) ) <<
-					 "\t" << static_cast<int>( length * ToDouble( mc.second[ leaf ].getEnd() ) );
+					 "\t" << static_cast<int>( length * ToDouble( mc.second[ ToInt(leaf) ].getBeg() ) ) <<
+					 "\t" << static_cast<int>( length * ToDouble( mc.second[ ToInt(leaf) ].getEnd() ) );
 				out << "\n";
 			}
 		}

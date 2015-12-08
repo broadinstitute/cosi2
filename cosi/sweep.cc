@@ -125,7 +125,7 @@ unsigned long n_switch_recomb = 0, n_tot_recomb = 0;
 genid Sweep::sweep_execute(popid popname, gensInv_t sel_coeff, genid gen, loc_t sel_pos, 
 													 freq_t final_sel_freq) {
   Pop *popptr;
-  int inode, nsel, nunsel;
+  nchroms_t inode, nsel, nunsel;
   int newn = -1, foundit;
   Node **sel_nodes, **unsel_nodes, *rec_nodes[3], *gc_nodes[3];
   Node *old_allele_node, *new_allele_node;
@@ -142,20 +142,21 @@ genid Sweep::sweep_execute(popid popname, gensInv_t sel_coeff, genid gen, loc_t 
   loc_t loc;
   prob_t prob_gc;
   loc_t loc1, loc2;
-  int selsize, unselsize, dorandom=1;
+  nchroms_t selsize, unselsize;
+	int dorandom=1;
 
   /*  sw_trajectory(popname, sel_coeff); */
 	finalFreq = final_sel_freq;
 	selLoc = sel_pos;
 
   popptr = demography->dg_get_pop_by_name(popname);
-  nunsel = nsel = 0;
+  nunsel = nsel = nchroms_t(0);
   selsize = unselsize = popptr->pop_get_num_nodes();
-  sel_nodes = (Node **)malloc(selsize * sizeof(Node*));
-  unsel_nodes = (Node **)malloc(unselsize * sizeof(Node*));
+  sel_nodes = (Node **)malloc(ToInt(selsize) * sizeof(Node*));
+  unsel_nodes = (Node **)malloc(ToInt(unselsize) * sizeof(Node*));
   assert(sel_nodes != NULL && unsel_nodes != NULL);
 
-  epsilon = 1 / (2. * popptr->pop_get_size());
+  epsilon = 1 / (2. * ToDouble(popptr->pop_get_size()));
   if (final_sel_freq > 1-epsilon) {
     end_shift = ZERO_GENS;
     dorandom = 0;
@@ -173,19 +174,20 @@ genid Sweep::sweep_execute(popid popname, gensInv_t sel_coeff, genid gen, loc_t 
   //alpha = 2 * popptr->pop_get_size() * sel_coeff;
 
 	leafset_p sel_leaves = make_empty_leafset();
-  for (inode = 0; inode < (int)popptr->pop_get_num_nodes(); inode++) {
-    if (!dorandom || ( fix_freq && inode < ((int)( final_sel_freq * ((double)popptr->pop_get_num_nodes())) ) ) ||
+  for (inode = nchroms_t(0); inode < nchroms_t( (int)ToDouble(popptr->pop_get_num_nodes()) ); inode++) {
+    if (!dorandom || ( fix_freq && inode <
+											 nchroms_t( ((int)( final_sel_freq * ((double)ToDouble(popptr->pop_get_num_nodes()))) )) ) ||
 				( !fix_freq && random_double() < final_sel_freq) ) {
-      sel_nodes[nsel] = popptr->pop_get_node(inode);
+      sel_nodes[ToInt(nsel)] = popptr->pop_get_node(nchroms_t(inode));
 
-			ForEach( const seglist::Seg& seg, *sel_nodes[nsel]->getSegs() )
+			ForEach( const seglist::Seg& seg, *sel_nodes[ToInt(nsel)]->getSegs() )
 				 if ( seg.getBeg() <= sel_pos && sel_pos <= seg.getEnd() )
 						sel_leaves = leafset_union( sel_leaves, seg.getLeafset() );
 			
       nsel++;
     }
     else {
-      unsel_nodes[nunsel] = popptr->pop_get_node(inode);
+      unsel_nodes[ToInt(nunsel)] = popptr->pop_get_node(inode);
       nunsel++;
     }
   }
@@ -256,7 +258,7 @@ genid Sweep::sweep_execute(popid popname, gensInv_t sel_coeff, genid gen, loc_t 
 #endif
 
 	unsigned long nsteps = 0;
-  for (t = gen; sel_freq >= epsilon || nsel > 1; t += deltaT) {
+  for (t = gen; sel_freq >= epsilon || nsel > nchroms_t(1); t += deltaT) {
 		nsteps++;
     while (t > t_nonsweep) {
       /* Process event in a nonsweep population, and update time for next nonsweep event */
@@ -282,8 +284,10 @@ genid Sweep::sweep_execute(popid popname, gensInv_t sel_coeff, genid gen, loc_t 
 		while ( True ) {
 #endif		
 
-			prob_coal_sel = ToDouble( deltaT ) * nsel * (nsel-1) / 4 / popptr->pop_get_size() / sel_freq;
-			prob_coal_unsel = ToDouble( deltaT ) * nunsel * (nunsel-1) / 4 / popptr->pop_get_size() / (1 - sel_freq);
+			prob_coal_sel = ToDouble( deltaT ) * ToInt(nsel) * (ToInt(nsel)-1) / 4 /
+				 ToDouble(popptr->pop_get_size()) / sel_freq;
+			prob_coal_unsel = ToDouble( deltaT ) * ToInt(nunsel) * (ToInt(nunsel)-1) / 4 /
+				 ToDouble(popptr->pop_get_size()) / (1 - sel_freq);
 #if 0
 			BOOST_AUTO( curCoalRate, 1.0 / 2 / popptr->pop_get_size() / sel_freq  );
 			BOOST_AUTO( curCoalRateComplement, 1.0 / 2 / popptr->pop_get_size() / (1-sel_freq)  );
@@ -299,8 +303,8 @@ genid Sweep::sweep_execute(popid popname, gensInv_t sel_coeff, genid gen, loc_t 
 #endif
 			
 //		PRINT9( t, sel_freq, nsel, nsel_pop, nunsel, nunsel_pop, popptr->pop_get_size(), prob_coal_sel, prob_coal_unsel );
-			prob_recomb = ToDouble( deltaT ) * (nsel + nunsel) * ToDouble( genMap->getRegionRecombRateAbs() );
-			prob_gc = ToDouble( deltaT ) * (nsel + nunsel) * ToDouble( geneConversion->getRegionGeneConvRate() );
+			prob_recomb = ToDouble( deltaT ) * ToInt(nsel + nunsel) * ToDouble( genMap->getRegionRecombRateAbs() );
+			prob_gc = ToDouble( deltaT ) * ToInt(nsel + nunsel) * ToDouble( geneConversion->getRegionGeneConvRate() );
 			all_prob = 0; 
 			all_prob += prob_coal_unsel;
 			all_prob += prob_coal_sel;
@@ -356,9 +360,10 @@ genid Sweep::sweep_execute(popid popname, gensInv_t sel_coeff, genid gen, loc_t 
 
 				foundit = 0;
 				bool_t oldWasSel = False;
-				for (inode = 0; inode < nsel; inode++) {
-					if (sel_nodes[inode] == rec_nodes[0]) {
-						sel_nodes[inode] = old_allele_node ? old_allele_node : sel_nodes[ nsel-- - 1 ];
+				for (inode = nchroms_t(0); inode < nsel; inode++) {
+					if (sel_nodes[ToInt(inode)] == rec_nodes[0]) {
+						sel_nodes[ToInt(inode)] = old_allele_node ? old_allele_node : sel_nodes[ ToInt( nsel - nchroms_t(1) ) ];
+						nsel--;
 						foundit = 1;
 						oldWasSel = True;
 						break;
@@ -366,8 +371,10 @@ genid Sweep::sweep_execute(popid popname, gensInv_t sel_coeff, genid gen, loc_t 
 				}
 				if (!foundit) {
 					for (inode = 0; inode < nunsel; inode++) {
-						if (unsel_nodes[inode] == rec_nodes[0]) {
-							unsel_nodes[inode] = old_allele_node ? old_allele_node : unsel_nodes[ nunsel-- - 1 ];
+						if (unsel_nodes[ToInt(inode)] == rec_nodes[0]) {
+							unsel_nodes[ToInt(inode)] = old_allele_node ? old_allele_node :
+								 unsel_nodes[ ToInt(nunsel - nchroms_t(1) ) ];
+							unsel--;
 							foundit = 1;
 							break;
 						}

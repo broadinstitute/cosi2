@@ -489,7 +489,7 @@ private:
 	 public:
 			SweepOnePopListener( Event_SweepOnePop *evt_ ): evt( evt_ ) { }
 			virtual ~SweepOnePopListener() { }
-			virtual void nodeAdded( Pop *pop, nodeid nodeName, idx_t idx, loc_t beg, loc_t end ) {
+			virtual void nodeAdded( Pop *pop, nodeid nodeName, nchroms_t idx, loc_t beg, loc_t end ) {
 				(void)nodeName;
 				PartialSumTree<glen_t> *pst = ( pop == evt->derPop ? &(evt->sideRecombRates_der) :
 																							( pop == evt->ancPop ? &(evt->sideRecombRates_anc) : NULL ) );
@@ -500,7 +500,7 @@ private:
 						 ( pop == evt->derPop ? &(evt->sideRecombVals_der) : &(evt->sideRecombVals_anc) );
 
 					
-					idx_t nodeidx = idx + 1;
+					idx_t nodeidx = ToInt(idx) + 1;
 					assert( nodeidx > 0 );
 					while ( int( srv->size() ) <= nodeidx+5 )
 						 srv->resize( 2 * std::max( srv->size(), static_cast<size_t>(1024) ) );
@@ -537,7 +537,8 @@ private:
 					PRINT( "added to unknownPop!" );
 				}
 			}
-			virtual void nodeRemoved( Pop *pop, idx_t idx ) {
+			virtual void nodeRemoved( Pop *pop, nchroms_t idx_ ) {
+				int idx = ToInt( idx_ );
 				PRINT3( "nodeRemoved", pop->pop_get_name(), idx );
 				PartialSumTree<glen_t> *pst = ( pop == evt->derPop ? &(evt->sideRecombRates_der) :
 																							( pop == evt->ancPop ? &(evt->sideRecombRates_anc) : NULL ) );

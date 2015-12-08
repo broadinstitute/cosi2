@@ -59,14 +59,14 @@ class Pop {
 	 
 public:
 
-	 Pop(popid  popname_ , nchroms_t  popsize_ , 
+	 Pop(popid  popname_ , popsize_float_t  popsize_ , 
 			 const string& label_ );
 	 ~Pop();
 
 	 class PopListener {
 	 public:
-			virtual void nodeAdded( Pop *pop, nodeid nodeName, idx_t idx_in_pop, loc_t beg, loc_t end ) = 0;
-			virtual void nodeRemoved( Pop *, idx_t idx_in_pop ) = 0;
+			virtual void nodeAdded( Pop *pop, nodeid nodeName, nchroms_t idx_in_pop, loc_t beg, loc_t end ) = 0;
+			virtual void nodeRemoved( Pop *, nchroms_t idx_in_pop ) = 0;
 			virtual ~PopListener() { }
 	 };
 
@@ -74,16 +74,16 @@ public:
 	 void clearPopListener() { this->popListener.reset(); }
 
 	 void pop_remove_node ( Node *);
-	 void pop_remove_node_by_idx ( int idx_in_pop);
+	 void pop_remove_node_by_idx ( nchroms_t idx_in_pop);
 	 void pop_add_node ( Node *);
-	 nchroms_t pop_get_num_nodes () const { return members.size(); }
+	 nchroms_t pop_get_num_nodes () const { return static_cast<nchroms_t>( members.size() ); }
 	 bool_t empty() const { return members.empty(); }
-	 void pop_set_size (nchroms_t  popsize_  ) { popsize = popsize_; }
+	 void pop_set_size (popsize_float_t  popsize_  ) { popsize = popsize_; }
 	 popid pop_get_name() const { return name; }
 
-	 Node *pop_get_node( int nodeIdx ) const;
+	 Node *pop_get_node( nchroms_t nodeIdx ) const;
 
-	 nchroms_t pop_get_size() const { return popsize; }
+	 popsize_float_t pop_get_size() const { return popsize; }
 	 const std::string& get_label() const { return label; }
 
 	 // Method: getMembers
@@ -152,7 +152,7 @@ private:
 	 // The current (effective) size of this population.
 	 // This is actually the number of diploid individuals in the population;
 	 // the number of haploid chromosomes is twice this.
-	 nchroms_t popsize;
+	 popsize_float_t popsize;
 
 	 // Private field: label
 	 // A human-readable name for a population.  Does not affect
@@ -190,7 +190,9 @@ private:
 };  // class Pop
 
 
-inline Node *Pop::pop_get_node( int nodeIdx ) const { return node::nodelist_get_node( nodeIdx, &members ); }
+inline Node *Pop::pop_get_node( nchroms_t nodeIdx ) const {
+	return node::nodelist_get_node( ToInt( nodeIdx ), &members );
+}
 
 }  // namespace cosi
 

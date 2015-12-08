@@ -87,7 +87,7 @@ public:
 	 
 	 glen_cM_t getRegionGeneConvRate() const;
 	 
-	 void gc_execute (genid gen, int popindex, loc_t *loc1, loc_t *loc2, Node**nodes_out);
+	 void gc_execute (genid gen, pop_idx_t popindex, loc_t *loc1, loc_t *loc2, Node**nodes_out);
 
 	 //
 	 // Method: gc_execute

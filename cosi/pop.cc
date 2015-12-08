@@ -14,7 +14,7 @@ namespace cosi {
 using std::string;
 using util::chkCond;
 
-Pop::Pop(popid name_, int popsize_, const string& label_) :
+Pop::Pop(popid name_, popsize_float_t popsize_, const string& label_) :
 	name( name_ ), popsize( popsize_ ), label( label_ ),
 	isRestrictingCoalescence( false )
 #ifdef COSI_SUPPORT_COALAPX
@@ -25,17 +25,17 @@ Pop::Pop(popid name_, int popsize_, const string& label_) :
 #endif
 	, _isInactive( false )
 {
-	chkCond( popsize >= 0, "creating pop with negative size" );
+	chkCond( popsize >= popsize_float_t(0.), "creating pop with negative size" );
 }
 
 Pop::~Pop() { }
 
-void Pop::pop_remove_node_by_idx ( int idx_in_pop) {
-	Node *n = members[ idx_in_pop ];
+void Pop::pop_remove_node_by_idx ( nchroms_t idx_in_pop) {
+	Node *n = members[ ToInt(idx_in_pop) ];
 	PRINT3( "pop_remove_node_by_idx", this->name, idx_in_pop );
 	if ( popListener ) {
 		popListener->nodeRemoved( this, idx_in_pop );
-		if ( idx_in_pop < ((int)members.size())-1 ) {
+		if ( idx_in_pop < nchroms_t( ((int)members.size())-1 ) ) {
 			Node *last_node = members.back();
 			popListener->nodeRemoved( this, last_node->get_idx_in_pop() );
 			popListener->nodeAdded( this, last_node->getName(), idx_in_pop, seglist_beg( last_node->getSegs() ),
@@ -65,7 +65,7 @@ void
 Pop::pop_add_node ( Node *nodeptr) 
 {
 	Node::PopAccess::SetNodePop( nodeptr, this );
-  nodeptr->set_idx_in_pop( nodelist_add(&(members), nodeptr) );
+  nodeptr->set_idx_in_pop( static_cast<nchroms_t>( nodelist_add(&(members), nodeptr) ) );
 #ifdef COSI_SUPPORT_COALAPX	
 	if ( restrictingCoalescence() ) {
 		 hullMgr->addHull( seglist_beg( nodeptr->getSegs() ), seglist_end( nodeptr->getSegs() ),
@@ -91,22 +91,22 @@ bool apxWithTrajOk = True;
 factor_t apxMinFactor = 0;
 
 bool Pop::useCoalApx() const {
-	return isRestrictingCoalescence && ( popsize > members.size() * apxMinFactor ) &&
+	return isRestrictingCoalescence && ( ToDouble(popsize) > members.size() * apxMinFactor ) &&
 		 ( apxWithTrajOk || !coalArrivalProcess );
 }
 
 nchromPairs_t Pop::getNumCoalesceableChromPairs() const {
-	return !useCoalApx() ? ( members.size() * ( members.size() - 1 ) / 2 ) :
-		 hullMgr->getNumIntersections();
+	return nchromPairs_t( !useCoalApx() ? ( members.size() * ( members.size() - 1 ) / 2 ) :
+												( hullMgr->getNumIntersections() ) );
 }
 
 std::pair< Node *, Node * > Pop::chooseRandomIntersection( RandGenP randGen ) {
 	if ( !useCoalApx() ) {
-		nchroms_t node1idx = randGen->random_idx( members.size() );
-		nchroms_t node2idx = randGen->random_idx( members.size() - 1 );
+		nchroms_t node1idx( randGen->random_idx( members.size() ) );
+		nchroms_t node2idx( randGen->random_idx( members.size() - 1 ) );
 		if ( node2idx >= node1idx ) node2idx++;
 
-		return std::make_pair( members[ node1idx ], members[ node2idx ] );
+		return std::make_pair( members[ ToInt(node1idx) ], members[ ToInt(node2idx) ] );
 
 	} else {
 		std::pair< const HullMgr::Hull *, const HullMgr::Hull * > p = 

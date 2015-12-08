@@ -200,7 +200,7 @@ ParamFileReader::file_proc_buff(char *var, char* buffer, FILE* segfp)
 		/* 
 		 * Throw a fatal error if pop [popname] does not exist.
 		 */		
-		if (! demography->dg_set_pop_size_by_name (ZERO_GEN, popname, intarg))
+		if (! demography->dg_set_pop_size_by_name (ZERO_GEN, popname, popsize_float_t( intarg ) ))
 			 file_exit("file_proc_buff", 
 								 "parameter file - pop specified does not exist.");
 		
@@ -211,7 +211,7 @@ ParamFileReader::file_proc_buff(char *var, char* buffer, FILE* segfp)
 		intarg = atoi(strtok (NULL, " " ));
 		if (FILE_DEBUG)
 			 printf("sampsize: %d\n", intarg);
-		demography->dg_populate_by_name (popname, intarg);
+		demography->dg_populate_by_name (popname, static_cast<nchroms_t>( intarg) );
 		if (segfp != NULL) {fprintf(segfp, "A %d %d\n", ToInt( popname ), intarg);}
 	}
 	else if ( !strcmp( var, "pop_ignore_recombs" ) ) {

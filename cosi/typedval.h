@@ -26,6 +26,9 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/has_operator.hpp>
+#include <boost/type_traits/is_convertible.hpp>
 #include <cosi/utildefs.h>
 
 #include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()
@@ -60,7 +63,7 @@ struct zero_t {};
 // Represents the value zero in a way understandable at compile time.
 // For example if you want to be able to initialize an object from a zero
 // but not from an arbitrary floating-point value, you could use this.
-//const zero_t ZERO;
+const zero_t ZERO;
 
 inline cosi_double ToDouble( const zero_t& ) { return 0.0; }
 
@@ -103,6 +106,31 @@ struct TypedVal: public boost::totally_ordered<T>  {
 	 TypedVal( const nan_t& ): val( std::numeric_limits<ValT>::quiet_NaN() ) {}
 	 T& operator=( const nan_t& ) { val = std::numeric_limits<ValT>::quiet_NaN(); return (T&)*this; }
 
+	 typename boost::enable_if< boost::has_pre_increment< ValT >,
+															TypedVal& >::type
+	 operator++() { val++; return *this; }
+	 
+	 typename boost::enable_if< boost::has_post_increment< ValT >,
+															TypedVal >::type
+	 operator++(int) {
+		 TypedVal temp = *this;
+		 ++*this;
+		 return temp;
+	 }
+
+	 typename boost::enable_if< boost::has_pre_decrement< ValT >,
+															TypedVal& >::type
+	 operator--() { val--; return *this; }
+	 
+	 typename boost::enable_if< boost::has_post_decrement< ValT >,
+															TypedVal >::type
+	 operator--(int) {
+		 TypedVal temp = *this;
+		 --*this;
+		 return temp;
+	 }
+	 
+
 private:	 
 	 friend class boost::serialization::access;
 	 template <class Archive> void serialize( Archive& ar, const unsigned int /* version */ ) {
@@ -127,7 +155,10 @@ template <class T, typename V> inline bool operator<=( const zero_t&, const Type
 template <class T, typename V> inline bool operator>( const zero_t&, const TypedVal<T,V>& f ) { return f.val > 0; }
 template <class T, typename V> inline bool operator>=( const zero_t&, const TypedVal<T,V>& f ) { return f.val >= 0; }
 
-template <class T> inline cosi_double ToDouble( const TypedVal<T,cosi_double>& factor ) { return factor.val; }
+template <class T, typename ValT>
+inline
+typename boost::enable_if< boost::is_convertible< ValT, cosi_double  >, cosi_double >::type
+ToDouble( const TypedVal<T,ValT>& factor ) { return static_cast<double>( factor.val ); }
 template <class T, typename V> inline std::ostream& operator<<( std::ostream& s, const TypedVal<T,V>& f ) { s << f.val; return s; }
 template <class T, typename V> inline std::istream& operator>>( std::istream& s, TypedVal<T,V>& f ) { s >> f.val; return s; }
 
@@ -148,6 +179,8 @@ inline bool is_zero( const TypedVal<T,cosi_double>& tval ) { return ToDouble( tv
 
 template <class T>
 inline bool is_null( const TypedVal<T,cosi_double>& tval ) { return (boost::math::isnan)( ToDouble( tval ) ); }
+
+template <typename TFrom, typename TTo> struct typedval_can_convert;
 
 //
 // Macro: COSI_DEFINE_TYPEDVAL
@@ -235,6 +268,13 @@ const T operator-( const TypedValRel<T,V>& rv ) { return T( -rv.val ); }
 	struct Type: public TypedValRel<Type> {												\
 		Type() {}																										\
 		explicit Type( cosi_double val_ ): TypedValRel<Type>( val_ ) {}	\
+  }
+
+#define COSI_DEFINE_TYPEDVAL_REL_REP(Type,ValT)										\
+	struct Type: public TypedValRel<Type,ValT> {													\
+	typedef TypedValRel<Type,ValT> parent_type; \
+	Type(): parent_type( 0 ) {}																				\
+	explicit Type( ValT val_ ): parent_type( val_ ) {}								\
   }
 
 // 

@@ -48,11 +48,11 @@ tot_breakoff = 0, tot_alloced = 0;
 
 Node *NodePool::alloc_node() {
   Node *n = (Node *)mempool_node.mempool_alloc_item();
-  n->name = node_index++;
+  n->name = static_cast<nodeid>( node_index++ );
 	n->pop = NULL;
 	n->recombRate = ZERO_GLEN;
 	n->gcRate = ZERO_GLEN;
-	n->idx_in_allNodes = allNodes.size();
+	n->idx_in_allNodes = nchroms_t( allNodes.size() );
 	allNodes.push_back( n );
   return n;
 }
@@ -64,14 +64,14 @@ void NodePool::node_delete( Node **np ) {
 
 	setNodeRecombRate( n, ZERO_GLEN );
 	setNodeGcRate( n, ZERO_GLEN );
-	int idx = n->idx_in_allNodes;
-	if ( idx < isize(allNodes)-1 ) {
+	nchroms_t idx = n->idx_in_allNodes;
+	if ( ToInt(idx) < isize(allNodes)-1 ) {
 		Node *last_node = allNodes.back();
 		glen_t last_node_recomb_rate = last_node->recombRate;
 		glen_t last_node_gc_rate = last_node->gcRate;
 		setNodeRecombRate( last_node, ZERO_GLEN );
 		setNodeGcRate( last_node, ZERO_GLEN );
-		allNodes[ idx ] = last_node;
+		allNodes[ ToInt(idx) ] = last_node;
 		last_node->idx_in_allNodes = idx;
 		setNodeRecombRate( last_node, last_node_recomb_rate );
 		setNodeGcRate( last_node, last_node_gc_rate );
@@ -141,7 +141,7 @@ NodePool::node_coalesce (Node ** node1p, Node ** node2p, genid gen)
   seglist_chk( node2->segs );
 	//PRINT2( "coal", gen );
 
-	nodeid next_node_name = node_index;
+	nodeid next_node_name = static_cast< nodeid >( node_index );
 
 	
 	getHooks()->fire_add_edge( node1->name, next_node_name, node1->gen, gen, node1->segs, EDGE_COAL );
@@ -205,7 +205,7 @@ NodePool::node_recombine (Node **nodep, Node **newnode1, Node **newnode2,
 
   node_chk( node );
 
-  int node_idx_in_pop = node->get_idx_in_pop();
+  nchroms_t node_idx_in_pop = node->get_idx_in_pop();
 	Pop *popptr = node->getPop();
 
 	if ( nodes_out ) { nodes_out[0] = node; nodes_out[1] = nodes_out[2] = (Node *)NULL; }
@@ -540,10 +540,10 @@ nodelist_add(NodeList *nlptr, Node *nodeptr) {
   return nlptr->size()-1;
 }
 
-void nodelist_remove_idx( NodeList *nlptr, int idx ) {
-  if ( idx < ((int)nlptr->size())-1 ) {
+void nodelist_remove_idx( NodeList *nlptr, nchroms_t idx ) {
+  if ( ToInt(idx) < ((int)nlptr->size())-1 ) {
 		Node *last_node = nlptr->back();
-		(*nlptr)[ idx ] = last_node;
+		(*nlptr)[ ToInt(idx) ] = last_node;
 		last_node->idx_in_pop = idx;
   }
   nlptr->pop_back();

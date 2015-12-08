@@ -2079,12 +2079,12 @@ void seglist_test_1(void ) {
 int seglist_run_tests() {
 	std::cout.precision(18);
 	std::cerr.precision(18);
-	leafset_set_max_leaf_id(9);
+	leafset_set_max_leaf_id(static_cast<leaf_id_t>(9));
 
 	Seglist_builder builder;
 	seglist_builder_init( &builder );
-	seglist_builder_add_seg( &builder, loc_t( ploc_t( 0.1 ), gloc_t( 0.1 ) ), loc_t( ploc_t( .2 ), gloc_t( .2 ) ), make_singleton_leafset( 1 ), NULL_GEN );
-	seglist_builder_add_seg( &builder, loc_t( ploc_t( 0.3 ), gloc_t( 0.3 ) ), loc_t( ploc_t( .4 ), gloc_t( .4 ) ), make_singleton_leafset( 1 ), NULL_GEN );
+	seglist_builder_add_seg( &builder, loc_t( ploc_t( 0.1 ), gloc_t( 0.1 ) ), loc_t( ploc_t( .2 ), gloc_t( .2 ) ), make_singleton_leafset( leaf_id_t(1) ), NULL_GEN );
+	seglist_builder_add_seg( &builder, loc_t( ploc_t( 0.3 ), gloc_t( 0.3 ) ), loc_t( ploc_t( .4 ), gloc_t( .4 ) ), make_singleton_leafset( leaf_id_t(1) ), NULL_GEN );
 	
 	Seglist *s1 = seglist_builder_free_and_get_result( &builder );
 	chkCond( equal_eps( seglist_find_glen( s1, glen_t(.05) ), gloc_t(.15) ), "err" );

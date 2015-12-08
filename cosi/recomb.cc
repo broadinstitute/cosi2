@@ -44,7 +44,7 @@ glen_t Recomb::getAllNodesRecombRate() const {
 
 void Recomb::recomb_execute (genid gen, int popindex, loc_t *location, Node**nodes_out) {
 	Pop *popptr = demography->dg_get_pop_by_index( popindex );
-  int nodeindex = (int) (random_double() * popptr->pop_get_num_nodes());
+  nchroms_t nodeindex( (int) (random_double() * ToInt(popptr->pop_get_num_nodes())) );
   Node *n = popptr->pop_get_node (nodeindex);
 	*location = genMap->getLoc( gloc_t( random_double() ) );
 	demography->dg_recombine( n, gen, *location, nodes_out );

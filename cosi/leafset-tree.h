@@ -25,7 +25,7 @@ namespace leafset_tree {
 /* Identifier of one leaf node of the ARG, representing a present-day <chrom>. */
 typedef nodeid leaf_id_t;
 
-const leaf_id_t NULL_LEAF_ID = -1;
+const leaf_id_t NULL_LEAF_ID( -1 );
 
 struct leafset_struct;
 
@@ -126,10 +126,12 @@ inline bool_t leafset_may_differ( leafset_p leafset1, leafset_p leafset2) { retu
 
 inline
 nchroms_t leafset_size( leafset_p leafset ) {
-	return leafset_is_empty( leafset ) ? 0 : leafset->size;
+	return leafset_is_empty( leafset ) ? static_cast<nchroms_t>(0) : leafset->size;
 }
 
-inline bool leafset_is_full( leafset_p leafset ) { return leafset_size( leafset ) == leafset_get_max_leaf_id(); }
+inline bool leafset_is_full( leafset_p leafset ) {
+	return leafset_size( leafset ) == static_cast<nchroms_t>( leafset_get_max_leaf_id() );
+}
 
 template <class OutputIter>
 void leafset_get_leaves( leafset_p leafset, OutputIter result ) {

@@ -72,7 +72,7 @@ public:
 	 void dg_create_pop (popid popname, const std::string& label, 
 											 genid gen);
 	 void dg_populate_by_name (popid popname, 
-														 int members,  genid gen = ZERO_GEN );
+														 nchroms_t members,  genid gen = ZERO_GEN );
 
 	 int dg_get_num_pops(void) const { return pops.size(); }
 
@@ -89,10 +89,10 @@ public:
 
 	 nchroms_t dg_get_num_nodes (void) const;
 	 
-	 nchroms_t dg_get_pop_size_by_index(int popindex) const { return pops[popindex]->pop_get_size(); }
+	 popsize_float_t dg_get_pop_size_by_index(pop_idx_t popindex) const { return pops[popindex]->pop_get_size(); }
 
 	 int dg_set_pop_size_by_name (genid gen, popid popname, 
-																nchroms_t newsize);
+																popsize_float_t newsize);
 
 	 /* POISSON EVENTS */
 
@@ -168,7 +168,7 @@ public:
 	 std::map< popid, nchroms_t > getLeafsetPopCounts( leafset_p leafset ) const {
 		 std::map< popid, nchroms_t > result;
 		 COSI_FOR_LEAFSET( leafset, leaf, {
-				 result[ leaf2popName[ leaf ] ]++;
+				 result[ leaf2popName[ ToInt(leaf) ] ]++;
 			 });
 		 return result;
 	 }
@@ -178,7 +178,7 @@ public:
 	 void getLeafsetPopCounts( leafset_p leafset, OutputIterator it ) const {
 		 std::vector<nchroms_t> counts( sampleSizes.size(), 0 );
 		 COSI_FOR_LEAFSET( leafset, leaf, {
-				 counts[ popname2idx[ ToInt( leaf2popName[ leaf ] ) ] ]++;
+				 counts[ popname2idx[ ToInt( leaf2popName[ ToInt(leaf) ] ) ] ]++;
 			 });
 		 boost::copy( counts, it );
 	 }
@@ -218,7 +218,7 @@ private:
 
 	 typedef struct populate_request {
 			popid popname;
-			int members;
+			nchroms_t members;
 			genid gen;
 	 } populate_request_t;
 	 
@@ -234,7 +234,7 @@ private:
 	 bool_t maxCoalDistCvxHull;
 	 
 	 void
-	 dg_populate_by_name_do (popid popname, int members, genid gen);
+	 dg_populate_by_name_do (popid popname, nchroms_t members, genid gen);
 
 };  // class Demography
 

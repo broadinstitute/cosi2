@@ -79,12 +79,12 @@ void Mutlist::freeze( bool_t inf_sites, len_bp_t length ) {
 	////////
 #ifndef COSI_LEAFSET_SIZEONLY
 #ifndef COSI_FREQONLY	
-	leaf2muts.resize( leafset_get_max_leaf_id() );
+	leaf2muts.resize( ToInt( leafset_get_max_leaf_id() ) );
 	for ( const_iterator it = muts.begin(); it != muts.end(); it++ ) {
 		vector< leaf_id_t > leavesVec;
 		leafset_get_leaves( it->leaves, std::back_inserter( leavesVec ) );
 		ForEach( leaf_id_t leaf_it, leavesVec )
-			 leaf2muts[ leaf_it ].push_back( it );
+			 leaf2muts[ ToInt( leaf_it ) ].push_back( it );
 	}
 #endif	
 #endif	
@@ -212,11 +212,11 @@ MutlistP Mutlist::loadFromMs( istream& is ) {
 
 	chkCond( !chroms.empty(), "ms format error: no chroms" );
 
-	leafset_set_max_leaf_id( chroms.size() );
+	leafset_set_max_leaf_id( static_cast< leaf_id_t >( chroms.size() ) );
 
 	for ( unsigned int mutId = 0; mutId < nmuts; mutId++ ) {
 		leafset_p leafset( LEAFSET_NULL );
-		leaf_id_t leafId = 0;
+		leaf_id_t leafId( 0 );
 		ForEach( string chrom, chroms ) {
 			if ( chrom[ mutId ] == '1' ) {
 				leafset = leafset_union( leafset, make_singleton_leafset( leafId ) );
@@ -317,9 +317,9 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 		}
 		//PRINT( "wrote header" );
 
-		leaf_id_t leaf = 0;
+		leaf_id_t leaf( 0 );
 		for (size_t ipop = 0; ipop < sampleSizes.size(); ipop++) {
-			if (sampleSizes[ipop] > 0) {
+			if (sampleSizes[ipop] > nchroms_t(0) ) {
 				leaf_id_t popEndLeaf = leaf + sampleSizes[ipop];
 
 				for (; leaf < popEndLeaf; leaf++) {
@@ -365,7 +365,7 @@ void MutProcessor_AddToMutlist::postprocess() {
 MutProcessor_AddToMutlist_WithAscertainment::~MutProcessor_AddToMutlist_WithAscertainment() { }
 
 void MutProcessor_AddToMutlist_WithAscertainment::processMut(loc_t loc, leafset_p leaves, genid gen, popid popName) {
-	if ( ( leafset_size( leaves ) != 1 ) || ( random_double() > dropSingletonsFrac ) )
+	if ( ( leafset_size( leaves ) != nchroms_t(1) ) || ( random_double() > dropSingletonsFrac ) )
 		 PARENT::processMut( loc, leaves, gen, popName );
 }
 

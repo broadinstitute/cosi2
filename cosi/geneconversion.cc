@@ -79,9 +79,9 @@ plen_t GeneConversion::sampleTractLen() const {
 	return plen_t( ToDouble( tractLenBp ) / ToDouble( regionLen ) );
 }
 
-void GeneConversion::gc_execute (genid gen, int popindex, loc_t *loc1, loc_t *loc2, Node**nodes_out) {
+void GeneConversion::gc_execute (genid gen, pop_idx_t popindex, loc_t *loc1, loc_t *loc2, Node**nodes_out) {
 	Pop *popptr = demography->dg_get_pop_by_index( popindex );
-  int nodeindex = (int) (random_double() * popptr->pop_get_num_nodes());
+  nchroms_t nodeindex( (int) (random_double() * ToInt(popptr->pop_get_num_nodes())) );
   Node *n = popptr->pop_get_node (nodeindex);
 
 	loc_t gcOrigin = genMap->getLoc( gloc_t( random_double() ) );

@@ -125,7 +125,7 @@ public:
 	 // Return list of muts falling on a given leaf (present-day chromosome).
 	 const vector< const_iterator >& getLeafMuts( leaf_id_t leaf ) const {
 		 assert( frozen );
-		 return leaf2muts[ leaf ];
+		 return leaf2muts[ ToInt(leaf) ];
 	 }
 
 	 // Method: getMuts

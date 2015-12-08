@@ -84,7 +84,8 @@ Migrate::migrate_get_all_nodes_rate ( genid gen ) const
 	if ( baseModel ) {
 		for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
 				 pi != baseModel->popInfos.end(); ++pi ) {
-			num_nodes = static_cast<popsize_float_t>( demography->dg_get_pop_by_name( pi->first )->pop_get_num_nodes() );
+			num_nodes = static_cast<popsize_float_t>(
+				ToDouble( demography->dg_get_pop_by_name( pi->first )->pop_get_num_nodes() ) );
 			if ( num_nodes > static_cast<popsize_float_t>(0.) ) {
 				BOOST_AUTO( const& popInfo, pi->second );
 				for( BOOST_AUTO( mi, popInfo.migrRateTo.begin() );
@@ -104,7 +105,7 @@ Migrate::migrate_get_all_nodes_rate ( genid gen ) const
 				// 	 std::cerr << " looking migration from " << tempmigrate->frompop->pop_get_name() << " to " << tempmigrate->topop->pop_get_name() << "\n";
 				util::chkCond( !tempmigrate->frompop->isInactive(), "migration on inactive node!" );
 				util::chkCond( !tempmigrate->topop->isInactive(), "migration on inactive node!" );
-				num_nodes = static_cast<popsize_float_t>( tempmigrate->frompop->pop_get_num_nodes() );
+				num_nodes = static_cast<popsize_float_t>( ToDouble( tempmigrate->frompop->pop_get_num_nodes() ) );
 				rate += num_nodes * tempmigrate->rate;
 				tempmigrate = tempmigrate->next;
 			}
@@ -130,7 +131,7 @@ Migrate::migrate_execute (genid gen)
 			for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
 					 pi != baseModel->popInfos.end(); ++pi ) {
 				Pop *srcPop = demography->dg_get_pop_by_name( pi->first );
-				numnodes = static_cast<popsize_float_t>( srcPop->pop_get_num_nodes() );
+				numnodes = static_cast<popsize_float_t>( ToDouble( srcPop->pop_get_num_nodes() ) );
 				if ( numnodes > static_cast<popsize_float_t>(0.) ) {
 					BOOST_AUTO( const& popInfo, pi->second );
 					for( BOOST_AUTO( mi, popInfo.migrRateTo.begin() );
@@ -148,7 +149,7 @@ Migrate::migrate_execute (genid gen)
 		}  // if basemodel
 		else {
 			while (tempmigrate != NULL && rate < randcounter) {
-				numnodes = static_cast< popsize_float_t >( tempmigrate->frompop->pop_get_num_nodes() );
+				numnodes = static_cast< popsize_float_t >( ToDouble( tempmigrate->frompop->pop_get_num_nodes() ) );
 				rate += numnodes * tempmigrate->rate;
 				if (rate < randcounter)
 					 tempmigrate = tempmigrate->next;
@@ -217,7 +218,9 @@ public:
 		 demography( demography_ ), srcPop( srcPop_ ), dstPop( dstPop_ ) {
 	 }
 
-	 virtual popsize_float_t getRateFactor() const { return static_cast<popsize_float_t>( srcPop->pop_get_num_nodes() ); }
+	 virtual popsize_float_t getRateFactor() const {
+		 return static_cast<popsize_float_t>( ToDouble( srcPop->pop_get_num_nodes() ) );
+	 }
 	 virtual void executeEvent( genid gen, RandGen& ) { demography->dg_migrate_one_chrom( srcPop, dstPop, gen ); }
 };  // class MigrateProcess
 

@@ -69,14 +69,13 @@ Demography::dg_create_pop (popid popname, const std::string& label, genid gen) {
 		dg_exit("dg_create_pop","duplicate popname used.");
   }
 
-	nchroms_t zero_chroms = 0;
-	PopP pop = boost::make_shared<Pop>(popname, zero_chroms, label);
+	PopP pop = boost::make_shared<Pop>(popname, popsize_float_t(0.), label);
   dg_add_pop (pop, gen);
 }
 
 
 void
-Demography::dg_populate_by_name (popid popname, int members, genid gen) {
+Demography::dg_populate_by_name (popid popname, nchroms_t members, genid gen) {
   populate_request_t req;
   req.popname = popname;
   req.members = members;
@@ -85,12 +84,12 @@ Demography::dg_populate_by_name (popid popname, int members, genid gen) {
 }
 
 void
-Demography::dg_populate_by_name_do (popid popname, int members, genid gen) {
+Demography::dg_populate_by_name_do (popid popname, nchroms_t members, genid gen) {
   Pop *popptr = dg_get_pop_by_name(popname);
   Node *tempnode;
-  int i;	
+  nchroms_t i;	
 
-  for (i = 0; i < members; i++) {
+  for (i = nchroms_t(0); i < members; i++) {
 		tempnode = dg_nodePool->make_new_leaf();
 		popptr->pop_add_node (tempnode);
 
@@ -100,13 +99,13 @@ Demography::dg_populate_by_name_do (popid popname, int members, genid gen) {
 }
 
 void Demography::dg_complete_initialization() {
-  int totmembers = 0;
+	nchroms_t totmembers(0);
 
   ForVec( populate_request, req, populate_requests )
 		 totmembers += req->members;
 
   leafset_set_max_leaf_id( totmembers );
-	this->leaf2popName.resize( totmembers + 1 );
+	this->leaf2popName.resize( ToInt(totmembers) + 1 );
 
 #ifdef COSI_FREQONLY
 	// extern const std::vector< popid > *leafset_leaf2popName;
@@ -119,7 +118,7 @@ void Demography::dg_complete_initialization() {
 #endif
 	
 
-  leaf_id_t leafFrom = 0;
+  leaf_id_t leafFrom(0);
   ForVec( populate_request, req, populate_requests ) {
 		popNames.push_back( req->popname );
 		sampleSizes.push_back( req->members );
@@ -127,7 +126,7 @@ void Demography::dg_complete_initialization() {
 		pop2leaves.push_back( make_range_leafset( leafFrom, leafFrom + req->members ) );
 #endif
 		for ( leaf_id_t leaf = leafFrom; leaf < leafFrom + req->members; leaf++ )
-			 this->leaf2popName[ leaf ] = req->popname;
+			 this->leaf2popName[ ToInt(leaf) ] = req->popname;
 		leafFrom += req->members;
 		dg_populate_by_name_do( req->popname, req->members, req->gen );
 		
@@ -168,7 +167,7 @@ Demography::dg_get_pop_name_by_label (const char *label) const
  * Returns zero if the population specified does not exist.
  */
 int 
-Demography::dg_set_pop_size_by_name (genid gen, popid popname, nchroms_t newsize) 
+Demography::dg_set_pop_size_by_name (genid gen, popid popname, popsize_float_t newsize) 
 {
   Pop *popptr =  dg_get_pop_by_name(popname);
   if (popptr == NULL) {
@@ -233,8 +232,8 @@ Demography::dg_coalesce_by_pop(Pop* popptr, genid gen, bool forceCoalescence )
 		node1 = pickedNodes.first;
 		node2 = pickedNodes.second;
 	} else {
-		nchroms_t node1index = (int) (random_double() * popptr->pop_get_num_nodes());
-		nchroms_t node2index = (int) (random_double() * (popptr->pop_get_num_nodes() - 1));
+		nchroms_t node1index( (int) (random_double() * ToInt( popptr->pop_get_num_nodes() )) );
+		nchroms_t node2index( (int) (random_double() * (ToInt(popptr->pop_get_num_nodes()) - 1)) );
 		
 		if (node2index >= node1index) node2index++;
 		
@@ -244,8 +243,8 @@ Demography::dg_coalesce_by_pop(Pop* popptr, genid gen, bool forceCoalescence )
 
 #else  // if not approximating the coalescent
 
-	nchroms_t node1index = (int) (random_double() * popptr->pop_get_num_nodes());
-	nchroms_t node2index = (int) (random_double() * (popptr->pop_get_num_nodes() - 1));
+	nchroms_t node1index( (int) (random_double() * ToInt(popptr->pop_get_num_nodes())) );
+	nchroms_t node2index( (int) (random_double() * (ToInt(popptr->pop_get_num_nodes()) - 1)) );
 		
 	if (node2index >= node1index) node2index++;
 		
@@ -382,7 +381,7 @@ void Demography::dg_gc(Node *node, genid gen, loc_t loc1, loc_t loc2, Node** nod
 	 */
 
   /* STEP 1 */
-  int node_idx_in_pop = node->get_idx_in_pop();
+  nchroms_t node_idx_in_pop = node->get_idx_in_pop();
 	genid node_gen = node->getGen();
   gens_t edge_len = gen - node->getGen();
   Node *node_address = node;
@@ -429,10 +428,10 @@ void
 Demography::dg_migrate_one_chrom (Pop* from_popptr, Pop* to_popptr, genid gen) 
 {
   Node *tempnode;
-  int node_index;
+  nchroms_t node_index;
 
 	
-  node_index = (int) (random_double() * from_popptr->pop_get_num_nodes());
+  node_index = nchroms_t( (int) (random_double() * ToInt( from_popptr->pop_get_num_nodes()) ) );
   tempnode = from_popptr->pop_get_node (node_index);
   from_popptr->pop_remove_node (tempnode);
   to_popptr->pop_add_node (tempnode);
@@ -454,7 +453,7 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
 		 *to_popptr;
   Node *tempnode;
   nchroms_t num_to_move;
-  int node_index, i;
+  nchroms_t node_index, i;
 
   from_popptr = dg_get_pop_by_name (frompop);
   to_popptr = dg_get_pop_by_name(topop);
@@ -467,13 +466,14 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
 		return;
 	}
 
-  num_to_move = exactFraction ? nchroms_t( fractionToMove * from_popptr->pop_get_num_nodes() ) : ranbinom(from_popptr->pop_get_num_nodes(), fractionToMove);
+  num_to_move = exactFraction ? nchroms_t( fractionToMove * ToInt( from_popptr->pop_get_num_nodes() ) ) :
+		 nchroms_t( ranbinom(ToInt(from_popptr->pop_get_num_nodes()), fractionToMove) );
 	PRINT11( "moving_nodes", gen, frompop, topop, fractionToMove, bool_t(exactFraction), num_to_move,
 					 from_popptr->pop_get_size(), from_popptr->pop_get_num_nodes(), to_popptr->pop_get_size(), to_popptr->pop_get_num_nodes() );
 
-  for (i = 0; i < num_to_move; i++) {
-		node_index = (int) (random_double() 
-												* from_popptr->pop_get_num_nodes());
+  for (i = nchroms_t(0); i < num_to_move; i++) {
+		node_index = nchroms_t( (int) (random_double() 
+																	 * ToInt( from_popptr->pop_get_num_nodes() ) ) );
 		tempnode = from_popptr->pop_get_node (node_index);
 		from_popptr->pop_remove_node (tempnode);
 		to_popptr->pop_add_node (tempnode);
@@ -486,10 +486,10 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
 /* NODE FUNCTIONS */
 
 /* GET_NUM_NODES */
-int 
+nchroms_t
 Demography::dg_get_num_nodes (void) const
 {
-  int     total = 0;
+  nchroms_t     total( 0 );
 
   for (size_t i = 0; i < pops.size(); i++)
 		 total = dg_get_num_nodes_in_pop_by_index (i);

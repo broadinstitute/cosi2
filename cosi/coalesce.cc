@@ -35,7 +35,7 @@ Coalesce::coalesce_get_rate (void) const
 	int i;
 	double rate = 0;
 	nchroms_t numnodes;
-	nchroms_t popsize;
+	popsize_float_t popsize;
 
 	popRates.clear();
 	
@@ -46,13 +46,14 @@ Coalesce::coalesce_get_rate (void) const
 
 		numnodes = demography->dg_get_num_nodes_in_pop_by_index (i);
 		popsize = demography->dg_get_pop_size_by_index (i);
-		if (numnodes > 1  /*&& popsize > 0*/ ) {
-			prob_t coalRate = util::getFrac( numnodes * (numnodes - 1),
-																			 4 * std::max( popsize, 1 ) );
+		if (numnodes > static_cast<nchroms_t>( 1 )  /*&& popsize > 0*/ ) {
+			prob_t coalRate = util::getFrac( ToDouble( numnodes * (numnodes - static_cast<nchroms_t>( 1 ) ) ),
+																			 4 * ToDouble( std::max( popsize, static_cast<popsize_float_t>( 1. ) ) ) );
 #ifdef COSI_SUPPORT_COALAPX
 
 			if ( popptr->restrictingCoalescence() )
-				 coalRate = util::getFrac( popptr->getNumCoalesceableChromPairs(), 2.0 * std::max( popsize, 1 ) );
+				 coalRate = util::getFrac( ToDouble( popptr->getNumCoalesceableChromPairs() ),
+																	 2.0 * ToDouble( std::max( popsize, static_cast<popsize_float_t>( 1. ) ) ) );
 			
 #endif  // #ifdef COSI_SUPPORT_COALAPX			
 			
@@ -87,7 +88,7 @@ gens_t Coalesce::coalesce_get_wait_time_nonhomog( genid gen, gens_t maxWaitTime 
 			nchroms_t numnodes = demography->dg_get_num_nodes_in_pop_by_index (i);
 
 			
-			nchromPairs_t npairs = numnodes * (numnodes-1) / 2;
+			nchromPairs_t npairs = numnodes * (numnodes- static_cast<nchroms_t>(1) ) / 2;
 
 #ifdef COSI_SUPPORT_COALAPX
 
@@ -95,11 +96,11 @@ gens_t Coalesce::coalesce_get_wait_time_nonhomog( genid gen, gens_t maxWaitTime 
 				 npairs = popptr->getNumCoalesceableChromPairs();
 			
 #endif  // #ifdef COSI_SUPPORT_COALAPX
-			if ( npairs > 0 ) {
+			if ( npairs > static_cast<nchromPairs_t>( 0 ) ) {
 
 			
 				genid nextCoalTime = proc.nextArrivalTime( gen, gen + maxWaitTime,
-																									 static_cast<double>( npairs ),
+																									 ToDouble( npairs ),
 																									 *getRandGen(),
 																									 /* eps= */ poisPrec,
 																									 /* maxSteps= */ poisMaxSteps );

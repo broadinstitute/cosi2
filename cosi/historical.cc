@@ -54,7 +54,7 @@ namespace histevents {
 // Note also that this event affects only population size, not the sample size (number of <Nodes> belonging to that pop).
 class Event_PopSize: public HistEvents::Event {
 public:
-	 Event_PopSize( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, nchroms_t popsize_ ):
+	 Event_PopSize( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, popsize_float_t popsize_ ):
 		 Event( histEvents_, label_, gen_ ), pop( pop_ ), popsize( popsize_ ) {
 		 chkRep();
 	 }
@@ -83,10 +83,10 @@ private:
 			
 	 // Field: popsize
 	 // The new population size
-	 nchroms_t popsize;
+	 popsize_float_t popsize;
 
 	 void chkRep() const {
-		 if ( popsize < nchroms_t(0) )
+		 if ( popsize < popsize_float_t(0) )
 				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
 															 << error_msg( "pop size negative" ) );
 	 }
@@ -96,8 +96,8 @@ private:
 // Exponential expansion of population size over a range of generations.
 class Event_PopSizeExp: public HistEvents::Event {
 public:
-	 Event_PopSizeExp( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, nchroms_t popsize_,
-										 genid genBeg_, nchroms_t popSizeBeg_ ):
+	 Event_PopSizeExp( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, popsize_float_t popsize_,
+										 genid genBeg_, popsize_float_t popSizeBeg_ ):
 		 Event( histEvents_, label_, gen_ ), pop( pop_ ) , popsize( popsize_ ), genBeg( genBeg_ ), popSizeBeg( popSizeBeg_ ) {
 		 PRINT6( pop, gen, genBeg, popsize, popSizeBeg, expansionRate );
 		 calcExpansionRate();
@@ -168,8 +168,8 @@ class Event_PopSizeExp2: public HistEvents::Event {
 	 static int procCount;
 	 
 public:
-	 Event_PopSizeExp2( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, nchroms_t popsize_,
-										 genid genBeg_, nchroms_t popSizeBeg_ ):
+	 Event_PopSizeExp2( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, popsize_float_t popsize_,
+										 genid genBeg_, popsize_float_t popSizeBeg_ ):
 		 Event( histEvents_, label_, gen_ ), pop( pop_ ) , popsize( popsize_ ), genBeg( genBeg_ ), popSizeBeg( popSizeBeg_ ) , procName( -1 ) {
 		 calcExpansionRate();
 	 }
@@ -424,7 +424,7 @@ genid Event_PopSize::execute() {
 }
 
 void Event_PopSize::addToBaseModel( BaseModel& baseModel ) const {
-	baseModel.popInfos[ pop ].setSizeFrom( gen, popsize_float_t( popsize ) );
+	baseModel.popInfos[ pop ].setSizeFrom( gen, popsize );
 }
 
 
@@ -434,7 +434,8 @@ const gens_t Event_PopSizeExp::STEP( getenv( "COSI_POPSIZEEXP_STEP" ) ? atof( ge
 
 genid Event_PopSizeExp::execute() {
 	//	PRINT( STEP );
-	getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( ToDouble( popsize + static_cast< popsize_float_t >( .5 ) ) ) );
+	getDemography()->dg_set_pop_size_by_name( gen, pop,
+																						popsize + static_cast< popsize_float_t >( .5 ) );
 	genid oldgen = gen;
 	if ( gen < genBeg ) {
 		genid newgen = std::min( oldgen + STEP, genBeg );
@@ -526,7 +527,7 @@ genid Event_PopSizeExp2::execute() {
 			 popPtr->clearCoalArrivalProcess();
 			 
 			 PRINT( "clearedArrivalProcess" );
-			 getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( ToDouble( popSizeBeg + static_cast< popsize_float_t >( .5 ) ) ) );			 
+			 getDemography()->dg_set_pop_size_by_name( gen, pop, popSizeBeg + static_cast< popsize_float_t >( .5 ) );			 
 		}
 	}
 	return oldgen;
@@ -551,7 +552,8 @@ void Event_PopSizeExp2::addToBaseModel( BaseModel& baseModel ) const {
 
 genid Event_Bottleneck::execute() {
   Pop* the_pop = getDemography()->dg_get_pop_by_name(pop);
-  int num_nodes = the_pop->pop_get_num_nodes();
+  nchroms_t num_nodes_ = the_pop->pop_get_num_nodes();
+	int num_nodes = ToInt( num_nodes );
   gens_t t = ZERO_GENS;
 	rate_t rate;
   

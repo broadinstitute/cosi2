@@ -62,8 +62,8 @@ public:
 	 Seglist *getSegs() const { return segs; }
 	 Pop *getPop() const { return pop; }
 	 
-	 int get_idx_in_pop() const { return idx_in_pop; }
-	 void set_idx_in_pop( int idx_in_pop_ ) { idx_in_pop = idx_in_pop_; }
+	 nchroms_t get_idx_in_pop() const { return idx_in_pop; }
+	 void set_idx_in_pop( nchroms_t idx_in_pop_ ) { idx_in_pop = idx_in_pop_; }
 
 private:
 	 /* Field: name */
@@ -77,7 +77,7 @@ private:
 	 /* Field: idx_in_pop */
 	 /* Index of this node in its population.  Used when removing the node */
 	 /* from its population's nodelist. */
-	 int idx_in_pop;
+	 nchroms_t idx_in_pop;
 
 	 /* Field: segs */
 	 /* The parts of this chromosome inherited by _some_ present-day (sample) chromosome.  */
@@ -89,7 +89,7 @@ private:
 
 	 // Field: idx_in_allNodes
 	 // Index of this node in <NodePool::allNodes>
-	 int idx_in_allNodes;
+	 nchroms_t idx_in_allNodes;
 
 	 // Field: recombRate
 	 // Total recomb rate within this node.  Equal to the genetic distance between
@@ -106,7 +106,7 @@ private:
 #endif	 
 
 	 friend class NodePool;
-	 friend void nodelist_remove_idx( NodeList *nlptr, int idx );
+	 friend void nodelist_remove_idx( NodeList *nlptr, nchroms_t idx );
 
 public:
 
@@ -206,7 +206,7 @@ public:
 
 	 glen_t getAllNodesGeneConvRate() const { return gcPartialSums.getTotalSum(); }
 	 
-	 nchroms_t getNumNodes() const { return allNodes.size()-1; }
+	 nchroms_t getNumNodes() const { return static_cast<nchroms_t>( allNodes.size()-1 ); }
 
 	 Node *pickRandomNode() const { return allNodes[ 1 + ((int)(random_double() * (allNodes.size()-1))) ]; }
 
@@ -311,12 +311,12 @@ private:
 	 glen_t compute_node_gc_rate( Node * ) const;
 
 	 void setNodeRecombRate( Node *n, glen_t recombRate ) {
-		 recombPartialSums.add( n->idx_in_allNodes, recombRate - n->recombRate );
+		 recombPartialSums.add( ToInt(n->idx_in_allNodes), recombRate - n->recombRate );
 		 n->recombRate = recombRate;
 	 }
 	 void setNodeGcRate( Node *n, glen_t gcRate ) {
 		 if ( enableGeneConv ) {
-			 gcPartialSums.add( n->idx_in_allNodes, gcRate - n->gcRate );
+			 gcPartialSums.add( ToInt(n->idx_in_allNodes), gcRate - n->gcRate );
 			 n->gcRate = gcRate;
 		 }
 	 }
