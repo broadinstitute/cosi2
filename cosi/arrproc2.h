@@ -440,13 +440,13 @@ public:
 }; // class ArrivalProcess<TTime, Any< TRand > >
 
 template <typename TTime, typename URNG>
-TTime nextEventTime( ArrivalProcess<TTime, Stoch< URNG, AnyProc > > const& p,
+TTime nextEventTime( ArrivalProcess<TTime, Stoch< URNG, AnyProc > >& p,
 										 TTime fromTime, TTime maxTime, URNG& urng ) {
 	return p.nextArrivalTime( fromTime, maxTime, urng );
 }
 
 template <typename TTime, typename URNG>
-void executeNextEvent( ArrivalProcessImpl<TTime, Stoch<URNG, AnyProc> >& p, TTime t, URNG& urng ) {
+void executeNextEvent( ArrivalProcess<TTime, Stoch<URNG, AnyProc> >& p, TTime t, URNG& urng ) {
 	p.execNextEvent( t, urng );
 }
 

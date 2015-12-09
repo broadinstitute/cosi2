@@ -44,6 +44,18 @@ Simulator::Simulator( DemographyP demography_, GenMapP genMap_ ):
 genid
 Simulator::sim_execute (void) 
 {
+	if ( getenv( "COSI_NEWSIM" ) ) {
+		genid INF(1e30);
+		genid gen( 0. );
+		while( !demography->dg_done_coalescent() ) {
+			genid nextEvtTime = nextEventTime( arrProcs, gen, INF, *getRandGen() );
+			std::cerr << "gen=" << gen << " nextEvt=" << nextEvtTime << "\n";
+			if ( nextEvtTime >= INF ) break;
+			executeNextEvent( arrProcs, nextEvtTime, *getRandGen() );
+		}
+		return gen;
+	}
+	
 	genid gen = ZERO_GEN;
 	gens_t historical_event_time;
 	gens_t poisson_event_time;	

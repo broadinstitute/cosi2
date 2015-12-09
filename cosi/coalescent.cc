@@ -194,15 +194,21 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	if ( getenv( "COSI_NEWSIM" ) ) {
 		BaseModelP baseModel = params->getBaseModel();
 		migrate->setBaseModel( baseModel );
-		add( simulator->arrProcs, arrival2::ArrivalProcess<genid, arrival2::Stoch< RandGen, arrival2::AnyProc > >
-				 ( *migrate->createMigrationProcesses() ) );
-		for( BOOST_AUTO( it, baseModel->popInfos.begin() ); it != baseModel->popInfos.end(); it++ ) {
-			Pop *pop = demography->dg_get_pop_by_name( it->first );
-			if ( !pop ) throw std::runtime_error( "trajectory specified for unknown population" );
-			BaseModel::PopInfo const& popInfo = it->second;
-			//pop->setCoalRateFn( popInfo.coalRateFn, genid( 0.0 ) );
-		}
-		migrate->setBaseModel( baseModel );
+		typedef arrival2::ArrivalProcess<genid, arrival2::Stoch< RandGen, arrival2::AnyProc > > any_proc;
+		add( simulator->arrProcs, any_proc( *migrate->createMigrationProcesses() ) );
+		coalesce->setBaseModel( baseModel );
+		add( simulator->arrProcs, any_proc( *coalesce->createCoalProcesses() ) );
+		add( simulator->arrProcs, any_proc( *recomb->createRecombProcesses() ) );
+		if ( params->getGeneConv2RecombRateRatio() > 0 ) 
+			 add( simulator->arrProcs, any_proc( *geneConversion->createGeneConvProcesses() ) );
+		
+		// for( BOOST_AUTO( it, baseModel->popInfos.begin() ); it != baseModel->popInfos.end(); it++ ) {
+		// 	Pop *pop = demography->dg_get_pop_by_name( it->first );
+		// 	if ( !pop ) throw std::runtime_error( "trajectory specified for unknown population" );
+		// 	BaseModel::PopInfo const& popInfo = it->second;
+		// 	//pop->setCoalRateFn( popInfo.coalRateFn, genid( 0.0 ) );
+		// }
+		// migrate->setBaseModel( baseModel );
 	}
 	
 	mutate.reset( new Mutate( getRandGen(), params->getMu(), params->getLength() ) );
