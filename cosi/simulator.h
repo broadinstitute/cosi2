@@ -6,6 +6,7 @@
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/cosirand.h>
+#include <cosi/arrproc2.h>
 
 namespace cosi {
 
@@ -30,6 +31,9 @@ public:
 	 void sim_setRecomb( RecombP recomb_ ) { recomb = recomb_; }
 	 void sim_setCoalesce( CoalesceP coalesce_ );
 
+
+	 arrival2::ArrivalProcess< genid, arrival2::Stoch< RandGen, arrival2::Compound< arrival2::AnyProc > > > arrProcs;
+	 
 private:
 	 DemographyP demography;
 	 GenMapP genMap;

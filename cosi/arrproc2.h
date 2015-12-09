@@ -107,6 +107,8 @@ void add( ArrivalProcess<TTime, Stoch<URNG, Compound< TComponentSpec > > >&,
 #include <vector>
 #include <cstdlib>
 #include <iostream>
+#include <algorithm>
+#include <iterator>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -254,13 +256,13 @@ public:
 };  // class ArrivalProcess<TTime, Poisson< TRate, NonHomogeneous< TRateFnSpec > > >
 
 template <typename TTime, typename URNG, typename TRateFnSpec, typename TRateFactor>
-TTime nextEventTime( ArrivalProcess<TTime, Stoch< URNG, Poisson< TRateFnSpec, TRateFactor > > > const& p,
+TTime nextEventTime( ArrivalProcess<TTime, Stoch< URNG, Poisson< TRateFnSpec, TRateFactor > > >& p,
 										 TTime fromTime, TTime maxTime, URNG& urng ) {
 	return p.nextArrivalTime( fromTime, maxTime, p.processDef->getRateFactor(), urng );
 }
 
 template <typename TTime, typename URNG, typename TSpec>
-void executeNextEvent( ArrivalProcessImpl<TTime, Stoch<URNG, TSpec> >& p, TTime t, URNG& urng ) {
+void executeNextEvent( ArrivalProcess<TTime, Stoch<URNG, TSpec> >& p, TTime t, URNG& urng ) {
 	p.processDef->executeEvent( t, urng );
 }
 
@@ -298,11 +300,15 @@ public:
 
 
 template <typename TTime, typename URNG, typename TRateFactor>
-TTime nextEventTime( ArrivalProcess<TTime, Stoch< URNG, Poisson< math::Const<>, TRateFactor > > > const& p,
+TTime nextEventTime( ArrivalProcess<TTime, Stoch< URNG, Poisson< math::Const<>, TRateFactor > > >& p,
 										 TTime fromTime, TTime maxTime, URNG& urng ) {
 	typedef BOOST_TYPEOF_TPL( boost::declval<TTime>() - boost::declval<TTime>()) time_diff_type;
+	double poisRate = ToDouble( p.processDef->getRateFactor() * evalConst( p.rateFn ) );
+
+	if ( poisRate < 1e-30 ) return maxTime;
+															
 	return fromTime +
-		 time_diff_type( urng.poisson_get_next( ToDouble( p.processDef->getRateFactor() * evalConst( p.rateFn ) ) ) );
+		 time_diff_type( urng.poisson_get_next( poisRate ) );
 }
 
 
@@ -331,7 +337,18 @@ struct ArrivalProcess<TTime, Stoch<URNG, Compound< TComponentSpec > > > {
 	 std::vector< component_type > procs;
 	 component_type *nextEvtProc;
 
-	 ArrivalProcess(): nextEvtProc( NULL ) { }
+	 ArrivalProcess(): nextEvtProc( NULL ), label("compound") { }
+
+	 friend std::ostream& operator<<( std::ostream& s, ArrivalProcess const& p ) {
+		 s << "[CompoundArrProc: ";
+		 std::copy( p.procs.begin(), p.procs.end(), std::ostream_iterator< component_type >( s, "," ) );
+		 s   << "]";
+		 return s;
+	 }
+
+	 std::string getLabel() const { return label; }
+	 std::string label;
+	 
 };  // ArrivalProcess<TTime, Stoch<URNG, Compound< TComponentSpec > > >
 
 template< typename TTime, typename URNG, typename TComponentSpec >
@@ -340,13 +357,14 @@ void add( ArrivalProcess<TTime, Stoch<URNG, Compound< TComponentSpec > > >& comp
 	compoundProcess.procs.push_back( newComponent );
 }
 
+
 template <typename TTime, typename URNG, typename TComponentSpec>
 TTime nextEventTime( ArrivalProcess< TTime, Stoch< URNG, Compound< TComponentSpec > > >& p, TTime fromTime,
 										 TTime maxTime, URNG& urng ) {
 	TTime curMaxTime = maxTime;
 	p.nextEvtProc = NULL;
 	typedef typename ArrivalProcess< TTime, Stoch< URNG, Compound< TComponentSpec > > >::component_type component_type;
-	BOOST_FOREACH( component_type const& c, p.procs ) {
+	BOOST_FOREACH( component_type& c, p.procs ) {
 		TTime nextTimeHere = nextEventTime( c, fromTime, curMaxTime, urng );
 		if ( nextTimeHere < curMaxTime ) {
 			curMaxTime = nextTimeHere;
@@ -357,15 +375,15 @@ TTime nextEventTime( ArrivalProcess< TTime, Stoch< URNG, Compound< TComponentSpe
 
 template <typename TTime, typename URNG, typename TComponentSpec>
 void executeNextEvent( ArrivalProcess< TTime, Stoch< URNG, Compound< TComponentSpec > > >& p, TTime t, URNG& urng ) {
-	executeNextEvent( *p.nextEvtProc, t, urng );
+	if ( p.nextEvtProc ) executeNextEvent( *p.nextEvtProc, t, urng );
 }
 
 template <typename TTime, typename URNG>
 class ArrivalProcess<TTime, Stoch< URNG, AnyProc > > {
    struct ArrivalProcessConcept {
       virtual ~ArrivalProcessConcept() {}
-      virtual TTime do_nextEventTime( TTime fromTime, TTime maxTime, URNG& ) const = 0;
-      virtual void do_executeNextEvent( TTime t, URNG& ) const = 0;
+      virtual TTime do_nextEventTime( TTime fromTime, TTime maxTime, URNG& ) = 0;
+      virtual void do_executeNextEvent( TTime t, URNG& ) = 0;
 			virtual ostream& print( ostream& s ) const = 0;
 			virtual std::string doGetLabel() const = 0;
    };
@@ -376,10 +394,10 @@ class ArrivalProcess<TTime, Stoch< URNG, AnyProc > > {
       virtual ~ArrivalProcessModel() {}
 
 			
-      virtual TTime do_nextEventTime( TTime fromTime, TTime maxTime, URNG& urng ) const {
-				return nextEventTime( proc, maxTime, urng );
+      virtual TTime do_nextEventTime( TTime fromTime, TTime maxTime, URNG& urng ) {
+				return nextEventTime( proc, fromTime, maxTime, urng );
 			}
-      virtual void do_executeNextEvent( TTime t, URNG& urng ) const {
+      virtual void do_executeNextEvent( TTime t, URNG& urng ) {
 				executeNextEvent( proc, t, urng );
 			}
 			
