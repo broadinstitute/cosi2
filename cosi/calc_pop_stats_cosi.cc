@@ -14,7 +14,11 @@
 
 int customstats_main(int numReps, int seqlen, int NPOPS,
 										 int excludePopIdx,
-										 void (*get_coal_data_from_cosi)( coal_data *, int /* irep */, int /* ipop */ )  ){
+										 void (*get_coal_data_from_cosi)( coal_data *, int /* irep */, int /* ipop */ )  );
+
+int customstats_main(int numReps, int seqlen, int NPOPS,
+										 int excludePopIdx,
+										 void (*get_coal_data_from_cosi)( coal_data *, int /* irep */, int /* ipop */ )  ) {
     //const int maxdist = 70000; //only calculate LD for 70kb
     const int min_minor = 3; //don't calculate LD at singletons or doubletons
     const double min_freq = .2; 

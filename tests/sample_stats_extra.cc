@@ -1405,7 +1405,7 @@ int sample_stats_main(int argc, char *argv[])
 
 	double regionLen_bp(-1);
 	double regionLen_cM(-1);
-	bool useAbsRegionLen = false;
+	//bool useAbsRegionLen = false;
 
 	loc_t dindLoc = 0.0;
 	snp_id_t dindLocIdx = -1;
@@ -2220,11 +2220,11 @@ thetah( int nsam, int segsites, char **list)
 }
 
 
-int
-frequency( char allele,int site,int nsam,  char **list);
+// int
+// frequency( char allele,int site,int nsam,  char **list);
 
-int
-frequency( char allele,int site,nchroms_t bsam, nchroms_t nsam,  char **list);
+// int
+// frequency( char allele,int site,nchroms_t bsam, nchroms_t nsam,  char **list);
 
 
 void get_freqs( int site_i, int site_j, int nsam, char **list,

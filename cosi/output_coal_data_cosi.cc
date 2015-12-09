@@ -23,12 +23,14 @@ namespace customstats {
 namespace {
 coal_data *coal_datas;
 size_t nsims;
-size_t simNum;
+//size_t simNum;
 std::vector<popid> popNames;
 coal_data *data;
 int seqlen;
 pop_idx_t excludePopIdx = NULL_POP_IDX;
 }  // namespace anon
+
+void init( DemographyP demography, size_t nsims_, int seqlen_, popid excludePop_ ) ;
 
 void init( DemographyP demography, size_t nsims_, int seqlen_, popid excludePop_ ) {
 	popNames = demography->getPopNames();
@@ -39,10 +41,14 @@ void init( DemographyP demography, size_t nsims_, int seqlen_, popid excludePop_
 }
 
 
+void my_get_coal_data_from_cosi( coal_data *d, int irep, int ipop );
+
 void my_get_coal_data_from_cosi( coal_data *d, int irep, int ipop ) {
 	//std::cerr << "getting coal data: irep=" << irep << " ipop=" << ipop << "popNames.size=" << popNames.size() << "\n";
 	*d = coal_datas[ irep * popNames.size() + ipop - 1 ];
 }
+
+void finish();
 
 void finish() {
 	std::cerr << "computing stats...\n";
@@ -53,7 +59,10 @@ void finish() {
 }
 
 void record_sim(DemographyP demography, GenMapP genMap, len_bp_int_t length, MutlistP mutlist,
-								bool_t inf_sites ) {
+								bool_t inf_sites ); 
+
+void record_sim(DemographyP demography, GenMapP genMap, len_bp_int_t length, MutlistP mutlist,
+								bool_t /*inf_sites*/ ) {
 	using std::fill;
 
 //  freq_t freq;
