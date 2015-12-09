@@ -31,7 +31,7 @@ struct BaseModel {
 
 			// Field: coalRateIntegralFn - the integral of the coalescence rate, equal to
 			// indefiniteIntegral( 1/2*popSizeFn )
-			math::Function< genid, popsizeInv_float_t, math::Piecewise< math::Any<> > > coalRateFn;
+			math::Function< genid, prob_per_chromPair_per_gen_t, math::Piecewise< math::Any<> > > coalRateFn;
 
 			// Field: migrRateTo - for each target pop, migration rate from this pop to the target pop.
 			std::map< popid, math::Function< genid, prob_per_chrom_per_gen_t,
@@ -41,9 +41,10 @@ struct BaseModel {
 			void setSizeFrom( genid fromGen, math::Function< genid, popsize_float_t, TSpec> const& f ) {
 				using namespace math;
 				popSizeFn.getPieces()[ fromGen ] = f;
+
 				coalRateFn.getPieces()[ fromGen ] =
 					 cval( 1. ) /
-					 ( cval( 2. ) * f );
+					 ( cval( 2.* gens_t(1.) * popsize_float_t(1.) ) * f ); 
 			}
 
 			void setSizeFrom( genid fromGen, popsize_float_t sz ) {

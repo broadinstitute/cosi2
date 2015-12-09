@@ -8,6 +8,7 @@
 #include <cosi/hooks.h>
 #include <cosi/cosirand.h>
 #include <cosi/basemodel.h>
+#include <cosi/arrproc2.h>
 
 namespace cosi {
 
@@ -46,6 +47,16 @@ public:
 
 	 void setBaseModel( BaseModelP baseModel_ ) { baseModel = baseModel_; }
 
+	 typedef
+	 arrival2::ArrivalProcess< genid,
+														 arrival2::Stoch< RandGen,
+																							arrival2::Compound<
+																								arrival2::Poisson<
+																									math::Piecewise< math::Const<> >, popsize_float_t > > > >
+	 migr_processes_type;
+
+	 boost::shared_ptr< migr_processes_type >
+	 createMigrationProcesses();
 	 
 
 private:

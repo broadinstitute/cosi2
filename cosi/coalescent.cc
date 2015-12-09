@@ -197,7 +197,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 			Pop *pop = demography->dg_get_pop_by_name( it->first );
 			if ( !pop ) throw std::runtime_error( "trajectory specified for unknown population" );
 			BaseModel::PopInfo const& popInfo = it->second;
-			pop->setCoalRateFn( popInfo.coalRateFn, genid( 0.0 ) );
+			//pop->setCoalRateFn( popInfo.coalRateFn, genid( 0.0 ) );
 		}
 		migrate->setBaseModel( baseModel );
 	}

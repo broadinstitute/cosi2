@@ -318,6 +318,78 @@ void executeNextEvent( ArrivalProcess< TTime, Stoch< URNG, Compound< TComponentS
 	executeNextEvent( *p.nextEvtProc, t, urng );
 }
 
+template <typename TTime, typename URNG>
+class ArrivalProcess<TTime, Stoch< URNG, AnyProc > > {
+   struct ArrivalProcessConcept {
+      virtual ~ArrivalProcessConcept() {}
+      virtual TTime do_nextEventTime( TTime fromTime, TTime maxTime, URNG& ) const = 0;
+      virtual void do_executeNextEvent( TTime t, URNG& ) const = 0;
+			virtual ostream& print( ostream& s ) const = 0;
+			virtual std::string doGetLabel() const = 0;
+   };
+   template <typename TSpec>
+   class ArrivalProcessModel: public ArrivalProcessConcept {
+   public:
+      ArrivalProcessModel( const ArrivalProcess<TTime, Stoch< URNG, TSpec> >& proc_ ): proc( proc_ ) {}
+      virtual ~ArrivalProcessModel() {}
+
+			
+      virtual TTime do_nextEventTime( TTime fromTime, TTime maxTime, URNG& urng ) const {
+				return nextEventTime( proc, maxTime, urng );
+			}
+      virtual void do_executeNextEvent( TTime t, URNG& urng ) const {
+				executeNextEvent( proc, t, urng );
+			}
+			
+			virtual ostream& print( ostream& s ) const { s << proc; return s; }
+			virtual std::string doGetLabel() const { return proc.getLabel(); }
+   private:
+      ArrivalProcess<TTime, Stoch< URNG, TSpec> > proc;
+   };
+
+   boost::shared_ptr<ArrivalProcessConcept> object;
+public:
+   ArrivalProcess() { }
+   
+   template< typename TSpec >
+   ArrivalProcess( const ArrivalProcess< TTime, Stoch< URNG, TSpec > >& proc ):
+     object( new ArrivalProcessModel<TSpec>( proc ) ) { }
+   
+   template< typename TSpec >
+   void reset( const ArrivalProcess< TTime, Stoch< URNG, TSpec > >& proc ) {
+     object.reset( new ArrivalProcessModel<TSpec>( proc ) );
+   }
+   bool empty() const { return !object.get(); }
+   operator bool() const { return !empty(); }
+   void reset() { object.reset(); }
+   
+   TTime nextArrivalTime( TTime fromTime, TTime maxTime, URNG& urng ) {
+     return object->do_nextEventTime( fromTime, maxTime, urng );
+   }
+
+	 void execNextEvent( TTime t, URNG& urng ) { object->do_executeNextEvent( t, urng ); }
+	 
+	 ostream& print( ostream& s ) const { return object->print( s ); }
+
+	 std::string getLabel() const { return object->doGetLabel(); }
+   
+   friend ostream& operator<<( ostream& s, const ArrivalProcess& f ) {
+		 return f.print( s );
+	 }
+//	 friend std::string getLabel<>( const ArrivalProcess& p ); // { return p.object->doGetLabel(); }
+}; // class ArrivalProcess<TTime, Any< TRand > >
+
+template <typename TTime, typename URNG>
+TTime nextEventTime( ArrivalProcess<TTime, Stoch< URNG, AnyProc > > const& p,
+										 TTime fromTime, TTime maxTime, URNG& urng ) {
+	return p.nextArrivalTime( fromTime, maxTime, urng );
+}
+
+template <typename TTime, typename URNG>
+void executeNextEvent( ArrivalProcessImpl<TTime, Stoch<URNG, AnyProc> >& p, TTime t, URNG& urng ) {
+	p.execNextEvent( t, urng );
+}
+
 #if 0
 
 

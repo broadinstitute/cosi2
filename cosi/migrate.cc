@@ -198,13 +198,6 @@ class MigrationProcess: public EventRunner< genid, RandGen
 
 namespace cosi {
 
-struct xyz
-{
-    void foo(int) const;
-	 void goo() const { std::cerr << "goo\n" ; }
-};
-
-
 class MigrationProcess: public arrival2::ArrivalProcessDef< genid, RandGen, popsize_float_t > {
 
 	 DemographyP demography;
@@ -222,13 +215,15 @@ public:
 };  // class MigrateProcess
 
 
-void createMigrationProcesses( DemographyP demography, BaseModelP baseModel ) {
+boost::shared_ptr< Migrate::migr_processes_type >
+Migrate::createMigrationProcesses() {
 	using namespace arrival2;
 	using math::Any;
 	using math::Const;
 	using math::Piecewise;
-	
-	ArrivalProcess< genid, Stoch< RandGen, Compound< Poisson< Piecewise< Const<> >, popsize_float_t > > > > migrProcs;
+
+	boost::shared_ptr< migr_processes_type > migrProcs =
+		 boost::make_shared<migr_processes_type>();
 	for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
 			 pi != baseModel->popInfos.end(); ++pi ) {
 		Pop *srcPop = demography->dg_get_pop_by_name( pi->first );
@@ -238,12 +233,13 @@ void createMigrationProcesses( DemographyP demography, BaseModelP baseModel ) {
 			Pop *dstPop = demography->dg_get_pop_by_name( mi->first );
 
 			boost::shared_ptr< MigrationProcess > mp = boost::make_shared<MigrationProcess>( demography, srcPop, dstPop );
-			add( migrProcs,
+			add( *migrProcs,
 					 ArrivalProcess< genid, Stoch< RandGen, Poisson< Piecewise< Const<> >, popsize_float_t > > >
 					 ( mi->second, genid(0.),  mp ) );
 																												
 		}
 	}
+	return migrProcs;
 }  // createMigrationProcesses
 
 }  // namespace cosi
