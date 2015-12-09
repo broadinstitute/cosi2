@@ -192,8 +192,6 @@ class MigrationProcess: public EventRunner< genid, RandGen
 
 }  // namespace cosi
 
-#include <boost/phoenix/bind/bind_member_function.hpp>
-#include <boost/phoenix/core/argument.hpp>
 #include <cosi/arrproc2.h>
 
 namespace cosi {
