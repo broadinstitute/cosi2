@@ -195,12 +195,12 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		BaseModelP baseModel = params->getBaseModel();
 		migrate->setBaseModel( baseModel );
 		typedef arrival2::ArrivalProcess<genid, arrival2::Stoch< RandGen, arrival2::AnyProc > > any_proc;
-		add( simulator->arrProcs, any_proc( *migrate->createMigrationProcesses() ) );
+		add( simulator->arrProcs, any_proc( setLabel( *migrate->createMigrationProcesses(), "migrations" ) ) );
 		coalesce->setBaseModel( baseModel );
-		add( simulator->arrProcs, any_proc( *coalesce->createCoalProcesses() ) );
-		add( simulator->arrProcs, any_proc( *recomb->createRecombProcesses() ) );
+		add( simulator->arrProcs, any_proc( setLabel( *coalesce->createCoalProcesses(), "coals" ) ) );
+		add( simulator->arrProcs, any_proc( setLabel( *recomb->createRecombProcesses(), "recombs" ) ) );
 		if ( params->getGeneConv2RecombRateRatio() > 0 ) 
-			 add( simulator->arrProcs, any_proc( *geneConversion->createGeneConvProcesses() ) );
+			 add( simulator->arrProcs, any_proc( setLabel( *geneConversion->createGeneConvProcesses(), "gcs" ) ) );
 		
 		// for( BOOST_AUTO( it, baseModel->popInfos.begin() ); it != baseModel->popInfos.end(); it++ ) {
 		// 	Pop *pop = demography->dg_get_pop_by_name( it->first );

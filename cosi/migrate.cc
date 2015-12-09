@@ -231,9 +231,13 @@ Migrate::createMigrationProcesses() {
 			Pop *dstPop = demography->dg_get_pop_by_name( mi->first );
 
 			boost::shared_ptr< MigrationProcess > mp = boost::make_shared<MigrationProcess>( demography, srcPop, dstPop );
+			ArrivalProcess< genid, Stoch< RandGen, Poisson< Piecewise< Const<> >, popsize_float_t > > >
+				 migrProc( mi->second, genid(0.),  mp );
+			std::string lbl = std::string( "migr_" ) + boost::lexical_cast<std::string>( pi->first )
+				 + std::string("_") + boost::lexical_cast<std::string>( mi->first );
+				 
 			add( *migrProcs,
-					 ArrivalProcess< genid, Stoch< RandGen, Poisson< Piecewise< Const<> >, popsize_float_t > > >
-					 ( mi->second, genid(0.),  mp ) );
+					 setLabel( migrProc, lbl ) );
 																												
 		}
 	}

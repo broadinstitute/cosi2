@@ -4,6 +4,7 @@
 #include <map>
 #include <stdexcept>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cosi/defs.h>
 #include <cosi/coalesce.h>
 #include <cosi/demography.h>
@@ -134,7 +135,12 @@ class CoalProcessDef: public arrival2::ArrivalProcessDef< genid, RandGen, nchrom
 
 public:
 	 CoalProcessDef( DemographyP demography_, Pop *pop_ ): demography( demography_ ), pop( pop_ ) { }
-	 virtual nchromPairs_float_t getRateFactor() const { return
+	 virtual nchromPairs_float_t getRateFactor() const {
+#ifdef COSI_SUPPORT_COALAPX
+		 if ( pop->restrictingCoalescence() )
+				return nchromPairs_float_t( pop->getNumCoalesceableChromPairs() );
+#endif		 
+		 return
 				nchroms_float_t( ToDouble( pop->pop_get_num_nodes() ) ) *
 				( nchroms_float_t( ToDouble( pop->pop_get_num_nodes() ) ) - nchroms_float_t(1.) ) / 2.; }
 	 virtual void executeEvent( genid gen, RandGen& ) { demography->dg_coalesce_by_pop( pop, gen ); }
@@ -153,10 +159,13 @@ Coalesce::createCoalProcesses() {
 	for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
 			 pi != baseModel->popInfos.end(); ++pi ) {
 		Pop *pop = demography->dg_get_pop_by_name( pi->first );
-		
+
+		std::string lbl = std::string( "coal_" ) + boost::lexical_cast<std::string>( pi->first );
+		ArrivalProcess< genid, Stoch< RandGen, Poisson< Piecewise< Any<> >, nchromPairs_float_t > > >
+			 coalProc( pi->second.coalRateFn, genid(0.), boost::make_shared<CoalProcessDef>( demography, pop ) );
 		add( *coalProcs,
-				 ArrivalProcess< genid, Stoch< RandGen, Poisson< Piecewise< Any<> >, nchromPairs_float_t > > >
-				 ( pi->second.coalRateFn, genid(0.), boost::make_shared<CoalProcessDef>( demography, pop ) ) );
+				 setLabel( coalProc,
+									 lbl ) );
 	}
 	return coalProcs;
 }  // createCoalProcesses

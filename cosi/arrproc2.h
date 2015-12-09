@@ -22,6 +22,9 @@ namespace math {
 template <typename TDomain, typename TRange, typename TSpec> struct Function;
 }
 
+template <typename T> inline
+T& setLabel( T& x, std::string lbl ) { x.label = lbl; return x; }
+
 namespace arrival2 {
 
 using math::Function;
@@ -277,7 +280,7 @@ public:
 	 
    typedef Function< TTime, rate_type, math::Const<> > rate_fn_type;
 
-	 ArrivalProcess( rate_fn_type const& rateFn_, TTime startTime_,
+	 ArrivalProcess( rate_fn_type const& rateFn_,
 									 boost::shared_ptr< ArrivalProcessDef<TTime, URNG, TRateFactor> > processDef_,
 									 std::string label_="" ):
 		 rateFn( rateFn_ ),
@@ -366,11 +369,14 @@ TTime nextEventTime( ArrivalProcess< TTime, Stoch< URNG, Compound< TComponentSpe
 	typedef typename ArrivalProcess< TTime, Stoch< URNG, Compound< TComponentSpec > > >::component_type component_type;
 	BOOST_FOREACH( component_type& c, p.procs ) {
 		TTime nextTimeHere = nextEventTime( c, fromTime, curMaxTime, urng );
+		//std::cerr << "process: " << c << " nextevt: " << nextTimeHere << " curMaxTime=" << curMaxTime << "\n";
 		if ( nextTimeHere < curMaxTime ) {
 			curMaxTime = nextTimeHere;
 			p.nextEvtProc = &c;
+			//std::cerr << "   -> new curMaxTime: " << curMaxTime << " from process " << c.getLabel() << "\n"; 
 		}
 	}
+	return curMaxTime;
 }
 
 template <typename TTime, typename URNG, typename TComponentSpec>

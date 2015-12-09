@@ -103,7 +103,6 @@ boost::shared_ptr< Recomb::recomb_processes_type >
 Recomb::createRecombProcesses() {
 	return boost::make_shared<recomb_processes_type>(
 			 math::fn_const<genid>( gensInv_t( ToDouble( genMap->getRegionRecombRateAbs() ) ) ),
-			 genid(0.),
 			 boost::make_shared<RecombProcessDef>( this ) );
 }  // createRecombProcesses
 

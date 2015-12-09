@@ -49,9 +49,11 @@ Simulator::sim_execute (void)
 		genid gen( 0. );
 		while( !demography->dg_done_coalescent() ) {
 			genid nextEvtTime = nextEventTime( arrProcs, gen, INF, *getRandGen() );
-			std::cerr << "gen=" << gen << " nextEvt=" << nextEvtTime << "\n";
+			//std::cerr << "gen=" << gen << " nextEvt=" << nextEvtTime << "\n";
 			if ( nextEvtTime >= INF ) break;
+
 			executeNextEvent( arrProcs, nextEvtTime, *getRandGen() );
+			gen = nextEvtTime;
 		}
 		return gen;
 	}

@@ -158,7 +158,6 @@ boost::shared_ptr< GeneConversion::geneconv_processes_type >
 GeneConversion::createGeneConvProcesses() {
 	return boost::make_shared<geneconv_processes_type>(
 			 math::fn_const<genid>( gensInv_t( ToDouble( genMap->getRegionRecombRateAbs() ) ) ),
-			 genid(0.),
 			 boost::make_shared<GeneConvProcessDef>( this ) );
 }  // createGeneConvProcesses
 
