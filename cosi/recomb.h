@@ -12,6 +12,7 @@
 #include <cosi/cosirand.h>
 #include <cosi/hooks.h>
 #include <cosi/nodefwd.h>
+#include <cosi/arrproc2.h>
 
 namespace cosi {
 
@@ -42,6 +43,12 @@ public:
 	 void setIgnoreRecombsInPop( popid ignoreRecombsInPop_ ) {
 		 this->ignoreRecombsInPop = ignoreRecombsInPop_;
 	 }
+
+	 typedef
+	 arrival2::ArrivalProcess< genid, arrival2::Stoch< RandGen, arrival2::Poisson< math::Const<>, double > > >
+	 recomb_processes_type;
+
+	 boost::shared_ptr< recomb_processes_type > createRecombProcesses();
 
 private:
 	 DemographyP demography;

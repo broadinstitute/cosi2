@@ -77,3 +77,34 @@ void RecombRecorder::handle_recomb( Node *, Node *, loc_t loc, genid) {
 
 }  // namespace cosi
 
+
+#include <cosi/arrproc2.h>
+
+namespace cosi {
+
+class RecombProcessDef: public arrival2::ArrivalProcessDef< genid, RandGen, double > {
+
+	 Recomb *recomb;
+
+public:
+
+	 RecombProcessDef( Recomb *recomb_ ):
+		 recomb( recomb_ ) {
+	 }
+
+	 virtual double getRateFactor() const { return ToDouble( recomb->getAllNodesRecombRate() ); }
+	 virtual void executeEvent( genid gen, RandGen& ) {
+		 recomb->recomb_execute( gen, recomb->random_double() );
+	 }
+};  // class RecombProcessDef
+
+
+boost::shared_ptr< Recomb::recomb_processes_type >
+Recomb::createRecombProcesses() {
+	return boost::make_shared<recomb_processes_type>(
+			 math::fn_const<genid>( gensInv_t( ToDouble( genMap->getRegionRecombRateAbs() ) ) ),
+			 genid(0.),
+			 boost::make_shared<RecombProcessDef>( this ) );
+}  // createRecombProcesses
+
+}  // namespace cosi

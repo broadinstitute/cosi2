@@ -264,6 +264,48 @@ void executeNextEvent( ArrivalProcessImpl<TTime, Stoch<URNG, TSpec> >& p, TTime 
 	p.processDef->executeEvent( t, urng );
 }
 
+
+template <typename TTime, typename URNG, typename TRateFactor>
+class ArrivalProcess<TTime, Stoch< URNG, Poisson< math::Const<>, TRateFactor > > > {
+public:
+
+   typedef BOOST_TYPEOF_TPL( boost::declval<TTime>() - boost::declval<TTime>()) time_diff_type;
+	 typedef BOOST_TYPEOF_TPL(( boost::declval<double>() / boost::declval<time_diff_type>()
+															/ boost::declval<TRateFactor>() )) rate_type;
+	 
+   typedef Function< TTime, rate_type, math::Const<> > rate_fn_type;
+
+	 ArrivalProcess( rate_fn_type const& rateFn_, TTime startTime_,
+									 boost::shared_ptr< ArrivalProcessDef<TTime, URNG, TRateFactor> > processDef_,
+									 std::string label_="" ):
+		 rateFn( rateFn_ ),
+		 processDef( processDef_ ),
+		 label( label_ ) { }
+
+   
+   friend ostream& operator<<( ostream& s, const ArrivalProcess& f ) {
+		 s << "ArrivalProcess[label=" << f.label << ", rateFn=" << f.rateFn << "]";
+		 return s;
+	 }
+
+	 std::string getLabel() const { return label; }
+
+   rate_fn_type rateFn;
+	 boost::shared_ptr< ArrivalProcessDef<TTime, URNG, TRateFactor> > processDef;
+	 std::string label;
+   //integral_val_type integralAtZeroTime;
+};  // class ArrivalProcess<TTime, Poisson< TRate, NonHomogeneous< TRateFnSpec > > >
+
+
+template <typename TTime, typename URNG, typename TRateFactor>
+TTime nextEventTime( ArrivalProcess<TTime, Stoch< URNG, Poisson< math::Const<>, TRateFactor > > > const& p,
+										 TTime fromTime, TTime maxTime, URNG& urng ) {
+	typedef BOOST_TYPEOF_TPL( boost::declval<TTime>() - boost::declval<TTime>()) time_diff_type;
+	return fromTime +
+		 time_diff_type( urng.poisson_get_next( ToDouble( p.processDef->getRateFactor() * evalConst( p.rateFn ) ) ) );
+}
+
+
 // template <typename TTime, typename URNG, typename TRateFnSpec >
 // struct result_of_makePoissonProcess {
 //    BOOST_MPL_ASSERT(( IsFunctionSpec<TRateFnSpec> ));
