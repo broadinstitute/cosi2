@@ -37,6 +37,7 @@
 #include <cosi/sweep3.h>
 #include <cosi/condsnp.h>
 #include <cosi/output.h>
+#include <cosi/msweep.h>
 
 namespace cosi {
 

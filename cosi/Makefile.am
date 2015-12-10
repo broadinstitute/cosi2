@@ -54,7 +54,7 @@ COSI_CPPFLAGS += -DCOSI_SUPPORT_COALAPX
 
 SD=$(srcdir)/cosi
 
-COSIUTILHEADERS = $(SD)/utils.h $(SD)/arrival.h $(SD)/generalmath.h $(SD)/cosirand.h $(SD)/gauss_legendre.h \
+COSIUTILHEADERS = $(SD)/utils.h $(SD)/arrival.h $(SD)/arrproc2.h $(SD)/generalmath.h $(SD)/cosirand.h $(SD)/gauss_legendre.h \
 	$(SD)/valgrind.h $(SD)/evtgrp.h $(SD)/typedval.h \
 	$(SD)/order_statistics.hpp $(SD)/random_access_skip_list.h $(SD)/skip_list_detail.h $(SD)/utildefs.h \
 	$(SD)/drd.h $(SD)/memcheck.h $(SD)/mempool.h 
@@ -80,7 +80,7 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $
 	$(SD)/migrate.h $(SD)/mutate.h $(SD)/node.h $(SD)/nodefwd.h $(SD)/nodelist.h $(SD)/output.h $(SD)/pop.h $(SD)/popfwd.h $(SD)/recomb.h $(SD)/seglist.h $(SD)/seglistfwd.h \
 	$(SD)/seglistfwd2.h $(SD)/segsumm.h $(SD)/simulator.h $(SD)/cositop.h \
 	$(SD)/sweep.h $(SD)/sweep1.h $(SD)/sweep2.h $(SD)/sweep3.h $(SD)/recomb.h $(SD)/genmap.h $(SD)/stats.h $(SD)/traj.h $(SD)/decls.h $(SD)/hooks.h \
-	$(SD)/coalrate.h $(SD)/condsnp.h $(SD)/condsnp.cc \
+	$(SD)/coalrate.h $(SD)/condsnp.h $(SD)/condsnp.cc $(SD)/msweep.h \
 	$(SD)/mutcontext.h $(SD)/hullmgr.h $(SD)/hullmgr.cc \
 	$(SD)/cosicfg.h $(SD)/coalescent.h $(SD)/mutlist.h $(SD)/output_coal_data_cosi.cc $(SD)/coal_data_cosi.h $(SD)/customstats.h \
 	$(SD)/calc_pop_stats_cosi.cc $(SD)/calc_Fst_cosi.cc \

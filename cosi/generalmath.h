@@ -946,7 +946,7 @@ public:
    
 	 Function() { }
 	 template <typename SinglePassRange>
-	 Function( const SinglePassRange& r ):
+	 explicit Function( const SinglePassRange& r ):
 		 pieces( boost::begin( r ), boost::end( r ) ) {
 				
 		 BOOST_CONCEPT_ASSERT(( boost::SinglePassRangeConcept< SinglePassRange > ));

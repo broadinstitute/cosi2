@@ -37,6 +37,15 @@ struct BaseModel {
 			std::map< popid, math::Function< genid, prob_per_chrom_per_gen_t,
 																			 math::Piecewise< math::Const<> > > > migrRateTo;
 
+			// Field: sweepSibPop
+			// If simulating a selective sweep, the sibling pop of this pop: if this pop represents
+			// the chroms with selected variant, the sibling is the pop representing the chroms
+			// with the unselected variant; and vice versa.  If not simulating a selective sweep, then
+			// NULL_POPID.
+			popid sweepSibPop;
+
+			PopInfo(): sweepSibPop( NULL_POPID ) { }
+
 			template <typename TSpec>
 			void setSizeFrom( genid fromGen, math::Function< genid, popsize_float_t, TSpec> const& f ) {
 				using namespace math;
@@ -48,7 +57,7 @@ struct BaseModel {
 			}
 
 			void setSizeFrom( genid fromGen, popsize_float_t sz ) {
-				setSizeFrom( fromGen, math::fn_const< genid >( sz ) );
+				setSizeFrom( fromGen, math::fn_const< genid >( std::max( sz, popsize_float_t(1) ) ) );
 			}
 
 			bool isSizeSetFrom( genid gen ) const { return popSizeFn.getPieces().count( gen ) > 0; }

@@ -10,7 +10,7 @@
  *
  */
 
-//#define COSI_DEV_PRINT
+#define COSI_DEV_PRINT
 
 #include <cstdlib>
 #include <cassert>
@@ -20,6 +20,7 @@
 #include <ios>
 #include <sstream>
 #include <algorithm>
+#include <iterator>
 #include <boost/make_shared.hpp>
 #include <boost/next_prior.hpp>
 #include <boost/exception/all.hpp>
@@ -34,6 +35,7 @@
 #include <cosi/sweep3.h>
 //#include <cosi/generalmath.h>
 #include <cosi/basemodel.h>
+#include <cosi/msweep.h>
 
 namespace cosi {
 
@@ -408,6 +410,48 @@ private:
 };  // class Event_Sweep
 
 
+// Class: Event_MSweep
+// A selective sweep .
+class Event_MSweep: public HistEvents::Event {
+public:
+	 Event_MSweep( HistEvents *histEvents_, const string& label_, genid gen_, popid sweepPop_, gensInv_t selCoeff_, loc_t selPos_,
+								freq_t final_sel_freq_ ):
+		 Event( histEvents_, label_, gen_ ), sweepPop( sweepPop_ ), selCoeff( selCoeff_ ), selPos( selPos_ ), final_sel_freq( final_sel_freq_ ) { }
+	 Event_MSweep( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
+		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq;
+	 }
+
+	 // Method: typeStr
+	 // Return the string denoting this type of historical event in the <parameter file>.
+	 // Historical events are specified in the parameter file by lines of the form
+	 // pop_event <eventType> <eventParams>
+	 // This method specifies the eventType.
+	 static const char *typeStr() { return "sweep_mult"; }
+	 virtual eventKind_t getEventKind() const { return E_SWEEP; }	 
+				
+	 virtual ~Event_MSweep();
+
+	 virtual genid execute();
+			
+private:
+	 // Field: sweepPop
+	 // The population in which the sweep happens.
+	 popid sweepPop;
+
+	 // Field: selCoeff
+	 // The selection coefficient.
+	 gensInv_t selCoeff;
+
+	 // Field: selPos
+	 // The location of the causal mutation.
+	 loc_t selPos;
+
+	 // Field: final_sel_freq
+	 // The frequency of the derived allele at the end of the sweep.
+	 freq_t final_sel_freq;
+};  // class Event_MSweep
+
+
 
 Event_PopSize::~Event_PopSize() {}
 Event_PopSizeExp::~Event_PopSizeExp() {}
@@ -417,6 +461,7 @@ Event_MigrationRate::~Event_MigrationRate() {}
 Event_Admix::~Event_Admix() {}
 Event_Split::~Event_Split() {}
 Event_Sweep::~Event_Sweep() {}
+Event_MSweep::~Event_MSweep() {}
 
 genid Event_PopSize::execute() {
 	getDemography()->dg_set_pop_size_by_name( gen, pop, popsize );
@@ -594,6 +639,10 @@ genid Event_Sweep::execute() {
 	return getSweep()->sweep_execute( sweepPop, selCoeff, gen, selPos, final_sel_freq );
 }
 
+genid Event_MSweep::execute() {
+	return gen;
+}
+
 genid Event_MigrationRate::execute() {
 	Pop *fromPopPtr = getDemography()->dg_get_pop_by_name( fromPop );
 	Pop *toPopPtr = getDemography()->dg_get_pop_by_name( toPop );
@@ -680,6 +729,35 @@ void HistEvents::constructBaseModel( BaseModelP baseModel ) {
 		 if ( e.second->getEventKind() == Event::E_BOTTLENECK ||
 					e.second->getEventKind() == Event::E_ADMIX )
 				e.second->addToBaseModel( *baseModel );
+
+	MSweep m;
+
+	using namespace math;
+	typedef std::map< popid, Function< genid, freq_t, Piecewise< Const<> > > > pop2freqSelFn_type;
+	pop2freqSelFn_type pop2freqSelFn	;
+	for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
+			 pi != baseModel->popInfos.end(); ++pi ) {
+		popid pop = pi->first;
+		BOOST_AUTO( &freqSelFnPcs, pop2freqSelFn[ pop ].getPieces() );
+		freqSelFnPcs[ genid(0.)  ] = fn_const<genid>( freq_t(.1) );
+		freqSelFnPcs[ genid(10.) ] = fn_const<genid>( freq_t(0.) );
+
+		for ( BOOST_AUTO( pci, freqSelFnPcs.begin() ); pci != freqSelFnPcs.end(); ++pci ) {
+			PRINT( pop );
+			PRINT( pci->first );
+			PRINT( pci->second );
+		}
+	}
+
+	BaseModelP sweepModel = m.getSweepModel( baseModel, pop2freqSelFn );
+	//PRINT( pop2freqSelFn );
+	
+	// std::copy( pop2freqSelFn.begin(), pop2freqSelFn.end(),
+	// 					 std::ostream_iterator< pop2freqSelFn_type::value_type >( std::cerr, ",") );
+	// std::cerr << "\n";
+	PRINT( *baseModel );
+	PRINT( *sweepModel );
+	
 
 	size_t prevSize;
 	do {
@@ -770,6 +848,7 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 		else if ( typestr == sweep1::Event_SweepOnePop_typeStr() ) event = sweep1::make_shared_Event_SweepOnePop( this, is );
 		else if ( typestr == sweep2::Event_SweepOnePop2_typeStr() ) event = sweep2::make_shared_Event_SweepOnePop2( this, is );
 		else if ( typestr == sweep3::Event_SweepOnePop3_typeStr() ) event = sweep3::make_shared_Event_SweepOnePop3( this, is );
+		else if (  typestr == Event_MSweep::typeStr() ) event.reset( new Event_MSweep( this, is ) );
 		else chkCond( False, "could not parse event %s", buffer );
 	} catch( ios::failure e ) {
 		chkCond( False, "could not parse event %s", buffer );
