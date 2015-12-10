@@ -28,11 +28,19 @@ public:
 
 		 for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
 					pi != baseModel->popInfos.end(); ++pi ) {
+			 popid selPop( nextPopId++ );
+			 popid unsPop( pi->first );
+			 sweepModel->pop2sib[ selPop ] = unsPop;
+			 sweepModel->pop2sib[ unsPop ] = selPop;
+		 }
+
+		 for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
+					pi != baseModel->popInfos.end(); ++pi ) {
 			 //Pop *srcPop = demography->dg_get_pop_by_name( pi->first );
 			 BOOST_AUTO( const& popInfo, pi->second );
 
-			 popid selPop( nextPopId++ );
 			 popid unsPop( pi->first );
+			 popid selPop( sweepModel->pop2sib[ unsPop ] );
 
 			 BOOST_AUTO( & popInfoSel, sweepModel->popInfos[ selPop ] );
 			 BOOST_AUTO( & popInfoUns, sweepModel->popInfos[ unsPop ] );
@@ -66,22 +74,9 @@ public:
 				 popInfoUns.coalRateFn.getPieces().insert( std::make_pair( selBegGen, lb->second ) );
 			 }
 
-			 // std::cerr << "freqUns=" << freqUns << "\n";
-			 // PRINT2( freqUns, popInfo.popSizeFn );
-			 // PRINT( freqUns * popInfo.popSizeFn );
-			 // PRINT( simplify_typename( freqUns * popInfo.popSizeFn ) );
-			 
-			 //popInfoUns.popSizeFn = freqUns * popInfo.popSizeFn;
-			 // popInfoUns.coalRateFn = (cval( 1. ) / freqUns) * popInfo.coalRateFn;
-			 // popInfoSel.popSizeFn = freqSel * popInfo.popSizeFn;
-			 // popInfoSel.coalRateFn = (cval( 1. ) / freqSel) * popInfo.coalRateFn;
-			 
-			 // for( BOOST_AUTO( mi, popInfo.migrRateTo.begin() );
-			 // 			mi != popInfo.migrRateTo.end(); ++mi ) {
-			 // 	 Pop *dstPop = demography->dg_get_pop_by_name( mi->first );
-			 
-			 
-			 // }
+			 popInfoUns.migrRateTo = popInfo.migrRateTo;
+			 for( BOOST_AUTO( migr_it, popInfo.migrRateTo.begin() ); migr_it != popInfo.migrRateTo.end(); ++migr_it )
+					popInfoSel.migrRateTo[ sweepModel->pop2sib[ migr_it->first ] ] = migr_it->second;
 		 }
 
 		 return sweepModel;

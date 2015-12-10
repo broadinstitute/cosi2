@@ -74,6 +74,8 @@ struct BaseModel {
 	 
 	 // Field: popInfos - map from pop name to <PopInfo> for  that pop.
 	 std::map< popid, PopInfo > popInfos;
+
+	 std::map< popid, popid > pop2sib;
 };  // struct BaseModel
 
 inline
