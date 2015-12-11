@@ -991,12 +991,25 @@ public:
 
 	 bool operator==( const Function& f ) const { return pieces == f.pieces; }
 	 bool operator!=( const Function& f ) const { return pieces != f.pieces; }
-   
+	    
 private:
 	 // Field: pieces
 	 // Map from domain point to the piece function starting at that point; ordered from rightmost point to leftmost.
 	 pieces_type pieces;
 };  // class Function<TDomain, TRange, Piecewise< TPieceSpec > >
+
+template <typename TDomain, typename TRange>
+void set( Function< TDomain, TRange, Const<> >& f, TDomain x, TRange val ) {
+	f.getPieces.insert( std::make_pair( x, fn_const<TDomain>( val ) ) );
+}
+
+template <typename TDomain, typename TRange, typename TPieceSpec>
+typename boost::enable_if< boost::is_convertible< Function< TDomain, TRange, Const<> >,
+																									Function< TDomain, TRange, TPieceSpec > > >::type
+set( Function< TDomain, TRange, Piecewise< TPieceSpec > >& f, TDomain x, TRange val ) {
+	f.getPieces().insert( std::make_pair( x, fn_const<TDomain>( val ) ) );
+}
+
 
 #ifdef __GNUC__
 #if ( __GNUC__ > 4 ) || ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ > 5 ) )
