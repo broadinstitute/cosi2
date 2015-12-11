@@ -728,36 +728,7 @@ void HistEvents::constructBaseModel( BaseModelP baseModel ) {
 	BOOST_FOREACH( pair_t e, events )
 		 if ( e.second->getEventKind() == Event::E_BOTTLENECK ||
 					e.second->getEventKind() == Event::E_ADMIX )
-				e.second->addToBaseModel( *baseModel );
-
-	MSweep m;
-
-	using namespace math;
-	typedef std::map< popid, Function< genid, freq_t, Piecewise< Const<> > > > pop2freqSelFn_type;
-	pop2freqSelFn_type pop2freqSelFn	;
-	for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
-			 pi != baseModel->popInfos.end(); ++pi ) {
-		popid pop = pi->first;
-		BOOST_AUTO( &freqSelFnPcs, pop2freqSelFn[ pop ].getPieces() );
-		freqSelFnPcs[ genid(0.)  ] = fn_const<genid>( freq_t(.1) );
-		freqSelFnPcs[ genid(10.) ] = fn_const<genid>( freq_t(0.) );
-
-		for ( BOOST_AUTO( pci, freqSelFnPcs.begin() ); pci != freqSelFnPcs.end(); ++pci ) {
-			PRINT( pop );
-			PRINT( pci->first );
-			PRINT( pci->second );
-		}
-	}
-
-	BaseModelP sweepModel = m.getSweepModel( baseModel, pop2freqSelFn );
-	//PRINT( pop2freqSelFn );
-	
-	// std::copy( pop2freqSelFn.begin(), pop2freqSelFn.end(),
-	// 					 std::ostream_iterator< pop2freqSelFn_type::value_type >( std::cerr, ",") );
-	// std::cerr << "\n";
-	PRINT( *baseModel );
-	PRINT( *sweepModel );
-	
+				e.second->addToBaseModel( *baseModel );	
 
 	size_t prevSize;
 	do {

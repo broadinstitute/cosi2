@@ -8,7 +8,7 @@
 // parts of simulator behavior; <CoSi::runSim()> then runs the simulation.
 //
 
-//#define COSI_DEV_PRINT
+#define COSI_DEV_PRINT
 
 #include <cstdlib>
 #include <boost/foreach.hpp>
@@ -182,6 +182,55 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	migrate->setHooks( hooks );
 	params->getHistEvents()->historical_setMigrate( migrate );
 	simulator->sim_setMigrate( migrate );
+
+	BaseModelP baseModel;
+	if ( getenv( "COSI_NEWSIM" ) ) {
+		baseModel = params->getBaseModel();
+
+		MSweep m;
+
+		using namespace math;
+		typedef std::map< popid, Function< genid, freq_t, Piecewise< Const<> > > > pop2freqSelFn_type;
+		pop2freqSelFn_type pop2freqSelFn	;
+		for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
+				 pi != baseModel->popInfos.end(); ++pi ) {
+			popid pop = pi->first;
+			BOOST_AUTO( &freqSelFnPcs, pop2freqSelFn[ pop ].getPieces() );
+			freqSelFnPcs[ genid(0.)  ] = fn_const<genid>( freq_t(.1) );
+			freqSelFnPcs[ genid(10.) ] = fn_const<genid>( freq_t(0.) );
+
+			for ( BOOST_AUTO( pci, freqSelFnPcs.begin() ); pci != freqSelFnPcs.end(); ++pci ) {
+				PRINT( pop );
+				PRINT( pci->first );
+				PRINT( pci->second );
+			}
+		}
+
+		BaseModelP sweepModel = m.getSweepModel( baseModel, pop2freqSelFn );
+		double fit[] = { 1., .99, .98 };
+		std::map<popid,freq_t> begFreqs;
+		begFreqs[ popid(1) ] = freq_t(.2);
+		begFreqs[ popid(2) ] = freq_t(0.);
+		std::map<popid, std::pair<freq_t,freq_t> > endFreqs;
+		endFreqs[ popid(1) ] = std::make_pair( freq_t( 0.1 ), freq_t( 1. ) );
+		endFreqs[ popid(2) ] = std::make_pair( freq_t( 0. ), freq_t( 1. ) );
+		MSweep msweep;
+		BOOST_AUTO( mtraj, msweep.simulateTrajFwd( baseModel, fit, genid(100), begFreqs, endFreqs,
+																							 *getRandGen() ) );
+
+		cosi_for_map( pop, traj, mtraj ) {
+			std::cerr << "pop=" << pop << " traj=" << traj << "\n";
+		} cosi_end_for;
+		exit(1);
+		
+		//PRINT( pop2freqSelFn );
+	
+		// std::copy( pop2freqSelFn.begin(), pop2freqSelFn.end(),
+		// 					 std::ostream_iterator< pop2freqSelFn_type::value_type >( std::cerr, ",") );
+		// std::cerr << "\n";
+		PRINT( *baseModel );
+		PRINT( *sweepModel );
+	}
 	
 	demography->dg_complete_initialization();
 
@@ -193,7 +242,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	}
 
 	if ( getenv( "COSI_NEWSIM" ) ) {
-		BaseModelP baseModel = params->getBaseModel();
+		//BaseModelP baseModel = params->getBaseModel();
 		migrate->setBaseModel( baseModel );
 		typedef arrival2::ArrivalProcess<genid, arrival2::Stoch< RandGen, arrival2::AnyProc > > any_proc;
 		add( simulator->arrProcs, any_proc( setLabel( *migrate->createMigrationProcesses(), "migrations" ) ) );
