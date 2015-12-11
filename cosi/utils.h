@@ -260,6 +260,12 @@ unsigned long timespec_since( const struct timespec *start);
 //    v - the range.
 //#define For(x,v) for ( auto x = boost::begin(v); x != boost::end(v); x++ )
 
+#define cosi_for_map( k, v, m ) for( BOOST_AUTO( it, m.begin() ); it != m.end(); ++ it ) { \
+	BOOST_AUTO( const& k, it->first ); \
+	BOOST_AUTO( const& v, it->second );
+
+#define cosi_end_for }
+
 #define ForEach BOOST_FOREACH
 
 template <typename T> struct IndexSorter {
