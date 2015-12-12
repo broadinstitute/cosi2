@@ -7,6 +7,7 @@
 #include <utility>
 #include <iostream>
 #include <cstdlib>
+#include <boost/range/adaptor/map.hpp>  
 #include <boost/units/detail/utility.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/random/binomial_distribution.hpp>
@@ -127,6 +128,8 @@ public:
 										std::map<popid, std::pair<freq_t,freq_t> > endFreqs,
 										URNG& urng,
 										size_t maxAttempts = 10000 ) {
+		 using util::at;
+		 
 		 mpop_traj_t pop2freqSelFn;
 
 		 double s[3] = { 0., fit[1] / fit[0] - 1., fit[2] / fit[0] - 1. };
@@ -139,10 +142,52 @@ public:
 			 for( genid gen = begGen; gen > genid(0); gen -= gens_t(1) ) {
 				 // record the current freqs
 				 cosi_for_map( pop, popInfo, baseModel->popInfos ) {
+					 PRINT3( gen, pop, freqs[pop] );
 					 set( pop2freqSelFn[ pop ], gen, freqs[ pop ] );
 					 freqs[ pop ] = getNextXt( freqs[ pop ], baseModel->popInfos[ pop ].popSizeFn( gen ), s, urng );
 				 } cosi_end_for;
-			 }
+
+
+				 // migrations; note that the direction is reversed for the fwd vs the bwd sim.
+				 cosi_for_map( dstPop, popInfo, baseModel->popInfos ) {
+					 cosi_for_map( srcPop, migrRateFn, popInfo.migrRateTo ) {
+						 if ( freqs[ srcPop ] > 0 ) {
+							 // find the number of chroms bearing the selected allele in the source population
+							 // what if fixed or lost?
+							 // check also for small pop size.
+							 nchroms_t NtSrc( 2 * ToDouble( baseModel->popInfos[ srcPop ].popSizeFn( gen ) ) );
+							 nchroms_t NtDst( 2 * ToDouble( baseModel->popInfos[ dstPop ].popSizeFn( gen ) ) );
+							 nchroms_t nSrcSel( 2 * NtSrc * freqs[ srcPop ] );
+							 nchroms_t nDstSel( 2 * NtDst * freqs[ dstPop ] );
+							 double migrRate = ToDouble(  migrRateFn( gen ) );
+							 if ( nSrcSel > nchroms_t(1) && migrRate > 0. ) {
+								 
+								 nchroms_t nSrcUns = 2 * NtSrc - nSrcSel;
+								 
+								 // so, for each src chrom, there's a chance of migration; the number of migrators
+								 // is then binomial.  note that we're treating this as a collection of haploids;
+								 // more correctly might be to assume it's randomly mixing and see how many diploids
+								 // of each type migrate?  on the other hand these are probs of haploid chroms migrating?
+								 // so, if there's a fixed chance of a diploid _individual_ migrating, then
+								 // a chrom's chance of migrating is : there are p*p chance of being in an aa indiv.
+								 // would we get the same migration rates?
+								 
+								 using boost::random::binomial_distribution;
+								 binomial_distribution<nchroms_t> bdistSel( nSrcSel, migrRate );
+								 binomial_distribution<nchroms_t> bdistUns( nSrcUns, migrRate );
+								 nchroms_t nMigSel = bdistSel( urng );
+                 nchroms_t nMigUns = bdistUns( urng );
+
+								 //PRINT9( gen, srcPop, dstPop, NtSrc, NtDst, nSrcSel, nDstSel, nMigSel, nMigUns );
+								 
+                 nchroms_t nMig = nMigSel + nMigUns;
+								 freqs[ srcPop ] = double( nSrcSel - nMigSel ) / double( 2*NtSrc - nMig );
+								 freqs[ dstPop ] = double( nDstSel + nMigSel ) / double( 2*NtDst + nMig );
+							 }  // if ( nSrcSel > nchroms_t(1) && migrRate > 0. )
+						 } // if ( freqs[ srcPop ] > 0 )
+					 } cosi_end_for;  // cosi_for_map( srcPop, migrRateFn, popInfo.migrRateTo )
+				 } cosi_end_for;  // cosi_for_map( trgPop, popInfo, baseModel->popInfos )
+			 } // for each gen
 
 			 bool freqWrong = false;
 			 cosi_for_map( pop, popInfo, baseModel->popInfos ) {
@@ -178,7 +223,7 @@ private:
 		 double num = x * (1. + s2 * x + s1 * (1. - x));
 		 double denom = (1. + s2 * x * x + 2 * s1 * x * (1. - x));
 		 freq_t y =  num/ denom;
-		 std::cerr << "x=" << x << " Nt=" << Nt << " num=" << num << " denom=" << denom << " y=" << y << "\n";
+		 //std::cerr << "x=" << x << " Nt=" << Nt << " num=" << num << " denom=" << denom << " y=" << y << "\n";
 		 // y is obtained, is the expected allele frequency for the next generation t+1
 		 boost::random::binomial_distribution<nchroms_t> bdist( 2 * nchroms_t( ToDouble( Nt ) ), y );
 		 nchroms_t nsel_next_gen = bdist( urng );

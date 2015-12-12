@@ -215,7 +215,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		endFreqs[ popid(1) ] = std::make_pair( freq_t( 0.1 ), freq_t( 1. ) );
 		endFreqs[ popid(2) ] = std::make_pair( freq_t( 0. ), freq_t( 1. ) );
 		MSweep msweep;
-		BOOST_AUTO( mtraj, msweep.simulateTrajFwd( baseModel, fit, genid(100), begFreqs, endFreqs,
+		BOOST_AUTO( mtraj, msweep.simulateTrajFwd( baseModel, fit, genid(200), begFreqs, endFreqs,
 																							 *getRandGen() ) );
 
 		cosi_for_map( pop, traj, mtraj ) {
