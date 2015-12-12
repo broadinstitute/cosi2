@@ -160,7 +160,7 @@ public:
 #endif											 
 											 *cpuTimer,
 											 const genid *endGen,
-											 const std::vector< leaf_id_t > *leafOrder = NULL
+											 boost::shared_ptr< const std::vector< leaf_id_t > > leafOrder
 		 ) const;
 
 	 // Method: loadFromMs

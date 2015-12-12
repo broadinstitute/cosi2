@@ -306,6 +306,10 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
 																																											 dropSingletonsFrac, randGen ) );
 
+		if ( !leafset_is_empty( cosi.selLeaves ) ) {
+			muts->addMut( cosi.selLoc, cosi.selLeaves, cosi.selGen, cosi.selPop );
+		}
+
 		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << "\n"; }
 	
 		ParamFileReaderP params = cosi.getParams();
@@ -355,7 +359,8 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #else															
 															/*outputSimTimes ? &cpuTimer : */NULL,
 #endif															
-															outputEndGens ? &endGen : NULL );
+															outputEndGens ? &endGen : NULL,
+															cosi.leafOrder );
 		}  // output simulation results
 		// {
 		// 	boost::timer::cpu_times elapsed = cpuTimer.elapsed();

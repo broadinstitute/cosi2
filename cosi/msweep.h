@@ -1,7 +1,7 @@
 #ifndef COSI_INCLUDE_MSWEEP_H
 #define COSI_INCLUDE_MSWEEP_H
 
-#define COSI_DEV_PRINT
+//#define COSI_DEV_PRINT
 
 #include <map>
 #include <utility>
@@ -13,6 +13,7 @@
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/clamp.hpp>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/utils.h>
@@ -118,12 +119,16 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 
 			 demography->dg_create_pop( selPop, demography->dg_get_pop_by_name( unsPop )->get_label() +
 																	std::string( "_sel" ), genid(0.) );
+			 nchroms_t sampSz = demography->find_pop_request( unsPop )->members;
+			 using boost::algorithm::clamp;
+			 nchroms_t selSampleSize( clamp( int( util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) *
+																						ToDouble( sampSz ) ), 0, sampSz ) );
+			 
 			 demography->dg_populate_by_name( selPop,
-																				nchroms_t( util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) *
-																									 ToDouble( pi->second.popSizeFn( genid( 0. ) ) ) ) );
-			 demography->find_pop_request( unsPop )->members =
-					nchroms_t( ( 1.0 - util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) ) *
-										 ToDouble( pi->second.popSizeFn( genid( 0. ) ) ) );
+																				selSampleSize );
+			 nchroms_t unsSampleSize( sampSz - selSampleSize );
+			 demography->find_pop_request( unsPop )->members = unsSampleSize;
+			 //std::cerr << "selSampleSize=" << selSampleSize << " unsSampleSize=" << unsSampleSize << "\n";
 		 }
 		 boost::shared_ptr<Hook> hookPtr( new SweepHook( demography, sweepModel, demography->getRandGen(),
 																										 selPos ) );
@@ -213,7 +218,7 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 
 		 double s[3] = { 0., fit[1] / fit[0] - 1., fit[2] / fit[0] - 1. };
 
-		 std::cerr << "s=(" << s[0] << "," << s[1] << "," << s[2] << "\n";
+		 //std::cerr << "s=(" << s[0] << "," << s[1] << "," << s[2] << "\n";
 
 		 bool found = false;
 		 while( !found && maxAttempts-- >= 1 ) {
@@ -225,7 +230,7 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 				 // record the current freqs
 				 bool haveNonZero = false;
 				 cosi_for_map( pop, popInfo, baseModel->popInfos ) {
-					 PRINT3( gen, pop, freqs[pop] );
+					 //PRINT3( gen, pop, freqs[pop] );
 					 set( pop2freqSelFn[ pop ], gen, freqs[ pop ] );
 					 freqs[ pop ] = getNextXt( freqs[ pop ], baseModel->popInfos[ pop ].popSizeFn( gen ), s, urng );
 					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
@@ -311,8 +316,8 @@ private:
 		 // y is obtained, is the expected allele frequency for the next generation t+1
 		 boost::random::binomial_distribution<nchroms_t> bdist( 2 * nchroms_t( ToDouble( Nt ) ), y );
 		 nchroms_t nsel_next_gen = bdist( urng );
-		 std::cerr << "x=" << x << " Nt=" << Nt << " num=" << num << " denom=" << denom << " y=" << y
-							 << " nsel_next_gen=" << nsel_next_gen << "\n";
+		 // std::cerr << "x=" << x << " Nt=" << Nt << " num=" << num << " denom=" << denom << " y=" << y
+		 // 					 << " nsel_next_gen=" << nsel_next_gen << "\n";
 
 		 return ToDouble( nsel_next_gen ) / ToDouble( 2*Nt );
 	 }

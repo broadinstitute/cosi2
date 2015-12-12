@@ -101,6 +101,12 @@ public:
 	 CondSnpMgrP getCondSnpMgr() const { return condSnpMgr; }
 	 GenMapP getGenMap() const { return genMap; }
 
+	 boost::shared_ptr< std::vector< leaf_id_t > > leafOrder;
+	 leafset_p selLeaves;
+	 loc_t selLoc;
+	 genid selGen;
+	 popid selPop;
+
 protected:
 
 	 // Field: params

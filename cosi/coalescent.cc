@@ -252,6 +252,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	mutate.reset( new Mutate( getRandGen(), params->getMu(), params->getLength() ) );
 	demography->dg_setMutate( mutate );
 
+	selLeaves = make_empty_leafset();
 	if ( getenv( "COSI_NEWSIM" ) ) {
 		//BaseModelP baseModel = params->getBaseModel();
 		migrate->setBaseModel( sweepModel );
@@ -263,16 +264,46 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		if ( params->getGeneConv2RecombRateRatio() > 0 ) 
 			 add( simulator->arrProcs, any_proc( setLabel( *geneConversion->createGeneConvProcesses(), "gcs" ) ) );
 
+		leafOrder = boost::make_shared< std::vector< leaf_id_t > >();
+
 		vector< leafset_p > const& pop2leaves = demography->get_pop2leaves();
-		leafset_p selLeaves = make_empty_leafset();
 		cosi_for_map( pop, popInfo, sweepModel->popInfos ) {
 			if ( popInfo.isSelPop ) {
-				selLeaves = leafset_union( selLeaves, pop2leaves[ demography->dg_get_pop_index_by_name( pop ) ] );
-			}
+				// std::cerr << "selpop=" << pop << " selpopIdx=" << demography->dg_get_pop_index_by_name( pop )
+				// 					<< " pop2leaves.size()=" << pop2leaves.size() << "\n";
+				// std::cerr << "unselpop=" << util::at( sweepModel->pop2sib, pop )
+				// 					<< " unselidx=" << demography->dg_get_pop_index_by_name( util::at( sweepModel->pop2sib, pop ) )
+				// 					<< "\n";
+				leafset_p leaves_sel = pop2leaves[ demography->dg_get_pop_index_by_name( pop ) ];
+				leafset_p leaves_uns =
+					 pop2leaves[ demography->dg_get_pop_index_by_name( util::at( sweepModel->pop2sib, pop ) ) ];
+				selLeaves = leafset_union( selLeaves, leaves_sel );
+
+				COSI_FOR_LEAFSET( leaves_uns, leaf, {
+						leafOrder->push_back( leaf );
+						//std::cerr << "pushing uns leaf " << leaf << "\n";
+					});
+				COSI_FOR_LEAFSET( leaves_sel, leaf, {
+						leafOrder->push_back( leaf );
+						//std::cerr << "pushing sel leaf " << leaf << "\n";
+					});
+			}  // if ( popInfo.isSelPop )
 		} cosi_end_for;  // cosi_for_map( popInfo, sweepModel->popInfos )
-		mutate->mutate_print_leafset( baseModel->sweepInfo.selPos, selLeaves,
-																	baseModel->sweepInfo.selGen,
-																	baseModel->sweepInfo.selPop );
+
+		selLoc = baseModel->sweepInfo.selPos;
+		selGen = baseModel->sweepInfo.selGen;
+		selPop = baseModel->sweepInfo.selPop;
+		
+		// mutate->mutate_print_leafset( baseModel->sweepInfo.selPos, selLeaves,
+		// 															baseModel->sweepInfo.selGen,
+		// 															baseModel->sweepInfo.selPop );
+		//std::cerr << "selPos=" << baseModel->sweepInfo.selPos << "\n";
+		// {
+
+		// 	COSI_FOR_LEAFSET( selLeaves, leaf, {
+		// 			std::cerr << "have sel leaf " << leaf << "\n";
+		// 		});
+		// }
 		
 		// for( BOOST_AUTO( it, baseModel->popInfos.begin() ); it != baseModel->popInfos.end(); it++ ) {
 		// 	Pop *pop = demography->dg_get_pop_by_name( it->first );

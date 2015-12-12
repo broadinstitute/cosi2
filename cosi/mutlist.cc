@@ -262,7 +262,7 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 #endif														 
 														 *cpuTimer,
 														 const genid *endGen,
-														 const std::vector< leaf_id_t > *leafOrder ) const {
+														 boost::shared_ptr< const std::vector< leaf_id_t > > leafOrder ) const {
 
 	boost::io::ios_precision_saver strm_precision_saver( strm );
 	strm.precision( outputPrecision );
@@ -333,7 +333,7 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 				}
 			}
 		}
-		if ( !leafOrder ) leafOrder = &stdLeafOrder;
+		if ( !leafOrder ) leafOrder = boost::make_shared< std::vector< leaf_id_t > >( stdLeafOrder );
 		
 		BOOST_FOREACH( leaf_id_t leaf, *leafOrder ) {
 			memset( line.get(), '0', nmuts );
