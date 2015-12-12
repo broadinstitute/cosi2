@@ -107,6 +107,9 @@ inline leafset_p leafset_union( leafset_p leafset1, leafset_p leafset2 ) {
 	return new leafset_t( leafset1, leafset2 );
 }
 
+leafset_p make_range_leafset( leaf_id_t fromLeaf, leaf_id_t toLeaf );
+
+
 bool leafset_equal( leafset_p leafset1, leafset_p leafset2 );
 
 leafset_p leafset_intersection( leafset_p leafset1, leafset_p leafset2 );

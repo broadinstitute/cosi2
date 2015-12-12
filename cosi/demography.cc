@@ -123,9 +123,9 @@ void Demography::dg_complete_initialization() {
   ForVec( populate_request, req, populate_requests ) {
 		popNames.push_back( req->popname );
 		sampleSizes.push_back( req->members );
-#ifdef COSI_EHH	 
+
 		pop2leaves.push_back( make_range_leafset( leafFrom, leafFrom + req->members ) );
-#endif
+
 		for ( leaf_id_t leaf = leafFrom; leaf < leafFrom + req->members; leaf++ )
 			 this->leaf2popName[ leaf ] = req->popname;
 		leafFrom += req->members;

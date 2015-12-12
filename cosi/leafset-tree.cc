@@ -171,5 +171,14 @@ cosi_double leafset_struct::compute_r2( leafset_p leafset1, leafset_p leafset2 )
 }  // leafset_struct::compute_r2
 #endif // ifdef COSI_R2
 
+/* FuncP: make_range_leafset */
+/* Returns the leafset containing the given range of leaves. */
+leafset_p make_range_leafset( leaf_id_t fromLeaf, leaf_id_t toLeaf ) {
+	leafset_p result = make_empty_leafset();
+	for( leaf_id_t leaf = fromLeaf; leaf < toLeaf; ++leaf )
+		 result = leafset_union( result, make_singleton_leafset( leaf ) );
+	return result;
+}
+
 }  // namespace leafset_tree
 }  // namespace cosi

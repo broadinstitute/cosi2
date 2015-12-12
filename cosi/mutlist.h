@@ -159,7 +159,9 @@ public:
 											 void
 #endif											 
 											 *cpuTimer,
-											 const genid *endGen  ) const;
+											 const genid *endGen,
+											 const std::vector< leaf_id_t > *leafOrder = NULL
+		 ) const;
 
 	 // Method: loadFromMs
 	 // Load a Mutlist from the output of the ms simulator

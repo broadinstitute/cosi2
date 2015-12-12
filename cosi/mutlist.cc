@@ -261,7 +261,8 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 														 void
 #endif														 
 														 *cpuTimer,
-														 const genid *endGen ) const {
+														 const genid *endGen,
+														 const std::vector< leaf_id_t > *leafOrder ) const {
 
 	boost::io::ios_precision_saver strm_precision_saver( strm );
 	strm.precision( outputPrecision );
@@ -317,29 +318,37 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 		}
 		//PRINT( "wrote header" );
 
-		leaf_id_t leaf = 0;
-		for (size_t ipop = 0; ipop < sampleSizes.size(); ipop++) {
-			if (sampleSizes[ipop] > 0) {
-				leaf_id_t popEndLeaf = leaf + sampleSizes[ipop];
+		std::vector< leaf_id_t > stdLeafOrder;
 
-				for (; leaf < popEndLeaf; leaf++) {
-					memset( line.get(), '0', nmuts );
+		{
 
-					const vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
-					ForEach( Mutlist::const_iterator m, leafMuts ) {
-					  chkCond( 0 <= m->mutId );
-					  chkCond( m->mutId < int(nmuts) );
-					
-					  line.get()[ m->mutId ] = '1';
+			leaf_id_t leaf = 0;
+			for (size_t ipop = 0; ipop < sampleSizes.size(); ipop++) {
+				if (sampleSizes[ipop] > 0) {
+					leaf_id_t popEndLeaf = leaf + sampleSizes[ipop];
+
+					for (; leaf < popEndLeaf; leaf++) {
+						stdLeafOrder.push_back( leaf );
 					}
-					strm << line.get();
 				}
 			}
-		}  // for each pop
+		}
+		if ( !leafOrder ) leafOrder = &stdLeafOrder;
+		
+		BOOST_FOREACH( leaf_id_t leaf, *leafOrder ) {
+			memset( line.get(), '0', nmuts );
+			
+			const vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
+			ForEach( Mutlist::const_iterator m, leafMuts ) {
+				chkCond( 0 <= m->mutId );
+				chkCond( m->mutId < int(nmuts) );
+				
+				line.get()[ m->mutId ] = '1';
+			}
+			strm << line.get();
+		}
 
 		//PRINT( "wrote haps" );
-
-		
 	}
 	strm << "\n";
 }  // print_haps_ms

@@ -214,6 +214,8 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 			sweepModel = msweep.getSweepModel( baseModel, mtraj, demography,
 																				 sweepInfo.selPos );
 
+			
+
 		}
 
 		// double fit[] = { 1., .99, .98 };
@@ -247,6 +249,9 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		pop->setSizeTraj( it->second, genid( 0.0 ) );
 	}
 
+	mutate.reset( new Mutate( getRandGen(), params->getMu(), params->getLength() ) );
+	demography->dg_setMutate( mutate );
+
 	if ( getenv( "COSI_NEWSIM" ) ) {
 		//BaseModelP baseModel = params->getBaseModel();
 		migrate->setBaseModel( sweepModel );
@@ -257,6 +262,17 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		add( simulator->arrProcs, any_proc( setLabel( *recomb->createRecombProcesses(), "recombs" ) ) );
 		if ( params->getGeneConv2RecombRateRatio() > 0 ) 
 			 add( simulator->arrProcs, any_proc( setLabel( *geneConversion->createGeneConvProcesses(), "gcs" ) ) );
+
+		vector< leafset_p > const& pop2leaves = demography->get_pop2leaves();
+		leafset_p selLeaves = make_empty_leafset();
+		cosi_for_map( pop, popInfo, sweepModel->popInfos ) {
+			if ( popInfo.isSelPop ) {
+				selLeaves = leafset_union( selLeaves, pop2leaves[ demography->dg_get_pop_index_by_name( pop ) ] );
+			}
+		} cosi_end_for;  // cosi_for_map( popInfo, sweepModel->popInfos )
+		mutate->mutate_print_leafset( baseModel->sweepInfo.selPos, selLeaves,
+																	baseModel->sweepInfo.selGen,
+																	baseModel->sweepInfo.selPop );
 		
 		// for( BOOST_AUTO( it, baseModel->popInfos.begin() ); it != baseModel->popInfos.end(); it++ ) {
 		// 	Pop *pop = demography->dg_get_pop_by_name( it->first );
@@ -267,8 +283,6 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		// migrate->setBaseModel( baseModel );
 	}
 	
-	mutate.reset( new Mutate( getRandGen(), params->getMu(), params->getLength() ) );
-	demography->dg_setMutate( mutate );
 	
 	sweep->sweep_setGenMap( genMap );
 	sweep->sweep_setRecomb( recomb );

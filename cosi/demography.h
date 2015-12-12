@@ -195,6 +195,8 @@ public:
 				if ( pr.popname == popname ) return &(pr);
 		 BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "unknown pop request" ) );
 	 }
+
+	 vector< leafset_p > const& get_pop2leaves() const { return pop2leaves; }
 	 
 private:
 	 // Field: pops
@@ -210,11 +212,9 @@ private:
 	 // For each pop, the size of the present-day sample from that pop.
 	 vector< nchroms_t > sampleSizes;
 
-#ifdef COSI_EHH	 
 	 // Field: pop2leaves
 	 // For each pop, a leafset containing the leaves in that pop.
 	 vector< leafset_p > pop2leaves;
-#endif
 
 	 // Field: leaf2popName
 	 // For each leaf, the name of the pop from which that leaf comes
