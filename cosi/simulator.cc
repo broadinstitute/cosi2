@@ -49,7 +49,10 @@ Simulator::sim_execute (void)
 		genid gen( 0. );
 		while( !demography->dg_done_coalescent() ) {
 			genid nextEvtTime = nextEventTime( arrProcs, gen, INF, *getRandGen() );
-			//std::cerr << "gen=" << gen << " nextEvt=" << nextEvtTime << "\n";
+			std::cerr << "gen=" << gen << " nextEvt=" << nextEvtTime
+								<< "nnodes1=" << demography->dg_get_pop_by_name( popid( 1 ) )->pop_get_num_nodes()
+								<< "nnodes2=" << demography->dg_get_pop_by_name( popid( 2 ) )->pop_get_num_nodes() <<
+				 "\n";
 			if ( nextEvtTime >= INF ) break;
 
 			executeNextEvent( arrProcs, nextEvtTime, *getRandGen() );

@@ -203,7 +203,7 @@ public:
      BOOST_AUTO_TPL(integralAtFromTime, ( eval( rateFnIntegral, fromTime )  ));
      BOOST_AUTO_TPL(integralAtMaxTime, ( eval( rateFnIntegral, maxTime ) ));
      assert( integralAtMaxTime >= integralAtFromTime );
-		 PRINT7( label, fromTime, maxTime, rateFactor, eps, integralAtFromTime, integralAtMaxTime );
+		 //PRINT7( label, fromTime, maxTime, rateFactor, eps, integralAtFromTime, integralAtMaxTime );
 		 if ( integralAtMaxTime == integralAtFromTime ) return maxTime;
 #ifndef NDEBUG
 #ifdef COSI_DEV_PRINT_GENERALMATH

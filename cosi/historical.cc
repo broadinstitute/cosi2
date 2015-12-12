@@ -427,7 +427,16 @@ public:
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
 	 static const char *typeStr() { return "sweep_mult"; }
-	 virtual eventKind_t getEventKind() const { return E_SWEEP; }	 
+	 virtual eventKind_t getEventKind() const { return E_SWEEP; }
+
+	 virtual void addToBaseModel( BaseModel& m ) const {
+		 m.sweepInfo.selGen = gen;
+		 m.sweepInfo.selCoeff = ToDouble( selCoeff );
+		 m.sweepInfo.selPos = selPos;
+		 m.sweepInfo.selPop = sweepPop;
+		 m.sweepInfo.final_sel_freq = final_sel_freq;
+	 }
+	 
 				
 	 virtual ~Event_MSweep();
 
@@ -450,7 +459,6 @@ private:
 	 // The frequency of the derived allele at the end of the sweep.
 	 freq_t final_sel_freq;
 };  // class Event_MSweep
-
 
 
 Event_PopSize::~Event_PopSize() {}
@@ -728,8 +736,10 @@ void HistEvents::constructBaseModel( BaseModelP baseModel ) {
 	BOOST_FOREACH( pair_t e, events )
 		 if ( e.second->getEventKind() == Event::E_BOTTLENECK ||
 					e.second->getEventKind() == Event::E_ADMIX )
-				e.second->addToBaseModel( *baseModel );	
+				e.second->addToBaseModel( *baseModel );
 
+	events.clear();
+#if 0
 	size_t prevSize;
 	do {
 		prevSize = events.size();
@@ -743,7 +753,7 @@ void HistEvents::constructBaseModel( BaseModelP baseModel ) {
 		}
 		
 	} while ( events.size() < prevSize );
-
+#endif
 	
 	
 }

@@ -270,7 +270,7 @@ unsigned long timespec_since( const struct timespec *start);
 #define ForEach BOOST_FOREACH
 
 template <typename K, typename V>
-V at( const std::map< K, V>& m, const K k ) {
+V const& at( const std::map< K, V>& m, const K k ) {
 	typename std::map< K, V>::const_iterator it = m.find( k );
 	if ( it == m.end() ) BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "lookup in map failed" ) );
 	else
@@ -777,7 +777,14 @@ inline bool_t startsWith( const string& s, const string& t ) {
 template <class T>
 ostream& operator<<( ostream& s, const vector<T>& v) {
 	s << "[";
-	std::copy( v.begin(), v.end(), std::ostream_iterator<T>( s, ", " ) );
+	bool first = true;
+	for ( typename vector<T>::const_iterator it = v.begin(); it != v.end(); ++it ) {
+		if ( !first ) s << ", ";
+		using namespace std;
+		s << *it;
+		first = false;
+	}
+	//std::copy( v.begin(), v.end(), std::ostream_iterator<T>( s, ", " ) );
 	s << "]";
 	return s;
 }
@@ -785,7 +792,15 @@ ostream& operator<<( ostream& s, const vector<T>& v) {
 template <typename K, typename V>
 ostream& operator<<( ostream& s, const std::map<K,V>& m) {
 	s << "[";
-	std::copy( m.begin(), m.end(), std::ostream_iterator< typename std::map<K,V>::value_type >( s, ", " ) );
+	bool first = true;
+	for ( typename std::map<K,V>::const_iterator it = m.begin(); it != m.end(); ++it ) {
+		if ( !first ) s << ", ";
+		using namespace std;
+		s << "(" << it->first << "," << it->second << ")";
+		first = false;
+	}
+	
+	//std::copy( m.begin(), m.end(), std::ostream_iterator< typename std::map<K,V>::value_type >( s, ", " ) );
 	s << "]";
 	return s;
 }
