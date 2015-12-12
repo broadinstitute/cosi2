@@ -59,6 +59,7 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/exception/exception.hpp>
 #include <boost/exception/error_info.hpp>
+#include <boost/exception/all.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/range/algorithm/lower_bound.hpp>
 #include <boost/range/sub_range.hpp>
@@ -267,6 +268,14 @@ unsigned long timespec_since( const struct timespec *start);
 #define cosi_end_for }
 
 #define ForEach BOOST_FOREACH
+
+template <typename K, typename V>
+V at( const std::map< K, V>& m, const K k ) {
+	typename std::map< K, V>::const_iterator it = m.find( k );
+	if ( it == m.end() ) BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "lookup in map failed" ) );
+	else
+		 return it->second;
+}
 
 template <typename T> struct IndexSorter {
 	 const vector<T>& origVec;
@@ -783,6 +792,12 @@ ostream& operator<<( ostream& s, const std::map<K,V>& m) {
 
 template <typename T1, typename T2>
 ostream& operator<<( ostream& s, const std::pair<T1,T2>& p ) {
+	s << "(" << p.first << "," << p.second << ")";
+	return s;
+}
+
+template <typename T1, typename T2>
+ostream& operator<<( ostream& s, const std::pair<const T1,T2>& p ) {
 	s << "(" << p.first << "," << p.second << ")";
 	return s;
 }
