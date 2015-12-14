@@ -15,7 +15,9 @@
 #include <cosi/mempool.h>
 #include <cosi/seglist.h>
 #include <cosi/cosirand.h>
+#ifdef COSI_DEV_CALLGRIND
 #include <cosi/callgrind.h>
+#endif
 #include <cosi/evtgrp.h>
 
 namespace cosi {
