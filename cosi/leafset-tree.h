@@ -152,20 +152,22 @@ void leafset_get_leaves( leafset_p leafset, OutputIter result ) {
 	}
 }
 
-#define COSI_FOR_LEAFSET(leafset,leaf_var,body) do {	\
-		std::stack<const leafset_t *> s;									\
-		s.push( leafset.get() );													\
-		while( !s.empty() ) {															\
-			const leafset_t *p = s.top();										\
-			s.pop();																				\
-			if ( p->leafId != NULL_LEAF_ID ) {							\
-				leaf_id_t leaf_var = p->leafId;								\
-				{ body; }																			\
-			} else {																				\
-				s.push( p->childA.get() );										\
-				s.push( p->childB.get() );										\
-			}																								\
-		}																									\
+#define COSI_FOR_LEAFSET(leafset,leaf_var,body) do {	  \
+	  if ( !leafset_is_empty( leafset ) ) {               \
+		  std::stack<const leafset_t *> s;									\
+		  s.push( leafset.get() );													\
+		  while( !s.empty() ) {															\
+			  const leafset_t *p = s.top();										\
+			  s.pop();																				\
+			  if ( p->leafId != NULL_LEAF_ID ) {							\
+		  		leaf_id_t leaf_var = p->leafId;								\
+				 { body; }																			\
+			  } else {																				\
+				  s.push( p->childA.get() );										\
+				  s.push( p->childB.get() );										\
+			  }  																							\
+		  }  /* while( !s.empty() ) */											\
+	  }  /* if leafset nonempty */										    \
   } while(0)
 
 
