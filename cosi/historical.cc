@@ -154,9 +154,9 @@ private:
 		 if ( genBeg <= gen )
 				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
 															 << error_msg( "pop size expansion ends before it starts" ) );
-		 if ( popSizeBeg >= popsize ) 
-				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
-															 << error_msg( "pop size expansion: size does not increase" ) );
+		 // if ( popSizeBeg >= popsize ) 
+		 // 		BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+		 // 													 << error_msg( "pop size expansion: size does not increase" ) );
 		 expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen );
 	 }
 
@@ -222,9 +222,9 @@ private:
 		 if ( genBeg <= gen )
 				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
 															 << error_msg( "pop size expansion ends before it starts" ) );
-		 if ( popSizeBeg >= popsize ) 
-				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
-															 << error_msg( "pop size expansion: size does not increase" ) );
+		 // if ( popSizeBeg >= popsize ) 
+		 // 		BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+		 // 													 << error_msg( "pop size expansion: size does not increase" ) );
 		 
 		 expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen );
 	 }
