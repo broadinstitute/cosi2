@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <boost/range/adaptor/map.hpp>  
 //#include <boost/units/detail/utility.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/exception/all.hpp>
@@ -207,7 +208,7 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 //	 
 	 template <typename URNG>
 	 mpop_traj_t
-	 simulateTrajFwd( BaseModelP baseModel, const double fit[3],
+	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel, const double fit[3],
 										genid begGen, std::map<popid,freq_t> begFreqs,
 										std::map<popid, std::pair<freq_t,freq_t> > endFreqs,
 										URNG& urng,
@@ -215,38 +216,43 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 		 using util::at;
 		 
 		 mpop_traj_t pop2freqSelFn;
-
+		 
 		 double s[3] = { 0., fit[1] / fit[0] - 1., fit[2] / fit[0] - 1. };
-
+		 
 		 //std::cerr << "s=(" << s[0] << "," << s[1] << "," << s[2] << "\n";
-
+		 using boost::adaptors::map_keys;
+		 using boost::range::push_back;
+		 
+		 std::vector<popid> pops;
+		 push_back( pops, baseModel->popInfos | map_keys );
+		 
 		 bool found = false;
 		 while( !found && maxAttempts-- >= 1 ) {
-
+			 
 			 BOOST_AUTO( freqs, begFreqs );
 			 namespace rng = boost::range;
 			 std::cerr.precision(8);
 			 for( genid gen = begGen; gen > genid(0); gen -= gens_t(1) ) {
 				 // record the current freqs
 				 bool haveNonZero = false;
-				 cosi_for_map( pop, popInfo, baseModel->popInfos ) {
+				 BOOST_FOREACH( popid pop, pops ) {
 					 //PRINT3( gen, pop, freqs[pop] );
 					 set( pop2freqSelFn[ pop ], gen, freqs[ pop ] );
-					 freqs[ pop ] = getNextXt( freqs[ pop ], baseModel->popInfos[ pop ].popSizeFn( gen ), s, urng );
+					 freqs[ pop ] = getNextXt( freqs[ pop ], at( baseModel->popInfos, pop ).popSizeFn( gen ), s, urng );
 					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
-				 } cosi_end_for;
+				 }
 				 if ( !haveNonZero ) break;
-
-
+				 
 				 // migrations; note that the direction is reversed for the fwd vs the bwd sim.
-				 cosi_for_map( dstPop, popInfo, baseModel->popInfos ) {
-					 cosi_for_map( srcPop, migrRateFn, popInfo.migrRateTo ) {
+				 cosi_for_map( dstPop, popInfoDst, baseModel->popInfos ) {
+					 cosi_for_map( srcPop, migrRateFn, popInfoDst.migrRateTo ) {
 						 if ( freqs[ srcPop ] > 0 ) {
 							 // find the number of chroms bearing the selected allele in the source population
 							 // what if fixed or lost?
 							 // check also for small pop size.
-							 nchroms_t NtSrc( 2 * ToDouble( baseModel->popInfos[ srcPop ].popSizeFn( gen ) ) );
-							 nchroms_t NtDst( 2 * ToDouble( baseModel->popInfos[ dstPop ].popSizeFn( gen ) ) );
+							 BaseModel::PopInfo const& popInfoSrc = at( baseModel->popInfos, srcPop );
+							 nchroms_t NtSrc( 2 * ToDouble( popInfoSrc.popSizeFn( gen ) ) );
+							 nchroms_t NtDst( 2 * ToDouble( popInfoDst.popSizeFn( gen ) ) );
 							 nchroms_t nSrcSel( 2 * NtSrc * freqs[ srcPop ] );
 							 nchroms_t nDstSel( 2 * NtDst * freqs[ dstPop ] );
 							 double migrRate = ToDouble(  migrRateFn( gen ) );
@@ -267,7 +273,7 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 								 binomial_distribution<nchroms_t> bdistUns( nSrcUns, migrRate );
 								 nchroms_t nMigSel = bdistSel( urng );
                  nchroms_t nMigUns = bdistUns( urng );
-
+								 
 								 //PRINT9( gen, srcPop, dstPop, NtSrc, NtDst, nSrcSel, nDstSel, nMigSel, nMigUns );
 								 
                  nchroms_t nMig = nMigSel + nMigUns;
@@ -280,16 +286,16 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 			 } // for each gen
 
 			 bool freqWrong = false;
-			 cosi_for_map( pop, popInfo, baseModel->popInfos ) {
+			 BOOST_FOREACH( popid pop, pops ) {
 				 if ( ( endFreqs[ pop ].first <= freqs[ pop ] ) && ( freqs[ pop ] <= endFreqs[ pop ].second ) )
 						set( pop2freqSelFn[ pop ], genid(0.), freqs[ pop ] );
 				 else
 						freqWrong = true;
-			 } cosi_end_for;
+			 }
 			 if ( !freqWrong )
 					return pop2freqSelFn;
 		 }
-		 BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "no traj found within given number of attempts" ) );
+		 BOOST_THROW_EXCEPTION( cosi::cosi_error() << error_msg( "no traj found within given number of attempts" ) );
 	 }  // simulateTrajFwd
 	 
 private:
