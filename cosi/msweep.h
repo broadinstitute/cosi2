@@ -210,7 +210,7 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 	 mpop_traj_t
 	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel, const double fit[3],
 										genid begGen, std::map<popid,freq_t> begFreqs,
-										std::map<popid, std::pair<freq_t,freq_t> > endFreqs,
+										std::map<popid, util::ValRange<freq_t> > endFreqs,
 										URNG& urng,
 										size_t maxAttempts = 1000000 ) {
 		 using util::at;
@@ -287,7 +287,7 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 
 			 bool freqWrong = false;
 			 BOOST_FOREACH( popid pop, pops ) {
-				 if ( ( endFreqs[ pop ].first <= freqs[ pop ] ) && ( freqs[ pop ] <= endFreqs[ pop ].second ) )
+				 if ( endFreqs[ pop ]( freqs[ pop ] ) )
 						set( pop2freqSelFn[ pop ], genid(0.), freqs[ pop ] );
 				 else
 						freqWrong = true;

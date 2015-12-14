@@ -892,7 +892,8 @@ template <typename T>
 class ValRange {
 public:
 	 ValRange() { }
-	 ValRange( string rangeDef ) { init( rangeDef ); }
+	 explicit ValRange( string rangeDef ) { init( rangeDef ); }
+	 ValRange( T min_, T max_ ): bounds( min_, max_ ) { }
 
 	 void init( string rangeDef ) {
 		 if ( !rangeDef.empty() ) {
@@ -905,12 +906,21 @@ public:
 
 			 if ( result.size() == 1 ) {
 				 bounds.first = bounds.second = boost::lexical_cast<T>( result.at(0) );
-			 } else if ( result.size() == 2 ) {
-				 bounds.first = boost::lexical_cast<T>( result.at(0) );
-				 bounds.second = boost::lexical_cast<T>( result.at(1) );
+			 } else if ( result.size() == 2 && !result.at(0).empty() && !result.at(0).empty() ) {
+				 try { 
+					 bounds.first = boost::lexical_cast<T>( result.at(0) );
+					 bounds.second = boost::lexical_cast<T>( result.at(1) );
+				 } catch( boost::bad_lexical_cast const& ) {
+					 BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "invalid range: " + rangeDef ) );					 
+				 }
 			 }
-			 else throw std::invalid_argument( "invalid range: " + rangeDef );
+			 else
+				 BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "invalid range: " + rangeDef ) );
 		 }
+		 else
+				BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "invalid range: " + rangeDef ) );
+		 if ( !( bounds.first <= bounds.second ) ) 
+				BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "invalid range - min>max: " + rangeDef ) );
 	 }
 
 	 bool operator() ( T val ) const { return ( !bounds.first || val >= *bounds.first ) &&
@@ -927,6 +937,9 @@ private:
 	 pair< boost::optional<T>, boost::optional<T> > bounds;
 
 };  // class ValRange
+
+template <typename T>
+inline ValRange<T> make_val_range( T min_, T max_ ){ return ValRange<T>( min_, max_ ); }
 
 template <typename T>
 istream& operator>>( istream& is, ValRange<T>& valRange );

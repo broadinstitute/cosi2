@@ -76,10 +76,10 @@ struct BaseModel {
 			double selCoeff;
 			loc_t selPos;
 			popid selPop;
-			freq_t final_sel_freq;
+			util::ValRange<freq_t> final_sel_freq;
 
 			SweepInfo(): selGen( NULL_GEN ), selCoeff( 0.0 ), selPos( 0.0 ),
-									 selPop( NULL_POPID ), final_sel_freq( 0.0 ) { }
+									 selPop( NULL_POPID ) { }
 	 };
 
 	 SweepInfo sweepInfo;

@@ -194,16 +194,15 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 			MSweep msweep;
 			double fit[3] = { 1., 1. + 0.5*sweepInfo.selCoeff, 1. + sweepInfo.selCoeff };
 			std::map<popid, freq_t> begFreqs;
-			std::map<popid, std::pair<freq_t,freq_t> > endFreqs;
+			std::map<popid, util::ValRange<freq_t> > endFreqs;
 
 			cosi_for_map( pop, popInfo, baseModel->popInfos ) {
 				if ( pop != sweepInfo.selPop ) {
 					begFreqs[ pop ] = 0.;
-					endFreqs[ pop ] = std::make_pair( 0., 1. );
+					endFreqs[ pop ] = util::make_val_range( 0., 1. );
 				} else {
 					begFreqs[ pop ] = 2. / ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) );
-					endFreqs[ pop ] = std::make_pair( sweepInfo.final_sel_freq - .1,
-																						sweepInfo.final_sel_freq + .1 );
+					endFreqs[ pop ] = sweepInfo.final_sel_freq;
 				}
 			} cosi_end_for;
 			

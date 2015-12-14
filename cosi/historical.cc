@@ -414,11 +414,15 @@ private:
 // A selective sweep .
 class Event_MSweep: public HistEvents::Event {
 public:
-	 Event_MSweep( HistEvents *histEvents_, const string& label_, genid gen_, popid sweepPop_, gensInv_t selCoeff_, loc_t selPos_,
-								freq_t final_sel_freq_ ):
+	 Event_MSweep( HistEvents *histEvents_, const string& label_, genid gen_, popid sweepPop_, gensInv_t selCoeff_,
+								 loc_t selPos_,
+								 util::ValRange<freq_t> final_sel_freq_ ):
 		 Event( histEvents_, label_, gen_ ), sweepPop( sweepPop_ ), selCoeff( selCoeff_ ), selPos( selPos_ ), final_sel_freq( final_sel_freq_ ) { }
 	 Event_MSweep( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
 		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq;
+		 if ( !( final_sel_freq.getMin() && final_sel_freq.getMax() &&
+						 0. <= final_sel_freq.getMin() && final_sel_freq.getMin() <= 1. ) )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error() << error_msg( "invalid final freq range" ) );
 	 }
 
 	 // Method: typeStr
@@ -457,7 +461,7 @@ private:
 
 	 // Field: final_sel_freq
 	 // The frequency of the derived allele at the end of the sweep.
-	 freq_t final_sel_freq;
+	 util::ValRange<freq_t> final_sel_freq;
 };  // class Event_MSweep
 
 
