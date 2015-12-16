@@ -84,6 +84,8 @@ typedef int nchromPairs_t;
 // A count of simulations
 typedef int nsims_t;
 
+enum genotype_t { GT_AA, GT_Aa, GT_aa };
+
 // // Type: frac_t
 // // A fraction, in the interval [0.0,1.0]
 // struct frac_t: public factor_t {
