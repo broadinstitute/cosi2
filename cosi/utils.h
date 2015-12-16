@@ -1010,7 +1010,18 @@ private:
 
 } // namespace util
 
-}  // namespace cosi  
+}  // namespace cosi
+
+#define cosi_using2(id1,id2)					 \
+	using id1;													 \
+	using id2;
+
+#define cosi_using5(id1,id2,id3,id4,id5)  \
+	using id1;													 \
+	using id2;													 \
+	using id3;													 \
+	using id4;													 \
+	using id5
 
 #ifdef NDEBUG 
 #define COSI_IF_DEBUG(x)
