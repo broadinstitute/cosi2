@@ -138,6 +138,10 @@ private:
 	 // ** Field: customStatsExcludePop
 	 // Whether to exclude a given pop from custom stats output
 	 popid customStatsExcludePop;
+
+	 // ** Field: trajOnly
+	 // Whether to only simulate trajectories and output present-day freqs
+	 bool trajOnly;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

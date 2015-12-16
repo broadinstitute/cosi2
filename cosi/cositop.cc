@@ -30,6 +30,7 @@
 #include <cosi/condsnp.h>
 #include <cosi/cosicfg.h>
 #include <cosi/customstats.h>
+#include <cosi/msweep.h>
 
 namespace cosi {
 
@@ -55,7 +56,8 @@ CoSiMain::CoSiMain():
 	, genMapShift( 0 ), sweepFracSample( False ), outputSimTimes( False ), outputEndGens( False ), stopAfterMinutes( 0 ),
 							 outputARGedges( False ), freqsOnly( False ),
 							 dropSingletonsFrac( 0 ), genmapRandomRegions( False ), outputPopInfo( False ),
-							 outputGenMap( False ), customStats( False ), customStatsExcludePop( NULL_POPID )
+							 outputGenMap( False ), customStats( False ), customStatsExcludePop( NULL_POPID ),
+							 trajOnly( False )
 {
 }
 
@@ -117,7 +119,8 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 #endif		 
 #ifdef COSI_CONDSNP
 		 ( "condsnp,c", po::value(&this->condSnpDef), "condition sims on a SNP at this loc with these freqs" )
-#endif		 
+#endif
+		 ( "traj-only", po::bool_switch(&trajOnly), "just simulate trajectories and output present-day freqs" )
 		 ;
 
 	po::options_description output_options( "Specifying the output format" );
@@ -277,6 +280,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		cosi.set_recombfileFN( this->recombfileFN );
 		cosi.set_outputARGedges( this->outputARGedges );
 		cosi.set_genmapRandomRegions( this->genmapRandomRegions );
+		cosi.set_trajOnly( this->trajOnly );
 
 		cosi.setUpSim( paramfile, randGen, genMap );
 
@@ -306,9 +310,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
 																																											 dropSingletonsFrac, randGen ) );
 
-		if ( !leafset_is_empty( cosi.selLeaves ) ) {
-			muts->addMut( cosi.selLoc, cosi.selLeaves, cosi.selGen, cosi.selPop );
-		}
+		addSelMut( cosi.getMSweep(), muts );
 
 		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << "\n"; }
 	

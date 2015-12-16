@@ -215,12 +215,12 @@ am_libcosi_la_OBJECTS = libcosi_la-coalesce.lo \
 	libcosi_la-output.lo libcosi_la-pop.lo libcosi_la-recomb.lo \
 	libcosi_la-seglist.lo libcosi_la-segsumm.lo \
 	libcosi_la-simulator.lo libcosi_la-sweep.lo \
-	libcosi_la-sweep1.lo libcosi_la-sweep2.lo libcosi_la-sweep3.lo \
-	libcosi_la-genmap.lo libcosi_la-stats.lo libcosi_la-hooks.lo \
-	libcosi_la-traj.lo libcosi_la-cositop.lo libcosi_la-ehh.lo \
-	libcosi_la-leafset-sizeonly.lo libcosi_la-mutcontext.lo \
-	libcosi_la-condsnp.lo libcosi_la-hullmgr.lo \
-	libcosi_la-output_coal_data_cosi.lo \
+	libcosi_la-msweep.lo libcosi_la-sweep1.lo libcosi_la-sweep2.lo \
+	libcosi_la-sweep3.lo libcosi_la-genmap.lo libcosi_la-stats.lo \
+	libcosi_la-hooks.lo libcosi_la-traj.lo libcosi_la-cositop.lo \
+	libcosi_la-ehh.lo libcosi_la-leafset-sizeonly.lo \
+	libcosi_la-mutcontext.lo libcosi_la-condsnp.lo \
+	libcosi_la-hullmgr.lo libcosi_la-output_coal_data_cosi.lo \
 	libcosi_la-calc_pop_stats_cosi.lo libcosi_la-calc_Fst_cosi.lo \
 	$(am__objects_1) libcosi_la-leafset-tree.lo \
 	libcosi_la-leafset-counts.lo
@@ -1052,7 +1052,7 @@ COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/fi
 	$(SD)/historical.cc \
 	$(SD)/migrate.cc $(SD)/mutate.cc $(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc $(SD)/pop.cc $(SD)/recomb.cc \
 	$(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
-	$(SD)/sweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
+	$(SD)/sweep.cc $(SD)/msweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
 	$(SD)/traj.cc $(SD)/cositop.cc $(SD)/mutcontext.cc \
 	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
 
@@ -1065,13 +1065,13 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc \
 	$(SD)/historical.cc $(SD)/migrate.cc $(SD)/mutate.cc \
 	$(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc $(SD)/pop.cc \
 	$(SD)/recomb.cc $(SD)/seglist.cc $(SD)/segsumm.cc \
-	$(SD)/simulator.cc $(SD)/sweep.cc $(SD)/sweep1.cc \
-	$(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc \
-	$(SD)/hooks.cc $(SD)/traj.cc $(SD)/cositop.cc \
-	$(SD)/callgrind.h $(SD)/defs.h $(SD)/coalesce.h \
-	$(SD)/demography.h $(SD)/ehh.h $(SD)/ehh.cc $(SD)/file.h \
-	$(SD)/geneconversion.h $(SD)/historical.h $(SD)/leafset.h \
-	$(SD)/leafset-bitset.h $(SD)/leafset-tree.h \
+	$(SD)/simulator.cc $(SD)/sweep.cc $(SD)/msweep.cc \
+	$(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc \
+	$(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc $(SD)/traj.cc \
+	$(SD)/cositop.cc $(SD)/callgrind.h $(SD)/defs.h \
+	$(SD)/coalesce.h $(SD)/demography.h $(SD)/ehh.h $(SD)/ehh.cc \
+	$(SD)/file.h $(SD)/geneconversion.h $(SD)/historical.h \
+	$(SD)/leafset.h $(SD)/leafset-bitset.h $(SD)/leafset-tree.h \
 	$(SD)/leafset-sizeonly.h $(SD)/leafset-sizeonly.cc \
 	$(SD)/leafset-counts.h $(SD)/mutcontext.cc $(SD)/migrate.h \
 	$(SD)/mutate.h $(SD)/node.h $(SD)/nodefwd.h $(SD)/nodelist.h \
@@ -1415,6 +1415,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-leafset-sizeonly.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-leafset-tree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-migrate.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-msweep.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-mutate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-mutcontext.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-mutlist.Plo@am__quote@
@@ -1876,6 +1877,13 @@ libcosi_la-sweep.lo: $(SD)/sweep.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/sweep.cc' object='libcosi_la-sweep.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-sweep.lo `test -f '$(SD)/sweep.cc' || echo '$(srcdir)/'`$(SD)/sweep.cc
+
+libcosi_la-msweep.lo: $(SD)/msweep.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -MT libcosi_la-msweep.lo -MD -MP -MF $(DEPDIR)/libcosi_la-msweep.Tpo -c -o libcosi_la-msweep.lo `test -f '$(SD)/msweep.cc' || echo '$(srcdir)/'`$(SD)/msweep.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_la-msweep.Tpo $(DEPDIR)/libcosi_la-msweep.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/msweep.cc' object='libcosi_la-msweep.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-msweep.lo `test -f '$(SD)/msweep.cc' || echo '$(srcdir)/'`$(SD)/msweep.cc
 
 libcosi_la-sweep1.lo: $(SD)/sweep1.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -MT libcosi_la-sweep1.lo -MD -MP -MF $(DEPDIR)/libcosi_la-sweep1.Tpo -c -o libcosi_la-sweep1.lo `test -f '$(SD)/sweep1.cc' || echo '$(srcdir)/'`$(SD)/sweep1.cc

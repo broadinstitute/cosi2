@@ -67,14 +67,14 @@ COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/fi
 	$(SD)/historical.cc \
 	$(SD)/migrate.cc $(SD)/mutate.cc $(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc $(SD)/pop.cc $(SD)/recomb.cc \
 	$(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
-	$(SD)/sweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
+	$(SD)/sweep.cc $(SD)/msweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
 	$(SD)/traj.cc $(SD)/cositop.cc $(SD)/mutcontext.cc \
 	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
 
 libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/file.cc $(SD)/geneconversion.cc \
 	$(SD)/historical.cc \
 	$(SD)/migrate.cc $(SD)/mutate.cc $(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc $(SD)/pop.cc $(SD)/recomb.cc $(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
-	$(SD)/sweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc $(SD)/traj.cc $(SD)/cositop.cc \
+	$(SD)/sweep.cc $(SD)/msweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc $(SD)/traj.cc $(SD)/cositop.cc \
 	$(SD)/callgrind.h $(SD)/defs.h $(SD)/coalesce.h $(SD)/demography.h $(SD)/ehh.h $(SD)/ehh.cc $(SD)/file.h $(SD)/geneconversion.h $(SD)/historical.h $(SD)/leafset.h \
 	$(SD)/leafset-bitset.h $(SD)/leafset-tree.h $(SD)/leafset-sizeonly.h $(SD)/leafset-sizeonly.cc $(SD)/leafset-counts.h $(SD)/mutcontext.cc \
 	$(SD)/migrate.h $(SD)/mutate.h $(SD)/node.h $(SD)/nodefwd.h $(SD)/nodelist.h $(SD)/output.h $(SD)/pop.h $(SD)/popfwd.h $(SD)/recomb.h $(SD)/seglist.h $(SD)/seglistfwd.h \

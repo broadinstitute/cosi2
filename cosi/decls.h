@@ -103,6 +103,9 @@ typedef boost::shared_ptr<CondSnpMgr> CondSnpMgrP;  // defined in condsnp.h
 class BaseModel;  // defined in basemodel.h
 typedef boost::shared_ptr<BaseModel> BaseModelP;
 
+class MSweep; // defined in msweep.h
+typedef boost::shared_ptr<MSweep> MSweepP;
+
 }  // namespace cosi
 
 

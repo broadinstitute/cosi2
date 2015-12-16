@@ -56,7 +56,7 @@ CoSi::CoSi(): segfp( NULL ), logfp( NULL ), verbose( False ),
 						, maxCoalDist( plen_t( 1.0 ) ), maxCoalDistCvxHull( False )
 #endif
 						, genMapShift( 0 ), sweepFracSample( False ), outputARGedges( False ),
-							genmapRandomRegions( False )
+							genmapRandomRegions( False ), trajOnly( False )
 {
 	seglist::seglist_init_module();
 }
@@ -184,67 +184,8 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	params->getHistEvents()->historical_setMigrate( migrate );
 	simulator->sim_setMigrate( migrate );
 
-	BaseModelP baseModel, sweepModel;
-	if ( getenv( "COSI_NEWSIM" ) ) {
-		baseModel = params->getBaseModel();
+	this->msweep = make_MSweep( demography, params->getBaseModel(), getRandGen() );
 
-		BaseModel::SweepInfo const& sweepInfo = baseModel->sweepInfo;
-		
-		if ( sweepInfo.selCoeff != 0 ) {
-			cosi_using2( std::map, boost::assign::insert );
-
-			MSweep msweep;
-			map<popid, map<genotype_t,double> > fits;
-			map<popid, freq_t> begFreqs;
-			map<popid, util::ValRange<freq_t> > endFreqs;
-
-			cosi_for_map( pop, popInfo, baseModel->popInfos ) {
-				double s;
-				if ( pop != sweepInfo.selPop ) {
-					begFreqs[ pop ] = 0.;
-					endFreqs[ pop ] = util::make_val_range( 0., 1. );
-					s = 0;
-				} else {
-					begFreqs[ pop ] = 2. / ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) );
-					endFreqs[ pop ] = sweepInfo.final_sel_freq;
-					s = sweepInfo.selCoeff;
-				}
-				insert( fits[ pop ] )( GT_AA, 1.)( GT_Aa, 1. + 0.5*s )( GT_aa, 1. + s );
-			} cosi_end_for;
-			
-			BOOST_AUTO( mtraj, msweep.simulateTrajFwd( baseModel, fits, sweepInfo.selGen,
-																								 begFreqs, endFreqs,
-																								 *getRandGen() ) );
-			
-			sweepModel = msweep.getSweepModel( baseModel, mtraj, demography,
-																				 sweepInfo.selPos );
-
-			
-
-		}
-
-		// double fit[] = { 1., .99, .98 };
-		// map<popid,freq_t> begFreqs;
-		// begFreqs[ popid(1) ] = freq_t(.2);
-		// begFreqs[ popid(2) ] = freq_t(0.);
-		// map<popid, std::pair<freq_t,freq_t> > endFreqs;
-		// endFreqs[ popid(1) ] = std::make_pair( freq_t( 0.1 ), freq_t( 1. ) );
-		// endFreqs[ popid(2) ] = std::make_pair( freq_t( 0. ), freq_t( 1. ) );
-
-		// cosi_for_map( pop, traj, mtraj ) {
-		// 	std::cerr << "pop=" << pop << " traj=" << traj << "\n";
-		// } cosi_end_for;
-		// exit(1);
-		
-		// //PRINT( pop2freqSelFn );
-	
-		// // std::copy( pop2freqSelFn.begin(), pop2freqSelFn.end(),
-		// // 					 std::ostream_iterator< pop2freqSelFn_type::value_type >( std::cerr, ",") );
-		// // std::cerr << "\n";
-		// PRINT( *baseModel );
-		// PRINT( *sweepModel );
-	}
-	
 	demography->dg_complete_initialization();
 
 	BOOST_AUTO( traj, params->get_pop2sizeTraj() );
@@ -257,66 +198,17 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	mutate.reset( new Mutate( getRandGen(), params->getMu(), params->getLength() ) );
 	demography->dg_setMutate( mutate );
 
-	selLeaves = make_empty_leafset();
 	if ( getenv( "COSI_NEWSIM" ) ) {
-		//BaseModelP baseModel = params->getBaseModel();
-		migrate->setBaseModel( sweepModel );
+		migrate->setBaseModel( getSweepModel( msweep ) );
 		typedef arrival2::ArrivalProcess<genid, arrival2::Stoch< RandGen, arrival2::AnyProc > > any_proc;
 		add( simulator->arrProcs, any_proc( setLabel( *migrate->createMigrationProcesses(), "migrations" ) ) );
-		coalesce->setBaseModel( sweepModel );
+		coalesce->setBaseModel( getSweepModel( msweep ) );
 		add( simulator->arrProcs, any_proc( setLabel( *coalesce->createCoalProcesses(), "coals" ) ) );
 		add( simulator->arrProcs, any_proc( setLabel( *recomb->createRecombProcesses(), "recombs" ) ) );
 		if ( params->getGeneConv2RecombRateRatio() > 0 ) 
 			 add( simulator->arrProcs, any_proc( setLabel( *geneConversion->createGeneConvProcesses(), "gcs" ) ) );
 
-		leafOrder = boost::make_shared< std::vector< leaf_id_t > >();
-
-		vector< leafset_p > const& pop2leaves = demography->get_pop2leaves();
-		cosi_for_map( pop, popInfo, sweepModel->popInfos ) {
-			if ( popInfo.isSelPop ) {
-				// std::cerr << "selpop=" << pop << " selpopIdx=" << demography->dg_get_pop_index_by_name( pop )
-				// 					<< " pop2leaves.size()=" << pop2leaves.size() << "\n";
-				// std::cerr << "unselpop=" << util::at( sweepModel->pop2sib, pop )
-				// 					<< " unselidx=" << demography->dg_get_pop_index_by_name( util::at( sweepModel->pop2sib, pop ) )
-				// 					<< "\n";
-				leafset_p leaves_sel = pop2leaves[ demography->dg_get_pop_index_by_name( pop ) ];
-				leafset_p leaves_uns =
-					 pop2leaves[ demography->dg_get_pop_index_by_name( util::at( sweepModel->pop2sib, pop ) ) ];
-				selLeaves = leafset_union( selLeaves, leaves_sel );
-
-				COSI_FOR_LEAFSET( leaves_uns, leaf, {
-						leafOrder->push_back( leaf );
-						//std::cerr << "pushing uns leaf " << leaf << "\n";
-					});
-				COSI_FOR_LEAFSET( leaves_sel, leaf, {
-						leafOrder->push_back( leaf );
-						//std::cerr << "pushing sel leaf " << leaf << "\n";
-					});
-			}  // if ( popInfo.isSelPop )
-		} cosi_end_for;  // cosi_for_map( popInfo, sweepModel->popInfos )
-
-		selLoc = baseModel->sweepInfo.selPos;
-		selGen = baseModel->sweepInfo.selGen;
-		selPop = baseModel->sweepInfo.selPop;
-		
-		// mutate->mutate_print_leafset( baseModel->sweepInfo.selPos, selLeaves,
-		// 															baseModel->sweepInfo.selGen,
-		// 															baseModel->sweepInfo.selPop );
-		//std::cerr << "selPos=" << baseModel->sweepInfo.selPos << "\n";
-		// {
-
-		// 	COSI_FOR_LEAFSET( selLeaves, leaf, {
-		// 			std::cerr << "have sel leaf " << leaf << "\n";
-		// 		});
-		// }
-		
-		// for( BOOST_AUTO( it, baseModel->popInfos.begin() ); it != baseModel->popInfos.end(); it++ ) {
-		// 	Pop *pop = demography->dg_get_pop_by_name( it->first );
-		// 	if ( !pop ) throw std::runtime_error( "trajectory specified for unknown population" );
-		// 	BaseModel::PopInfo const& popInfo = it->second;
-		// 	//pop->setCoalRateFn( popInfo.coalRateFn, genid( 0.0 ) );
-		// }
-		// migrate->setBaseModel( baseModel );
+		leafOrder = computeLeafOrder( msweep );
 	}
 	
 	
