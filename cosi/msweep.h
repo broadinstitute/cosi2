@@ -7,7 +7,9 @@
 #include <utility>
 #include <iostream>
 #include <cstdlib>
-#include <boost/range/adaptor/map.hpp>  
+#include <boost/range/adaptor/map.hpp>
+#include <boost/array.hpp>
+#include <boost/assign/std/map.hpp>
 //#include <boost/units/detail/utility.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/algorithm/for_each.hpp>
@@ -208,23 +210,29 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 //	 
 	 template <typename URNG>
 	 mpop_traj_t
-	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel, const double fit[3],
+	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel, std::map<popid, std::map<genotype_t,double> > fits,
 										genid begGen, std::map<popid,freq_t> begFreqs,
 										std::map<popid, util::ValRange<freq_t> > endFreqs,
 										URNG& urng,
 										size_t maxAttempts = 1000000 ) {
-		 using util::at;
+		 cosi_using5( util::at, std::map, boost::assign::insert, boost::adaptors::map_keys, boost::range::push_back );
 		 
 		 mpop_traj_t pop2freqSelFn;
-		 
-		 double s[3] = { 0., fit[1] / fit[0] - 1., fit[2] / fit[0] - 1. };
-		 
-		 //std::cerr << "s=(" << s[0] << "," << s[1] << "," << s[2] << "\n";
-		 using boost::adaptors::map_keys;
-		 using boost::range::push_back;
-		 
+
 		 std::vector<popid> pops;
 		 push_back( pops, baseModel->popInfos | map_keys );
+		 
+		 map<popid, map<genotype_t,double> >	pop2s;
+		 BOOST_FOREACH( popid pop, pops ) {
+			 map<genotype_t,double> const& fit = at( fits, pop );
+			 insert( pop2s[ pop ] )
+					(GT_AA, 0.)
+					(GT_Aa, at(fit,GT_Aa) / at(fit,GT_AA) - 1.)
+					(GT_aa, at(fit,GT_aa) / at(fit,GT_AA) - 1.);
+		 }
+		 
+		 //std::cerr << "s=(" << s[0] << "," << s[1] << "," << s[2] << "\n";
+		 
 		 
 		 bool found = false;
 		 while( !found && maxAttempts-- >= 1 ) {
@@ -238,7 +246,7 @@ BaseModelP getSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 				 BOOST_FOREACH( popid pop, pops ) {
 					 //PRINT3( gen, pop, freqs[pop] );
 					 set( pop2freqSelFn[ pop ], gen, freqs[ pop ] );
-					 freqs[ pop ] = getNextXt( freqs[ pop ], at( baseModel->popInfos, pop ).popSizeFn( gen ), s, urng );
+					 freqs[ pop ] = getNextXt( freqs[ pop ], at( baseModel->popInfos, pop ).popSizeFn( gen ), at( pop2s, pop ), urng );
 					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
 				 }
 				 if ( !haveNonZero ) break;
@@ -309,15 +317,16 @@ private:
 // Returns:
 //    frequency of selected allele in the next generation.
 	 template <typename URNG>
-	 static freq_t getNextXt( freq_t x, popsize_float_t Nt, const double s[3], URNG& urng ) {
+	 static freq_t getNextXt( freq_t x, popsize_float_t Nt, std::map<genotype_t,double> const& s, URNG& urng ) {
+		 using util::at;
      // if current allele freq in subpop sp at locus loc has already been 0 or 1,
      // set it to be 0 or 1 for next gens
 		 if ( x == 0 || x == 1 ) return x;
-		 freq_t s1 = s[1];
-		 freq_t s2 = s[2];
+		 freq_t s_Aa = at( s, GT_Aa );
+		 freq_t s_aa = at( s, GT_aa );
 		 // with s1 and s2 on hand, calculate freq at the next generation
-		 double num = x * (1. + s2 * x + s1 * (1. - x));
-		 double denom = (1. + s2 * x * x + 2 * s1 * x * (1. - x));
+		 double num = x * (1. + s_aa * x + s_Aa * (1. - x));
+		 double denom = (1. + s_aa * x * x + 2 * s_Aa * x * (1. - x));
 		 freq_t y =  num/ denom;
 		 // y is obtained, is the expected allele frequency for the next generation t+1
 		 boost::random::binomial_distribution<nchroms_t> bdist( 2 * nchroms_t( ToDouble( Nt ) ), y );

@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/assign/std/map.hpp>
 #include <cosi/hooks.h>
 #include <cosi/node.h>
 #include <cosi/coalescent.h>
@@ -190,23 +191,28 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		BaseModel::SweepInfo const& sweepInfo = baseModel->sweepInfo;
 		
 		if ( sweepInfo.selCoeff != 0 ) {
+			cosi_using2( std::map, boost::assign::insert );
 
 			MSweep msweep;
-			double fit[3] = { 1., 1. + 0.5*sweepInfo.selCoeff, 1. + sweepInfo.selCoeff };
-			std::map<popid, freq_t> begFreqs;
-			std::map<popid, util::ValRange<freq_t> > endFreqs;
+			map<popid, map<genotype_t,double> > fits;
+			map<popid, freq_t> begFreqs;
+			map<popid, util::ValRange<freq_t> > endFreqs;
 
 			cosi_for_map( pop, popInfo, baseModel->popInfos ) {
+				double s;
 				if ( pop != sweepInfo.selPop ) {
 					begFreqs[ pop ] = 0.;
 					endFreqs[ pop ] = util::make_val_range( 0., 1. );
+					s = 0;
 				} else {
 					begFreqs[ pop ] = 2. / ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) );
 					endFreqs[ pop ] = sweepInfo.final_sel_freq;
+					s = sweepInfo.selCoeff;
 				}
+				insert( fits[ pop ] )( GT_AA, 1.)( GT_Aa, 1. + 0.5*s )( GT_aa, 1. + s );
 			} cosi_end_for;
 			
-			BOOST_AUTO( mtraj, msweep.simulateTrajFwd( baseModel, fit, sweepInfo.selGen,
+			BOOST_AUTO( mtraj, msweep.simulateTrajFwd( baseModel, fits, sweepInfo.selGen,
 																								 begFreqs, endFreqs,
 																								 *getRandGen() ) );
 			
@@ -218,10 +224,10 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		}
 
 		// double fit[] = { 1., .99, .98 };
-		// std::map<popid,freq_t> begFreqs;
+		// map<popid,freq_t> begFreqs;
 		// begFreqs[ popid(1) ] = freq_t(.2);
 		// begFreqs[ popid(2) ] = freq_t(0.);
-		// std::map<popid, std::pair<freq_t,freq_t> > endFreqs;
+		// map<popid, std::pair<freq_t,freq_t> > endFreqs;
 		// endFreqs[ popid(1) ] = std::make_pair( freq_t( 0.1 ), freq_t( 1. ) );
 		// endFreqs[ popid(2) ] = std::make_pair( freq_t( 0. ), freq_t( 1. ) );
 
