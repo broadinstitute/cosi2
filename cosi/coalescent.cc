@@ -8,7 +8,7 @@
 // parts of simulator behavior; <CoSi::runSim()> then runs the simulation.
 //
 
-#define COSI_DEV_PRINT
+//#define COSI_DEV_PRINT
 
 #include <cstdlib>
 #include <boost/foreach.hpp>

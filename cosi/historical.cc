@@ -10,7 +10,7 @@
  *
  */
 
-#define COSI_DEV_PRINT
+//#define COSI_DEV_PRINT
 
 #include <cstdlib>
 #include <cassert>

@@ -10,7 +10,7 @@
 #ifndef __INCLUDE_COSI_HISTORICAL_H
 #define __INCLUDE_COSI_HISTORICAL_H
 
-#define COSI_DEV_PRINT
+//#define COSI_DEV_PRINT
 
 #include <cstdlib>
 #include <cmath>
