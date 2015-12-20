@@ -22,6 +22,7 @@
 #define __INCLUDE_COSI_TYPEDVAL_H
 
 #include <limits>
+#include <boost/operators.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/serialization/access.hpp>
