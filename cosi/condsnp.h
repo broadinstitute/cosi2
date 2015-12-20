@@ -19,6 +19,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
+#include <boost/optional/optional_io.hpp>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/hooks.h>
