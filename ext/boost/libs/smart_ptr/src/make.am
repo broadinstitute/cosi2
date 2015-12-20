@@ -1,0 +1,5 @@
+lib_LTLIBRARIES += libcosismart_ptr.la
+SP=$(BOOST_DIR)/libs/smart_ptr/src
+libcosismart_ptr_la_SOURCES = $(SP)/sp_collector.cpp $(SP)/sp_debug_hooks.cpp
+libcosismart_ptr_la_CXXFLAGS = $(AM_CXXFLAGS)
+
