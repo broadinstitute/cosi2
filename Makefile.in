@@ -250,6 +250,13 @@ am__objects_2 = libcosi_rand_noinst_la-expdev.lo \
 	libcosi_rand_noinst_la-rng.lo
 am_libcosi_rand_noinst_la_OBJECTS = $(am__objects_2)
 libcosi_rand_noinst_la_OBJECTS = $(am_libcosi_rand_noinst_la_OBJECTS)
+libcosiatomic_la_LIBADD =
+am_libcosiatomic_la_OBJECTS = libcosiatomic_la-lockpool.lo
+libcosiatomic_la_OBJECTS = $(am_libcosiatomic_la_OBJECTS)
+libcosiatomic_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(libcosiatomic_la_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 libcosichrono_la_LIBADD =
 am_libcosichrono_la_OBJECTS = libcosichrono_la-chrono.lo \
 	libcosichrono_la-process_cpu_clocks.lo \
@@ -327,7 +334,6 @@ am_libcosiserialization_la_OBJECTS =  \
 	libcosiserialization_la-extended_type_info_typeid.lo \
 	libcosiserialization_la-polymorphic_iarchive.lo \
 	libcosiserialization_la-polymorphic_oarchive.lo \
-	libcosiserialization_la-shared_ptr_helper.lo \
 	libcosiserialization_la-stl_port.lo \
 	libcosiserialization_la-text_iarchive.lo \
 	libcosiserialization_la-text_oarchive.lo \
@@ -344,6 +350,14 @@ am_libcosiserialization_la_OBJECTS =  \
 	libcosiserialization_la-xml_woarchive.lo
 libcosiserialization_la_OBJECTS =  \
 	$(am_libcosiserialization_la_OBJECTS)
+libcosismart_ptr_la_LIBADD =
+am_libcosismart_ptr_la_OBJECTS = libcosismart_ptr_la-sp_collector.lo \
+	libcosismart_ptr_la-sp_debug_hooks.lo
+libcosismart_ptr_la_OBJECTS = $(am_libcosismart_ptr_la_OBJECTS)
+libcosismart_ptr_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(libcosismart_ptr_la_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 libcosisystem_la_LIBADD =
 am_libcosisystem_la_OBJECTS = libcosisystem_la-error_code.lo
 libcosisystem_la_OBJECTS = $(am_libcosisystem_la_OBJECTS)
@@ -508,29 +522,32 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libcosi_la_SOURCES) $(libcosi_rand_la_SOURCES) \
-	$(libcosi_rand_noinst_la_SOURCES) $(libcosichrono_la_SOURCES) \
-	$(libcosifilesystem_la_SOURCES) $(libcosiprogopt_la_SOURCES) \
-	$(libcosiregex_la_SOURCES) $(libcosiserialization_la_SOURCES) \
-	$(libcosisystem_la_SOURCES) $(libcositimer_la_SOURCES) \
-	$(libcosiutil_la_SOURCES) $(coalescent_SOURCES) \
-	$(cosiroot_SOURCES) $(funcs_test_SOURCES) \
-	$(get_recomap_SOURCES) $(ldhist_SOURCES) $(ost_test_SOURCES) \
-	$(ost_test_main_SOURCES) $(recomap_hapmap2_SOURCES) \
-	$(recosimulate_SOURCES) $(sample_stats_extra_SOURCES) \
-	$(seglist_test_SOURCES) $(test_arrproc_SOURCES) \
-	$(test_funcs_SOURCES)
-DIST_SOURCES = $(libcosi_la_SOURCES) $(libcosi_rand_la_SOURCES) \
-	$(libcosi_rand_noinst_la_SOURCES) $(libcosichrono_la_SOURCES) \
-	$(libcosifilesystem_la_SOURCES) $(libcosiprogopt_la_SOURCES) \
-	$(libcosiregex_la_SOURCES) $(libcosiserialization_la_SOURCES) \
-	$(libcosisystem_la_SOURCES) $(libcositimer_la_SOURCES) \
-	$(libcosiutil_la_SOURCES) $(coalescent_SOURCES) \
-	$(am__cosiroot_SOURCES_DIST) $(funcs_test_SOURCES) \
-	$(get_recomap_SOURCES) $(am__ldhist_SOURCES_DIST) \
-	$(ost_test_SOURCES) $(am__ost_test_main_SOURCES_DIST) \
+	$(libcosi_rand_noinst_la_SOURCES) $(libcosiatomic_la_SOURCES) \
+	$(libcosichrono_la_SOURCES) $(libcosifilesystem_la_SOURCES) \
+	$(libcosiprogopt_la_SOURCES) $(libcosiregex_la_SOURCES) \
+	$(libcosiserialization_la_SOURCES) \
+	$(libcosismart_ptr_la_SOURCES) $(libcosisystem_la_SOURCES) \
+	$(libcositimer_la_SOURCES) $(libcosiutil_la_SOURCES) \
+	$(coalescent_SOURCES) $(cosiroot_SOURCES) \
+	$(funcs_test_SOURCES) $(get_recomap_SOURCES) $(ldhist_SOURCES) \
+	$(ost_test_SOURCES) $(ost_test_main_SOURCES) \
 	$(recomap_hapmap2_SOURCES) $(recosimulate_SOURCES) \
 	$(sample_stats_extra_SOURCES) $(seglist_test_SOURCES) \
 	$(test_arrproc_SOURCES) $(test_funcs_SOURCES)
+DIST_SOURCES = $(libcosi_la_SOURCES) $(libcosi_rand_la_SOURCES) \
+	$(libcosi_rand_noinst_la_SOURCES) $(libcosiatomic_la_SOURCES) \
+	$(libcosichrono_la_SOURCES) $(libcosifilesystem_la_SOURCES) \
+	$(libcosiprogopt_la_SOURCES) $(libcosiregex_la_SOURCES) \
+	$(libcosiserialization_la_SOURCES) \
+	$(libcosismart_ptr_la_SOURCES) $(libcosisystem_la_SOURCES) \
+	$(libcositimer_la_SOURCES) $(libcosiutil_la_SOURCES) \
+	$(coalescent_SOURCES) $(am__cosiroot_SOURCES_DIST) \
+	$(funcs_test_SOURCES) $(get_recomap_SOURCES) \
+	$(am__ldhist_SOURCES_DIST) $(ost_test_SOURCES) \
+	$(am__ost_test_main_SOURCES_DIST) $(recomap_hapmap2_SOURCES) \
+	$(recosimulate_SOURCES) $(sample_stats_extra_SOURCES) \
+	$(seglist_test_SOURCES) $(test_arrproc_SOURCES) \
+	$(test_funcs_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -735,12 +752,14 @@ TEST_LOG_COMPILE = $(TEST_LOG_COMPILER) $(AM_TEST_LOG_FLAGS) \
 	$(TEST_LOG_FLAGS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/cosi/Makefile.am \
 	$(srcdir)/cosi_rand/Makefile.am \
+	$(srcdir)/ext/boost/libs/atomic/src/make.am \
 	$(srcdir)/ext/boost/libs/chrono/src/make.am \
 	$(srcdir)/ext/boost/libs/filesystem/src/make.am \
 	$(srcdir)/ext/boost/libs/make.am \
 	$(srcdir)/ext/boost/libs/program_options/src/make.am \
 	$(srcdir)/ext/boost/libs/regex/src/make.am \
 	$(srcdir)/ext/boost/libs/serialization/src/make.am \
+	$(srcdir)/ext/boost/libs/smart_ptr/src/make.am \
 	$(srcdir)/ext/boost/libs/system/src/make.am \
 	$(srcdir)/ext/boost/libs/timer/src/make.am \
 	$(srcdir)/recosim/Makefile.am $(srcdir)/tests/cositests.am \
@@ -922,10 +941,10 @@ ACLOCAL_AMFLAGS = -I m4
 # Section: Building cosi
 #
 ################################################
-lib_LTLIBRARIES = libcosiprogopt.la libcosiregex.la \
-	libcosifilesystem.la libcosisystem.la libcosichrono.la \
-	libcositimer.la libcosiserialization.la libcosi_rand.la \
-	libcosiutil.la libcosi.la
+lib_LTLIBRARIES = libcosismart_ptr.la libcosiprogopt.la \
+	libcosiregex.la libcosifilesystem.la libcosisystem.la \
+	libcosichrono.la libcositimer.la libcosiserialization.la \
+	libcosiatomic.la libcosi_rand.la libcosiutil.la libcosi.la
 noinst_LTLIBRARIES = libcosi_rand_noinst.la
 EXTRA_DIST = ext/boost examples doc \
 	$(srcdir)/tests/testScripts/tests/model001/t/run.sh \
@@ -980,6 +999,7 @@ BOOST_CPPFLAGS = -isystem $(srcdir)/ext/boost
 AM_CPPFLAGS = -I$(srcdir) $(BOOST_CPPFLAGS) -DNDEBUG 
 AM_CXXFLAGS = $(CXX11_CXXFLAGS) -O3
 BOOST_DIR = $(srcdir)/ext/boost
+BOOST_SMART_PTR_LIBS = $(builddir)/libcosismart_ptr.la
 BOOST_PROGRAM_OPTIONS_LIBS = $(builddir)/libcosiprogopt.la
 BOOST_REGEX_LIBS = $(builddir)/libcosiregex.la
 BOOST_FILESYSTEM_LIBS = $(builddir)/libcosifilesystem.la
@@ -987,6 +1007,10 @@ BOOST_SYSTEM_LIBS = $(builddir)/libcosisystem.la
 BOOST_CHRONO_LIBS = $(builddir)/libcosichrono.la
 BOOST_TIMER_LIBS = $(builddir)/libcositimer.la
 BOOST_SERIALIZATION_LIBS = $(builddir)/libcosiserialization.la
+BOOST_ATOMIC_LIBS = $(builddir)/libcosiatomic.la
+SP = $(BOOST_DIR)/libs/smart_ptr/src
+libcosismart_ptr_la_SOURCES = $(SP)/sp_collector.cpp $(SP)/sp_debug_hooks.cpp
+libcosismart_ptr_la_CXXFLAGS = $(AM_CXXFLAGS)
 PO = $(BOOST_DIR)/libs/program_options/src
 libcosiprogopt_la_SOURCES = $(PO)/cmdline.cpp $(PO)/config_file.cpp $(PO)/convert.cpp $(PO)/options_description.cpp $(PO)/parsers.cpp $(PO)/positional_options.cpp $(PO)/split.cpp $(PO)/utf8_codecvt_facet.cpp $(PO)/value_semantic.cpp $(PO)/variables_map.cpp $(PO)/winmain.cpp
 libcosiprogopt_la_CXXFLAGS = $(AM_CXXFLAGS)
@@ -1015,11 +1039,14 @@ libcosiserialization_la_SOURCES = $(SR)/archive_exception.cpp $(SR)/basic_archiv
  $(SR)/basic_pointer_iserializer.cpp $(SR)/basic_pointer_oserializer.cpp $(SR)/basic_serializer_map.cpp $(SR)/basic_text_iprimitive.cpp $(SR)/basic_text_oprimitive.cpp \
  $(SR)/basic_text_wiprimitive.cpp $(SR)/basic_text_woprimitive.cpp $(SR)/basic_xml_archive.cpp $(SR)/binary_iarchive.cpp $(SR)/binary_oarchive.cpp \
  $(SR)/binary_wiarchive.cpp $(SR)/binary_woarchive.cpp $(SR)/codecvt_null.cpp $(SR)/extended_type_info.cpp $(SR)/extended_type_info_no_rtti.cpp $(SR)/extended_type_info_typeid.cpp \
- $(SR)/polymorphic_iarchive.cpp $(SR)/polymorphic_oarchive.cpp $(SR)/shared_ptr_helper.cpp $(SR)/stl_port.cpp $(SR)/text_iarchive.cpp $(SR)/text_oarchive.cpp $(SR)/text_wiarchive.cpp \
+ $(SR)/polymorphic_iarchive.cpp $(SR)/polymorphic_oarchive.cpp $(SR)/stl_port.cpp $(SR)/text_iarchive.cpp $(SR)/text_oarchive.cpp $(SR)/text_wiarchive.cpp \
  $(SR)/text_woarchive.cpp $(SR)/utf8_codecvt_facet.cpp $(SR)/void_cast.cpp $(SR)/xml_archive_exception.cpp $(SR)/xml_grammar.cpp $(SR)/xml_iarchive.cpp $(SR)/xml_oarchive.cpp \
  $(SR)/xml_wgrammar.cpp $(SR)/xml_wiarchive.cpp $(SR)/xml_woarchive.cpp
 
 libcosiserialization_la_CPPFLAGS = $(AM_CPPFLAGS)
+AT = $(BOOST_DIR)/libs/atomic/src
+libcosiatomic_la_SOURCES = $(AT)/lockpool.cpp
+libcosiatomic_la_CXXFLAGS = $(AM_CXXFLAGS)
 RD = $(srcdir)/cosi_rand
 libcosi_rand_la_SOURCES = $(RD)/expdev.c $(RD)/gamma.c $(RD)/gammln.c $(RD)/mtwist.c $(RD)/multinom.c $(RD)/poisson.c \
 	$(RD)/ranbinom.c $(RD)/rng.c $(RD)/expdev.h $(RD)/gamma.h $(RD)/gammln.h $(RD)/mtwist.h $(RD)/multinom.h \
@@ -1163,7 +1190,7 @@ all: all-am
 .SUFFIXES: .c .cc .cpp .lo .log .o .obj .test .test$(EXEEXT) .trs
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/ext/boost/libs/make.am $(srcdir)/ext/boost/libs/program_options/src/make.am $(srcdir)/ext/boost/libs/regex/src/make.am $(srcdir)/ext/boost/libs/filesystem/src/make.am $(srcdir)/ext/boost/libs/system/src/make.am $(srcdir)/ext/boost/libs/chrono/src/make.am $(srcdir)/ext/boost/libs/timer/src/make.am $(srcdir)/ext/boost/libs/serialization/src/make.am $(srcdir)/cosi_rand/Makefile.am $(srcdir)/cosi/Makefile.am $(srcdir)/recosim/Makefile.am $(srcdir)/tests/tests.am $(srcdir)/tests/cositests.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/ext/boost/libs/make.am $(srcdir)/ext/boost/libs/smart_ptr/src/make.am $(srcdir)/ext/boost/libs/program_options/src/make.am $(srcdir)/ext/boost/libs/regex/src/make.am $(srcdir)/ext/boost/libs/filesystem/src/make.am $(srcdir)/ext/boost/libs/system/src/make.am $(srcdir)/ext/boost/libs/chrono/src/make.am $(srcdir)/ext/boost/libs/timer/src/make.am $(srcdir)/ext/boost/libs/serialization/src/make.am $(srcdir)/ext/boost/libs/atomic/src/make.am $(srcdir)/cosi_rand/Makefile.am $(srcdir)/cosi/Makefile.am $(srcdir)/recosim/Makefile.am $(srcdir)/tests/tests.am $(srcdir)/tests/cositests.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1185,7 +1212,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/ext/boost/libs/make.am $(srcdir)/ext/boost/libs/program_options/src/make.am $(srcdir)/ext/boost/libs/regex/src/make.am $(srcdir)/ext/boost/libs/filesystem/src/make.am $(srcdir)/ext/boost/libs/system/src/make.am $(srcdir)/ext/boost/libs/chrono/src/make.am $(srcdir)/ext/boost/libs/timer/src/make.am $(srcdir)/ext/boost/libs/serialization/src/make.am $(srcdir)/cosi_rand/Makefile.am $(srcdir)/cosi/Makefile.am $(srcdir)/recosim/Makefile.am $(srcdir)/tests/tests.am $(srcdir)/tests/cositests.am $(am__empty):
+$(srcdir)/ext/boost/libs/make.am $(srcdir)/ext/boost/libs/smart_ptr/src/make.am $(srcdir)/ext/boost/libs/program_options/src/make.am $(srcdir)/ext/boost/libs/regex/src/make.am $(srcdir)/ext/boost/libs/filesystem/src/make.am $(srcdir)/ext/boost/libs/system/src/make.am $(srcdir)/ext/boost/libs/chrono/src/make.am $(srcdir)/ext/boost/libs/timer/src/make.am $(srcdir)/ext/boost/libs/serialization/src/make.am $(srcdir)/ext/boost/libs/atomic/src/make.am $(srcdir)/cosi_rand/Makefile.am $(srcdir)/cosi/Makefile.am $(srcdir)/recosim/Makefile.am $(srcdir)/tests/tests.am $(srcdir)/tests/cositests.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -1251,6 +1278,9 @@ libcosi_rand.la: $(libcosi_rand_la_OBJECTS) $(libcosi_rand_la_DEPENDENCIES) $(EX
 libcosi_rand_noinst.la: $(libcosi_rand_noinst_la_OBJECTS) $(libcosi_rand_noinst_la_DEPENDENCIES) $(EXTRA_libcosi_rand_noinst_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK)  $(libcosi_rand_noinst_la_OBJECTS) $(libcosi_rand_noinst_la_LIBADD) $(LIBS)
 
+libcosiatomic.la: $(libcosiatomic_la_OBJECTS) $(libcosiatomic_la_DEPENDENCIES) $(EXTRA_libcosiatomic_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(libcosiatomic_la_LINK) -rpath $(libdir) $(libcosiatomic_la_OBJECTS) $(libcosiatomic_la_LIBADD) $(LIBS)
+
 libcosichrono.la: $(libcosichrono_la_OBJECTS) $(libcosichrono_la_DEPENDENCIES) $(EXTRA_libcosichrono_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(libdir) $(libcosichrono_la_OBJECTS) $(libcosichrono_la_LIBADD) $(LIBS)
 
@@ -1265,6 +1295,9 @@ libcosiregex.la: $(libcosiregex_la_OBJECTS) $(libcosiregex_la_DEPENDENCIES) $(EX
 
 libcosiserialization.la: $(libcosiserialization_la_OBJECTS) $(libcosiserialization_la_DEPENDENCIES) $(EXTRA_libcosiserialization_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(libdir) $(libcosiserialization_la_OBJECTS) $(libcosiserialization_la_LIBADD) $(LIBS)
+
+libcosismart_ptr.la: $(libcosismart_ptr_la_OBJECTS) $(libcosismart_ptr_la_DEPENDENCIES) $(EXTRA_libcosismart_ptr_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(libcosismart_ptr_la_LINK) -rpath $(libdir) $(libcosismart_ptr_la_OBJECTS) $(libcosismart_ptr_la_LIBADD) $(LIBS)
 
 libcosisystem.la: $(libcosisystem_la_OBJECTS) $(libcosisystem_la_DEPENDENCIES) $(EXTRA_libcosisystem_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(libdir) $(libcosisystem_la_OBJECTS) $(libcosisystem_la_LIBADD) $(LIBS)
@@ -1449,6 +1482,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-poisson.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-ranbinom.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-rng.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiatomic_la-lockpool.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosichrono_la-chrono.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosichrono_la-process_cpu_clocks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosichrono_la-thread_clock.Plo@am__quote@
@@ -1513,7 +1547,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-extended_type_info_typeid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-polymorphic_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-polymorphic_oarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-shared_ptr_helper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-stl_port.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-text_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-text_oarchive.Plo@am__quote@
@@ -1528,6 +1561,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-xml_wgrammar.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-xml_wiarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiserialization_la-xml_woarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosismart_ptr_la-sp_collector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosismart_ptr_la-sp_debug_hooks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosisystem_la-error_code.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcositimer_la-auto_timers_construction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcositimer_la-cpu_timer.Plo@am__quote@
@@ -2011,6 +2046,13 @@ libcosi_la-leafset-counts.lo: $(SD)/leafset-counts.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-leafset-counts.lo `test -f '$(SD)/leafset-counts.cc' || echo '$(srcdir)/'`$(SD)/leafset-counts.cc
 
+libcosiatomic_la-lockpool.lo: $(AT)/lockpool.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcosiatomic_la_CXXFLAGS) $(CXXFLAGS) -MT libcosiatomic_la-lockpool.lo -MD -MP -MF $(DEPDIR)/libcosiatomic_la-lockpool.Tpo -c -o libcosiatomic_la-lockpool.lo `test -f '$(AT)/lockpool.cpp' || echo '$(srcdir)/'`$(AT)/lockpool.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiatomic_la-lockpool.Tpo $(DEPDIR)/libcosiatomic_la-lockpool.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(AT)/lockpool.cpp' object='libcosiatomic_la-lockpool.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcosiatomic_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosiatomic_la-lockpool.lo `test -f '$(AT)/lockpool.cpp' || echo '$(srcdir)/'`$(AT)/lockpool.cpp
+
 libcosichrono_la-chrono.lo: $(CR)/chrono.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosichrono_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosichrono_la-chrono.lo -MD -MP -MF $(DEPDIR)/libcosichrono_la-chrono.Tpo -c -o libcosichrono_la-chrono.lo `test -f '$(CR)/chrono.cpp' || echo '$(srcdir)/'`$(CR)/chrono.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosichrono_la-chrono.Tpo $(DEPDIR)/libcosichrono_la-chrono.Plo
@@ -2459,13 +2501,6 @@ libcosiserialization_la-polymorphic_oarchive.lo: $(SR)/polymorphic_oarchive.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiserialization_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiserialization_la-polymorphic_oarchive.lo `test -f '$(SR)/polymorphic_oarchive.cpp' || echo '$(srcdir)/'`$(SR)/polymorphic_oarchive.cpp
 
-libcosiserialization_la-shared_ptr_helper.lo: $(SR)/shared_ptr_helper.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiserialization_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiserialization_la-shared_ptr_helper.lo -MD -MP -MF $(DEPDIR)/libcosiserialization_la-shared_ptr_helper.Tpo -c -o libcosiserialization_la-shared_ptr_helper.lo `test -f '$(SR)/shared_ptr_helper.cpp' || echo '$(srcdir)/'`$(SR)/shared_ptr_helper.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiserialization_la-shared_ptr_helper.Tpo $(DEPDIR)/libcosiserialization_la-shared_ptr_helper.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SR)/shared_ptr_helper.cpp' object='libcosiserialization_la-shared_ptr_helper.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiserialization_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiserialization_la-shared_ptr_helper.lo `test -f '$(SR)/shared_ptr_helper.cpp' || echo '$(srcdir)/'`$(SR)/shared_ptr_helper.cpp
-
 libcosiserialization_la-stl_port.lo: $(SR)/stl_port.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiserialization_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiserialization_la-stl_port.lo -MD -MP -MF $(DEPDIR)/libcosiserialization_la-stl_port.Tpo -c -o libcosiserialization_la-stl_port.lo `test -f '$(SR)/stl_port.cpp' || echo '$(srcdir)/'`$(SR)/stl_port.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiserialization_la-stl_port.Tpo $(DEPDIR)/libcosiserialization_la-stl_port.Plo
@@ -2563,6 +2598,20 @@ libcosiserialization_la-xml_woarchive.lo: $(SR)/xml_woarchive.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SR)/xml_woarchive.cpp' object='libcosiserialization_la-xml_woarchive.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiserialization_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiserialization_la-xml_woarchive.lo `test -f '$(SR)/xml_woarchive.cpp' || echo '$(srcdir)/'`$(SR)/xml_woarchive.cpp
+
+libcosismart_ptr_la-sp_collector.lo: $(SP)/sp_collector.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcosismart_ptr_la_CXXFLAGS) $(CXXFLAGS) -MT libcosismart_ptr_la-sp_collector.lo -MD -MP -MF $(DEPDIR)/libcosismart_ptr_la-sp_collector.Tpo -c -o libcosismart_ptr_la-sp_collector.lo `test -f '$(SP)/sp_collector.cpp' || echo '$(srcdir)/'`$(SP)/sp_collector.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosismart_ptr_la-sp_collector.Tpo $(DEPDIR)/libcosismart_ptr_la-sp_collector.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SP)/sp_collector.cpp' object='libcosismart_ptr_la-sp_collector.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcosismart_ptr_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosismart_ptr_la-sp_collector.lo `test -f '$(SP)/sp_collector.cpp' || echo '$(srcdir)/'`$(SP)/sp_collector.cpp
+
+libcosismart_ptr_la-sp_debug_hooks.lo: $(SP)/sp_debug_hooks.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcosismart_ptr_la_CXXFLAGS) $(CXXFLAGS) -MT libcosismart_ptr_la-sp_debug_hooks.lo -MD -MP -MF $(DEPDIR)/libcosismart_ptr_la-sp_debug_hooks.Tpo -c -o libcosismart_ptr_la-sp_debug_hooks.lo `test -f '$(SP)/sp_debug_hooks.cpp' || echo '$(srcdir)/'`$(SP)/sp_debug_hooks.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosismart_ptr_la-sp_debug_hooks.Tpo $(DEPDIR)/libcosismart_ptr_la-sp_debug_hooks.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SP)/sp_debug_hooks.cpp' object='libcosismart_ptr_la-sp_debug_hooks.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcosismart_ptr_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosismart_ptr_la-sp_debug_hooks.lo `test -f '$(SP)/sp_debug_hooks.cpp' || echo '$(srcdir)/'`$(SP)/sp_debug_hooks.cpp
 
 libcosisystem_la-error_code.lo: $(SY)/error_code.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosisystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosisystem_la-error_code.lo -MD -MP -MF $(DEPDIR)/libcosisystem_la-error_code.Tpo -c -o libcosisystem_la-error_code.lo `test -f '$(SY)/error_code.cpp' || echo '$(srcdir)/'`$(SY)/error_code.cpp
