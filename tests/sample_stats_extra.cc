@@ -49,7 +49,8 @@
 #include <locale>
 #include <limits>
 #include <boost/numeric/conversion/bounds.hpp>
-#include <boost/assign.hpp>
+#include <boost/assign/list_inserter.hpp>
+#include <boost/assign/std/map.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>

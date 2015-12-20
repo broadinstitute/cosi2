@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <string>
 #include <cassert>
-#include <boost/typeof/std/utility.hpp>
 #include <boost/typeof/std/vector.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/accumulators/framework/accumulator_set.hpp>
@@ -25,10 +24,10 @@
 #include <boost/accumulators/statistics/covariance.hpp>
 #include <boost/accumulators/statistics/variates/covariate.hpp>
 #include <boost/accumulators/statistics/extended_p_square_quantile.hpp>
+#include <boost/core/demangle.hpp>
 #include <cosi/typedval.h>
 #include <cosi/generalmath.h>
 #include <cosi/coalrate.h>
-#include <boost/units/detail/utility.hpp>
 
 namespace cosi {
 
@@ -305,7 +304,7 @@ int main( int /*argc*/, char ** /*argv */ ) {
 	BOOST_AUTO( h, exp_( c_2 * c_x ) );
 	PRINT( h );
 
-	using boost::units::detail::demangle;
+	using boost::core::demangle;
 	
 	PRINT( demangle( typeid( h ).name() ) );
 	//PRINT( indefiniteIntegral(g) );
