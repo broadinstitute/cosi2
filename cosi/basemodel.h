@@ -37,10 +37,6 @@ struct BaseModel {
 			std::map< popid, math::Function< genid, prob_per_chrom_per_gen_t,
 																			 math::Piecewise< math::Const<> > > > migrRateTo;
 
-			bool isSelPop;
-
-			PopInfo(): isSelPop( false ) { }
-
 			template <typename TSpec>
 			void setSizeFrom( genid fromGen, math::Function< genid, popsize_float_t, TSpec> const& f ) {
 				using namespace math;
@@ -66,23 +62,15 @@ struct BaseModel {
 			}
 			
 	 };  // struct PopInfo
+
+	 // Field: pops - the population ids; their order here determines order in the output.
+	 std::vector< popid > pops;
 	 
 	 // Field: popInfos - map from pop name to <PopInfo> for  that pop.
 	 std::map< popid, PopInfo > popInfos;
-	 std::map< popid, popid > pop2sib;
 
-	 struct SweepInfo {
-			genid selGen;
-			double selCoeff;
-			loc_t selPos;
-			popid selPop;
-			util::ValRange<freq_t> final_sel_freq;
-
-			SweepInfo(): selGen( NULL_GEN ), selCoeff( 0.0 ), selPos( 0.0 ),
-									 selPop( NULL_POPID ) { }
-	 };
-
-	 SweepInfo sweepInfo;
+	 // Field: sweepInfo - information about selected sweep.
+	 SweepInfoP sweepInfo;
 	 
 };  // struct BaseModel
 

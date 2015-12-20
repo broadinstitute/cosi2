@@ -414,10 +414,6 @@ private:
 // A selective sweep .
 class Event_MSweep: public HistEvents::Event {
 public:
-	 Event_MSweep( HistEvents *histEvents_, const string& label_, genid gen_, popid sweepPop_, gensInv_t selCoeff_,
-								 loc_t selPos_,
-								 util::ValRange<freq_t> final_sel_freq_ ):
-		 Event( histEvents_, label_, gen_ ), sweepPop( sweepPop_ ), selCoeff( selCoeff_ ), selPos( selPos_ ), final_sel_freq( final_sel_freq_ ) { }
 	 Event_MSweep( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
 		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq;
 		 if ( !( final_sel_freq.getMin() && final_sel_freq.getMax() &&
@@ -434,13 +430,8 @@ public:
 	 virtual eventKind_t getEventKind() const { return E_SWEEP; }
 
 	 virtual void addToBaseModel( BaseModel& m ) const {
-		 m.sweepInfo.selGen = gen;
-		 m.sweepInfo.selCoeff = ToDouble( selCoeff );
-		 m.sweepInfo.selPos = selPos;
-		 m.sweepInfo.selPop = sweepPop;
-		 m.sweepInfo.final_sel_freq = final_sel_freq;
+		 setSweepInfo( m, gen, selCoeff, selPos, sweepPop, final_sel_freq  );
 	 }
-	 
 				
 	 virtual ~Event_MSweep();
 
@@ -453,7 +444,7 @@ private:
 
 	 // Field: selCoeff
 	 // The selection coefficient.
-	 gensInv_t selCoeff;
+	 double selCoeff;
 
 	 // Field: selPos
 	 // The location of the causal mutation.

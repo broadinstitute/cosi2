@@ -1,6 +1,7 @@
 
 //#define COSI_DEV_PRINT
 
+#include <set>
 #include <map>
 #include <utility>
 #include <iostream>
@@ -29,6 +30,27 @@
 
 namespace cosi {
 
+struct SweepInfo {
+	 genid selGen;
+	 double selCoeff;
+	 loc_t selPos;
+	 popid selPop;
+	 util::ValRange<freq_t> final_sel_freq;
+
+	 SweepInfo(): selGen( NULL_GEN ), selCoeff( 0.0 ), selPos( 0.0 ),
+								selPop( NULL_POPID ) { }
+	 SweepInfo( genid selGen_, double selCoeff_, loc_t selPos_, popid selPop_,
+							util::ValRange<freq_t> final_sel_freq_ ):
+		 selGen( selGen_ ), selCoeff( selCoeff_ ), selPos( selPos_ ), selPop( selPop_ ),
+		 final_sel_freq( final_sel_freq_ ) { }
+};
+
+void setSweepInfo( BaseModel& baseModel,
+									 genid selGen, double selCoeff, loc_t selPos, popid selPop,
+									 util::ValRange<freq_t> final_sel_freq ) {
+	baseModel.sweepInfo = boost::make_shared<SweepInfo>( selGen, selCoeff, selPos, selPop, final_sel_freq );
+}
+
 // * class MSweep - implementation of selective sweep in multiple populations
 //
 // Note: some code here is adapted from simuPOP simulator by Bo Peng et al ; see
@@ -47,211 +69,213 @@ public:
 	 BaseModelP baseModel;
 	 BaseModelP sweepModel;
 
-	 leafset_p selLeaves;
-	 loc_t selLoc;
-	 genid selGen;
-	 popid selPop;
+	 RandGenP randGen;
 	 
-	 MSweep( DemographyP demography_, BaseModelP baseModel_, RandGenP randGen ):
-		 demography( demography_ ), baseModel( baseModel_ ) {
+	 leafset_p selLeaves;
+
+	 std::map< popid, popid > pop2sib;
+	 std::set< popid > selPops;
+
+	 COSI_DECL(SweepHook);
+	 SweepHookP sweepHook;
+
+	 MSweep( DemographyP demography_, BaseModelP baseModel_, RandGenP randGen_ ):
+		 demography( demography_ ), baseModel( baseModel_ ), randGen( randGen_ ) {
 
 		 selLeaves = make_empty_leafset();
-		 
-		 if ( getenv( "COSI_NEWSIM" ) ) {
-			 BaseModel::SweepInfo const& sweepInfo = baseModel->sweepInfo;
 		
-			 if ( sweepInfo.selCoeff != 0 ) {
-				 cosi_using2( std::map, boost::assign::insert );
+		 if ( baseModel->sweepInfo ) {
+			 cosi_using2( std::map, boost::assign::insert );
 
-				 map<popid, map<genotype_t,double> > fits;
-				 map<popid, freq_t> begFreqs;
-				 map<popid, util::ValRange<freq_t> > endFreqs;
+			 SweepInfo const& sweepInfo = *baseModel->sweepInfo;
+			 
+			 map<popid, map<genotype_t,double> > fits;
+			 map<popid, freq_t> begFreqs;
+			 map<popid, util::ValRange<freq_t> > endFreqs;
 
-				 cosi_for_map( pop, popInfo, baseModel->popInfos ) {
-					 double s;
-					 if ( pop != sweepInfo.selPop ) {
-						 begFreqs[ pop ] = 0.;
-						 endFreqs[ pop ] = util::make_val_range( 0., 1. );
-						 s = 0;
-					 } else {
-						 begFreqs[ pop ] = 2. / ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) );
-						 endFreqs[ pop ] = sweepInfo.final_sel_freq;
-						 s = sweepInfo.selCoeff;
-					 }
-					 insert( fits[ pop ] )( GT_AA, 1.)( GT_Aa, 1. + 0.5*s )( GT_aa, 1. + s );
-				 } cosi_end_for;
+			 cosi_for_map( pop, popInfo, baseModel->popInfos ) {
+				 double s;
+				 if ( pop != sweepInfo.selPop ) {
+					 begFreqs[ pop ] = 0.;
+					 endFreqs[ pop ] = util::make_val_range( 0., 1. );
+					 s = 0;
+				 } else {
+					 begFreqs[ pop ] = 2. / ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) );
+					 endFreqs[ pop ] = sweepInfo.final_sel_freq;
+					 s = sweepInfo.selCoeff;
+				 }
+				 insert( fits[ pop ] )( GT_AA, 1.)( GT_Aa, 1. + 0.5*s )( GT_aa, 1. + s );
+			 } cosi_end_for;
 
-				 this->mtraj = this->simulateTrajFwd( baseModel, fits, sweepInfo.selGen,
-																							begFreqs, endFreqs,
-																							*randGen );
+			 this->mtraj = this->simulateTrajFwd( baseModel, fits, sweepInfo.selGen,
+																						begFreqs, endFreqs,
+																						*randGen );
 
-				 // if ( this->trajOnly ) {
-				 // 	 cosi_for_map( pop, traj, mtraj ) {
+			 using util::operator<<;
+			 std::cerr << "got  traj: " << this->mtraj << "\n";
+
+			 // if ( this->trajOnly ) {
+			 // 	 cosi_for_map( pop, traj, mtraj ) {
 					
-				 // 	 } cosi_end_for;
-				 // }
+			 // 	 } cosi_end_for;
+			 // }
 			
-				 this->sweepModel = this->makeSweepModel( this->baseModel, this->mtraj,
-																									sweepInfo.selPos );
-			 }  // if selCoeff nonzero
-			 else
-					this->sweepModel = baseModel;
-		 } // if (  getenv( "COSI_NEWSIM" ) )
-		 
+			 this->sweepModel = this->makeSweepModel( this->baseModel, this->mtraj,
+																								sweepInfo.selPos, this->pop2sib );
+		 }  // if selCoeff nonzero
+		 else {
+				this->sweepModel = baseModel;
+				std::cerr << "GOT NO SWEEP\n";
+		 }
 	 }  // MSweep()
 
 	 class SweepHook: public Hook {
-			DemographyP demography;
-			BaseModelP sweepModel;
-			RandGenP randGen;
+
+			MSweep *msweep;
 			loc_t selPos;
 
-	 public:
-
-			SweepHook( DemographyP demography_, BaseModelP sweepModel_, RandGenP randGen_, loc_t selPos_ ):
-				demography( demography_ ), sweepModel( sweepModel_ ), randGen( randGen_ ), selPos( selPos_ )  { }
+	 public:			
+			SweepHook( MSweep *msweep_, loc_t selPos_ ): msweep( msweep_ ), selPos( selPos_ ) { }
 			
 			virtual void handle_recomb( Node *node1, Node *node2, loc_t loc, genid curGen ) {
-				determineAlleleAtSelPos_( selPos < loc ? node2 : node1, curGen );
+				msweep->determineAlleleAtSelPos( selPos < loc ? node2 : node1, curGen );
 			}
 			virtual void handle_gc( Node *node1, Node *node2, loc_t loc1, loc_t loc2,
 															genid curGen ) {
-				determineAlleleAtSelPos_( loc1 <= selPos && selPos <= loc2 ? node2 : node1,
-																	curGen );
+				msweep->determineAlleleAtSelPos( loc1 <= selPos && selPos <= loc2 ? node2 : node1,
+																				 curGen );
 			}
-
-	 private:
-
-			void determineAlleleAtSelPos_( Node *node, genid gen ) {
-				using util::at;
-				if ( node ) {
-					popid pop_this = node->getPop()->pop_get_name();
-					BaseModel::PopInfo const& popInfo_this = at( sweepModel->popInfos, pop_this );
-					popid pop_othr = at( sweepModel->pop2sib, pop_this );
-					BaseModel::PopInfo const& popInfo_othr = at( sweepModel->popInfos, pop_othr );
-					nchroms_float_t popsize_this = popInfo_this.popSizeFn( gen );
-					nchroms_float_t popsize_othr = popInfo_othr.popSizeFn( gen );
-
-					nchroms_float_t popsize_sel, popsize_uns;
-					Pop *curPop = demography->dg_get_pop_by_name( pop_this );
-					Pop *selPop, *unsPop;
-					if ( popInfo_this.isSelPop ) {
-						popsize_sel = popsize_this;
-						popsize_uns = popsize_othr;
-						selPop = demography->dg_get_pop_by_name( pop_this );
-						unsPop = demography->dg_get_pop_by_name( pop_othr );
-					} else {
-						popsize_sel = popsize_this;
-						popsize_uns = popsize_othr;
-						selPop = demography->dg_get_pop_by_name( pop_othr );
-						unsPop = demography->dg_get_pop_by_name( pop_this );
-					}
-			 
-					freq_t testFreq = popsize_sel  / ( popsize_sel + popsize_uns );
-					prob_t pval = randGen->random_double();
-					Pop * shouldBeInPop = ( pval < testFreq ) ? selPop : unsPop;
-					if ( shouldBeInPop != curPop ) {
-						curPop->pop_remove_node( node );
-						shouldBeInPop->pop_add_node( node );
-					}
-				}  // if ( node ) 
-			} // void determineAlleleAtSelPos_( Node *node, genid gen )
+			
 	 };  // class SweepHook
+
+	 void determineAlleleAtSelPos( Node *node, genid gen ) {
+		 cosi_using2( util::at, util::STLContains );
+		 
+		 if ( node ) {
+			 popid pop_this = node->getPop()->pop_get_name();
+			 BaseModel::PopInfo const& popInfo_this = at( sweepModel->popInfos, pop_this );
+			 popid pop_othr = at( pop2sib, pop_this );
+			 BaseModel::PopInfo const& popInfo_othr = at( sweepModel->popInfos, pop_othr );
+			 nchroms_float_t popsize_this = popInfo_this.popSizeFn( gen );
+			 nchroms_float_t popsize_othr = popInfo_othr.popSizeFn( gen );
+
+			 nchroms_float_t popsize_sel, popsize_uns;
+			 Pop *curPop = demography->dg_get_pop_by_name( pop_this );
+			 Pop *selPop, *unsPop;
+			 if ( STLContains( selPops, pop_this ) ) {
+				 popsize_sel = popsize_this;
+				 popsize_uns = popsize_othr;
+				 selPop = demography->dg_get_pop_by_name( pop_this );
+				 unsPop = demography->dg_get_pop_by_name( pop_othr );
+			 } else {
+				 popsize_sel = popsize_this;
+				 popsize_uns = popsize_othr;
+				 selPop = demography->dg_get_pop_by_name( pop_othr );
+				 unsPop = demography->dg_get_pop_by_name( pop_this );
+			 }
+			 
+			 freq_t testFreq = popsize_sel  / ( popsize_sel + popsize_uns );
+			 prob_t pval = randGen->random_double();
+			 Pop * shouldBeInPop = ( pval < testFreq ) ? selPop : unsPop;
+			 if ( shouldBeInPop != curPop ) {
+				 curPop->pop_remove_node( node );
+				 shouldBeInPop->pop_add_node( node );
+			 }
+		 }  // if ( node ) 
+	 } // void determineAlleleAtSelPos_( Node *node, genid gen )
 
 	 
 	 
 // ** Method: makeSweepModel - given an original BaseModel, construct a BaseModel for simulating sweeps.
 // 	  For each original pop, the sweep model has two pops: one for chroms carrying the selected allele,
 //    and one for those carrying the unselected allele.  
-BaseModelP makeSweepModel( boost::shared_ptr<const BaseModel> baseModel,
-													 mpop_traj_t const& pop2freqSelFn, loc_t selPos ) {
-	BaseModelP sweepModel = boost::make_shared<BaseModel>();
-	sweepModel->sweepInfo = baseModel->sweepInfo;
-
-	int nextPopId = ToInt( baseModel->popInfos.rbegin()->first ) + 1;
+	 BaseModelP makeSweepModel( boost::shared_ptr<const BaseModel> baseModel,
+															mpop_traj_t const& pop2freqSelFn, loc_t selPos,
+															std::map< popid, popid >& pop2sib
+															
+		 ) {
+		 BaseModelP sweepModel = boost::make_shared<BaseModel>();
 		 
-	using namespace math;
+		 int nextPopId = ToInt( baseModel->popInfos.rbegin()->first ) + 1;
+		 
+		 using namespace math;
 //		 using boost::units::simplify_typename;
 		 
-	for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
-			 pi != baseModel->popInfos.end(); ++pi ) {
-		popid selPop( nextPopId++ );
-		popid unsPop( pi->first );
-		sweepModel->pop2sib[ selPop ] = unsPop;
-		sweepModel->pop2sib[ unsPop ] = selPop;
+		 for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
+					pi != baseModel->popInfos.end(); ++pi ) {
+			 popid selPop( nextPopId++ );
+			 popid unsPop( pi->first );
+			 pop2sib[ selPop ] = unsPop;
+			 pop2sib[ unsPop ] = selPop;
 
-		demography->dg_create_pop( selPop, demography->dg_get_pop_by_name( unsPop )->get_label() +
-															 std::string( "_sel" ), genid(0.) );
-		nchroms_t sampSz = demography->find_pop_request( unsPop )->members;
-		using boost::algorithm::clamp;
-		nchroms_t selSampleSize( clamp( int( util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) *
-																				 ToDouble( sampSz ) ), 0, sampSz ) );
+			 demography->dg_create_pop( selPop, demography->dg_get_pop_by_name( unsPop )->get_label() +
+																	std::string( "_sel" ), genid(0.) );
+			 nchroms_t sampSz = demography->find_pop_request( unsPop )->members;
+			 using boost::algorithm::clamp;
+			 nchroms_t selSampleSize( clamp( int( util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) *
+																						ToDouble( sampSz ) ), 0, sampSz ) );
 			 
-		demography->dg_populate_by_name( selPop,
-																		 selSampleSize );
-		nchroms_t unsSampleSize( sampSz - selSampleSize );
-		demography->find_pop_request( unsPop )->members = unsSampleSize;
-		//std::cerr << "selSampleSize=" << selSampleSize << " unsSampleSize=" << unsSampleSize << "\n";
-	}
-	boost::shared_ptr<Hook> hookPtr = boost::make_shared<SweepHook>( demography, sweepModel, demography->getRandGen(),
-																																	 selPos );
-	demography->addHook( hookPtr );
+			 demography->dg_populate_by_name( selPop,
+																				selSampleSize );
+			 nchroms_t unsSampleSize( sampSz - selSampleSize );
+			 demography->find_pop_request( unsPop )->members = unsSampleSize;
+			 //std::cerr << "selSampleSize=" << selSampleSize << " unsSampleSize=" << unsSampleSize << "\n";
+		 }
+		 sweepHook = boost::make_shared<SweepHook>( this, selPos );
+		 demography->addHook( sweepHook );
 		 
-	for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
-			 pi != baseModel->popInfos.end(); ++pi ) {
-		//Pop *srcPop = demography->dg_get_pop_by_name( pi->first );
-		BOOST_AUTO( const& popInfo, pi->second );
+		 for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
+					pi != baseModel->popInfos.end(); ++pi ) {
+			 //Pop *srcPop = demography->dg_get_pop_by_name( pi->first );
+			 BOOST_AUTO( const& popInfo, pi->second );
 
-		popid unsPop( pi->first );
-		popid selPop( sweepModel->pop2sib[ unsPop ] );
+			 popid unsPop( pi->first );
+			 popid selPop( pop2sib[ unsPop ] );
 
-		BOOST_AUTO( & popInfoSel, sweepModel->popInfos[ selPop ] );
-		BOOST_AUTO( & popInfoUns, sweepModel->popInfos[ unsPop ] );
+			 BOOST_AUTO( & popInfoSel, sweepModel->popInfos[ selPop ] );
+			 BOOST_AUTO( & popInfoUns, sweepModel->popInfos[ unsPop ] );
 
-		sweepModel->pop2sib.insert( std::make_pair( selPop, unsPop ) );
-		sweepModel->pop2sib.insert( std::make_pair( unsPop, selPop ) );
+			 pop2sib.insert( std::make_pair( selPop, unsPop ) );
+			 pop2sib.insert( std::make_pair( unsPop, selPop ) );
 
-		popInfoSel.isSelPop = true;
-		popInfoUns.isSelPop = false;
+			 selPops.insert( selPop );
 
-		BOOST_AUTO( const& freqSelFn, util::at( pop2freqSelFn, unsPop ) );
-		for( BOOST_AUTO( it, freqSelFn.getPieces().rbegin() ); it != freqSelFn.getPieces().rend(); ++it )  {
-			genid gen = it->first;
-			freq_t freqSel = it->second( gen );
-			freq_t freqUns = freq_t(1.0) - freqSel;
-			popsize_float_t sz = popInfo.popSizeFn( gen );
-			popsize_float_t szSel = freqSel * sz;
-			popsize_float_t szUns = freqUns * sz;
-			popInfoSel.setSizeFrom( gen, szSel );
-			popInfoUns.setSizeFrom( gen, szUns );
-		}
+			 BOOST_AUTO( const& freqSelFn, util::at( pop2freqSelFn, unsPop ) );
+			 for( BOOST_AUTO( it, freqSelFn.getPieces().rbegin() ); it != freqSelFn.getPieces().rend(); ++it )  {
+				 genid gen = it->first;
+				 freq_t freqSel = it->second( gen );
+				 freq_t freqUns = freq_t(1.0) - freqSel;
+				 popsize_float_t sz = popInfo.popSizeFn( gen );
+				 popsize_float_t szSel = freqSel * sz;
+				 popsize_float_t szUns = freqUns * sz;
+				 popInfoSel.setSizeFrom( gen, szSel );
+				 popInfoUns.setSizeFrom( gen, szUns );
+			 }
 
-		genid selBegGen = freqSelFn.getPieces().begin()->first;
+			 genid selBegGen = freqSelFn.getPieces().begin()->first;
 
-		{
-			BOOST_AUTO( lb, popInfo.popSizeFn.getPieces().lower_bound( selBegGen ) );
-			popInfoUns.popSizeFn.getPieces().insert( popInfo.popSizeFn.getPieces().begin(), lb );
-			popInfoUns.popSizeFn.getPieces().insert( std::make_pair( selBegGen, lb->second ) );
-		}
+			 {
+				 BOOST_AUTO( lb, popInfo.popSizeFn.getPieces().lower_bound( selBegGen ) );
+				 popInfoUns.popSizeFn.getPieces().insert( popInfo.popSizeFn.getPieces().begin(), lb );
+				 popInfoUns.popSizeFn.getPieces().insert( std::make_pair( selBegGen, lb->second ) );
+			 }
 
-		{
-			BOOST_AUTO( lb, popInfo.coalRateFn.getPieces().lower_bound( selBegGen ) );
-			popInfoUns.coalRateFn.getPieces().insert( popInfo.coalRateFn.getPieces().begin(), lb );
-			popInfoUns.coalRateFn.getPieces().insert( std::make_pair( selBegGen, lb->second ) );
-		}
+			 {
+				 BOOST_AUTO( lb, popInfo.coalRateFn.getPieces().lower_bound( selBegGen ) );
+				 popInfoUns.coalRateFn.getPieces().insert( popInfo.coalRateFn.getPieces().begin(), lb );
+				 popInfoUns.coalRateFn.getPieces().insert( std::make_pair( selBegGen, lb->second ) );
+			 }
 
-		popInfoUns.migrRateTo = popInfo.migrRateTo;
-		for( BOOST_AUTO( migr_it, popInfo.migrRateTo.begin() ); migr_it != popInfo.migrRateTo.end(); ++migr_it )
-			 popInfoSel.migrRateTo[ sweepModel->pop2sib[ migr_it->first ] ] = migr_it->second;
+			 popInfoUns.migrRateTo = popInfo.migrRateTo;
+			 for( BOOST_AUTO( migr_it, popInfo.migrRateTo.begin() ); migr_it != popInfo.migrRateTo.end(); ++migr_it )
+					popInfoSel.migrRateTo[ pop2sib[ migr_it->first ] ] = migr_it->second;
 
-		set( popInfoSel.migrRateTo[ unsPop ], selBegGen, prob_per_chrom_per_gen_t( .99999 ) );
-	}
+			 set( popInfoSel.migrRateTo[ unsPop ], selBegGen, prob_per_chrom_per_gen_t( .99999 ) );
+		 }
 
-	return sweepModel;
-} // makeSweepModel
+		 return sweepModel;
+	 } // makeSweepModel
 
-
-	 // adapted from simuPOP
 
 	 typedef double fitness_t;
 
@@ -267,7 +291,8 @@ BaseModelP makeSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 //
 //  Returns:
 //   for each pop, the trajectory of the selected allele in that pop.
-//	 
+//
+//  Note: code adapted from simuPOP by Bo Peng et al
 	 template <typename URNG>
 	 mpop_traj_t
 	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel, std::map<popid, std::map<genotype_t,double> > fits,
@@ -293,7 +318,6 @@ BaseModelP makeSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 		 
 		 //std::cerr << "s=(" << s[0] << "," << s[1] << "," << s[2] << "\n";
 		 
-		 
 		 bool found = false;
 		 while( !found && maxAttempts-- >= 1 ) {
 			 
@@ -305,6 +329,13 @@ BaseModelP makeSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 				 bool haveNonZero = false;
 				 BOOST_FOREACH( popid pop, pops ) {
 					 //PRINT3( gen, pop, freqs[pop] );
+
+					 if( (boost::math::isnan)( freqs[ pop ] ) || freqs[ pop ] < 0 )
+							BOOST_THROW_EXCEPTION( cosi::cosi_error() << error_msg( "nan freq in pop" +
+																																			boost::lexical_cast<std::string>( pop )
+																																			+ " at gen "
+																																			+ boost::lexical_cast<std::string>( gen ) ) );
+					 
 					 set( pop2freqSelFn[ pop ], gen, freqs[ pop ] );
 					 freqs[ pop ] = getNextXt( freqs[ pop ], at( baseModel->popInfos, pop ).popSizeFn( gen ), at( pop2s, pop ), urng );
 					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
@@ -407,16 +438,17 @@ BaseModelP getSweepModel( MSweepP msweep ) { return msweep->sweepModel; }
 
 boost::shared_ptr< std::vector< leaf_id_t > >
 computeLeafOrder( MSweepP msweep ) {
+	using util::STLContains;
 	boost::shared_ptr< std::vector< leaf_id_t > > leafOrder = boost::make_shared< std::vector< leaf_id_t > >();
 	BaseModelP sweepModel = msweep->sweepModel;
 	DemographyP demography = msweep->demography;
-	if ( sweepModel->sweepInfo.selCoeff != 0 ) {
+	if ( msweep->baseModel->sweepInfo ) {
 		vector< leafset_p > const& pop2leaves = demography->get_pop2leaves();
 		cosi_for_map( pop, popInfo, sweepModel->popInfos ) {
-			if ( popInfo.isSelPop ) {
+			if ( STLContains( msweep->selPops, pop ) ) {
 				leafset_p leaves_sel = pop2leaves[ demography->dg_get_pop_index_by_name( pop ) ];
 				leafset_p leaves_uns =
-					 pop2leaves[ demography->dg_get_pop_index_by_name( util::at( sweepModel->pop2sib, pop ) ) ];
+					 pop2leaves[ demography->dg_get_pop_index_by_name( util::at( msweep->pop2sib, pop ) ) ];
 				msweep->selLeaves = leafset_union( msweep->selLeaves, leaves_sel );
 			
 				COSI_FOR_LEAFSET( leaves_uns, leaf, {
@@ -425,17 +457,19 @@ computeLeafOrder( MSweepP msweep ) {
 				COSI_FOR_LEAFSET( leaves_sel, leaf, {
 						leafOrder->push_back( leaf );
 					});
-			}  // if ( popInfo.isSelPop )
+			}  // if ( STLContains( msweep->selPops, pop ) )
 		} cosi_end_for;  // cosi_for_map( popInfo, sweepModel->popInfos )
 	}
 	return leafOrder;
 }  // computeLeafOrder()
 
 void addSelMut( MSweepP msweep, MutlistP muts ) {
-	if ( !leafset_is_empty( msweep->selLeaves ) ) {
-		BaseModel::SweepInfo const& si = msweep->baseModel->sweepInfo;
+	std::cerr << "addSelMut: adding\n";
+	if ( msweep->baseModel->sweepInfo && !leafset_is_empty( msweep->selLeaves ) ) {
+		SweepInfo const& si = *msweep->baseModel->sweepInfo;
 		muts->addMut( si.selPos, msweep->selLeaves, si.selGen, si.selPop );
-	}
+	} else 
+		 std::cerr << "addSelMut: NOT adding\n";
 }
 
 
