@@ -215,6 +215,14 @@ char * cosi_strtok_r(char *s, const char *delim, char **last);
 template <typename T> inline void updateMin( T& curMin, T newVal ) { if ( newVal < curMin ) curMin = newVal; }
 template <typename T> inline void updateMax( T& curMax, T newVal ) { if ( newVal > curMax ) curMax = newVal; }
 
+#define cosi_chk( cond, msg ) do {																			\
+	  if ( !(cond) ) {																										\
+	    BOOST_THROW_EXCEPTION( cosi::cosi_error() << cosi::error_msg( msg ) ); \
+	  }																																		\
+	} while(0)
+
+#define chk_freq( freq ) cosi_chk( !(boost::math::isnan)(freq) && (0. <= freq) && ( freq <= 1.), "invalid freq" )
+
 #define cosi_fwrite(ptr, size, nmemb, stream) cosi_fwrite_helper(ptr, size, nmemb, stream, #ptr, __FILE__, __LINE__ )
 #define cosi_fread(ptr, size, nmemb, stream) cosi_fread_helper(ptr, size, nmemb, stream, #ptr, __FILE__, __LINE__ )
 void cosi_fwrite_helper(const void *ptr, size_t size, size_t nmemb, FILE *stream, const char *expr, const char *fname, int line);

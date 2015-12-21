@@ -1,4 +1,6 @@
 
+// * File: msweep.cc - implementation of selective sweeps
+
 //#define COSI_DEV_PRINT
 
 #include <set>
@@ -30,10 +32,16 @@
 
 namespace cosi {
 
+// ** struct: SweepInfo - definition of a selected sweep
 struct SweepInfo {
+	 
+// *** Field: selGen - the generation at which the selected allele is born
 	 genid selGen;
+// *** Field: selCoeff - the selection coefficient.
 	 double selCoeff;
+// *** Field: the location of the selected allele in the simulated region (should permit location outside?)
 	 loc_t selPos;
+// *** Field: selPop - the population in which the selected allele is born.
 	 popid selPop;
 	 util::ValRange<freq_t> final_sel_freq;
 
@@ -43,7 +51,7 @@ struct SweepInfo {
 							util::ValRange<freq_t> final_sel_freq_ ):
 		 selGen( selGen_ ), selCoeff( selCoeff_ ), selPos( selPos_ ), selPop( selPop_ ),
 		 final_sel_freq( final_sel_freq_ ) { }
-};
+};  // struct SweepInfo
 
 void setSweepInfo( BaseModel& baseModel,
 									 genid selGen, double selCoeff, loc_t selPos, popid selPop,
@@ -51,20 +59,22 @@ void setSweepInfo( BaseModel& baseModel,
 	baseModel.sweepInfo = boost::make_shared<SweepInfo>( selGen, selCoeff, selPos, selPop, final_sel_freq );
 }
 
-// * class MSweep - implementation of selective sweep in multiple populations
+// ** class MSweep - implementation of selective sweep in multiple populations
 //
 // Note: some code here is adapted from simuPOP simulator by Bo Peng et al ; see
 // http://simupop.sourceforge.net/manual_svn/build/userGuide_ch7_sec2.html	 
 class MSweep {
 public:
 
-// ** Type: pop_traj_t - frequency trajectory of an allele in one pop	 
+// *** Type: pop_traj_t - frequency trajectory of an allele in one pop	 
 	 typedef math::Function< genid, freq_t, math::Piecewise< math::Const<> > > pop_traj_t;
 
-// ** Type: mpop_traj_t - frequency trajectory of an allele in multiple pops
+// *** Type: mpop_traj_t - frequency trajectory of an allele in multiple pops
 	 typedef std::map< popid, pop_traj_t > mpop_traj_t;
 
 	 DemographyP demography;
+
+// *** Field: mtraj - the frequency trajectory of the selected allele in each pop
 	 mpop_traj_t mtraj;
 	 BaseModelP baseModel;
 	 BaseModelP sweepModel;
@@ -186,7 +196,7 @@ public:
 
 	 
 	 
-// ** Method: makeSweepModel - given an original BaseModel, construct a BaseModel for simulating sweeps.
+// *** Method: makeSweepModel - given an original BaseModel, construct a BaseModel for simulating sweeps.
 // 	  For each original pop, the sweep model has two pops: one for chroms carrying the selected allele,
 //    and one for those carrying the unselected allele.  
 	 BaseModelP makeSweepModel( boost::shared_ptr<const BaseModel> baseModel,
@@ -279,7 +289,7 @@ public:
 
 	 typedef double fitness_t;
 
-// ** Func: simulateTrajFwd - simulate the trajectory of a selected allele in a set of populations.
+// *** Func: simulateTrajFwd - simulate the trajectory of a selected allele in a set of populations.
 //
 // Params:
 //   baseModel - the BaseModel on which we're simulating	 
@@ -292,7 +302,7 @@ public:
 //  Returns:
 //   for each pop, the trajectory of the selected allele in that pop.
 //
-//  Note: code adapted from simuPOP by Bo Peng et al
+//  Note: some code adapted from simuPOP by Bo Peng et al
 	 template <typename URNG>
 	 mpop_traj_t
 	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel, std::map<popid, std::map<genotype_t,double> > fits,
@@ -322,24 +332,20 @@ public:
 		 while( !found && maxAttempts-- >= 1 ) {
 			 
 			 BOOST_AUTO( freqs, begFreqs );
-			 namespace rng = boost::range;
-			 std::cerr.precision(8);
 			 for( genid gen = begGen; gen > genid(0); gen -= gens_t(1) ) {
-				 // record the current freqs
 				 bool haveNonZero = false;
 				 BOOST_FOREACH( popid pop, pops ) {
 					 //PRINT3( gen, pop, freqs[pop] );
-
-					 if( (boost::math::isnan)( freqs[ pop ] ) || freqs[ pop ] < 0 )
-							BOOST_THROW_EXCEPTION( cosi::cosi_error() << error_msg( "nan freq in pop" +
-																																			boost::lexical_cast<std::string>( pop )
-																																			+ " at gen "
-																																			+ boost::lexical_cast<std::string>( gen ) ) );
+					 chk_freq( freqs[pop] );
 					 
+					 // Record the current freq of sel allele in this pop
 					 set( pop2freqSelFn[ pop ], gen, freqs[ pop ] );
-					 freqs[ pop ] = getNextXt( freqs[ pop ], at( baseModel->popInfos, pop ).popSizeFn( gen ), at( pop2s, pop ), urng );
+					 
+					 // Find the sel freq in pop at time gen-1
+					 freqs[ pop ] = getNextXt( freqs[ pop ], at( baseModel->popInfos, pop ).popSizeFn( gen ), at( pop2s, pop ),
+																		 urng );
 					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
-				 }
+				 }  // for each pop
 				 if ( !haveNonZero ) break;
 				 
 				 // migrations; note that the direction is reversed for the fwd vs the bwd sim.
@@ -398,23 +404,25 @@ public:
 	 }  // simulateTrajFwd
 	 
 private:
-// ** Private methods
+// *** Private methods
 	 
-// *** PrivMethod: getNextXt - given the current freq of selected allele in a pop, compute next-generation freq.
+// **** Fn: getNextXt - given the freq of selected allele in a pop at gen g, determine the freq at gen g-1.
 // Params:
-//    x - current freq on causal allele 
-//    Nt - current pop size (number of diploids).
+//    x - freq of causal allele at time g
+//    Nt - pop size (number of diploids) at time g
 //    s - the relative fitness of AA, Aa, aa (where A is the selected allele).
+//    urng - a uniform random number generator	 
 // Returns:
-//    frequency of selected allele in the next generation.
+//    frequency of selected allele at ge-1
+// Note: code adopted from Bo Peng's simuPOP simulator	 
 	 template <typename URNG>
 	 static freq_t getNextXt( freq_t x, popsize_float_t Nt, std::map<genotype_t,double> const& s, URNG& urng ) {
 		 using util::at;
-     // if current allele freq in subpop sp at locus loc has already been 0 or 1,
-     // set it to be 0 or 1 for next gens
+     // if the selected allele has already been either lost or fixed in the population, it stays that way
 		 if ( x == 0 || x == 1 ) return x;
-		 freq_t s_Aa = at( s, GT_Aa );
-		 freq_t s_aa = at( s, GT_aa );
+		 
+		 double s_Aa = at( s, GT_Aa );
+		 double s_aa = at( s, GT_aa );
 		 // with s1 and s2 on hand, calculate freq at the next generation
 		 double num = x * (1. + s_aa * x + s_Aa * (1. - x));
 		 double denom = (1. + s_aa * x * x + 2 * s_Aa * x * (1. - x));
