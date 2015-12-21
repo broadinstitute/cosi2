@@ -192,7 +192,7 @@ class MigrationProcess: public EventRunner< genid, RandGen
 
 }  // namespace cosi
 
-#include <cosi/arrproc2.h>
+#include <cosi/general/arrproc2.h>
 
 namespace cosi {
 

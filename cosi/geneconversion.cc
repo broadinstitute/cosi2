@@ -10,8 +10,8 @@
 #include <limits>
 #include <stdexcept>
 #include <boost/math/distributions/geometric.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/geneconversion.h>
-#include <cosi/utils.h>
 #include <cosi/genmap.h>
 #include <cosi/demography.h>
 #include <cosi/node.h>
@@ -133,7 +133,7 @@ void GeneConversion::gc_execute (genid gen, frac_t frac) {
 
 }  // namespace cosi
 
-#include <cosi/arrproc2.h>
+#include <cosi/general/arrproc2.h>
 
 namespace cosi {
 

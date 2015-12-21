@@ -13,7 +13,7 @@
 #include <gtest/gtest.h>
 //#include <gmock/gmock.h>
 #define private public
-#include <cosi/order_statistics.hpp>
+#include <cosi/general/datastruct/order_statistics.hpp>
 
 //#undef private
 

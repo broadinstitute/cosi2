@@ -3,10 +3,10 @@
 #ifndef __INCLUDE_COSI_SIMULATOR_H
 #define __INCLUDE_COSI_SIMULATOR_H
 #include <cstdio>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/arrproc2.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
-#include <cosi/cosirand.h>
-#include <cosi/arrproc2.h>
 
 namespace cosi {
 

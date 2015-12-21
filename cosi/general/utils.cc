@@ -29,7 +29,7 @@
 #ifdef HAVE_EXECINFO_H
 #include <execinfo.h>
 #endif
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 
 // *** main impl
 

@@ -1,8 +1,8 @@
 
 #include <boost/foreach.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/seglist.h>
 #include <cosi/mutcontext.h>
-#include <cosi/utils.h>
 #include <cosi/leafset.h>
 
 #define ForEach BOOST_FOREACH

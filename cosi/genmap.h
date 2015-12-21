@@ -9,8 +9,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/range/join.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
 #include <cosi/decls.h>
 
 namespace cosi {

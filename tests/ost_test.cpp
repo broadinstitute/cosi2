@@ -13,7 +13,7 @@
 #include <boost/concept_check.hpp>
 #include <boost/phoenix/bind/bind_member_variable.hpp>
 #define private public
-#include <cosi/order_statistics.hpp>
+#include <cosi/general/datastruct/order_statistics.hpp>
 
 namespace cosi {
 namespace util {

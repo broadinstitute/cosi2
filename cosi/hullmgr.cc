@@ -50,7 +50,7 @@
 #include <boost/phoenix.hpp>
 #include <boost/range.hpp>
 #include <boost/range/adaptors.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 //#include <cosi/seglist.h>
 #include <cosi/hullmgr.h>
 

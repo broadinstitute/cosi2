@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <boost/swap.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 #include <cosi/segsumm.h>
 
 namespace cosi {

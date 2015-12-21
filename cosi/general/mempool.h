@@ -13,7 +13,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 
 namespace cosi {
 

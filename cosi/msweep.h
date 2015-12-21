@@ -2,8 +2,8 @@
 #define COSI_INCLUDE_MSWEEP_H
 
 #include <vector>
+#include <cosi/general/utils.h>
 #include <cosi/decls.h>
-#include <cosi/utils.h>
 #include <cosi/basemodel.h>
 #include <cosi/leafset.h>
 

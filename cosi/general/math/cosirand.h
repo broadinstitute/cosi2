@@ -13,8 +13,8 @@
 #include <boost/shared_ptr.hpp>
 #include <cosi_rand/random.h>
 #include <cosi_rand/mtwist.h>
-#include <cosi/utildefs.h>
-#include <cosi/typedval.h>
+#include <cosi/general/utildefs.h>
+#include <cosi/general/typedval.h>
 
 namespace cosi {
 

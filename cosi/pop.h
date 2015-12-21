@@ -14,10 +14,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/utility/declval.hpp>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/nodelist.h>
-#include <cosi/generalmath.h>
 #include <cosi/coalrate.h>
 
 namespace cosi {

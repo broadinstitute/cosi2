@@ -27,7 +27,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
-#include <cosi/utildefs.h>
+#include <cosi/general/utildefs.h>
 
 #include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()
 

@@ -3,11 +3,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cosi/general/utils.h>
 #include <cosi/pop.h>
 #include <cosi/node.h>
 #include <cosi/hullmgr.h>
 #include <cosi/seglist.h>
-#include <cosi/utils.h>
 
 namespace cosi {
 

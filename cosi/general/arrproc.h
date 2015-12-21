@@ -16,8 +16,8 @@
 #include <boost/utility/value_init.hpp>
 #include <boost/function.hpp>
 #include <boost/signals2/signal.hpp>
-#include <cosi/typeutil.h>
-#include <cosi/generalmath.h>
+#include <cosi/general/typeutil.h>
+#include <cosi/general/math/generalmath.h>
 
 namespace cosi {
 namespace arrival {

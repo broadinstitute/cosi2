@@ -1,0 +1,4 @@
+
+* Folder: general/
+
+	General-purpose code not specific to population genetics.

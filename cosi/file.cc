@@ -16,6 +16,7 @@
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
 #include <boost/random/triangle_distribution.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/file.h>
 #include <cosi/recomb.h>
 #include <cosi/demography.h>
@@ -24,7 +25,6 @@
 #include <cosi/geneconversion.h>
 #include <cosi/historical.h>
 #include <cosi/sweep.h>
-#include <cosi/utils.h>
 
 namespace cosi {
 

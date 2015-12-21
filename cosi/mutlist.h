@@ -20,11 +20,11 @@
 #ifndef COSI_NO_CPU_TIMER
 #include <boost/timer/timer.hpp>
 #endif
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/leafset.h>
 #include <cosi/mutate.h>
-#include <cosi/cosirand.h>
 
 namespace cosi {
 

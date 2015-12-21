@@ -9,11 +9,11 @@
 #include <boost/utility/swap.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <cosi/general/utils.h>
+#include <cosi/general/mempool.h>
 #include <cosi/node.h>
 #include <cosi/nodelist.h>
 #include <cosi/seglist.h>
-#include <cosi/utils.h>
-#include <cosi/mempool.h>
 #include <cosi/recomb.h>
 #include <cosi/genmap.h>
 #include <cosi/pop.h>

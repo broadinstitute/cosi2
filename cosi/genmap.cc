@@ -24,8 +24,8 @@
 #include <boost/foreach.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/exception/all.hpp>
-#include <cosi/utils.h>
-#include <cosi/cosirand.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/genmap.h>
 
 namespace cosi {

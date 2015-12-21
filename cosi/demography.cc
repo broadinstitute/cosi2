@@ -13,12 +13,12 @@
 #include <vector>
 #include <boost/make_shared.hpp>
 #include <boost/range/algorithm/find_if.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
 #include <cosi/pop.h>
 #include <cosi/node.h>
 #include <cosi/seglist.h>
 #include <cosi/demography.h>
-#include <cosi/utils.h>
 #include <cosi/leafset.h>
 #include <cosi/seglist.h>
 #include <cosi/mutate.h>

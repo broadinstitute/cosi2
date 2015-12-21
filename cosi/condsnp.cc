@@ -17,8 +17,8 @@
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/assume_abstract.hpp>
-#include <cosi/utils.h>
-#include <cosi/generalmath.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/genmap.h>
 #include <cosi/mutlist.h>
 #include <cosi/demography.h>

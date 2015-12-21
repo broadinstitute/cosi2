@@ -64,11 +64,11 @@
 #include <boost/range/algorithm/lower_bound.hpp>
 #include <boost/range/sub_range.hpp>
 #include <boost/next_prior.hpp>
-#include <cosi/utildefs.h>
+#include <cosi/general/utildefs.h>
 
 #ifdef COSI_VALGRIND
-#include "valgrind.h"
-#include "memcheck.h"
+#include <cosi/general/dbg/valgrind.h>
+#include <cosi/general/dbg/memcheck.h>
 #endif
 
 #include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()

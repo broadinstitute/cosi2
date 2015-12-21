@@ -6,9 +6,9 @@
 #include <vector>
 #include <boost/foreach.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/coal_data_cosi.h>
 #include <cosi/mutlist.h>
-#include <cosi/utils.h>
 #include <cosi/genmap.h>
 #include <cosi/demography.h>
 

@@ -4,11 +4,11 @@
 #include <cstdio>
 #include <string>
 #include <boost/filesystem.hpp>
+#include <cosi/general/math/generalmath.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/geneconversion.h>
-#include <cosi/generalmath.h>
-#include <cosi/cosirand.h>
 #include <cosi/basemodel.h>
 
 namespace cosi {

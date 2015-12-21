@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "skip_list_detail.h"
+#include <cosi/general/datastruct/skip_list_detail.h>
 
 #include <memory>     // for std::allocator
 #include <functional> // for std::less

@@ -9,22 +9,24 @@ check_PROGRAMS += seglist_test funcs_test test_funcs test_arrproc
 seglist_test_SOURCES = $(TD)/seglist_test.cc $(SD)/seglist.cc $(SD)/seglist.h $(SD)/leafset-tree.h \
 	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/leafset-counts.h \
 	$(SD)/leafset.h $(SD)/segsumm.h $(SD)/segsumm.cc \
-	$(SD)/utils.h $(SD)/utils.cc $(SD)/defs.h $(SD)/utildefs.h $(SD)/typedval.h $(SD)/mempool.h $(SD)/mempool.cc
+	$(SD)/general/utils.h $(SD)/general/utils.cc $(SD)/defs.h $(SD)/general/utildefs.h $(SD)/general/typedval.h \
+	$(SD)/general/mempool.h $(SD)/general/mempool.cc
 seglist_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
 seglist_test_CXXFLAGS = $(COSI_CXXFLAGS)
 seglist_test_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
 seglist_test_LDADD = $(builddir)/libcosi_rand_noinst.la $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)
 
-funcs_test_SOURCES = $(TD)/funcs_test.cc $(SD)/generalmath.h $(SD)/utils.h $(SD)/utils.cc
+funcs_test_SOURCES = $(TD)/funcs_test.cc $(SD)/general/math/generalmath.h $(SD)/general/utils.h $(SD)/general/utils.cc
 funcs_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
 funcs_test_LDADD = $(BOOST_FILESYSTEM_LIBS) $(BOOST_SYSTEM_LIBS)
 
-test_funcs_SOURCES = $(TD)/test_funcs.cc $(SD)/generalmath.h $(SD)/utils.h $(SD)/utils.cc
+test_funcs_SOURCES = $(TD)/test_funcs.cc $(SD)/general/math/generalmath.h $(SD)/general/utils.h $(SD)/general/utils.cc
 test_funcs_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG -DCOSI_DEV_PRINT
 test_funcs_LDADD = $(BOOST_FILESYSTEM_LIBS) $(BOOST_SYSTEM_LIBS)
 
-test_arrproc_SOURCES = $(TD)/test_arrproc.cc $(SD)/generalmath.h $(SD)/utils.h $(SD)/utils.cc $(SD)/arrproc.h \
-	$(SD)/typeutil.h
+test_arrproc_SOURCES = $(TD)/test_arrproc.cc $(SD)/general/math/generalmath.h $(SD)/general/utils.h \
+	$(SD)/general/utils.cc $(SD)/general/arrproc.h \
+	$(SD)/general/typeutil.h
 test_arrproc_CPPFLAGS = $(COSI_CPPFLAGS) -DCOSI_DEV_PRINT -UNDEBUG
 test_arrproc_LDADD = $(BOOST_FILESYSTEM_LIBS) $(BOOST_SYSTEM_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
 
@@ -45,13 +47,15 @@ endif
 #test_random_access_CXXFLAGS = -Wno-unknown-pragmas
 
 check_PROGRAMS += ost_test
-ost_test_SOURCES = $(TD)/ost_test.cpp $(SD)/order_statistics.hpp $(SD)/utils.h $(SD)/utils.cc
+ost_test_SOURCES = $(TD)/ost_test.cpp $(SD)/general/datastruct/order_statistics.hpp $(SD)/general/utils.h \
+	$(SD)/general/utils.cc
 ost_test_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(builddir)/libcosi_rand.la
 ost_test_CPPFLAGS = $(AM_CPPFLAGS) -UNDEBUG
 
 if HAVE_GTEST
 check_PROGRAMS += ost_test_main
-ost_test_main_SOURCES = $(TD)/ost_test_main.cpp $(SD)/order_statistics.hpp $(SD)/utils.h $(SD)/utils.cc
+ost_test_main_SOURCES = $(TD)/ost_test_main.cpp $(SD)/general/datastruct/order_statistics.hpp \
+	$(SD)/general/utils.h $(SD)/general/utils.cc
 ost_test_main_CPPFLAGS = $(AM_CPPFLAGS) -UNDEBUG -I$(GTEST_DIR)/include
 ost_test_main_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(builddir)/libcosi_rand.la
 ost_test_main_LDFLAGS = $(AM_LDFLAGS) -L$(GTEST_DIR)/lib -lgtest

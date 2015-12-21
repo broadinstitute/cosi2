@@ -15,9 +15,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/foreach.hpp>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
-#include <cosi/cosirand.h>
 #include <cosi/hooks.h>
 #include <cosi/leafset.h>
 #include <cosi/nodefwd.h>

@@ -10,7 +10,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/numeric/conversion/bounds.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <cosi/generalmath.h>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/coalrate.h>
 #include <cosi/defs.h>
 

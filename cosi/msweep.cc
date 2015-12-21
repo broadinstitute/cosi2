@@ -18,11 +18,11 @@
 #include <boost/exception/all.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/clamp.hpp>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
-#include <cosi/utils.h>
-#include <cosi/cosirand.h>
-#include <cosi/generalmath.h>
 #include <cosi/basemodel.h>
 #include <cosi/node.h>
 #include <cosi/hooks.h>

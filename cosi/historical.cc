@@ -24,7 +24,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/next_prior.hpp>
 #include <boost/exception/all.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 #include <cosi/pop.h>
 #include <cosi/historical.h>
 #include <cosi/demography.h>

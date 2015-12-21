@@ -15,8 +15,8 @@
 #include <stack>
 #include <boost/intrusive_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
 
 namespace cosi {
 

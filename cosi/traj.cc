@@ -1,6 +1,6 @@
 #include <ios>
 #include <boost/filesystem/fstream.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 #include <cosi/traj.h>
 
 namespace cosi {

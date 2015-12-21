@@ -9,16 +9,16 @@
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/foreach.hpp>
-#include <cosi/defs.h>
-#include <cosi/utils.h>
-#include <cosi/leafset.h>
-#include <cosi/mempool.h>
-#include <cosi/seglist.h>
-#include <cosi/cosirand.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/mempool.h>
+#include <cosi/general/math/cosirand.h>
 #ifdef COSI_DEV_CALLGRIND
-#include <cosi/callgrind.h>
+#include <cosi/general/dbg/callgrind.h>
+#include <cosi/general/dbg/evtgrp.h>
 #endif
-#include <cosi/evtgrp.h>
+#include <cosi/defs.h>
+#include <cosi/leafset.h>
+#include <cosi/seglist.h>
 
 namespace cosi {
 

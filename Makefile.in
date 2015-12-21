@@ -412,7 +412,8 @@ ost_test_OBJECTS = $(am_ost_test_OBJECTS)
 ost_test_DEPENDENCIES = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) \
 	$(builddir)/libcosi_rand.la
 am__ost_test_main_SOURCES_DIST = $(TD)/ost_test_main.cpp \
-	$(SD)/order_statistics.hpp $(SD)/utils.h $(SD)/utils.cc
+	$(SD)/general/datastruct/order_statistics.hpp \
+	$(SD)/general/utils.h $(SD)/general/utils.cc
 @HAVE_GTEST_TRUE@am_ost_test_main_OBJECTS =  \
 @HAVE_GTEST_TRUE@	ost_test_main-ost_test_main.$(OBJEXT) \
 @HAVE_GTEST_TRUE@	ost_test_main-utils.$(OBJEXT)
@@ -1025,7 +1026,7 @@ FS = $(BOOST_DIR)/libs/filesystem/src
 libcosifilesystem_la_SOURCES = $(FS)/codecvt_error_category.cpp $(FS)/operations.cpp $(FS)/path.cpp $(FS)/path_traits.cpp $(FS)/portability.cpp $(FS)/unique_path.cpp $(FS)/utf8_codecvt_facet.cpp $(FS)/windows_file_codecvt.cpp $(SY)/error_code.cpp
 libcosifilesystem_la_CPPFLAGS = $(AM_CPPFLAGS)
 SY = $(BOOST_DIR)/libs/system/src
-libcosisystem_la_SOURCES = $(SY)/error_code.cpp $(SY)/local_free_on_destruction.hpp
+libcosisystem_la_SOURCES = $(SY)/error_code.cpp
 libcosisystem_la_CPPFLAGS = $(AM_CPPFLAGS)
 CR = $(BOOST_DIR)/libs/chrono/src
 libcosichrono_la_SOURCES = $(CR)/chrono.cpp $(CR)/process_cpu_clocks.cpp $(CR)/thread_clock.cpp
@@ -1066,17 +1067,20 @@ COSI_CXXFLAGS = $(AM_CXXFLAGS) $(am__append_1)
 #AM_LDFLAGS = -L$(srcdir)/../cosi_rand
 AM_DEFAULT_SOURCE_EXT = .cc
 SD = $(srcdir)/cosi
-COSIUTILHEADERS = $(SD)/utils.h $(SD)/arrival.h $(SD)/arrproc2.h $(SD)/generalmath.h $(SD)/cosirand.h $(SD)/gauss_legendre.h \
-	$(SD)/valgrind.h $(SD)/evtgrp.h $(SD)/typedval.h \
-	$(SD)/order_statistics.hpp $(SD)/random_access_skip_list.h $(SD)/skip_list_detail.h $(SD)/utildefs.h \
-	$(SD)/drd.h $(SD)/memcheck.h $(SD)/mempool.h 
+COSIUTILHEADERS = $(SD)/general/utils.h $(SD)/arrival.h $(SD)/general/arrproc2.h $(SD)/general/arrproc.h \
+	$(SD)/general/math/generalmath.h $(SD)/general/math/cosirand.h $(SD)/general/math/gauss_legendre.h \
+	$(SD)/general/dbg/valgrind.h $(SD)/general/dbg/evtgrp.h $(SD)/general/typedval.h \
+	$(SD)/general/datastruct/order_statistics.hpp $(SD)/general/datastruct/random_access_skip_list.h \
+	$(SD)/general/datastruct/skip_list_detail.h $(SD)/general/utildefs.h \
+	$(SD)/general/dbg/drd.h $(SD)/general/dbg/memcheck.h $(SD)/general/mempool.h 
 
-libcosiutil_la_SOURCES = $(SD)/utils.cc $(SD)/arrival.cc $(SD)/cosirand.cc $(SD)/gauss_legendre.c $(SD)/mempool.cc \
+libcosiutil_la_SOURCES = $(SD)/general/utils.cc $(SD)/arrival.cc $(SD)/general/math/cosirand.cc \
+	$(SD)/general/math/gauss_legendre.c $(SD)/general/mempool.cc \
 	$(COSIUTILHEADERS)
 
 libcosiutil_la_CPPFLAGS = $(AM_CPPFLAGS)
 COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/file.cc $(SD)/geneconversion.cc \
-	$(SD)/historical.cc \
+	$(SD)/historical.cc $(SD)/basemodel.h \
 	$(SD)/migrate.cc $(SD)/mutate.cc $(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc $(SD)/pop.cc $(SD)/recomb.cc \
 	$(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
 	$(SD)/sweep.cc $(SD)/msweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
@@ -1089,13 +1093,13 @@ COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/fi
 #else
 libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc \
 	$(SD)/demography.cc $(SD)/file.cc $(SD)/geneconversion.cc \
-	$(SD)/historical.cc $(SD)/migrate.cc $(SD)/mutate.cc \
-	$(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc $(SD)/pop.cc \
-	$(SD)/recomb.cc $(SD)/seglist.cc $(SD)/segsumm.cc \
+	$(SD)/historical.cc $(SD)/basemodel.h $(SD)/migrate.cc \
+	$(SD)/mutate.cc $(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc \
+	$(SD)/pop.cc $(SD)/recomb.cc $(SD)/seglist.cc $(SD)/segsumm.cc \
 	$(SD)/simulator.cc $(SD)/sweep.cc $(SD)/msweep.cc \
 	$(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc \
 	$(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc $(SD)/traj.cc \
-	$(SD)/cositop.cc $(SD)/callgrind.h $(SD)/defs.h \
+	$(SD)/cositop.cc $(SD)/general/dbg/callgrind.h $(SD)/defs.h \
 	$(SD)/coalesce.h $(SD)/demography.h $(SD)/ehh.h $(SD)/ehh.cc \
 	$(SD)/file.h $(SD)/geneconversion.h $(SD)/historical.h \
 	$(SD)/leafset.h $(SD)/leafset-bitset.h $(SD)/leafset-tree.h \
@@ -1149,27 +1153,33 @@ TD = $(srcdir)/tests
 seglist_test_SOURCES = $(TD)/seglist_test.cc $(SD)/seglist.cc $(SD)/seglist.h $(SD)/leafset-tree.h \
 	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/leafset-counts.h \
 	$(SD)/leafset.h $(SD)/segsumm.h $(SD)/segsumm.cc \
-	$(SD)/utils.h $(SD)/utils.cc $(SD)/defs.h $(SD)/utildefs.h $(SD)/typedval.h $(SD)/mempool.h $(SD)/mempool.cc
+	$(SD)/general/utils.h $(SD)/general/utils.cc $(SD)/defs.h $(SD)/general/utildefs.h $(SD)/general/typedval.h \
+	$(SD)/general/mempool.h $(SD)/general/mempool.cc
 
 seglist_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
 seglist_test_CXXFLAGS = $(COSI_CXXFLAGS)
 seglist_test_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
 seglist_test_LDADD = $(builddir)/libcosi_rand_noinst.la $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)
-funcs_test_SOURCES = $(TD)/funcs_test.cc $(SD)/generalmath.h $(SD)/utils.h $(SD)/utils.cc
+funcs_test_SOURCES = $(TD)/funcs_test.cc $(SD)/general/math/generalmath.h $(SD)/general/utils.h $(SD)/general/utils.cc
 funcs_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
 funcs_test_LDADD = $(BOOST_FILESYSTEM_LIBS) $(BOOST_SYSTEM_LIBS)
-test_funcs_SOURCES = $(TD)/test_funcs.cc $(SD)/generalmath.h $(SD)/utils.h $(SD)/utils.cc
+test_funcs_SOURCES = $(TD)/test_funcs.cc $(SD)/general/math/generalmath.h $(SD)/general/utils.h $(SD)/general/utils.cc
 test_funcs_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG -DCOSI_DEV_PRINT
 test_funcs_LDADD = $(BOOST_FILESYSTEM_LIBS) $(BOOST_SYSTEM_LIBS)
-test_arrproc_SOURCES = $(TD)/test_arrproc.cc $(SD)/generalmath.h $(SD)/utils.h $(SD)/utils.cc $(SD)/arrproc.h \
-	$(SD)/typeutil.h
+test_arrproc_SOURCES = $(TD)/test_arrproc.cc $(SD)/general/math/generalmath.h $(SD)/general/utils.h \
+	$(SD)/general/utils.cc $(SD)/general/arrproc.h \
+	$(SD)/general/typeutil.h
 
 test_arrproc_CPPFLAGS = $(COSI_CPPFLAGS) -DCOSI_DEV_PRINT -UNDEBUG
 test_arrproc_LDADD = $(BOOST_FILESYSTEM_LIBS) $(BOOST_SYSTEM_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
-ost_test_SOURCES = $(TD)/ost_test.cpp $(SD)/order_statistics.hpp $(SD)/utils.h $(SD)/utils.cc
+ost_test_SOURCES = $(TD)/ost_test.cpp $(SD)/general/datastruct/order_statistics.hpp $(SD)/general/utils.h \
+	$(SD)/general/utils.cc
+
 ost_test_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(builddir)/libcosi_rand.la
 ost_test_CPPFLAGS = $(AM_CPPFLAGS) -UNDEBUG
-@HAVE_GTEST_TRUE@ost_test_main_SOURCES = $(TD)/ost_test_main.cpp $(SD)/order_statistics.hpp $(SD)/utils.h $(SD)/utils.cc
+@HAVE_GTEST_TRUE@ost_test_main_SOURCES = $(TD)/ost_test_main.cpp $(SD)/general/datastruct/order_statistics.hpp \
+@HAVE_GTEST_TRUE@	$(SD)/general/utils.h $(SD)/general/utils.cc
+
 @HAVE_GTEST_TRUE@ost_test_main_CPPFLAGS = $(AM_CPPFLAGS) -UNDEBUG -I$(GTEST_DIR)/include
 @HAVE_GTEST_TRUE@ost_test_main_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(builddir)/libcosi_rand.la
 @HAVE_GTEST_TRUE@ost_test_main_LDFLAGS = $(AM_LDFLAGS) -L$(GTEST_DIR)/lib -lgtest
@@ -1724,12 +1734,12 @@ libcosi_rand_noinst_la-rng.lo: $(RD)/rng.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
 
-libcosiutil_la-gauss_legendre.lo: $(SD)/gauss_legendre.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosiutil_la-gauss_legendre.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-gauss_legendre.Tpo -c -o libcosiutil_la-gauss_legendre.lo `test -f '$(SD)/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/gauss_legendre.c
+libcosiutil_la-gauss_legendre.lo: $(SD)/general/math/gauss_legendre.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosiutil_la-gauss_legendre.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-gauss_legendre.Tpo -c -o libcosiutil_la-gauss_legendre.lo `test -f '$(SD)/general/math/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/general/math/gauss_legendre.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-gauss_legendre.Tpo $(DEPDIR)/libcosiutil_la-gauss_legendre.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(SD)/gauss_legendre.c' object='libcosiutil_la-gauss_legendre.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(SD)/general/math/gauss_legendre.c' object='libcosiutil_la-gauss_legendre.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosiutil_la-gauss_legendre.lo `test -f '$(SD)/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/gauss_legendre.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosiutil_la-gauss_legendre.lo `test -f '$(SD)/general/math/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/general/math/gauss_legendre.c
 
 get_recomap.o: $(srcdir)/recosim/get_recomap.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT get_recomap.o -MD -MP -MF $(DEPDIR)/get_recomap.Tpo -c -o get_recomap.o `test -f '$(srcdir)/recosim/get_recomap.c' || echo '$(srcdir)/'`$(srcdir)/recosim/get_recomap.c
@@ -2634,12 +2644,12 @@ libcositimer_la-cpu_timer.lo: $(TI)/cpu_timer.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcositimer_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcositimer_la-cpu_timer.lo `test -f '$(TI)/cpu_timer.cpp' || echo '$(srcdir)/'`$(TI)/cpu_timer.cpp
 
-libcosiutil_la-utils.lo: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-utils.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-utils.Tpo -c -o libcosiutil_la-utils.lo `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+libcosiutil_la-utils.lo: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-utils.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-utils.Tpo -c -o libcosiutil_la-utils.lo `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-utils.Tpo $(DEPDIR)/libcosiutil_la-utils.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='libcosiutil_la-utils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='libcosiutil_la-utils.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-utils.lo `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-utils.lo `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 
 libcosiutil_la-arrival.lo: $(SD)/arrival.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-arrival.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-arrival.Tpo -c -o libcosiutil_la-arrival.lo `test -f '$(SD)/arrival.cc' || echo '$(srcdir)/'`$(SD)/arrival.cc
@@ -2648,19 +2658,19 @@ libcosiutil_la-arrival.lo: $(SD)/arrival.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-arrival.lo `test -f '$(SD)/arrival.cc' || echo '$(srcdir)/'`$(SD)/arrival.cc
 
-libcosiutil_la-cosirand.lo: $(SD)/cosirand.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-cosirand.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-cosirand.Tpo -c -o libcosiutil_la-cosirand.lo `test -f '$(SD)/cosirand.cc' || echo '$(srcdir)/'`$(SD)/cosirand.cc
+libcosiutil_la-cosirand.lo: $(SD)/general/math/cosirand.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-cosirand.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-cosirand.Tpo -c -o libcosiutil_la-cosirand.lo `test -f '$(SD)/general/math/cosirand.cc' || echo '$(srcdir)/'`$(SD)/general/math/cosirand.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-cosirand.Tpo $(DEPDIR)/libcosiutil_la-cosirand.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/cosirand.cc' object='libcosiutil_la-cosirand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/math/cosirand.cc' object='libcosiutil_la-cosirand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-cosirand.lo `test -f '$(SD)/cosirand.cc' || echo '$(srcdir)/'`$(SD)/cosirand.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-cosirand.lo `test -f '$(SD)/general/math/cosirand.cc' || echo '$(srcdir)/'`$(SD)/general/math/cosirand.cc
 
-libcosiutil_la-mempool.lo: $(SD)/mempool.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-mempool.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-mempool.Tpo -c -o libcosiutil_la-mempool.lo `test -f '$(SD)/mempool.cc' || echo '$(srcdir)/'`$(SD)/mempool.cc
+libcosiutil_la-mempool.lo: $(SD)/general/mempool.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosiutil_la-mempool.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-mempool.Tpo -c -o libcosiutil_la-mempool.lo `test -f '$(SD)/general/mempool.cc' || echo '$(srcdir)/'`$(SD)/general/mempool.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-mempool.Tpo $(DEPDIR)/libcosiutil_la-mempool.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/mempool.cc' object='libcosiutil_la-mempool.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/mempool.cc' object='libcosiutil_la-mempool.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-mempool.lo `test -f '$(SD)/mempool.cc' || echo '$(srcdir)/'`$(SD)/mempool.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosiutil_la-mempool.lo `test -f '$(SD)/general/mempool.cc' || echo '$(srcdir)/'`$(SD)/general/mempool.cc
 
 coalescent-cosimain.o: $(SD)/cosimain.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(coalescent_CPPFLAGS) $(CPPFLAGS) $(coalescent_CXXFLAGS) $(CXXFLAGS) -MT coalescent-cosimain.o -MD -MP -MF $(DEPDIR)/coalescent-cosimain.Tpo -c -o coalescent-cosimain.o `test -f '$(SD)/cosimain.cc' || echo '$(srcdir)/'`$(SD)/cosimain.cc
@@ -2704,19 +2714,19 @@ funcs_test-funcs_test.obj: $(TD)/funcs_test.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o funcs_test-funcs_test.obj `if test -f '$(TD)/funcs_test.cc'; then $(CYGPATH_W) '$(TD)/funcs_test.cc'; else $(CYGPATH_W) '$(srcdir)/$(TD)/funcs_test.cc'; fi`
 
-funcs_test-utils.o: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT funcs_test-utils.o -MD -MP -MF $(DEPDIR)/funcs_test-utils.Tpo -c -o funcs_test-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+funcs_test-utils.o: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT funcs_test-utils.o -MD -MP -MF $(DEPDIR)/funcs_test-utils.Tpo -c -o funcs_test-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/funcs_test-utils.Tpo $(DEPDIR)/funcs_test-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='funcs_test-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='funcs_test-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o funcs_test-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o funcs_test-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 
-funcs_test-utils.obj: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT funcs_test-utils.obj -MD -MP -MF $(DEPDIR)/funcs_test-utils.Tpo -c -o funcs_test-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+funcs_test-utils.obj: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT funcs_test-utils.obj -MD -MP -MF $(DEPDIR)/funcs_test-utils.Tpo -c -o funcs_test-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/funcs_test-utils.Tpo $(DEPDIR)/funcs_test-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='funcs_test-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='funcs_test-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o funcs_test-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o funcs_test-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 
 ldhist-ldhist.o: $(TD)/ldhist.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ldhist_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ldhist-ldhist.o -MD -MP -MF $(DEPDIR)/ldhist-ldhist.Tpo -c -o ldhist-ldhist.o `test -f '$(TD)/ldhist.cc' || echo '$(srcdir)/'`$(TD)/ldhist.cc
@@ -2746,19 +2756,19 @@ ost_test-ost_test.obj: $(TD)/ost_test.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test-ost_test.obj `if test -f '$(TD)/ost_test.cpp'; then $(CYGPATH_W) '$(TD)/ost_test.cpp'; else $(CYGPATH_W) '$(srcdir)/$(TD)/ost_test.cpp'; fi`
 
-ost_test-utils.o: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ost_test-utils.o -MD -MP -MF $(DEPDIR)/ost_test-utils.Tpo -c -o ost_test-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+ost_test-utils.o: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ost_test-utils.o -MD -MP -MF $(DEPDIR)/ost_test-utils.Tpo -c -o ost_test-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/ost_test-utils.Tpo $(DEPDIR)/ost_test-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='ost_test-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='ost_test-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 
-ost_test-utils.obj: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ost_test-utils.obj -MD -MP -MF $(DEPDIR)/ost_test-utils.Tpo -c -o ost_test-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+ost_test-utils.obj: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ost_test-utils.obj -MD -MP -MF $(DEPDIR)/ost_test-utils.Tpo -c -o ost_test-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/ost_test-utils.Tpo $(DEPDIR)/ost_test-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='ost_test-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='ost_test-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 
 ost_test_main-ost_test_main.o: $(TD)/ost_test_main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ost_test_main-ost_test_main.o -MD -MP -MF $(DEPDIR)/ost_test_main-ost_test_main.Tpo -c -o ost_test_main-ost_test_main.o `test -f '$(TD)/ost_test_main.cpp' || echo '$(srcdir)/'`$(TD)/ost_test_main.cpp
@@ -2774,19 +2784,19 @@ ost_test_main-ost_test_main.obj: $(TD)/ost_test_main.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test_main-ost_test_main.obj `if test -f '$(TD)/ost_test_main.cpp'; then $(CYGPATH_W) '$(TD)/ost_test_main.cpp'; else $(CYGPATH_W) '$(srcdir)/$(TD)/ost_test_main.cpp'; fi`
 
-ost_test_main-utils.o: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ost_test_main-utils.o -MD -MP -MF $(DEPDIR)/ost_test_main-utils.Tpo -c -o ost_test_main-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+ost_test_main-utils.o: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ost_test_main-utils.o -MD -MP -MF $(DEPDIR)/ost_test_main-utils.Tpo -c -o ost_test_main-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/ost_test_main-utils.Tpo $(DEPDIR)/ost_test_main-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='ost_test_main-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='ost_test_main-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test_main-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test_main-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 
-ost_test_main-utils.obj: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ost_test_main-utils.obj -MD -MP -MF $(DEPDIR)/ost_test_main-utils.Tpo -c -o ost_test_main-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+ost_test_main-utils.obj: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ost_test_main-utils.obj -MD -MP -MF $(DEPDIR)/ost_test_main-utils.Tpo -c -o ost_test_main-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/ost_test_main-utils.Tpo $(DEPDIR)/ost_test_main-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='ost_test_main-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='ost_test_main-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test_main-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test_main-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 
 sample_stats_extra-sample_stats_extra.o: $(TD)/sample_stats_extra.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sample_stats_extra_CPPFLAGS) $(CPPFLAGS) $(sample_stats_extra_CXXFLAGS) $(CXXFLAGS) -MT sample_stats_extra-sample_stats_extra.o -MD -MP -MF $(DEPDIR)/sample_stats_extra-sample_stats_extra.Tpo -c -o sample_stats_extra-sample_stats_extra.o `test -f '$(TD)/sample_stats_extra.cc' || echo '$(srcdir)/'`$(TD)/sample_stats_extra.cc
@@ -2886,33 +2896,33 @@ seglist_test-segsumm.obj: $(SD)/segsumm.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -c -o seglist_test-segsumm.obj `if test -f '$(SD)/segsumm.cc'; then $(CYGPATH_W) '$(SD)/segsumm.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/segsumm.cc'; fi`
 
-seglist_test-utils.o: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -MT seglist_test-utils.o -MD -MP -MF $(DEPDIR)/seglist_test-utils.Tpo -c -o seglist_test-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+seglist_test-utils.o: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -MT seglist_test-utils.o -MD -MP -MF $(DEPDIR)/seglist_test-utils.Tpo -c -o seglist_test-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/seglist_test-utils.Tpo $(DEPDIR)/seglist_test-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='seglist_test-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='seglist_test-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -c -o seglist_test-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -c -o seglist_test-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 
-seglist_test-utils.obj: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -MT seglist_test-utils.obj -MD -MP -MF $(DEPDIR)/seglist_test-utils.Tpo -c -o seglist_test-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+seglist_test-utils.obj: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -MT seglist_test-utils.obj -MD -MP -MF $(DEPDIR)/seglist_test-utils.Tpo -c -o seglist_test-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/seglist_test-utils.Tpo $(DEPDIR)/seglist_test-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='seglist_test-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='seglist_test-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -c -o seglist_test-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -c -o seglist_test-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 
-seglist_test-mempool.o: $(SD)/mempool.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -MT seglist_test-mempool.o -MD -MP -MF $(DEPDIR)/seglist_test-mempool.Tpo -c -o seglist_test-mempool.o `test -f '$(SD)/mempool.cc' || echo '$(srcdir)/'`$(SD)/mempool.cc
+seglist_test-mempool.o: $(SD)/general/mempool.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -MT seglist_test-mempool.o -MD -MP -MF $(DEPDIR)/seglist_test-mempool.Tpo -c -o seglist_test-mempool.o `test -f '$(SD)/general/mempool.cc' || echo '$(srcdir)/'`$(SD)/general/mempool.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/seglist_test-mempool.Tpo $(DEPDIR)/seglist_test-mempool.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/mempool.cc' object='seglist_test-mempool.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/mempool.cc' object='seglist_test-mempool.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -c -o seglist_test-mempool.o `test -f '$(SD)/mempool.cc' || echo '$(srcdir)/'`$(SD)/mempool.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -c -o seglist_test-mempool.o `test -f '$(SD)/general/mempool.cc' || echo '$(srcdir)/'`$(SD)/general/mempool.cc
 
-seglist_test-mempool.obj: $(SD)/mempool.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -MT seglist_test-mempool.obj -MD -MP -MF $(DEPDIR)/seglist_test-mempool.Tpo -c -o seglist_test-mempool.obj `if test -f '$(SD)/mempool.cc'; then $(CYGPATH_W) '$(SD)/mempool.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/mempool.cc'; fi`
+seglist_test-mempool.obj: $(SD)/general/mempool.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -MT seglist_test-mempool.obj -MD -MP -MF $(DEPDIR)/seglist_test-mempool.Tpo -c -o seglist_test-mempool.obj `if test -f '$(SD)/general/mempool.cc'; then $(CYGPATH_W) '$(SD)/general/mempool.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/mempool.cc'; fi`
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/seglist_test-mempool.Tpo $(DEPDIR)/seglist_test-mempool.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/mempool.cc' object='seglist_test-mempool.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/mempool.cc' object='seglist_test-mempool.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -c -o seglist_test-mempool.obj `if test -f '$(SD)/mempool.cc'; then $(CYGPATH_W) '$(SD)/mempool.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/mempool.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(seglist_test_CPPFLAGS) $(CPPFLAGS) $(seglist_test_CXXFLAGS) $(CXXFLAGS) -c -o seglist_test-mempool.obj `if test -f '$(SD)/general/mempool.cc'; then $(CYGPATH_W) '$(SD)/general/mempool.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/mempool.cc'; fi`
 
 test_arrproc-test_arrproc.o: $(TD)/test_arrproc.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_arrproc-test_arrproc.o -MD -MP -MF $(DEPDIR)/test_arrproc-test_arrproc.Tpo -c -o test_arrproc-test_arrproc.o `test -f '$(TD)/test_arrproc.cc' || echo '$(srcdir)/'`$(TD)/test_arrproc.cc
@@ -2928,19 +2938,19 @@ test_arrproc-test_arrproc.obj: $(TD)/test_arrproc.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_arrproc-test_arrproc.obj `if test -f '$(TD)/test_arrproc.cc'; then $(CYGPATH_W) '$(TD)/test_arrproc.cc'; else $(CYGPATH_W) '$(srcdir)/$(TD)/test_arrproc.cc'; fi`
 
-test_arrproc-utils.o: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_arrproc-utils.o -MD -MP -MF $(DEPDIR)/test_arrproc-utils.Tpo -c -o test_arrproc-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+test_arrproc-utils.o: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_arrproc-utils.o -MD -MP -MF $(DEPDIR)/test_arrproc-utils.Tpo -c -o test_arrproc-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_arrproc-utils.Tpo $(DEPDIR)/test_arrproc-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='test_arrproc-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='test_arrproc-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_arrproc-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_arrproc-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 
-test_arrproc-utils.obj: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_arrproc-utils.obj -MD -MP -MF $(DEPDIR)/test_arrproc-utils.Tpo -c -o test_arrproc-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+test_arrproc-utils.obj: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_arrproc-utils.obj -MD -MP -MF $(DEPDIR)/test_arrproc-utils.Tpo -c -o test_arrproc-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_arrproc-utils.Tpo $(DEPDIR)/test_arrproc-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='test_arrproc-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='test_arrproc-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_arrproc-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_arrproc_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_arrproc-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 
 test_funcs-test_funcs.o: $(TD)/test_funcs.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_funcs-test_funcs.o -MD -MP -MF $(DEPDIR)/test_funcs-test_funcs.Tpo -c -o test_funcs-test_funcs.o `test -f '$(TD)/test_funcs.cc' || echo '$(srcdir)/'`$(TD)/test_funcs.cc
@@ -2956,19 +2966,19 @@ test_funcs-test_funcs.obj: $(TD)/test_funcs.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_funcs-test_funcs.obj `if test -f '$(TD)/test_funcs.cc'; then $(CYGPATH_W) '$(TD)/test_funcs.cc'; else $(CYGPATH_W) '$(srcdir)/$(TD)/test_funcs.cc'; fi`
 
-test_funcs-utils.o: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_funcs-utils.o -MD -MP -MF $(DEPDIR)/test_funcs-utils.Tpo -c -o test_funcs-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+test_funcs-utils.o: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_funcs-utils.o -MD -MP -MF $(DEPDIR)/test_funcs-utils.Tpo -c -o test_funcs-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_funcs-utils.Tpo $(DEPDIR)/test_funcs-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='test_funcs-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='test_funcs-utils.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_funcs-utils.o `test -f '$(SD)/utils.cc' || echo '$(srcdir)/'`$(SD)/utils.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_funcs-utils.o `test -f '$(SD)/general/utils.cc' || echo '$(srcdir)/'`$(SD)/general/utils.cc
 
-test_funcs-utils.obj: $(SD)/utils.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_funcs-utils.obj -MD -MP -MF $(DEPDIR)/test_funcs-utils.Tpo -c -o test_funcs-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+test_funcs-utils.obj: $(SD)/general/utils.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_funcs-utils.obj -MD -MP -MF $(DEPDIR)/test_funcs-utils.Tpo -c -o test_funcs-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_funcs-utils.Tpo $(DEPDIR)/test_funcs-utils.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/utils.cc' object='test_funcs-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='test_funcs-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_funcs-utils.obj `if test -f '$(SD)/utils.cc'; then $(CYGPATH_W) '$(SD)/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/utils.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_funcs_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_funcs-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -17,8 +17,8 @@
 #define __INCLUDE_COSI_SEGSUMM_H
 
 #include <iostream>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
 
 namespace cosi {
 /* FuncP: segsumm_init_module */

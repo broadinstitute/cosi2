@@ -1,7 +1,7 @@
 #include <cosi_rand/gammln.h>
 #include <cosi_rand/random.h>
 #include <cosi_rand/mtwist.h>
-#include <cosi/cosirand.h>
+#include <cosi/general/math/cosirand.h>
 
 namespace cosi {
 

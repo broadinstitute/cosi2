@@ -12,8 +12,8 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
 
 namespace cosi {
 

@@ -8,8 +8,8 @@
 #define COSI_INCLUDE_COALRATE_H
 
 #include <boost/call_traits.hpp>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/defs.h>
-#include <cosi/generalmath.h>
 
 namespace cosi {
 

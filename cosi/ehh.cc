@@ -13,7 +13,7 @@
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <cosi/generalmath.h>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/ehh.h>
 
 namespace cosi {

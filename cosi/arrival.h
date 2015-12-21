@@ -13,11 +13,10 @@
 #include <boost/foreach.hpp>
 #include <boost/range.hpp>
 #include <boost/iterator/iterator_traits.hpp>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/defs.h>
-#include <cosi/cosirand.h>
-#include <cosi/traj.h>
-#include <cosi/utils.h>
-#include <cosi/generalmath.h>
 
 namespace cosi {
 

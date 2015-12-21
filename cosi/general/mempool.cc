@@ -1,5 +1,5 @@
 #include <boost/foreach.hpp>
-#include <cosi/mempool.h>
+#include <cosi/general/mempool.h>
 
 namespace cosi {
 

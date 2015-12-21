@@ -11,8 +11,8 @@
 #include <boost/range/algorithm/copy.hpp>
 #include <cosi/mutate.h>
 #include <cosi/mutlist.h>
+#include <cosi/general/utils.h>
 #include <cosi/demography.h>
-#include <cosi/utils.h>
 #include <cosi/seglist.h>
 
 namespace cosi {

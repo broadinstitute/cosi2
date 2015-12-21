@@ -42,7 +42,7 @@ COSI_DECL(Hooks);  // defined in hooks.h
 COSI_DECL(Event_SweepNew);  // defined in sweep.cc
 COSI_DECL(FreqTraj);  // defined in traj.h
 COSI_DECL(DeterministicSweepTraj);  // defined in traj.h
-COSI_DECL(RandGen); // defined in cosirand.h
+COSI_DECL(RandGen); // defined in general/math/cosirand.h
 COSI_DECL(RecombRecorder); // defined in recomb.h
 COSI_DECL(RecomblessNeighborhoodsTracker); // defined in recomb.h
 COSI_DECL(HullMgr);

@@ -21,7 +21,6 @@
 #include <fstream>
 #include <string>
 #include <map>
-#include <vector>
 #include <stdexcept>
 #include <iterator>
 #include <boost/iterator/iterator_facade.hpp>
@@ -32,10 +31,10 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/has_minus.hpp>
 #include <boost/functional.hpp>
-// #include <boost/pool/pool.hpp>
-// #include <boost/pool/pool_alloc.hpp>
+#include <boost/pool/pool.hpp>
+#include <boost/pool/pool_alloc.hpp>
 #include <boost/utility/enable_if.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 
 namespace cosi {
 namespace util {
@@ -72,8 +71,6 @@ struct DummyWeight {
 	 friend DummyWeight operator+( const DummyWeight&, const DummyWeight& ) { return DummyWeight(); }
 	 friend DummyWeight operator-( const DummyWeight&, const DummyWeight& ) { return DummyWeight(); }
 	 friend bool operator==( const DummyWeight&, const DummyWeight& ) { return true; }
-   friend DummyWeight operator*( size_t, const DummyWeight& ) { return DummyWeight(); }
-   friend DummyWeight operator*( const DummyWeight&, size_t ) { return DummyWeight(); }
 };
 
 // Struct: DummyWeightExtractor
@@ -165,8 +162,6 @@ template
 		 typedef typename boost::unary_traits<key_extractor_type>::result_type key_type;
 		 typedef typename boost::unary_traits<weight_extractor_type>::result_type weight_type;
 
-		 typedef weight_type weight_difference_type;
-
 		 typedef typename boost::binary_traits<comparator_type>::first_argument_type cmp_arg1_type;
 		 typedef typename boost::binary_traits<comparator_type>::second_argument_type cmp_arg2_type;
 		 typedef typename boost::binary_traits<comparator_type>::result_type cmp_result_type;
@@ -213,9 +208,6 @@ template
 		 static WeightExtractor weightExtractor;
 		 static key_extractor_type keyExtractor;
 
-		// Class: tree_node
-		// Represents one node of the tree.  Represents either a real node, or the special
-		// sentinel node storing no value; each tree has one such node, stored in its <m_end> field.
 		class tree_node
 		{
 			typedef tree_node* self_pointer;
@@ -230,7 +222,6 @@ template
 				m_isRed(false),
 				m_subtreeSize(1),
 				m_subtreeWeight( weightExtractor( p_value ) ),
-				m_subtreeWeightDelta( weight_difference_type() ),
 				m_value(p_value)
 			{}
 
@@ -241,46 +232,17 @@ template
 				 m_isRed = false;
 				 m_subtreeSize = 1;
 				 m_subtreeWeight = weightExtractor( p_value );
-				 m_subtreeWeightDelta = weight_difference_type();
 				 m_value = p_value;
 			 }
 
-			// Field: m_left
-			// Left child of this node. 
 			self_pointer		 m_left;
-
-			// Field: m_right
-			// Right child of this node. 
 			self_pointer		 m_right;
-
-			// Field: m_parent
-			// Parent of this node. 
 			self_pointer		 m_parent;
-
-			// Field: m_isRed
-			// Whether this node of the red-black tree is red (true), or black (false).
 			bool			     m_isRed;
-
-			// Field: m_subtreeSize
-			// Number of nodes in this node's subtree (including this node). 
 			size_t				 m_subtreeSize;
-
-			// Field: m_subtreeWeight
-			// Sum of weights of nodes in the subtree rooted at this node.
-			// Includes the effect of any <m_delta> fields within this subtree,
-			// but not above it. 
 			weight_type m_subtreeWeight;
-
-			// Field: m_subtreeWeightDelta
-			// A weight value implicitly added to the weight of _every_ node in this node's
-			// subtree.  The true weight of a node is obtained by adding to weightExtractor( m_value )
-			// the m_subtreeWeightDelta of every node on the path to the root.
-			weight_difference_type m_subtreeWeightDelta;
-
-			// Field: m_value
-			// The user value stored in the node.  May include the key, extractable
-			// by the key extractor, and/or the weight, extractable by the weight extractor.
 			ValueType			 m_value;
+			 
 
 			size_t leftSize() const
 			{
@@ -296,7 +258,6 @@ template
 
 			weight_type leftWeight() const
 			{
-				assert( this );
 				if(m_left == 0) return weight_type();
 				else return m_left->m_subtreeWeight;
 			}
@@ -305,59 +266,6 @@ template
 			{
 				if(m_right == 0) return weight_type();
 				else return m_right->m_subtreeWeight;
-			}
-
-			weight_type leftWeight( weight_difference_type p_parentDelta ) const
-			{
-				if(m_left == 0) return weight_type();
-				else return m_left->m_subtreeWeight + m_left->m_subtreeSize * p_parentDelta;
-			}
-
-			weight_type rightWeight( weight_difference_type p_parentDelta ) const
-			{
-				if(m_right == 0) return weight_type();
-				else return m_right->m_subtreeWeight + m_right->m_subtreeSize * p_parentDelta;
-			}
-
-			 
-			// Method: subtreeWeightActual
-			// Return the sum of actual weights of this subtree's nodes.
-			 weight_type subtreeWeightActual( weight_difference_type p_deltasAbove = weight_difference_type() ) const {
-				assert( !isEnd() );
-				return m_subtreeWeight + ( p_deltasAbove * m_subtreeSize );
-			}
-
-			 weight_type weightWithLocalDelta() const {
-				 return weightExtractor( m_value ) + m_subtreeWeightDelta;
-			 }
-
-			// Method: weightActual
-			// Return the actual weight of this node, including any deltas above.  
-  		weight_type weightActual() const {
-				assert( !isEnd() );
-				weight_type w = weightExtractor( m_value ) + m_subtreeWeightDelta;
-				const tree_node *n = this;
-				while ( n->m_parent && !n->m_parent->isEnd() ) {
-					n = n->m_parent;
-					w += n->m_subtreeWeightDelta;
-				}
-				return w;
-			}
-
-			// Method: ensureZeroSubtreeWeightDelta
-			// Without changing any actual weights, ensure that this node has zero subtreeWeightDelta.
-			void ensureZeroSubtreeWeightDelta() {
-				assert( !isEnd() );
-				if ( m_left ) {
-					m_left->m_subtreeWeightDelta += m_subtreeWeightDelta;
-					m_left->m_subtreeWeight += m_subtreeWeightDelta * m_left->m_subtreeSize;
-				}
-				if ( m_right ) {
-					m_right->m_subtreeWeightDelta += m_subtreeWeightDelta;
-					m_right->m_subtreeWeight += m_subtreeWeightDelta * m_right->m_subtreeSize;
-				}
-				weightExtractor( m_value ) += m_subtreeWeightDelta;
-				m_subtreeWeightDelta = weight_type();
 			}
 			 
 
@@ -467,20 +375,13 @@ template
 				if( isEnd() ) return weightFieldExtractor( m_parent->m_subtreeWeight );
 
 				weightField_t l_lesserValuesWeight = weightFieldExtractor( leftWeight() );
-				size_t l_lesserValuesCounter = leftSize();
 				self_const_pointer l_currentNode = this;
 
 				while( !l_currentNode->isEnd() )
 				{
-					l_lesserValuesWeight +=
-						 l_lesserValuesCounter * weightFieldExtractor( l_currentNode->m_subtreeWeightDelta );
-					
 					if(l_currentNode == l_currentNode->m_parent->m_right)
 					{
-						l_lesserValuesWeight += weightFieldExtractor( l_currentNode->m_parent->leftWeight() )
-							 + weightFieldExtractor( weightExtractor( l_currentNode->m_parent->m_value ) );
-
-						l_lesserValuesCounter += l_currentNode->m_parent->leftSize() + 1;
+						l_lesserValuesWeight += weightFieldExtractor( l_currentNode->m_parent->leftWeight() ) + weightFieldExtractor( weightExtractor( l_currentNode->m_parent->m_value ) );
 					}
 					l_currentNode = l_currentNode->m_parent;
 				}
@@ -515,31 +416,7 @@ template
 			 void addWeight( weight_type weightDelta ) {
 				 this->addWeight( weightDelta, IdentityReferenceFunctor<weight_type>() );
 			 }
-
-
-			 void addWeightFrom( weight_difference_type weightDelta ) {
-				 self_pointer l_currentNode = this;
-
-				 bool arrivedFromLeft = true;
-				 weight_type weightAdded = weight_type();
-				 while ( !l_currentNode->isEnd() ) {
-					 if ( arrivedFromLeft ) {
-						 if ( l_currentNode->m_right ) {
-							 l_currentNode->m_right->m_subtreeWeightDelta += weightDelta;
-							 weight_type rightSubtreeWeightAdded = l_currentNode->m_right->m_subtreeSize * weightDelta;
-							 l_currentNode->m_right->m_subtreeWeight += rightSubtreeWeightAdded;
-							 weightAdded += rightSubtreeWeightAdded;
-						 }
-						 weightExtractor( l_currentNode->m_value ) += weightDelta;
-						 weightAdded += weightDelta;
-					 }
-					 l_currentNode->m_subtreeWeight += weightAdded;
-					 
-					 arrivedFromLeft = ( l_currentNode->m_parent->m_left == l_currentNode );
-					 l_currentNode = l_currentNode->m_parent;
-				 }
-			 }
-
+			 
 			inline bool isEnd() const
 			{
 				return m_parent == m_right;
@@ -550,7 +427,6 @@ template
 		typedef tree_node* node_pointer;
 		typedef const tree_node* const_node_pointer;
 		 typedef order_statistics_tree<ValueType, comparator_type, key_extractor_type, WeightExtractor>& tree_reference;
-		 typedef const order_statistics_tree<ValueType, comparator_type, key_extractor_type, WeightExtractor>& const_tree_reference;
 
 	public:
 	
@@ -562,8 +438,68 @@ template
 			typedef tree_node				node;
 			 friend class order_statistics_tree<ValueType, comparator_type, key_extractor_type, WeightExtractor>;
 		public:
+			// typedef std::bidirectional_iterator_tag		iterator_category;
+			// typedef ptrdiff_t							difference_type;
+			// typedef ValueType							value_type;
+			// typedef const ValueType*					pointer;
+			// typedef const ValueType&					reference;
+
 			explicit citerator(const node* p_pointingNode = 0) : m_pointingNode(p_pointingNode) {}
-			 
+
+			// reference operator*() const
+			// {
+			// 	assert( m_pointingNode && !m_pointingNode->isEnd() );
+			// 	return m_pointingNode->m_value;
+			// }
+
+			// pointer operator->() const
+			// {
+			// 	assert( m_pointingNode && !m_pointingNode->isEnd() );
+			// 	return &(m_pointingNode->m_value);
+			// }
+
+			// inline bool operator==(const self& p_rhs) const
+			// {
+			// 	return m_pointingNode == p_rhs.m_pointingNode;
+			// }
+
+			// inline bool operator!=(const self& p_rhs) const
+			// {
+			// 	return m_pointingNode != p_rhs.m_pointingNode;
+			// }
+
+			// self& operator++()
+			// {
+			// 	if(m_pointingNode->isEnd()) throw std::runtime_error(detail::g_iteratorsOutOufBoundsException);
+			// 	m_pointingNode = m_pointingNode->next();
+			// 	return *this;
+			// }
+
+			// self operator++(int)
+			// {
+			// 	if(m_pointingNode->isEnd()) throw std::runtime_error(detail::g_iteratorsOutOufBoundsException);
+			// 	self l_temporaryIterator = *this;
+			// 	m_pointingNode = m_pointingNode->next();
+			// 	return l_temporaryIterator;
+			// }
+
+			// self& operator--()
+			// {
+			// 	const node* l_previousNeighbor = m_pointingNode->previous();
+			// 	if(l_previousNeighbor->isEnd()) throw std::runtime_error(detail::g_iteratorsOutOufBoundsException);
+			// 	m_pointingNode = l_previousNeighbor;
+			// 	return *this;
+			// }
+
+			// self operator--(int)
+			// {
+			// 	const node* l_previousNeighbor = m_pointingNode->previous();
+			// 	if(l_previousNeighbor->isEnd()) throw std::runtime_error(detail::g_iteratorsOutOufBoundsException);
+			// 	self l_temporaryIterator = *this;
+			// 	m_pointingNode = l_previousNeighbor;
+			// 	return l_temporaryIterator;
+			// }
+
 			size_t position() const
 			{
 				assert( m_pointingNode );
@@ -579,8 +515,7 @@ template
 			 weight_type cumulWeight() const {
 				 return this->template cumulWeight< IdentityFunctor<weight_type> >();
 			 }
-
-			 weight_type weightActual() const { assert( m_pointingNode ); return m_pointingNode->weightActual(); }
+			 
 			 
 
 		private:
@@ -606,7 +541,8 @@ template
 			 }
 
 			 
-		}; // const_iterator
+		};
+		/// const_iterator
 
 		 class niterator: public boost::iterator_facade< niterator,
 																										 ValueType,
@@ -684,9 +620,6 @@ template
 				return m_pointingNode->position();
 			}
 
-			 weight_type weightActual() const { assert( m_pointingNode ); return m_pointingNode->weightActual(); }
-			 
-
 			// Method: cumulWeight
 			// Cumulative weight of all lesser nodes
 			 template <typename WeightFieldExtractor>
@@ -711,15 +644,10 @@ template
 				 ) {
 				 m_pointingNode->template addWeight< WeightFieldRefExtractor >( weightDelta, weightFieldRefExtractor );
 			 }
-			 
-			 void addWeight( weight_difference_type weightDelta ) {
+			 void addWeight( weight_type weightDelta ) {
 				 this->addWeight( weightDelta, IdentityReferenceFunctor<weight_type>() );
 			 }
-
-			 void addWeightFrom( weight_difference_type weightDelta ) {
-				 m_pointingNode->addWeightFrom( weightDelta );
-			 }
-
+			 
 
 		private:
 			node* m_pointingNode;
@@ -924,7 +852,7 @@ template
 			setRoot(0);
 		} 
 
-		order_statistics_tree(const_tree_reference p_copyPattern) : m_end(ValueType()), m_size(0)
+		order_statistics_tree(const tree_reference p_copyPattern) : m_end(ValueType()), m_size(0)
 		{
 			setRoot(0);
 			this->operator=(p_copyPattern);
@@ -993,22 +921,19 @@ template
 		{
 			return const_reverse_iterator( &m_end );
 		}
-		 // typedef boost::fast_pool_allocator<node, boost::default_user_allocator_new_delete,
-		 // 																		boost::details::pool::null_mutex > ost_alloc_t;
+		 typedef boost::fast_pool_allocator<node, boost::default_user_allocator_new_delete,
+																				boost::details::pool::null_mutex > ost_alloc_t;
 																				
 
 		 static node_pointer freeList;
 		 static size_t fromFreeList, fromMem, numDestroyed;
 
 		 struct FreeListReporter {
-				FreeListReporter() {  }
-				~FreeListReporter() {
-#if !defined(NDEBUG) && defined(COSI_DEV_PRINT)					
-					std::cerr << " freelist info for " <<
+				FreeListReporter() { std::cerr << "constructing freelist reporter" << std::endl; }
+				~FreeListReporter() { std::cerr << " freelist info for " <<
 						 typeid(*this).name() <<
 						 " from free list: " << fromFreeList << " fromMem: "
 																				<< fromMem << " numDestroyed=" << numDestroyed << std::endl;
-#endif					
 					while ( freeList ) {
 						node_pointer p = freeList->m_left;
 						delete freeList;
@@ -1195,31 +1120,19 @@ template
 				return end();
 			}
 
-			weight_type l_deltaAboveRoot = weight_type();
-
 			while(true)
 			{
-				assert( p_root );
-				assert( !p_root->isEnd() );
-
-				assert( static_cast< weight_type >( p_root->m_subtreeWeight +
-																						l_deltaAboveRoot * p_root->m_subtreeSize )  > p_cumulWeight );
-				
-				weight_type l_leftWeight = p_root->leftWeight( l_deltaAboveRoot + p_root->m_subtreeWeightDelta );
-				if ( p_cumulWeight < l_leftWeight ) {
-					l_deltaAboveRoot += p_root->m_subtreeWeightDelta;
-					p_root = p_root->m_left;
-				} else {
+				weight_type l_leftWeight = p_root->leftWeight();
+				if ( p_cumulWeight < l_leftWeight ) p_root = p_root->m_left;
+				else {
 					p_cumulWeight -= l_leftWeight;
-					weight_type l_rootWeight = weightExtractor( p_root->m_value ) + l_deltaAboveRoot
-						 + p_root->m_subtreeWeightDelta;
+					weight_type l_rootWeight = weightExtractor( p_root->m_value );
 
 					if ( p_cumulWeight < l_rootWeight ) {
 						*residue = l_rootWeight - p_cumulWeight;
 						return const_iterator( p_root );
 					} else {
 						p_cumulWeight -= l_rootWeight;
-						l_deltaAboveRoot += p_root->m_subtreeWeightDelta;
 						p_root = p_root->m_right;
 					}
 				}
@@ -1303,23 +1216,13 @@ template
 		 void addWeight( iterator beg, iterator end, weight_type delta ) {
 			 this->addWeight( beg, end, delta, IdentityReferenceFunctor<weight_type>() );
 		 }
-
-
-		 void addWeightFast( iterator beg, iterator end, weight_difference_type delta ) {
-			 beg.addWeightFrom( delta );
-			 end.addWeightFrom( -delta );
-		 }
+					
 
 	private:
 
 		void leftRotation(node_pointer p_rotationNode)
 		{
-			assert( p_rotationNode );
 			node_pointer l_newSubTreeRoot = p_rotationNode -> m_right;
-
-			p_rotationNode->ensureZeroSubtreeWeightDelta();
-			if ( l_newSubTreeRoot ) l_newSubTreeRoot->ensureZeroSubtreeWeightDelta();
-			
 			p_rotationNode -> m_right = l_newSubTreeRoot->m_left;
 			if(l_newSubTreeRoot->m_left != 0)
 			{
@@ -1353,13 +1256,7 @@ template
 
 		void rightRotation(node_pointer p_rotationNode)
 		{
-			assert( p_rotationNode );
 			node_pointer l_newSubTreeRoot = p_rotationNode -> m_left;
-
-
-			p_rotationNode->ensureZeroSubtreeWeightDelta();
-			if ( l_newSubTreeRoot ) l_newSubTreeRoot->ensureZeroSubtreeWeightDelta();
-			
 			p_rotationNode -> m_left = l_newSubTreeRoot->m_right;
 			if(l_newSubTreeRoot->m_right != 0)
 			{
@@ -1474,8 +1371,6 @@ template
 
 			while(l_insertionPlace != 0)
 			{
-				l_insertionPlace->ensureZeroSubtreeWeightDelta();
-				
 				l_insertionParent = l_insertionPlace;
 				++(l_insertionPlace->m_subtreeSize);
 				l_insertionPlace->m_subtreeWeight += weightExtractor( p_inserting->m_value );
@@ -1598,11 +1493,10 @@ template
 			}
 		}
 
-		std::vector<tree_node *> pathToRoot;
+		 
 
 		void deleteNode(const node_pointer p_deletingNode)
 		{
-			assert( p_deletingNode );
 			boost::value_initialized<ValueType> v;
 			node null(v);
 			null.m_subtreeSize = 0;
@@ -1633,27 +1527,12 @@ template
 			{
 				x = &null;
 			}
-			
-			{
-				pathToRoot.clear();
-				for( tree_node *n = y; !n->isEnd(); n = n->m_parent )
-					 pathToRoot.push_back( n );
-				while ( !pathToRoot.empty() ) {
-					pathToRoot.back()->ensureZeroSubtreeWeightDelta();
-					pathToRoot.pop_back();
-				}
-			}
-
-			// p_deletingNode->ensureZeroSubtreeWeightDelta();
-			// if ( y != p_deletingNode ) y->ensureZeroSubtreeWeightDelta();
 
 			//  std::map< std::string, node_pointer> names;
 			//  names.clear();
 			//  names.insert( std::make_pair( "x", x ) );
 			//  names.insert( std::make_pair( "y", y ) );
 			//  names.insert( std::make_pair( "del", p_deletingNode ) );
-			//  names.insert( std::make_pair( "m_end", &m_end ) );
-			//  names.insert( std::make_pair( "null", &null ) );
 			// printSVG( "/home/unix/ilya/public_html/nmid", &names );
 
 			//weight_type weightToSubtract = weightExtractor( y->m_value );
@@ -1675,16 +1554,11 @@ template
 
 				l_nodeToResizeItsSubtree->m_subtreeWeight = ( l_nodeToResizeItsSubtree == y ? weight_type() :
 																											( l_nodeToResizeItsSubtree == p_deletingNode ? y_weight : weightExtractor( l_nodeToResizeItsSubtree->m_value ) ) )
-					 + l_nodeToResizeItsSubtree->leftWeight() + l_nodeToResizeItsSubtree->rightWeight()
-					 + l_nodeToResizeItsSubtree->m_subtreeWeightDelta * l_nodeToResizeItsSubtree->m_subtreeSize;
-
-				// TODO: (option to) if weight didn't change here, and we're past p_deletingNode, can stop updating;
-				//       will optimize e.g. for weight + operation being max or min.
+					 + l_nodeToResizeItsSubtree->leftWeight() + l_nodeToResizeItsSubtree->rightWeight();
 				
 				l_nodeToResizeItsSubtree = l_nodeToResizeItsSubtree->m_parent;
 			}
-			//			printSVG( "/home/unix/ilya/public_html/naft", &names );
-		
+			
 			// names.clear();
 			// names.insert( std::make_pair( "x", x ) );
 			// names.insert( std::make_pair( "y", y ) );
@@ -1890,7 +1764,6 @@ template
 					s << "; " <<
 						p_node->m_subtreeSize << "; ";
 				 s << p_node->m_subtreeWeight;
-				 s << "; dl=" << p_node->m_subtreeWeightDelta;
 				 s << "; " << ( p_node->m_isRed ? "R" : "B" ) << "\" " << extraAttrs <<
 						rootLbl << " ] ;\n";
 				 if ( p_node->m_left ) s << "n" << p_node << " -> n" << p_node->m_left << " [ label = \"L\" ];\n";
@@ -1919,8 +1792,7 @@ template
 		 }
 
 		 void checkSubtree( node_pointer p_node, const key_type *mustBeBelow, const key_type *mustBeAbove,
-												size_t *subtreeSize, weight_type *subtreeWeight, size_t *subtreeBlackHeight,
-												weight_type weightDeltasAbove ) const {
+												size_t *subtreeSize, weight_type *subtreeWeight, size_t *subtreeBlackHeight ) const {
 			 assert( p_node );
 			 assert( p_node->m_parent );
 			 assert( !mustBeBelow || !( m_comparator( *mustBeBelow, keyExtractor( p_node->m_value ) ) ) );
@@ -1933,18 +1805,17 @@ template
 			 weight_type L_subtreeWeight = weight_type();
 			 size_t L_blackHeight = 0;
 			 key_type keyHere = keyExtractor( p_node->m_value );
-			 if ( p_node->m_left ) checkSubtree( p_node->m_left, &keyHere, mustBeAbove, &L_subtreeSize, &L_subtreeWeight, &L_blackHeight, weightDeltasAbove + p_node->m_subtreeWeightDelta );
+			 if ( p_node->m_left ) checkSubtree( p_node->m_left, &keyHere, mustBeAbove, &L_subtreeSize, &L_subtreeWeight, &L_blackHeight );
 
 			 size_t R_subtreeSize = 0;
 			 weight_type R_subtreeWeight = weight_type();
 			 size_t R_blackHeight = 0;
 			 
-			 if ( p_node->m_right ) checkSubtree( p_node->m_right, mustBeBelow, &keyHere, &R_subtreeSize, &R_subtreeWeight, &R_blackHeight, weightDeltasAbove + p_node->m_subtreeWeightDelta );
+			 if ( p_node->m_right ) checkSubtree( p_node->m_right, mustBeBelow, &keyHere, &R_subtreeSize, &R_subtreeWeight, &R_blackHeight );
 
 			 *subtreeSize = L_subtreeSize + 1 + R_subtreeSize;
 			 assert( *subtreeSize == p_node->m_subtreeSize );
-			 *subtreeWeight = L_subtreeWeight + weightExtractor( p_node->m_value ) + R_subtreeWeight
-					+ p_node->m_subtreeWeightDelta * p_node->m_subtreeSize;
+			 *subtreeWeight = L_subtreeWeight + weightExtractor( p_node->m_value ) + R_subtreeWeight;
 			 assert( *subtreeWeight == p_node->m_subtreeWeight );
 			 assert( L_blackHeight == R_blackHeight );
 			 *subtreeBlackHeight = L_blackHeight + ( p_node->m_isRed ? 0 : 1 );
@@ -1965,8 +1836,7 @@ template
 				 size_t subtreeSize = 0;
 				 weight_type subtreeWeight = weight_type();
 				 size_t subtreeBlackHeight = 0;
-				 checkSubtree( m_root, NULL, NULL, &subtreeSize, &subtreeWeight, &subtreeBlackHeight,
-											 weight_type() );
+				 checkSubtree( m_root, NULL, NULL, &subtreeSize, &subtreeWeight, &subtreeBlackHeight );
 			 }
 #endif // #ifdef NDEBUG
 		 }

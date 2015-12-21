@@ -6,9 +6,9 @@
 
 #include <string>
 #include <boost/optional.hpp>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/coalescent.h>
 #include <cosi/output.h>
-#include <cosi/cosirand.h>
 #include <cosi/condsnp.h>
 
 namespace cosi {

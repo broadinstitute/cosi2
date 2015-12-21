@@ -10,8 +10,8 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/parameter.hpp>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
-#include <cosi/cosirand.h>
 #include <cosi/stats.h>
 #include <cosi/decls.h>
 #include <cosi/nodefwd.h>

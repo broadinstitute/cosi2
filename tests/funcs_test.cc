@@ -25,8 +25,8 @@
 #include <boost/accumulators/statistics/variates/covariate.hpp>
 #include <boost/accumulators/statistics/extended_p_square_quantile.hpp>
 #include <boost/core/demangle.hpp>
-#include <cosi/typedval.h>
-#include <cosi/generalmath.h>
+#include <cosi/general/typedval.h>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/coalrate.h>
 
 namespace cosi {

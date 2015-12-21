@@ -54,7 +54,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
-#include "gauss_legendre.h"
+#include <cosi/general/math/gauss_legendre.h>
 
 #ifndef PI
 	#define PI 3.1415926535897932384626433832795028841971693993751

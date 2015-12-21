@@ -21,8 +21,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/foreach.hpp>
-#include <cosi/utils.h>
-#include <cosi/cosirand.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 

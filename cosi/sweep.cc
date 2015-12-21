@@ -17,13 +17,13 @@
 #include <boost/random/lagged_fibonacci.hpp>
 #include <boost/random/discrete_distribution.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/decls.h>
 #include <cosi/node.h>
 #include <cosi/pop.h>
 #include <cosi/demography.h>
 #include <cosi/recomb.h>
 #include <cosi/geneconversion.h>
-#include <cosi/utils.h>
 #include <cosi/mutlist.h>
 #include <cosi/mutate.h>
 #include <cosi/migrate.h>

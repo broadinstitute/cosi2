@@ -6,9 +6,9 @@
 #include <map>
 #include <iostream>
 #include <boost/typeof/typeof.hpp>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
-#include <cosi/generalmath.h>
 
 #include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()
 

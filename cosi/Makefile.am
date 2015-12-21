@@ -54,17 +54,20 @@ COSI_CPPFLAGS += -DCOSI_SUPPORT_COALAPX
 
 SD=$(srcdir)/cosi
 
-COSIUTILHEADERS = $(SD)/utils.h $(SD)/arrival.h $(SD)/arrproc2.h $(SD)/generalmath.h $(SD)/cosirand.h $(SD)/gauss_legendre.h \
-	$(SD)/valgrind.h $(SD)/evtgrp.h $(SD)/typedval.h \
-	$(SD)/order_statistics.hpp $(SD)/random_access_skip_list.h $(SD)/skip_list_detail.h $(SD)/utildefs.h \
-	$(SD)/drd.h $(SD)/memcheck.h $(SD)/mempool.h 
-libcosiutil_la_SOURCES = $(SD)/utils.cc $(SD)/arrival.cc $(SD)/cosirand.cc $(SD)/gauss_legendre.c $(SD)/mempool.cc \
+COSIUTILHEADERS = $(SD)/general/utils.h $(SD)/arrival.h $(SD)/general/arrproc2.h $(SD)/general/arrproc.h \
+	$(SD)/general/math/generalmath.h $(SD)/general/math/cosirand.h $(SD)/general/math/gauss_legendre.h \
+	$(SD)/general/dbg/valgrind.h $(SD)/general/dbg/evtgrp.h $(SD)/general/typedval.h \
+	$(SD)/general/datastruct/order_statistics.hpp $(SD)/general/datastruct/random_access_skip_list.h \
+	$(SD)/general/datastruct/skip_list_detail.h $(SD)/general/utildefs.h \
+	$(SD)/general/dbg/drd.h $(SD)/general/dbg/memcheck.h $(SD)/general/mempool.h 
+libcosiutil_la_SOURCES = $(SD)/general/utils.cc $(SD)/arrival.cc $(SD)/general/math/cosirand.cc \
+	$(SD)/general/math/gauss_legendre.c $(SD)/general/mempool.cc \
 	$(COSIUTILHEADERS)
 libcosiutil_la_CPPFLAGS = $(AM_CPPFLAGS)
 
 
 COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/file.cc $(SD)/geneconversion.cc \
-	$(SD)/historical.cc \
+	$(SD)/historical.cc $(SD)/basemodel.h \
 	$(SD)/migrate.cc $(SD)/mutate.cc $(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc $(SD)/pop.cc $(SD)/recomb.cc \
 	$(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
 	$(SD)/sweep.cc $(SD)/msweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
@@ -72,10 +75,10 @@ COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/fi
 	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
 
 libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/file.cc $(SD)/geneconversion.cc \
-	$(SD)/historical.cc \
+	$(SD)/historical.cc $(SD)/basemodel.h \
 	$(SD)/migrate.cc $(SD)/mutate.cc $(SD)/mutlist.cc $(SD)/node.cc $(SD)/output.cc $(SD)/pop.cc $(SD)/recomb.cc $(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
 	$(SD)/sweep.cc $(SD)/msweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc $(SD)/traj.cc $(SD)/cositop.cc \
-	$(SD)/callgrind.h $(SD)/defs.h $(SD)/coalesce.h $(SD)/demography.h $(SD)/ehh.h $(SD)/ehh.cc $(SD)/file.h $(SD)/geneconversion.h $(SD)/historical.h $(SD)/leafset.h \
+	$(SD)/general/dbg/callgrind.h $(SD)/defs.h $(SD)/coalesce.h $(SD)/demography.h $(SD)/ehh.h $(SD)/ehh.cc $(SD)/file.h $(SD)/geneconversion.h $(SD)/historical.h $(SD)/leafset.h \
 	$(SD)/leafset-bitset.h $(SD)/leafset-tree.h $(SD)/leafset-sizeonly.h $(SD)/leafset-sizeonly.cc $(SD)/leafset-counts.h $(SD)/mutcontext.cc \
 	$(SD)/migrate.h $(SD)/mutate.h $(SD)/node.h $(SD)/nodefwd.h $(SD)/nodelist.h $(SD)/output.h $(SD)/pop.h $(SD)/popfwd.h $(SD)/recomb.h $(SD)/seglist.h $(SD)/seglistfwd.h \
 	$(SD)/seglistfwd2.h $(SD)/segsumm.h $(SD)/simulator.h $(SD)/cositop.h \

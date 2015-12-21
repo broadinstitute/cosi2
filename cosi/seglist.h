@@ -31,9 +31,9 @@
 #include <iterator>
 #include <boost/utility.hpp>
 #include <boost/function.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
-#include <cosi/utils.h>
 #include <cosi/leafset.h>
 #include <cosi/segsumm.h>
 #include <cosi/seglistfwd.h>

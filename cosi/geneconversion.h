@@ -7,10 +7,10 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 #include <boost/random/geometric_distribution.hpp>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/arrproc2.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
-#include <cosi/cosirand.h>
-#include <cosi/arrproc2.h>
 
 namespace cosi {
 

@@ -6,7 +6,7 @@
 #include <string>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/shared_ptr.hpp>
-#include <cosi/arrproc.h>
+#include <cosi/general/arrproc.h>
 
 void doPrint() { std::cout << "hello1\n"; }
 void doPrint2() { std::cout << "hello2\n"; }

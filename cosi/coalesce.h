@@ -12,10 +12,10 @@
 #include <vector>
 #include <boost/random/discrete_distribution.hpp>
 #include <cosi/decls.h>
-#include <cosi/cosirand.h>
-#include <cosi/arrproc2.h>
+#include <cosi/general/math/generalmath.h>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/arrproc2.h>
 #include <cosi/basemodel.h>
-#include <cosi/generalmath.h>
 
 namespace cosi {
 

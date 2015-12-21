@@ -18,7 +18,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/foreach.hpp>
 #include <boost/io/ios_state.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 #include <cosi/mutlist.h>
 #include <cosi/stats.h>
 #include <cosi/genmap.h>

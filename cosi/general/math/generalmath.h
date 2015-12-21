@@ -55,8 +55,8 @@
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/exception/all.hpp>
-#include <cosi/gauss_legendre.h>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/gauss_legendre.h>
 
 #include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()
 

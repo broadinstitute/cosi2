@@ -4,11 +4,11 @@
 #define __INCLUDE_COSI_MIGRATE_H
 
 #include <boost/shared_ptr.hpp>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/arrproc2.h>
 #include <cosi/decls.h>
 #include <cosi/hooks.h>
-#include <cosi/cosirand.h>
 #include <cosi/basemodel.h>
-#include <cosi/arrproc2.h>
 
 namespace cosi {
 

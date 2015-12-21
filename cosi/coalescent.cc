@@ -14,6 +14,7 @@
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/assign/std/map.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/hooks.h>
 #include <cosi/node.h>
 #include <cosi/coalescent.h>
@@ -31,7 +32,6 @@
 #include <cosi/recomb.h>
 #include <cosi/genmap.h>
 #include <cosi/migrate.h>
-#include <cosi/utils.h>
 #include <cosi/stats.h>
 #include <cosi/sweep1.h>
 #include <cosi/sweep2.h>

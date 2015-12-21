@@ -7,8 +7,8 @@
 #include <boost/scoped_array.hpp>
 #include <boost/foreach.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/mutlist.h>
-#include <cosi/utils.h>
 #include <cosi/demography.h>
 #include <cosi/output.h>
 

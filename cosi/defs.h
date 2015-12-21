@@ -18,8 +18,8 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/nvp.hpp>
-#include <cosi/typedval.h>
-#include <cosi/utildefs.h>
+#include <cosi/general/typedval.h>
+#include <cosi/general/utildefs.h>
 
 #include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()
 

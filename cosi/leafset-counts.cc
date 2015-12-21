@@ -9,9 +9,9 @@
 #include <algorithm>
 #include <iterator>
 #include <boost/function_output_iterator.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/mempool.h>
 #include <cosi/leafset-counts.h>
-#include <cosi/mempool.h>
 
 namespace cosi {
 namespace leafset_counts {
