@@ -797,9 +797,9 @@ typedef struct seglist_builder {
 	 bool_t finger_at_end;
 } Seglist_builder;
 
-ostream& operator<<( ostream& s, const Seglist_builder& b );
+std::ostream& operator<<( std::ostream& s, const Seglist_builder& b );
 
-ostream& operator<<( ostream& s, const Seglist_builder& b ) {
+std::ostream& operator<<( std::ostream& s, const Seglist_builder& b ) {
 	s << "{B:" << *b.seglist << "}";
 	return s;
 }
@@ -1684,14 +1684,14 @@ void seglist_write_dot_helper( const Seglist *seglist, const Finger *finger, con
 }
 #endif	// #if 0
 
-ostream& operator<<( ostream& buf, const Seg *seg ) {
+std::ostream& operator<<( std::ostream& buf, const Seg *seg ) {
 	buf << "[Seg: " << seg->beg << "-" << seg->end << "|" << seg->leafset;
 	IF_COSI_TRACK_LAST_COAL( buf << "|" << seg->lastCoalGen );
 	buf << "]";
 	return buf;
 }
 
-ostream& operator<<( ostream& buf, const Seglist *seglist ) {
+std::ostream& operator<<( std::ostream& buf, const Seglist *seglist ) {
   buf << "[";
   const Seg *seg = seglist_first_seg_const( seglist );
   bool_t is_first = True;
@@ -1937,7 +1937,7 @@ struct node *seglist_get_node( const Seglist *seglist ) { return NULL; /*seglist
 #endif
 
 
-ostream& operator<<( ostream& s, const Seg& seg ) {
+std::ostream& operator<<( std::ostream& s, const Seg& seg ) {
 	if ( &seg == NIL )
 		 s << "(NIL)";
 	else
@@ -1945,7 +1945,7 @@ ostream& operator<<( ostream& s, const Seg& seg ) {
 	return s;
 }
 
-ostream& operator<<( ostream& s, const Seglist& seglist ) {
+std::ostream& operator<<( std::ostream& s, const Seglist& seglist ) {
 	s.precision( 16 );
 	s << "[";
 	for ( const Seg *seg = seglist_first_seg_const( &seglist ); seg!= NIL; seg = seglist_next_seg_const( seg ) )

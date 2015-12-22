@@ -19,7 +19,7 @@ static void segsumm_print( const segsumm_t *s ) {
 }
 #endif
 
-ostream& operator<<( ostream& strm, const segsumm_t& s ) {
+std::ostream& operator<<( std::ostream& strm, const segsumm_t& s ) {
   for ( seglet_idx_t i = 0; i < NUM_SEGLETS; i++ ) 
 		 strm << !segsumm_is_seglet_definitely_empty( &s, i );
 	return strm;

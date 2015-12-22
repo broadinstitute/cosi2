@@ -305,12 +305,14 @@ public:
 //  Note: some code adapted from simuPOP by Bo Peng et al
 	 template <typename URNG>
 	 mpop_traj_t
-	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel, std::map<popid, std::map<genotype_t,double> > fits,
+	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel,
+										std::map<popid, std::map<genotype_t,double> > fits,
 										genid begGen, std::map<popid,freq_t> begFreqs,
 										std::map<popid, util::ValRange<freq_t> > endFreqs,
 										URNG& urng,
 										size_t maxAttempts = 1000000 ) {
-		 cosi_using5( util::at, std::map, boost::assign::insert, boost::adaptors::map_keys, boost::range::push_back );
+		 cosi_using5( util::at, std::map, boost::assign::insert, boost::adaptors::map_keys,
+									boost::range::push_back );
 		 
 		 mpop_traj_t pop2freqSelFn;
 

@@ -833,7 +833,7 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 }
 
 void HistEvents::addEvent( EventP event ) {
-	events.insert( make_pair( event->getGen(), event ) );
+	events.insert( std::make_pair( event->getGen(), event ) );
 }
 
 }  // namespace cosi

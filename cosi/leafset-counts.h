@@ -138,7 +138,7 @@ inline bool leafset_is_full( leafset_p leafset ) { return leafset_size( leafset 
 
 #define COSI_FOR_LEAFSET(leafset,leaf_var,body) do {	assert(0); } while(0)
 
-ostream& operator<<( std::ostream& s, leafset_p leafset );
+std::ostream& operator<<( std::ostream& s, leafset_p leafset );
 
 } // namespace leafset_counts
 

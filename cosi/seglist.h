@@ -142,7 +142,7 @@ struct seg: private boost::noncopyable {
 
 };  // struct Seg
 
-ostream& operator<<( ostream&, const Seg& );
+std::ostream& operator<<( std::ostream&, const Seg& );
 
 inline Seg *seglist_next_seg( Seg *a_seg ) { return ((a_seg)->fwd[ seglist_min_level ].seg); }
 inline const Seg *seglist_next_seg_const( const Seg *a_seg ) { return ((a_seg)->fwd[ seglist_min_level ].seg); }
@@ -361,7 +361,7 @@ void seglist_move_end( Seglist *seglist, Finger *finger, loc_t new_end );
 void seglist_segsumm_chk_helper( const Seglist *my_s, const char *fname, int line );
 #define seglist_segsumm_chk(seglist)
 
-ostream& operator<<( ostream& s, const Seglist& seglist );
+std::ostream& operator<<( std::ostream& s, const Seglist& seglist );
 
 // Class: Seglist_const_iterator
 // Iterates over <Segs> of a <Seglist>
@@ -463,8 +463,8 @@ inline Seglist::iterator Seglist::end() { return Seglist_iterator( NIL ); }
 #define seglist_cmp(s2,s,FN,LN) seglist_cmp_helper(s2,s,#s2,#s,__FILE__,__LINE__,FN,LN)
 #endif
 
-ostream& operator<<( ostream& buf, const Seg *seg );
-ostream& operator<<( ostream& buf, const Seglist *seglist );
+std::ostream& operator<<( std::ostream& buf, const Seg *seg );
+std::ostream& operator<<( std::ostream& buf, const Seglist *seglist );
 
 void seglist_chk_helper( const Seglist *seglist, const char *fname, int line );
 

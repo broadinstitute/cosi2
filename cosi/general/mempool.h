@@ -47,7 +47,7 @@ private:
 	 
 	 /* Field: blocks */
 	 /* Pointers to the memory blocks that we have allocated so far. */
-	 vector<void *> blocks;
+	 std::vector<void *> blocks;
 	 
 	 /* Field: cur_block */
 	 /* Pointer to the current memory block, from which we're allocating items. */
@@ -63,7 +63,7 @@ private:
 	 
 	 /* Field: free_items */
 	 /* A freelist, containing pointers to items that have been freed. */
-	 vector<void *> free_items;
+	 std::vector<void *> free_items;
 
 	 /* Field: num_live_items */
 	 /* Current number of live items in the pool */

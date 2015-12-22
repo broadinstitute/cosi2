@@ -80,7 +80,7 @@ struct Mut: public boost::totally_ordered<Mut> {
 inline bool operator<( const Mut& m1, const Mut& m2 ) { return m1.loc < m2.loc; }
 inline bool operator==( const Mut& m1, const Mut& m2 ) { return m1.loc == m2.loc; }
 
-inline ostream& operator<<( ostream& s, const Mut& m ) {
+inline std::ostream& operator<<( std::ostream& s, const Mut& m ) {
   s << "[Mut: " << m.loc << "]";
   return s;
 }
@@ -148,7 +148,8 @@ public:
 	 //   outputMutGens - whether to write out the time of each mutation
 	 //   recombLocs - if non-NULL, vector (unsorted) of recombination locations
 	 //   outputPrecision - number of decimal places in the output
-	 void print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSizes, TreeStatsHookP treeStatsHook,
+	 void print_haps_ms( std::ostream& strm, const vector< nchroms_t >& sampleSizes,
+											 TreeStatsHookP treeStatsHook,
 											 bool_t outputMutGens, const vector< loc_t > *recombLocs,
 											 bool_t outputMutGlocs,
 											 GenMapP genMap,
@@ -165,7 +166,7 @@ public:
 
 	 // Method: loadFromMs
 	 // Load a Mutlist from the output of the ms simulator
-	 static MutlistP loadFromMs( istream& );
+	 static MutlistP loadFromMs( std::istream& );
 
 	 // Method: forMutPairs
 	 //

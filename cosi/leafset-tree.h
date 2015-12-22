@@ -171,7 +171,7 @@ void leafset_get_leaves( leafset_p leafset, OutputIter result ) {
   } while(0)
 
 
-ostream& operator<<( std::ostream& s, leafset_p leafset );
+std::ostream& operator<<( std::ostream& s, leafset_p leafset );
 
 } // namespace leafset_tree
 

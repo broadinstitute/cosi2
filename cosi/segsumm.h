@@ -57,7 +57,7 @@ extern segsumm_t empty_segsumm, full_segsumm;
 
 bool_t segsumm_split_on_seg( const segsumm_t *s, loc_t loc1, loc_t loc2,
 														 segsumm_t *s_inside, segsumm_t *s_outside );
-std::ostream& operator<<( ostream&, const segsumm_t& );
+std::ostream& operator<<( std::ostream&, const segsumm_t& );
 void segsumm_split( const segsumm_t *s, loc_t loc, segsumm_t *s_left, segsumm_t *s_right );
 bool_t segsumm_is_seglet_definitely_full( const segsumm_t *s, seglet_idx_t i );
 bool_t segsumm_is_seglet_definitely_empty( const segsumm_t *s, seglet_idx_t i );

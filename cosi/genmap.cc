@@ -53,15 +53,15 @@ GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_ ):
 	}
 }
 
-GenMap::GenMap( istream& f, const len_bp_t length_ ):
+GenMap::GenMap( std::istream& f, const len_bp_t length_ ):
 	pd_range_len( length_ ) {
 	readFrom( f );
 }
 
-void GenMap::readFrom( istream& recombfp ) {
+void GenMap::readFrom( std::istream& recombfp ) {
 
 	boost::io::ios_exception_saver save_exceptions( recombfp );
-	recombfp.exceptions( ios::failbit | ios::badbit );
+	recombfp.exceptions( std::ios::failbit | std::ios::badbit );
 	
 	pd_locs.clear();
 	gd_locs.clear();

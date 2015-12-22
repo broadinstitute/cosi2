@@ -75,20 +75,20 @@
 
 namespace cosi {
 
-using std::cout;
-using std::endl;
-using std::cerr;
-using std::ios;
-using std::ostream;
-using std::istream;
-using std::ofstream;
-using std::ifstream;
+// using std::cout;
+// using std::endl;
+// using std::cerr;
+// using std::ios;
+// using std::ostream;
+// using std::istream;
+// using std::ofstream;
+// using std::ifstream;
 
-using std::map;
-using std::vector;
-using std::make_pair;
-using std::pair;
-using std::string;
+// using std::map;
+// using std::vector;
+// using std::make_pair;
+// using std::pair;
+// using std::string;
 
 //#define COSI_LEAK_CHECK do { static int chk_count = 0; printf( "leak check %d at %s:%d\n", chk_count++, __FILE__, __LINE__ ); VALGRIND_DO_LEAK_CHECK; } while(0)
 
@@ -257,8 +257,8 @@ struct timespec;
   
 unsigned long timespec_since( const struct timespec *start);
 
-#define ForVec(T,x,v) for( vector< T >::const_iterator x = (v).begin(); x != (v).end(); x++ )
-#define ForVecMut(T,x,v) for( vector< T >::iterator x = (v).begin(); x != (v).end(); x++ )
+#define ForVec(T,x,v) for( std::vector< T >::const_iterator x = (v).begin(); x != (v).end(); x++ )
+#define ForVecMut(T,x,v) for( std::vector< T >::iterator x = (v).begin(); x != (v).end(); x++ )
 #define ForMap( KeyT, ValT, x, m ) for( map< KeyT, ValT >::const_iterator x = (m).begin(); x != (m).end(); x++ )
 
 // Macro: For
@@ -286,8 +286,8 @@ V const& at( const std::map< K, V>& m, const K k ) {
 }
 
 template <typename T> struct IndexSorter {
-	 const vector<T>& origVec;
-	 IndexSorter( const vector<T>& origVec_ ): origVec( origVec_ ) { }
+	 const std::vector<T>& origVec;
+	 IndexSorter( const std::vector<T>& origVec_ ): origVec( origVec_ ) { }
 	 bool operator()( int i, int j ) { return origVec[i] < origVec[j]; }
 };
 
@@ -432,7 +432,7 @@ public:
 			 numVals++;
 		
 			 int i = 0;
-			 for ( typename vector<ValT>::const_iterator yi = partials.begin(); yi != partials.end(); yi++ ) {
+			 for ( typename std::vector<ValT>::const_iterator yi = partials.begin(); yi != partials.end(); yi++ ) {
 				 ValT y = *yi;
 
 				 if ( ::fabs( ToDouble( x ) ) < ::fabs( ToDouble( y ) ) ) boost::swap( x, y );
@@ -475,7 +475,7 @@ public:
 	 }
   
 private:
-	 vector<ValT> partials;
+	 std::vector<ValT> partials;
 
 	 CountT numVals;
 	 CountT numNaNs;
@@ -686,12 +686,12 @@ struct CmpByField {
 };
 
 template <class Range1, class Range2, class Range3>
-void save( const string& col1, const Range1& r1, const string& col2, const Range2& r2,
-					 const string& col3, const Range3& r3,
-					 const string& fname,
+void save( const std::string& col1, const Range1& r1, const std::string& col2, const Range2& r2,
+					 const std::string& col3, const Range3& r3,
+					 const std::string& fname,
 					 int precision ) {
-	ofstream out( fname.c_str() );
-	out.setf(ios::fixed,ios::floatfield);
+	std::ofstream out( fname.c_str() );
+	out.setf(std::ios::fixed,std::ios::floatfield);
 	out.precision( precision );
 	out << col1 << "\t" << col2 << "\t" << col3 << "\n";
 	BOOST_AUTO_TPL( i1, boost::begin( r1 ) );
@@ -712,32 +712,32 @@ void save( const string& col1, const Range1& r1, const string& col2, const Range
 // string representation.
 //
 template <typename T>
-inline string ToString( const T& v ) {
+inline std::string ToString( const T& v ) {
 	std::ostringstream s;
 	s << v;
 	return s.str();
 }
 
-inline string ToString( const string& s ) { return s; }
+inline std::string ToString( const std::string& s ) { return s; }
 
 template <typename T1, typename T2>
-string tabjoin( const T1& v1, const T2& v2 ) { return ToString( v1 ) + "\t" + ToString( v2 ); }
+std::string tabjoin( const T1& v1, const T2& v2 ) { return ToString( v1 ) + "\t" + ToString( v2 ); }
 template <typename T1, typename T2, typename T3>
-string tabjoin( const T1& v1, const T2& v2, const T3& v3 ) { return tabjoin( v1, v2 ) + "\t" + v3; }
+std::string tabjoin( const T1& v1, const T2& v2, const T3& v3 ) { return tabjoin( v1, v2 ) + "\t" + v3; }
 template <typename T1, typename T2, typename T3, typename T4>
-string tabjoin( const T1& v1, const T2& v2, const T3& v3, const T4& v4 ) { return tabjoin( v1, v2, v3 ) + "\t" + v4; }
+std::string tabjoin( const T1& v1, const T2& v2, const T3& v3, const T4& v4 ) { return tabjoin( v1, v2, v3 ) + "\t" + v4; }
 template <typename T1, typename T2, typename T3, typename T4, typename T5>
-string tabjoin( const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5 ) { return tabjoin( v1, v2, v3, v4 ) + "\t" + v5; }
+std::string tabjoin( const T1& v1, const T2& v2, const T3& v3, const T4& v4, const T5& v5 ) { return tabjoin( v1, v2, v3, v4 ) + "\t" + v5; }
 
 
 template <class Range1, class Range2, class Range3, class Range4>
-void save( const string& col1, const Range1& r1, const string& col2, const Range2& r2,
-					 const string& col3, const Range3& r3,
-					 const string& col4, const Range4& r4,
-					 const string& fname,
+void save( const std::string& col1, const Range1& r1, const std::string& col2, const Range2& r2,
+					 const std::string& col3, const Range3& r3,
+					 const std::string& col4, const Range4& r4,
+					 const std::string& fname,
 					 int precision ) {
-	ofstream out( fname.c_str() );
-	out.setf(ios::fixed,ios::floatfield);
+	std::ofstream out( fname.c_str() );
+	out.setf(std::ios::fixed,std::ios::floatfield);
 	out.precision( precision );
 	out << col1 << "\t" << col2 << "\t" << col3 << "\t" << col4 << "\n";
 	BOOST_AUTO_TPL( i1, boost::begin( r1 ) );
@@ -778,15 +778,15 @@ const V& map_get( const std::map<K,V>& m, const K& k, const V& dflt ) {
 
 // Func: startsWith
 // Test whether string 's' begins with string 't'.
-inline bool_t startsWith( const string& s, const string& t ) {
+inline bool_t startsWith( const std::string& s, const std::string& t ) {
 	return s.size() >= t.size() && !s.compare( 0, t.size(), t );
 }
 
 template <class T>
-ostream& operator<<( ostream& s, const vector<T>& v) {
+std::ostream& operator<<( std::ostream& s, const std::vector<T>& v) {
 	s << "[";
 	bool first = true;
-	for ( typename vector<T>::const_iterator it = v.begin(); it != v.end(); ++it ) {
+	for ( typename std::vector<T>::const_iterator it = v.begin(); it != v.end(); ++it ) {
 		if ( !first ) s << ", ";
 		using namespace std;
 		s << *it;
@@ -798,7 +798,7 @@ ostream& operator<<( ostream& s, const vector<T>& v) {
 }
 
 template <typename K, typename V>
-ostream& operator<<( ostream& s, const std::map<K,V>& m) {
+std::ostream& operator<<( std::ostream& s, const std::map<K,V>& m) {
 	s << "[";
 	bool first = true;
 	for ( typename std::map<K,V>::const_iterator it = m.begin(); it != m.end(); ++it ) {
@@ -814,18 +814,18 @@ ostream& operator<<( ostream& s, const std::map<K,V>& m) {
 }
 
 template <typename T1, typename T2>
-ostream& operator<<( ostream& s, const std::pair<T1,T2>& p ) {
+std::ostream& operator<<( std::ostream& s, const std::pair<T1,T2>& p ) {
 	s << "(" << p.first << "," << p.second << ")";
 	return s;
 }
 
 template <typename T1, typename T2>
-ostream& operator<<( ostream& s, const std::pair<const T1,T2>& p ) {
+std::ostream& operator<<( std::ostream& s, const std::pair<const T1,T2>& p ) {
 	s << "(" << p.first << "," << p.second << ")";
 	return s;
 }
 
-inline bool_t isSpace( const string& s ) {
+inline bool_t isSpace( const std::string& s ) {
 	ForEach( char c, s ) if ( !std::isspace( c ) ) return False;
 	return True;
 }
@@ -900,17 +900,17 @@ template <typename T>
 class ValRange {
 public:
 	 ValRange() { }
-	 explicit ValRange( string rangeDef ) { init( rangeDef ); }
+	 explicit ValRange( std::string rangeDef ) { init( rangeDef ); }
 	 ValRange( T min_, T max_ ): bounds( min_, max_ ) { }
 
-	 void init( string rangeDef ) {
+	 void init( std::string rangeDef ) {
 		 if ( !rangeDef.empty() ) {
 
 			 typedef boost::tokenizer<boost::char_separator<char> > 
 					tokenizer;
 			 boost::char_separator<char> sep("-");
 			 tokenizer tokens(rangeDef, sep);
-			 vector<string> result( tokens.begin(), tokens.end() );
+			 std::vector<std::string> result( tokens.begin(), tokens.end() );
 
 			 if ( result.size() == 1 ) {
 				 bounds.first = bounds.second = boost::lexical_cast<T>( result.at(0) );
@@ -942,7 +942,7 @@ public:
 private:
 	 // Field: bounds
 	 // The pair of bounds of the range values
-	 pair< boost::optional<T>, boost::optional<T> > bounds;
+	 std::pair< boost::optional<T>, boost::optional<T> > bounds;
 
 };  // class ValRange
 
@@ -950,11 +950,11 @@ template <typename T>
 inline ValRange<T> make_val_range( T min_, T max_ ){ return ValRange<T>( min_, max_ ); }
 
 template <typename T>
-istream& operator>>( istream& is, ValRange<T>& valRange );
+std::istream& operator>>( std::istream& is, ValRange<T>& valRange );
 
 template <typename T>
-istream& operator>>( istream& is, ValRange<T>& valRange ) {
-	string valRangeDef;
+std::istream& operator>>( std::istream& is, ValRange<T>& valRange ) {
+	std::string valRangeDef;
 	is >> valRangeDef;
 	valRange.init( valRangeDef );
 	
@@ -963,7 +963,7 @@ istream& operator>>( istream& is, ValRange<T>& valRange ) {
 
 
 template <typename T>
-ostream& operator<<( ostream& os, const ValRange<T>& valRange ) {
+std::ostream& operator<<( std::ostream& os, const ValRange<T>& valRange ) {
 	if ( valRange.getMin() ) os << valRange.getMin();
 	if ( valRange.getMax() && !( valRange.getMin() == valRange.getMax() ) ) os << "-" << valRange.getMax();
 	

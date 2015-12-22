@@ -115,10 +115,10 @@ const char *leafset_str( leafset_p /*leafset*/ ) {
   return "unimpl";
 }
 
-ostream& operator<<( std::ostream& s, leafset_p leafset ) {
+std::ostream& operator<<( std::ostream& s, leafset_p leafset ) {
 	if ( leafset_is_empty( leafset ) ) { s << "{}"; return s; }
 	s << "{(" << leafset_size( leafset ) << ") ";
-	vector<leaf_id_t> leaves;
+	std::vector<leaf_id_t> leaves;
 	leafset_get_leaves( leafset, back_inserter( leaves ) );
 	std::sort( leaves.begin(), leaves.end() );
 	std::copy( leaves.begin(), leaves.end(), std::ostream_iterator<leaf_id_t>( std::cout, " " ) );
@@ -129,7 +129,7 @@ ostream& operator<<( std::ostream& s, leafset_p leafset ) {
 #ifdef COSI_R2
 void leafset_struct::computeLeaves() const {
 	if ( !leaves ) {
-		leaves = boost::scoped_ptr< vector< leaf_id_t > >( new vector< leaf_id_t >() );
+		leaves = boost::scoped_ptr< std::vector< leaf_id_t > >( new std::vector< leaf_id_t >() );
 		leafset_get_leaves( leafset_p( (leafset_t *)this ), std::back_inserter( *leaves ) );
 		std::sort( leaves->begin(), leaves->end() );
 	}

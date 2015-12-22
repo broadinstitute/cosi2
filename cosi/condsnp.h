@@ -90,7 +90,7 @@ private:
 	 // Map from population to the frequency restriction in that population.
 	 pop2cond_map_t pop2cond;
 	 
-	 friend std::ostream& operator<<( ostream& s, const CondSnpDef& condSnpDef ) {
+	 friend std::ostream& operator<<( std::ostream& s, const CondSnpDef& condSnpDef ) {
 		 s << condSnpDef.loc << "/" << condSnpDef.pop2cond;
 		 return s; 
 	 }

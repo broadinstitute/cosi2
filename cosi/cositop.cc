@@ -188,7 +188,7 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 	po::store(po::parse_command_line(argc, argv, cosi_options), vm);
 
 	if (vm.count("help")) {
-    cerr << cosi_options << "\n";
+    std::cerr << cosi_options << "\n";
     return EXIT_FAILURE;
 	}
 	if (vm.count("version")) {
@@ -248,14 +248,14 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 #ifndef COSI_NO_CPU_TIMER		
 		if ( stopAfterNs > 0 && overallTimer.elapsed().wall > stopAfterNs ) {
 			cout << "// cosi-early-exit\n";
-			cerr << "cosi: exiting after " << overallTimer.elapsed().wall << " ns; completed " <<
+			std::cerr << "cosi: exiting after " << overallTimer.elapsed().wall << " ns; completed " <<
 				 simNum << " of " << nsims << " sims.\n";
 			break;
 		}
 		
 		boost::timer::cpu_timer cpuTimer;
 #endif		
-		if ( showProgress && !( simNum % showProgress ) ) { cerr << " sim " << simNum << " of " << nsims << endl; }
+		if ( showProgress && !( simNum % showProgress ) ) { std::cerr << " sim " << simNum << " of " << nsims << std::endl; }
 		CoSi cosi;
 
 		cosi.set_segfp( segfp );
@@ -286,7 +286,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 
 		if ( simNum == 0 ) {
 			randGen = cosi.getRandGen();
-			if ( !msOutput ) cerr << "coalescent seed: " << randGen->getSeed() << "\n";
+			if ( !msOutput ) std::cerr << "coalescent seed: " << randGen->getSeed() << "\n";
 			if ( msOutput ) {
 				cout.precision( outputPrecision );
 				DemographyP dem = cosi.getDemography();

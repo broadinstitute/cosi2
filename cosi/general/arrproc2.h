@@ -245,7 +245,7 @@ public:
    }
    const rate_fn_integral_type& getRateFnIntegral() const { return rateFnIntegral; }
    
-   friend ostream& operator<<( ostream& s, const ArrivalProcess& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const ArrivalProcess& f ) {
 		 s << "ArrivalProcess[label=" << f.label << ", rateFnIntegral=" << f.rateFnIntegral << "]";
 		 return s;
 	 }
@@ -288,7 +288,7 @@ public:
 		 label( label_ ) { }
 
    
-   friend ostream& operator<<( ostream& s, const ArrivalProcess& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const ArrivalProcess& f ) {
 		 s << "ArrivalProcess[label=" << f.label << ", rateFn=" << f.rateFn << "]";
 		 return s;
 	 }
@@ -390,7 +390,7 @@ class ArrivalProcess<TTime, Stoch< URNG, AnyProc > > {
       virtual ~ArrivalProcessConcept() {}
       virtual TTime do_nextEventTime( TTime fromTime, TTime maxTime, URNG& ) = 0;
       virtual void do_executeNextEvent( TTime t, URNG& ) = 0;
-			virtual ostream& print( ostream& s ) const = 0;
+			virtual std::ostream& print( std::ostream& s ) const = 0;
 			virtual std::string doGetLabel() const = 0;
    };
    template <typename TSpec>
@@ -407,7 +407,7 @@ class ArrivalProcess<TTime, Stoch< URNG, AnyProc > > {
 				executeNextEvent( proc, t, urng );
 			}
 			
-			virtual ostream& print( ostream& s ) const { s << proc; return s; }
+			virtual std::ostream& print( std::ostream& s ) const { s << proc; return s; }
 			virtual std::string doGetLabel() const { return proc.getLabel(); }
    private:
       ArrivalProcess<TTime, Stoch< URNG, TSpec> > proc;
@@ -435,11 +435,11 @@ public:
 
 	 void execNextEvent( TTime t, URNG& urng ) { object->do_executeNextEvent( t, urng ); }
 	 
-	 ostream& print( ostream& s ) const { return object->print( s ); }
+	 std::ostream& print( std::ostream& s ) const { return object->print( s ); }
 
 	 std::string getLabel() const { return object->doGetLabel(); }
    
-   friend ostream& operator<<( ostream& s, const ArrivalProcess& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const ArrivalProcess& f ) {
 		 return f.print( s );
 	 }
 //	 friend std::string getLabel<>( const ArrivalProcess& p ); // { return p.object->doGetLabel(); }

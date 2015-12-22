@@ -273,7 +273,7 @@ public:
 
    TRange operator()( TDomain ) const { return val; }
 
-   friend ostream& operator<<( ostream& s, const Function& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
      s << f.val; return s;
    }
 
@@ -299,7 +299,7 @@ public:
    typedef Const< CompileTime<val> > spec_type;
    TRange operator()( TDomain ) const { return static_cast<TRange>( val ); }
 
-   friend ostream& operator<<( ostream& s, const Function& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
      s << val; return s;
    }
    
@@ -342,7 +342,7 @@ public:
    result_type operator()( TDomain x ) const { return factor * ( x - static_cast< TDomain >( 0.0 ) ) ; }
    factor_type getFactor() const { return factor; }
 
-   friend ostream& operator<<( ostream& s, const Function& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
 		 typedef BOOST_TYPEOF_TPL( f.factor ) f_t;
 		 if ( f.factor == f_t(1.0) ) s << "x";
 		 else
@@ -371,7 +371,7 @@ public:
    Function( factor_type factor_ ): factor( factor_ ) {}
    result_type operator()( TDomain x ) const { return factor * x*x; }
    factor_type getFactor() const { return factor; }
-   friend ostream& operator<<( ostream& s, const Function& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
      s << "(" << f.factor << " * x^2" << ")"; return s; 
    }
 private:
@@ -391,25 +391,25 @@ struct AddOp {
    typedef BOOST_TYPEOF_TPL( boost::declval<T1>() + boost::declval<T2>() ) result_type;
    result_type operator()( T1 a1, T2 a2 ) const { return a1 + a2; }
 
-   friend ostream& operator<<( ostream& s, const AddOp& ) { s << "+"; return s; }
+   friend std::ostream& operator<<( std::ostream& s, const AddOp& ) { s << "+"; return s; }
 };
 template <typename T1, typename T2 = T1>
 struct SubOp {
    typedef BOOST_TYPEOF_TPL( boost::declval<T1>() - boost::declval<T2>() ) result_type;
    result_type operator()( T1 a1, T2 a2 ) const { return a1 - a2; }
-   friend ostream& operator<<( ostream& s, const SubOp& ) { s << "-"; return s; }
+   friend std::ostream& operator<<( std::ostream& s, const SubOp& ) { s << "-"; return s; }
 };
 template <typename T1, typename T2 = T1>
 struct MultOp {
    typedef BOOST_TYPEOF_TPL( boost::declval<T1>() * boost::declval<T2>() ) result_type;
    result_type operator()( T1 a1, T2 a2 ) const { return a1 * a2; }
-   friend ostream& operator<<( ostream& s, const MultOp& ) { s << "*"; return s; }
+   friend std::ostream& operator<<( std::ostream& s, const MultOp& ) { s << "*"; return s; }
 };
 template <typename T1, typename T2 = T1>
 struct DivOp {
    typedef BOOST_TYPEOF_TPL( boost::declval<T1>() / boost::declval<T2>() ) result_type;
    result_type operator()( T1 a1, T2 a2 ) const { return a1 / a2; }
-   friend ostream& operator<<( ostream& s, const DivOp& ) { s << "/"; return s; }
+   friend std::ostream& operator<<( std::ostream& s, const DivOp& ) { s << "/"; return s; }
 };
 
 // *** Binary Op Function
@@ -445,7 +445,7 @@ public:
    result_type operator()( TDomain x ) const { return binop( eval( this->first(), x ),
                                                              eval( this->second(), x ) ); }
 
-   friend ostream& operator<<( ostream& s, const Function& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
      s << "(" << f.first() << " " << f.binop << " " << f.second() << ")"; return s;
    }
    
@@ -734,7 +734,7 @@ public:
 
    TRange operator()( TDomain x ) const { return op( f( x ) ); }
 
-//   friend ostream& operator<<( ostream& s, const Function& f ) { s << op << " " << f.f; return s; }
+//   friend std::ostream& operator<<( std::ostream& s, const Function& f ) { s << op << " " << f.f; return s; }
 
 	 const function_type& getFunction() const { return f; }
    
@@ -748,7 +748,7 @@ template <typename TDomain, typename TRange, typename TSpec, typename Op>
 const Op Function<TDomain, TRange, UnaryOp< TSpec, Op > >::op = Op();
 
 template <typename T> 
-ostream& operator<<( ostream& s, const std::negate< T >& ) { s << "-"; return s; }
+std::ostream& operator<<( std::ostream& s, const std::negate< T >& ) { s << "-"; return s; }
 
 
 template <typename TDomain, typename TRange, typename TSpec>
@@ -758,7 +758,7 @@ operator-( const Function<TDomain,TRange,TSpec>& f ) {
 }
 
 template <typename TDomain, typename TRange, typename TSpec>
-ostream& operator<<( ostream& s, const Function<TDomain,TRange,UnaryOp<TSpec, std::negate<TRange> > >& f ) {
+std::ostream& operator<<( std::ostream& s, const Function<TDomain,TRange,UnaryOp<TSpec, std::negate<TRange> > >& f ) {
 	s << "-(" << f.getFunction() << ")"; return s;
 }
 
@@ -770,7 +770,7 @@ struct Exp
 };
 
 template <typename TDomain, typename TSpec>
-ostream& operator<<( ostream& s, const Function<TDomain,double,UnaryOp<TSpec, Exp> >& f ) {
+std::ostream& operator<<( std::ostream& s, const Function<TDomain,double,UnaryOp<TSpec, Exp> >& f ) {
 	s << "e^(" << f.getFunction() << ")"; return s;
 }
 
@@ -780,7 +780,7 @@ struct Log
 	 T operator()(T x) const { return log(x);}
 };
 template <typename TDomain, typename TSpec>
-ostream& operator<<( ostream& s, const Function<TDomain,double,UnaryOp<TSpec, Log> >& f ) {
+std::ostream& operator<<( std::ostream& s, const Function<TDomain,double,UnaryOp<TSpec, Log> >& f ) {
 	s << "ln(" << f.getFunction() << ")"; return s;
 }
 
@@ -981,7 +981,7 @@ public:
 				eval( it->second, x );
 	 }
    
-	 friend ostream& operator<<( ostream& s, const Function& f ) {
+	 friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
 		 s << "Piecewise[";
 		 for ( BOOST_AUTO_TPL( it, f.pieces.rbegin() ); it != f.pieces.rend(); it++ )
 				s << "(" << it->first << ", " << it->second << ")";
@@ -1019,9 +1019,9 @@ set( Function< TDomain, TRange, Piecewise< TPieceSpec > >& f, TDomain x, TRange 
 
 // Method: loadFrom - read piecewise function from a file
 template <typename TDomain, typename TRange>
-void loadFrom( istream& s, Function<TDomain, TRange, Piecewise< Const<> > >& f ) {
+void loadFrom( std::istream& s, Function<TDomain, TRange, Piecewise< Const<> > >& f ) {
 	boost::io::ios_exception_saver save_exceptions( s );
-	s.exceptions( ios::failbit | ios::badbit );
+	s.exceptions( std::ios::failbit | std::ios::badbit );
 	f.getPieces().clear();
 	try {
 		while ( !s.eof() ) {
@@ -1745,7 +1745,7 @@ public:
 
    TRange operator()( TDomain x ) const { assert( object.get() ); return object->doEval( x ); }
 
-	 friend ostream& operator<<( ostream& s, const Function& f ) {
+	 friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
 		 assert( f.object.get() );
 		 f.object->doOutput( s );
 		 return s;
@@ -1783,7 +1783,7 @@ class ArrivalProcess<TTime, Any< TRand > > {
       virtual ~ArrivalProcessConcept() {}
       virtual TTime doNextArrival( TTime fromTime, TTime maxTime, double rateFactor,
                                    TRand& randGen, double eps, int maxSteps ) const = 0;
-			virtual ostream& print( ostream& s ) const = 0;
+			virtual std::ostream& print( std::ostream& s ) const = 0;
 			virtual std::string doGetLabel() const = 0;
    };
    template <typename TSpec>
@@ -1795,7 +1795,7 @@ class ArrivalProcess<TTime, Any< TRand > > {
                                    TRand& randGen, double eps, int maxSteps ) const {
         return proc.nextArrivalTime( fromTime, maxTime, rateFactor, randGen, eps, maxSteps );
       }
-			virtual ostream& print( ostream& s ) const { s << proc; return s; }
+			virtual std::ostream& print( std::ostream& s ) const { s << proc; return s; }
 			virtual std::string doGetLabel() const { return proc.getLabel(); }
    private:
       ArrivalProcess<TTime, TSpec> proc;
@@ -1821,11 +1821,11 @@ public:
                           TRand& randGen, double eps = 1e-5, int maxSteps = 100000 ) {
      return object->doNextArrival( fromTime, maxTime, rateFactor, randGen, eps, maxSteps );
    }
-	 ostream& print( ostream& s ) const { return object->print( s ); }
+	 std::ostream& print( std::ostream& s ) const { return object->print( s ); }
 
 	 std::string getLabel() const { return object->doGetLabel(); }
    
-   friend ostream& operator<<( ostream& s, const ArrivalProcess& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const ArrivalProcess& f ) {
 		 return f.print( s );
 	 }
 //	 friend std::string getLabel<>( const ArrivalProcess& p ); // { return p.object->doGetLabel(); }
@@ -1935,7 +1935,7 @@ public:
    }
    const rate_function_integral_type& getRateFunctionIntegral() const { return rateFunctionIntegral; }
    
-   friend ostream& operator<<( ostream& s, const ArrivalProcess& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const ArrivalProcess& f ) {
 		 s << "ArrivalProcess[label=" << f.label << ", rateFunctionIntegral=" << f.rateFunctionIntegral << "]";
 		 return s;
 	 }
@@ -2007,7 +2007,7 @@ public:
    // Points must be added in order of increasing 'x'.
    void addPt( TDomain x, TRange y ) {
      assert( x2y.empty() || x > boost::prior( x2y.end() )->first );
-     x2y.insert( x2y.end(), make_pair( x, y ) );
+     x2y.insert( x2y.end(), std::make_pair( x, y ) );
    }
 
    // Method: eval

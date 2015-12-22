@@ -262,7 +262,7 @@ private:
 
 	 // Field: allNodes
 	 // All currently active nodes. NOTE: 0th element of this vector is unused!
-	 vector<Node *> allNodes;
+	 std::vector<Node *> allNodes;
 
 	 // Field: recombPartialSums
 	 // Partial sum tree of recomb rates.  Keeps the

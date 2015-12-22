@@ -70,7 +70,7 @@ private:
 
 	 // Field: outputMutContextsFor
 	 // Mutations for which to output the context
-	 vector< loc_bp_int_t > outputMutContextsFor;
+	 std::vector< loc_bp_int_t > outputMutContextsFor;
 
 	 // Field: randSeed
 	 // Random seed to be used.

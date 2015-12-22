@@ -50,7 +50,7 @@ class GenMap: boost::noncopyable {
 
 public:
 	 GenMap( const boost::filesystem::path& fname, len_bp_t length_ );
-	 GenMap( istream&, len_bp_t length_ );
+	 GenMap( std::istream&, len_bp_t length_ );
 
 	 // Method: recomb_get_length
 	 // Returns the physical length of the simulated region, in basepairs.
@@ -117,7 +117,7 @@ private:
 	 // math::InterpFn<ploc_t,gloc_t> loc2cumRate;
 	 // math::InterpFn<gloc_t,ploc_t> cumRate2loc;
 
-	 void readFrom( istream& recombfp );
+	 void readFrom( std::istream& recombfp );
 
 	 ploc_t forceLocOntoBpBoundary( ploc_t loc ) const {
 		 return loc;

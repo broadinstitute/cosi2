@@ -27,12 +27,6 @@ namespace cosi {
 
 #define ForEach BOOST_FOREACH
   
-using std::cout;
-using std::ios;
-using std::endl;
-using std::ofstream;
-using std::make_pair;
-using std::string;
 namespace lam = boost::lambda;
 namespace ran = boost::range;
 
@@ -81,7 +75,7 @@ void Mutlist::freeze( bool_t inf_sites, len_bp_t length ) {
 #ifndef COSI_FREQONLY	
 	leaf2muts.resize( leafset_get_max_leaf_id() );
 	for ( const_iterator it = muts.begin(); it != muts.end(); it++ ) {
-		vector< leaf_id_t > leavesVec;
+		std::vector< leaf_id_t > leavesVec;
 		leafset_get_leaves( it->leaves, std::back_inserter( leavesVec ) );
 		ForEach( leaf_id_t leaf_it, leavesVec )
 			 leaf2muts[ leaf_it ].push_back( it );
@@ -117,7 +111,7 @@ void Mutlist::freeze( bool_t inf_sites, len_bp_t length ) {
 }  // Mutlist::freeze()
 
 #if 0
-vector< Mut >
+std::vector< Mut >
 Mutlist::getMutsInDir( loc_t coreLoc, dir_t dir ) const {
 	chkCond( False, "unimpl" );
   namespace ad = boost::adaptors;
@@ -125,7 +119,7 @@ Mutlist::getMutsInDir( loc_t coreLoc, dir_t dir ) const {
   const_iterator it = muts.lower_bound( coreLoc );
 	assert( it != muts.end() );
 
-  vector< Mut > result;
+  std::vector< Mut > result;
 #if 0	
   if ( dir == DIR_L )
 		 boost::push_back( result,  make_pair<const_iterator,const_iterator>( muts.begin(), boost::next(it) ) | ad::map_values | ad::reversed );
@@ -154,7 +148,7 @@ const Mut& Mutlist::getMut( loc_t loc ) const {
 
 // Method: loadFromMs
 // Load a Mutlist from the output of the ms simulator
-MutlistP Mutlist::loadFromMs( istream& is ) {
+MutlistP Mutlist::loadFromMs( std::istream& is ) {
 
 	// ms output for one simulation looks like:
 
@@ -188,7 +182,7 @@ MutlistP Mutlist::loadFromMs( istream& is ) {
 
 	is >> word;
 	chkCond( word == "positions:", "missing positions line in ms format" );
-	vector< ploc_t > mutLocs;
+	std::vector< ploc_t > mutLocs;
 	for ( unsigned int i = 0; i < nmuts; i++ ) {
 		ploc_t ploc;
 		is >> ploc;
@@ -196,12 +190,12 @@ MutlistP Mutlist::loadFromMs( istream& is ) {
 	}
 	chkCond( mutLocs.size() == nmuts, "ms format error: number of mutations does not equal segsites" );
 
-	vector< string > chroms;
+	std::vector< string > chroms;
 	while ( True ) {
 		line.clear();
 		if ( is ) {
 			try { getline( is, line ); }
-			catch( const istream::failure& f ) { }
+			catch( const std::istream::failure& f ) { }
 			bool_t okLine = !util::isSpace( line );
 			if ( okLine ) {
 				chkCond( line.size() == nmuts, "Mutlist::loadFromMs: mismatch between nsites and chromosome line length" );
@@ -249,9 +243,9 @@ MutlistP Mutlist::loadFromMs( istream& is ) {
 //   recombLocs - if non-NULL, vector (unsorted) of recombination locations
 //   outputPrecision - number of decimal places in the output
 //
-void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSizes,
+void Mutlist::print_haps_ms( std::ostream& strm, const std::vector< nchroms_t >& sampleSizes,
 														 TreeStatsHookP treeStatsHook, bool_t outputMutGens,
-														 const vector< loc_t > *recombLocs,
+														 const std::vector< loc_t > *recombLocs,
 														 bool_t outputMutGlocs,
 														 GenMapP genMap,
 														 int outputPrecision,
@@ -309,7 +303,7 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 		}
 
 		if ( recombLocs ) {
-			vector< loc_t > recombLocsSorted( *recombLocs );
+			std::vector< loc_t > recombLocsSorted( *recombLocs );
 			std::sort( recombLocsSorted.begin(), recombLocsSorted.end() );
 			strm << "recomblocs:";
 			ForEach( const loc_t& recombLoc, recombLocsSorted )
@@ -338,7 +332,7 @@ void Mutlist::print_haps_ms( ostream& strm, const vector< nchroms_t >& sampleSiz
 		BOOST_FOREACH( leaf_id_t leaf, *leafOrder ) {
 			memset( line.get(), '0', nmuts );
 			
-			const vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
+			const std::vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
 			ForEach( Mutlist::const_iterator m, leafMuts ) {
 				chkCond( 0 <= m->mutId );
 				chkCond( m->mutId < int(nmuts) );
