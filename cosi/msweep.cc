@@ -7,6 +7,7 @@
 #include <map>
 #include <utility>
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/array.hpp>
@@ -18,6 +19,7 @@
 #include <boost/exception/all.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/clamp.hpp>
+#include <boost/move/unique_ptr.hpp>
 #include <cosi/general/utils.h>
 #include <cosi/general/math/cosirand.h>
 #include <cosi/general/math/generalmath.h>
@@ -75,7 +77,7 @@ public:
 	 DemographyP demography;
 
 // *** Field: mtraj - the frequency trajectory of the selected allele in each pop
-	 mpop_traj_t mtraj;
+	boost::movelib::unique_ptr<mpop_traj_t> mtraj;
 	 BaseModelP baseModel;
 	 BaseModelP sweepModel;
 
@@ -117,12 +119,45 @@ public:
 				 insert( fits[ pop ] )( GT_AA, 1. + s )( GT_Aa, 1. + 0.5*s )( GT_aa, 1. );
 			 } cosi_end_for;
 
+			 size_t maxAttempts = 1000000;
+			 if ( getenv( "COSI_MAXATTEMPTS" ) ) maxAttempts = atoi( getenv( "COSI_MAXATTEMPTS" ) );
 			 this->mtraj = this->simulateTrajFwd( baseModel, fits, sweepInfo.selGen,
 																						begFreqs, endFreqs,
-																						*randGen );
+																						*randGen, maxAttempts );
 
 			 using util::operator<<;
-			 std::cerr << "got  traj: " << this->mtraj << "\n";
+			 if ( getenv( "COSI_SAVE_TRAJ") ) {
+
+				 static int simNum = 0;
+				 ++simNum;
+
+				 std::ofstream f;
+
+				 f.exceptions( std::ios::failbit | std::ios::badbit );
+				 std::ofstream::openmode mode = std::ofstream::out;
+				 if ( simNum > 1 ) mode = std::ofstream::out | std::ofstream::app;
+				 f.open( getenv( "COSI_SAVE_TRAJ"), mode );
+				 f.precision(12);
+
+				 if ( simNum == 1 ) {
+					 f << "sim\tgen";
+					 cosi_for_map_keys( pop, *mtraj ) {
+						 f << "\tselfreq_" << pop;
+					 } cosi_end_for;
+					 f << "\n";
+				 }
+
+				 gens_t STEP(1);
+				 for ( genid gen = sweepInfo.selGen; gen >= genid(0); gen -= STEP ) {
+					 f << simNum << "\t" << gen;
+					 cosi_for_map_values( traj, *mtraj ) {
+						 f << "\t" << traj( gen );
+					 } cosi_end_for;
+					 f << "\n";
+				 }
+			 }
+			 // std::cerr.precision(8);
+			 // std::cerr << "got  traj: " << *this->mtraj << "\n";
 
 			 // if ( this->trajOnly ) {
 			 // 	 cosi_for_map( pop, traj, mtraj ) {
@@ -130,7 +165,7 @@ public:
 			 // 	 } cosi_end_for;
 			 // }
 			
-			 this->sweepModel = this->makeSweepModel( this->baseModel, this->mtraj,
+			 this->sweepModel = this->makeSweepModel( this->baseModel, *this->mtraj,
 																								sweepInfo.selPos, this->pop2sib );
 		 }  // if selCoeff nonzero
 		 else {
@@ -304,7 +339,7 @@ public:
 //
 //  Note: some code adapted from simuPOP by Bo Peng et al
 	 template <typename URNG>
-	 mpop_traj_t
+	 static boost::movelib::unique_ptr<mpop_traj_t>
 	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel,
 										std::map<popid, std::map<genotype_t,double> > pop2fits,
 										genid begGen, std::map<popid,freq_t> begFreqs,
@@ -314,7 +349,7 @@ public:
 		 cosi_using5( util::at, std::map, boost::assign::insert, boost::adaptors::map_keys,
 									boost::range::push_back );
 		 
-		 mpop_traj_t pop2freqSelFn;
+		 boost::movelib::unique_ptr<mpop_traj_t> pop2freqSelFn( new mpop_traj_t );
 
 		 std::vector<popid> pops;
 		 push_back( pops, baseModel->popInfos | map_keys );
@@ -329,23 +364,34 @@ public:
 		 // }
 		 
 		 //std::cerr << "s=(" << s[0] << "," << s[1] << "," << s[2] << "\n";
-		 
+
+		 std::ostringstream msgs;
+
 		 bool foundTrajectory = false;
 		 while( !foundTrajectory && maxAttempts-- >= 1 ) {
+			 msgs.str("");
+			 msgs.clear();
+			 //std::cerr << "-------------\n";
+			 pop2freqSelFn->clear();
 			 
 			 BOOST_AUTO( freqs, begFreqs );
 			 gens_t STEP(1.);
 			 bool trajFailed = false;
-			 for( genid gen = begGen; gen+STEP >= genid(0) && !trajFailed; gen -= STEP ) {
+			 for( genid gen = begGen; gen-STEP >= genid(0) && !trajFailed; gen -= STEP ) {
+				 PRINT2( "mygen", gen );
 				 genid gen_next = gen - STEP;  // generations are numbered into the past, with present time being generation 0;
 				 //                               we use this convention for both fwd and bwd sims.
 				 bool haveNonZero = false;
 				 BOOST_FOREACH( popid pop, pops ) {
-					 //PRINT3( gen, pop, freqs[pop] );
+					 PRINT4( gen, gen_next, pop, freqs[pop] );
 					 chk_freq( freqs[pop] );
 					 
 					 // Record the current freq of sel allele in this pop
-					 set( pop2freqSelFn[ pop ], gen, freqs[ pop ] );
+					 //std::cerr << "befset: " << (*pop2freqSelFn)[ pop ] << "\n";
+					 set( (*pop2freqSelFn)[ pop ], gen, freqs[ pop ] );
+					 // std::cerr << "aftset: " << (*pop2freqSelFn)[ pop ] << "\n";
+					 // std::cerr << "justset: gen=" << gen << " pop=" << pop << " freq=" << freqs[pop] << " f=" << (*pop2freqSelFn)[pop](gen) << "\n";
+					 cosi_chk(  (*pop2freqSelFn)[pop](gen) == freqs[ pop ], "bug in piecewise fns" );
 					 
 					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
 				 }  // for each pop
@@ -360,9 +406,10 @@ public:
 								 double fit_AA = at( fits, GT_AA ), fit_Aa = at( fits, GT_Aa ), fit_aa = at( fits, GT_aa );
 								 freq_t p_A = freqs[ pop ];
 								 freq_t p_a = 1. - p_A;
-								 double amt_A = p_A * p_A * 2 * fit_AA + p_A * p_a * fit_Aa;
-								 double amt_a = p_a * p_a * 2 * fit_aa + p_A * p_a * fit_Aa;
+								 double amt_A = p_A * p_A * fit_AA + p_A * p_a * fit_Aa;
+								 double amt_a = p_a * p_a * fit_aa + p_A * p_a * fit_Aa;
 								 b4mig_p_A[ pop ] = amt_A / ( amt_A + amt_a );
+								 PRINT9( pop, fit_AA, fit_Aa, fit_aa, p_A, p_a, amt_A, amt_a, b4mig_p_A[pop] );
 						 } cosi_end_for;
 
 						 // now model migration.
@@ -381,7 +428,11 @@ public:
 							 nchroms_float_t N = popInfo.popSizeFn( gen_next );
 							 boost::random::binomial_distribution<nchroms_t> bdist( 2 * nchroms_t( ToDouble( N ) ), p_A );
 							 nchroms_t nsel_next_gen = bdist( urng );
+//PRINT3( 2*N, p_A, nsel_next_gen );
 							 freqs[ pop ] = nchroms_float_t( ToDouble( nsel_next_gen ) ) / ( 2 * N);
+							 // if ( gen <= genid(5) ) msgs << "gen=" << gen << " pop=" << pop << " 2*N=" << (2*N) << " p_A=" << p_A  << 
+							 // 									" nsel_next_gen=" << nsel_next_gen << " nonMigFrac=" << nonMigFrac << " p_A'=" << freqs[pop] << "\n";
+
 						 } cosi_end_for;  // cosi_for_map( pop, popInfo, baseModel->popInfos )
 					 } // if !trajFailed
 
@@ -397,13 +448,16 @@ public:
 			 if ( !trajFailed ) {
 				 bool freqWrong = false;
 				 BOOST_FOREACH( popid pop, pops ) {
+					 //msgs << "EF pop=" << pop << " EF=" << freqs[pop] << "\n";
 					 if ( endFreqs[ pop ]( freqs[ pop ] ) )
-						 set( pop2freqSelFn[ pop ], genid(0.), freqs[ pop ] );
+						 set( (*pop2freqSelFn)[ pop ], genid(0.), freqs[ pop ] );
 					 else
 						 freqWrong = true;
 				 }
-				 if ( !freqWrong )
+				 if ( !freqWrong ) {
 					 foundTrajectory = true;
+					 //std::cerr << "GOT!\n" << msgs.str() << "\n";
+				 }
 			 }  // if ( !trajFailed )
 		 }  // while traj not found
 		 if ( foundTrajectory )
@@ -481,7 +535,7 @@ computeLeafOrder( MSweepP msweep ) {
 }  // computeLeafOrder()
 
 void addSelMut( MSweepP msweep, MutlistP muts ) {
-	std::cerr << "addSelMut: adding\n";
+	//	std::cerr << "addSelMut: adding\n";
 	if ( msweep->baseModel->sweepInfo && !leafset_is_empty( msweep->selLeaves ) ) {
 		SweepInfo const& si = *msweep->baseModel->sweepInfo;
 		muts->addMut( si.selPos, msweep->selLeaves, si.selGen, si.selPop );
