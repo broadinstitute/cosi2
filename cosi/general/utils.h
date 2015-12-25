@@ -273,6 +273,12 @@ unsigned long timespec_since( const struct timespec *start);
 	BOOST_AUTO( const& k, it->first ); \
 	BOOST_AUTO( const& v, it->second );
 
+#define cosi_for_map_keys( k, m ) for( BOOST_AUTO( it, m.begin() ); it != m.end(); ++ it ) { \
+	BOOST_AUTO( const& k, it->first );
+
+#define cosi_for_map_values( v, m ) for( BOOST_AUTO( it, m.begin() ); it != m.end(); ++ it ) { \
+	BOOST_AUTO( const& v, it->second );
+
 #define cosi_end_for }
 
 #define ForEach BOOST_FOREACH
@@ -280,10 +286,15 @@ unsigned long timespec_since( const struct timespec *start);
 template <typename K, typename V>
 V const& at( const std::map< K, V>& m, const K k ) {
 	typename std::map< K, V>::const_iterator it = m.find( k );
-	if ( it == m.end() ) BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "lookup in map failed" ) );
-	else
-		 return it->second;
+	cosi_chk( it != m.end(), "map lookup failed" );
+	return it->second;
 }
+
+template <typename K1, typename K2, typename V> inline
+V const& at( const std::map< K1, std::map< K2, V> >& m, const K1 k1, const K2 k2 ) {
+	return at( at( m, k1 ), k2 );
+}
+
 
 template <typename T> struct IndexSorter {
 	 const std::vector<T>& origVec;

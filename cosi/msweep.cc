@@ -110,11 +110,11 @@ public:
 					 endFreqs[ pop ] = util::make_val_range( 0., 1. );
 					 s = 0;
 				 } else {
-					 begFreqs[ pop ] = 2. / ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) );
+					 begFreqs[ pop ] = 1. / ( 2. * ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) ) );
 					 endFreqs[ pop ] = sweepInfo.final_sel_freq;
 					 s = sweepInfo.selCoeff;
 				 }
-				 insert( fits[ pop ] )( GT_AA, 1.)( GT_Aa, 1. + 0.5*s )( GT_aa, 1. + s );
+				 insert( fits[ pop ] )( GT_AA, 1. + s )( GT_Aa, 1. + 0.5*s )( GT_aa, 1. );
 			 } cosi_end_for;
 
 			 this->mtraj = this->simulateTrajFwd( baseModel, fits, sweepInfo.selGen,
@@ -280,7 +280,7 @@ public:
 			 for( BOOST_AUTO( migr_it, popInfo.migrRateTo.begin() ); migr_it != popInfo.migrRateTo.end(); ++migr_it )
 					popInfoSel.migrRateTo[ pop2sib[ migr_it->first ] ] = migr_it->second;
 
-			 set( popInfoSel.migrRateTo[ unsPop ], selBegGen, prob_per_chrom_per_gen_t( .99999 ) );
+			 set( popInfoSel.migrRateTo[ unsPop ], selBegGen, prob_per_chrom_per_gen_t( 1 ) );
 		 }
 
 		 return sweepModel;
@@ -306,7 +306,7 @@ public:
 	 template <typename URNG>
 	 mpop_traj_t
 	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel,
-										std::map<popid, std::map<genotype_t,double> > fits,
+										std::map<popid, std::map<genotype_t,double> > pop2fits,
 										genid begGen, std::map<popid,freq_t> begFreqs,
 										std::map<popid, util::ValRange<freq_t> > endFreqs,
 										URNG& urng,
@@ -319,22 +319,26 @@ public:
 		 std::vector<popid> pops;
 		 push_back( pops, baseModel->popInfos | map_keys );
 		 
-		 map<popid, map<genotype_t,double> >	pop2s;
-		 BOOST_FOREACH( popid pop, pops ) {
-			 map<genotype_t,double> const& fit = at( fits, pop );
-			 insert( pop2s[ pop ] )
-					(GT_AA, 0.)
-					(GT_Aa, at(fit,GT_Aa) / at(fit,GT_AA) - 1.)
-					(GT_aa, at(fit,GT_aa) / at(fit,GT_AA) - 1.);
-		 }
+		 // map<popid, map<genotype_t,double> >	pop2s;
+		 // BOOST_FOREACH( popid pop, pops ) {
+		 // 	 map<genotype_t,double> const& fit = at( fits, pop );
+		 // 	 insert( pop2s[ pop ] )
+		 // 			(GT_AA, 0.)
+		 // 			(GT_Aa, at(fit,GT_Aa) / at(fit,GT_AA) - 1.)
+		 // 			(GT_aa, at(fit,GT_aa) / at(fit,GT_AA) - 1.);
+		 // }
 		 
 		 //std::cerr << "s=(" << s[0] << "," << s[1] << "," << s[2] << "\n";
 		 
-		 bool found = false;
-		 while( !found && maxAttempts-- >= 1 ) {
+		 bool foundTrajectory = false;
+		 while( !foundTrajectory && maxAttempts-- >= 1 ) {
 			 
 			 BOOST_AUTO( freqs, begFreqs );
-			 for( genid gen = begGen; gen > genid(0); gen -= gens_t(1) ) {
+			 gens_t STEP(1.);
+			 bool trajFailed = false;
+			 for( genid gen = begGen; gen+STEP >= genid(0) && !trajFailed; gen -= STEP ) {
+				 genid gen_next = gen - STEP;  // generations are numbered into the past, with present time being generation 0;
+				 //                               we use this convention for both fwd and bwd sims.
 				 bool haveNonZero = false;
 				 BOOST_FOREACH( popid pop, pops ) {
 					 //PRINT3( gen, pop, freqs[pop] );
@@ -343,66 +347,69 @@ public:
 					 // Record the current freq of sel allele in this pop
 					 set( pop2freqSelFn[ pop ], gen, freqs[ pop ] );
 					 
-					 // Find the sel freq in pop at time gen-1
-					 freqs[ pop ] = getNextXt( freqs[ pop ], at( baseModel->popInfos, pop ).popSizeFn( gen ), at( pop2s, pop ),
-																		 urng );
 					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
 				 }  // for each pop
-				 if ( !haveNonZero ) break;
+				 if ( !haveNonZero ) { 
+					 trajFailed = true; 
+				 }
+				 else 
+					 { // if !trajFailed
+						 // for each pop, determine n_A and n_a after random mating and selection, but before migration
+						 std::map<popid, freq_t> b4mig_p_A;
+						 cosi_for_map( pop, fits, pop2fits ) {
+								 double fit_AA = at( fits, GT_AA ), fit_Aa = at( fits, GT_Aa ), fit_aa = at( fits, GT_aa );
+								 freq_t p_A = freqs[ pop ];
+								 freq_t p_a = 1. - p_A;
+								 double amt_A = p_A * p_A * 2 * fit_AA + p_A * p_a * fit_Aa;
+								 double amt_a = p_a * p_a * 2 * fit_aa + p_A * p_a * fit_Aa;
+								 b4mig_p_A[ pop ] = amt_A / ( amt_A + amt_a );
+						 } cosi_end_for;
+
+						 // now model migration.
+						 // code below influenced by  msms simulator by Ewing and Hermisson, http://bioinformatics.oxfordjournals.org/content/suppl/2010/06/20/btq322.DC1/InternalManual.pdf
+						 cosi_for_map( pop, popInfo, baseModel->popInfos ) {
+							 frac_t nonMigFrac(1.0);
+							 freq_t p_A(0);
+							 cosi_for_map( srcPop, migrRateFn, popInfo.migrRateTo ) {
+								 frac_t migFrac_from_srcPop = migrRateFn( gen_next ) * STEP * nchroms_float_t(1);
+								 p_A += migFrac_from_srcPop * at( b4mig_p_A, srcPop );
+								 nonMigFrac -= migFrac_from_srcPop;
+							 } cosi_end_for;
+							 p_A += nonMigFrac * at( b4mig_p_A, pop );
+							 
+							 // genetic drift
+							 nchroms_float_t N = popInfo.popSizeFn( gen_next );
+							 boost::random::binomial_distribution<nchroms_t> bdist( 2 * nchroms_t( ToDouble( N ) ), p_A );
+							 nchroms_t nsel_next_gen = bdist( urng );
+							 freqs[ pop ] = nchroms_float_t( ToDouble( nsel_next_gen ) ) / ( 2 * N);
+						 } cosi_end_for;  // cosi_for_map( pop, popInfo, baseModel->popInfos )
+					 } // if !trajFailed
+
+					 // // Find the sel freq in pop at time gen-1
+					 // freqs[ pop ] =
+					 // 		getNextXt( freqs[ pop ],
+					 // 							 at( baseModel->popInfos, pop ).popSizeFn( gen ), at( pop2s, pop ),
+					 // 							 urng );
 				 
 				 // migrations; note that the direction is reversed for the fwd vs the bwd sim.
-				 cosi_for_map( dstPop, popInfoDst, baseModel->popInfos ) {
-					 cosi_for_map( srcPop, migrRateFn, popInfoDst.migrRateTo ) {
-						 if ( freqs[ srcPop ] > 0 ) {
-							 // find the number of chroms bearing the selected allele in the source population
-							 // what if fixed or lost?
-							 // check also for small pop size.
-							 BaseModel::PopInfo const& popInfoSrc = at( baseModel->popInfos, srcPop );
-							 nchroms_t NtSrc( 2 * ToDouble( popInfoSrc.popSizeFn( gen ) ) );
-							 nchroms_t NtDst( 2 * ToDouble( popInfoDst.popSizeFn( gen ) ) );
-							 nchroms_t nSrcSel( 2 * NtSrc * freqs[ srcPop ] );
-							 nchroms_t nDstSel( 2 * NtDst * freqs[ dstPop ] );
-							 double migrRate = ToDouble(  migrRateFn( gen ) );
-							 if ( nSrcSel > nchroms_t(1) && migrRate > 0. ) {
-								 
-								 nchroms_t nSrcUns = 2 * NtSrc - nSrcSel;
-								 
-								 // so, for each src chrom, there's a chance of migration; the number of migrators
-								 // is then binomial.  note that we're treating this as a collection of haploids;
-								 // more correctly might be to assume it's randomly mixing and see how many diploids
-								 // of each type migrate?  on the other hand these are probs of haploid chroms migrating?
-								 // so, if there's a fixed chance of a diploid _individual_ migrating, then
-								 // a chrom's chance of migrating is : there are p*p chance of being in an aa indiv.
-								 // would we get the same migration rates?
-								 
-								 using boost::random::binomial_distribution;
-								 binomial_distribution<nchroms_t> bdistSel( nSrcSel, migrRate );
-								 binomial_distribution<nchroms_t> bdistUns( nSrcUns, migrRate );
-								 nchroms_t nMigSel = bdistSel( urng );
-                 nchroms_t nMigUns = bdistUns( urng );
-								 
-								 //PRINT9( gen, srcPop, dstPop, NtSrc, NtDst, nSrcSel, nDstSel, nMigSel, nMigUns );
-								 
-                 nchroms_t nMig = nMigSel + nMigUns;
-								 freqs[ srcPop ] = double( nSrcSel - nMigSel ) / double( 2*NtSrc - nMig );
-								 freqs[ dstPop ] = double( nDstSel + nMigSel ) / double( 2*NtDst + nMig );
-							 }  // if ( nSrcSel > nchroms_t(1) && migrRate > 0. )
-						 } // if ( freqs[ srcPop ] > 0 )
-					 } cosi_end_for;  // cosi_for_map( srcPop, migrRateFn, popInfo.migrRateTo )
-				 } cosi_end_for;  // cosi_for_map( trgPop, popInfo, baseModel->popInfos )
 			 } // for each gen
 
-			 bool freqWrong = false;
-			 BOOST_FOREACH( popid pop, pops ) {
-				 if ( endFreqs[ pop ]( freqs[ pop ] ) )
-						set( pop2freqSelFn[ pop ], genid(0.), freqs[ pop ] );
-				 else
-						freqWrong = true;
-			 }
-			 if ( !freqWrong )
-					return pop2freqSelFn;
-		 }
-		 BOOST_THROW_EXCEPTION( cosi::cosi_error() << error_msg( "no traj found within given number of attempts" ) );
+			 if ( !trajFailed ) {
+				 bool freqWrong = false;
+				 BOOST_FOREACH( popid pop, pops ) {
+					 if ( endFreqs[ pop ]( freqs[ pop ] ) )
+						 set( pop2freqSelFn[ pop ], genid(0.), freqs[ pop ] );
+					 else
+						 freqWrong = true;
+				 }
+				 if ( !freqWrong )
+					 foundTrajectory = true;
+			 }  // if ( !trajFailed )
+		 }  // while traj not found
+		 if ( foundTrajectory )
+			 return pop2freqSelFn;
+		 else
+			 BOOST_THROW_EXCEPTION( cosi::cosi_error() << error_msg( "no trajectory found within given number of attempts" ) );
 	 }  // simulateTrajFwd
 	 
 private:
@@ -454,7 +461,7 @@ computeLeafOrder( MSweepP msweep ) {
 	DemographyP demography = msweep->demography;
 	if ( msweep->baseModel->sweepInfo ) {
 		vector< leafset_p > const& pop2leaves = demography->get_pop2leaves();
-		cosi_for_map( pop, popInfo, sweepModel->popInfos ) {
+		cosi_for_map_keys( pop, sweepModel->popInfos ) {
 			if ( STLContains( msweep->selPops, pop ) ) {
 				leafset_p leaves_sel = pop2leaves[ demography->dg_get_pop_index_by_name( pop ) ];
 				leafset_p leaves_uns =

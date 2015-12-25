@@ -33,7 +33,9 @@ struct BaseModel {
 			// indefiniteIntegral( 1/2*popSizeFn )
 			math::Function< genid, prob_per_chromPair_per_gen_t, math::Piecewise< math::Any<> > > coalRateFn;
 
-			// Field: migrRateTo - for each target pop, migration rate from this pop to the target pop.
+			// Field: migrRateTo - for each target pop, migration rate (going pastward) from this pop to the target pop.
+		  // Going forward, baseModel.popInfos[dstPop].migrRateTo[srcPop](gen) gives the fraction of dstPop at time gen
+		  // that is made up of migrants from srcPop who moved into dstPop over the time interval (gen+1,gen).
 			std::map< popid, math::Function< genid, prob_per_chrom_per_gen_t,
 																			 math::Piecewise< math::Const<> > > > migrRateTo;
 
