@@ -20,6 +20,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/move/unique_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cosi/general/utils.h>
 #include <cosi/general/math/cosirand.h>
 #include <cosi/general/math/generalmath.h>
@@ -120,7 +121,10 @@ public:
 			 } cosi_end_for;
 
 			 size_t maxAttempts = 1000000;
-			 if ( getenv( "COSI_MAXATTEMPTS" ) ) maxAttempts = atoi( getenv( "COSI_MAXATTEMPTS" ) );
+			 if ( getenv( "COSI_MAXATTEMPTS" ) ) {
+				 try { maxAttempts = boost::lexical_cast<size_t>( getenv( "COSI_MAXATTEMPTS" ) ); }
+				 catch( const boost::bad_lexical_cast& ) { BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "invalid COSI_MAXATTEMPTS" ) ); }
+			 }
 			 this->mtraj = this->simulateTrajFwd( baseModel, fits, sweepInfo.selGen,
 																						begFreqs, endFreqs,
 																						*randGen, maxAttempts );
