@@ -15,6 +15,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/operators.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <boost/cstdint.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/nvp.hpp>
@@ -63,7 +64,7 @@ namespace cosi {
 // Logical type: nchroms_t
 // A count of chromosome instances: for example, the size of a population or a sample,
 // or a subset of either.
-typedef int nchroms_t;
+typedef boost::int_fast64_t nchroms_t;
 
 // Logical type: popsize_float_t
 // A floating-point representation of population size.  Real populations of course have integer

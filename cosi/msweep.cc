@@ -263,6 +263,9 @@ public:
 			 using boost::algorithm::clamp;
 			 nchroms_t selSampleSize( clamp( int( util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) *
 																						ToDouble( sampSz ) ), 0, sampSz ) );
+
+			 // std::cerr << "makeSweepModel: selPop=" << selPop << " unsPop=" << unsPop <<
+			 // 	 " sampSz=" << sampSz << " frac=" << util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) << "\n";
 			 
 			 demography->dg_populate_by_name( selPop,
 																				selSampleSize );
@@ -381,20 +384,21 @@ public:
 			 BOOST_AUTO( freqs, begFreqs );
 			 gens_t STEP(1.);
 			 bool trajFailed = false;
+			 bool tr = false; //( maxAttempts == ( getenv( "COSI_TRAJ_ID" ) ? ((size_t)atol( getenv( "COSI_TRAJ_ID" ) ) ) : 0 ) ) ;
 			 for( genid gen = begGen; gen-STEP >= genid(0) && !trajFailed; gen -= STEP ) {
-				 PRINT2( "mygen", gen );
+				 if ( tr ) PRINT2( "mygen", gen );
 				 genid gen_next = gen - STEP;  // generations are numbered into the past, with present time being generation 0;
 				 //                               we use this convention for both fwd and bwd sims.
 				 bool haveNonZero = false;
 				 BOOST_FOREACH( popid pop, pops ) {
-					 PRINT4( gen, gen_next, pop, freqs[pop] );
+					 if ( tr ) PRINT4( gen, gen_next, pop, freqs[pop] );
 					 chk_freq( freqs[pop] );
 					 
 					 // Record the current freq of sel allele in this pop
-					 //std::cerr << "befset: " << (*pop2freqSelFn)[ pop ] << "\n";
+					 if ( tr ) std::cerr << "befset: " << (*pop2freqSelFn)[ pop ] << "\n";
 					 set( (*pop2freqSelFn)[ pop ], gen, freqs[ pop ] );
-					 // std::cerr << "aftset: " << (*pop2freqSelFn)[ pop ] << "\n";
-					 // std::cerr << "justset: gen=" << gen << " pop=" << pop << " freq=" << freqs[pop] << " f=" << (*pop2freqSelFn)[pop](gen) << "\n";
+					 if ( tr ) std::cerr << "aftset: " << (*pop2freqSelFn)[ pop ] << "\n";
+					 if ( tr ) std::cerr << "justset: gen=" << gen << " pop=" << pop << " freq=" << freqs[pop] << " f=" << (*pop2freqSelFn)[pop](gen) << "\n";
 					 cosi_chk(  (*pop2freqSelFn)[pop](gen) == freqs[ pop ], "bug in piecewise fns" );
 					 
 					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
@@ -413,7 +417,7 @@ public:
 								 double amt_A = p_A * p_A * fit_AA + p_A * p_a * fit_Aa;
 								 double amt_a = p_a * p_a * fit_aa + p_A * p_a * fit_Aa;
 								 b4mig_p_A[ pop ] = amt_A / ( amt_A + amt_a );
-								 PRINT9( pop, fit_AA, fit_Aa, fit_aa, p_A, p_a, amt_A, amt_a, b4mig_p_A[pop] );
+								 if ( tr ) PRINT9( pop, fit_AA, fit_Aa, fit_aa, p_A, p_a, amt_A, amt_a, b4mig_p_A[pop] );
 						 } cosi_end_for;
 
 						 // now model migration.
@@ -432,10 +436,10 @@ public:
 							 nchroms_float_t N = popInfo.popSizeFn( gen_next );
 							 boost::random::binomial_distribution<nchroms_t> bdist( 2 * nchroms_t( ToDouble( N ) ), p_A );
 							 nchroms_t nsel_next_gen = bdist( urng );
-//PRINT3( 2*N, p_A, nsel_next_gen );
+							 if ( tr ) PRINT5( 2*N, p_A, nsel_next_gen, bdist.param(), bdist );
 							 freqs[ pop ] = nchroms_float_t( ToDouble( nsel_next_gen ) ) / ( 2 * N);
-							 // if ( gen <= genid(5) ) msgs << "gen=" << gen << " pop=" << pop << " 2*N=" << (2*N) << " p_A=" << p_A  << 
-							 // 									" nsel_next_gen=" << nsel_next_gen << " nonMigFrac=" << nonMigFrac << " p_A'=" << freqs[pop] << "\n";
+							 if ( tr ) std::cerr << "gen=" << gen << " pop=" << pop << " 2*N=" << (2*N) << " p_A=" << p_A  << 
+													 " nsel_next_gen=" << nsel_next_gen << " nonMigFrac=" << nonMigFrac << " p_A'=" << freqs[pop] << "\n";
 
 						 } cosi_end_for;  // cosi_for_map( pop, popInfo, baseModel->popInfos )
 					 } // if !trajFailed
@@ -460,6 +464,14 @@ public:
 				 }
 				 if ( !freqWrong ) {
 					 foundTrajectory = true;
+					 using util::operator<<;
+					 using math::operator<<;
+					 //std::cerr << "got traj! maxAttempts=" << maxAttempts << " freqs=" << freqs << "\n";
+
+					 // BOOST_FOREACH( popid pop, pops ) {
+					 // 	 std::cerr << "EF pop=" << pop << " EF=" << freqs[pop] << " fn=" << at(*pop2freqSelFn, pop) <<  "\n";
+					 // }
+
 					 //std::cerr << "GOT!\n" << msgs.str() << "\n";
 				 }
 			 }  // if ( !trajFailed )
@@ -520,10 +532,12 @@ computeLeafOrder( MSweepP msweep ) {
 	if ( msweep->baseModel->sweepInfo ) {
 		vector< leafset_p > const& pop2leaves = demography->get_pop2leaves();
 		cosi_for_map_keys( pop, sweepModel->popInfos ) {
+			//std::cerr << "computeLeafOrder: pop=" << pop << "\n";
 			if ( STLContains( msweep->selPops, pop ) ) {
 				leafset_p leaves_sel = pop2leaves[ demography->dg_get_pop_index_by_name( pop ) ];
 				leafset_p leaves_uns =
 					 pop2leaves[ demography->dg_get_pop_index_by_name( util::at( msweep->pop2sib, pop ) ) ];
+				//std::cerr << "leaves_sel=" << leaves_sel << " leaves_uns=" << leaves_uns << "\n";
 				msweep->selLeaves = leafset_union( msweep->selLeaves, leaves_sel );
 			
 				COSI_FOR_LEAFSET( leaves_uns, leaf, {

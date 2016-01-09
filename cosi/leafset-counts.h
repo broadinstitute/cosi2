@@ -57,7 +57,7 @@ public:
    void operator delete (void *p);
 
 	 leafset_struct( leaf_id_t leafId_ ):
-		 chromCounts( 0, leafset_npops ) {
+	 chromCounts( nchroms_t(0), leafset_npops ) {
 		 ::cosi::util::chk( leafset_leaf2popName, "did not set leafset info" );
 		 popid popName = (*leafset_leaf2popName)[ leafId_ ];
 		 pop_idx_t popidx = (*leafset_popname2idx)[ ToInt( popName ) ];

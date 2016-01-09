@@ -486,13 +486,13 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
 /* NODE FUNCTIONS */
 
 /* GET_NUM_NODES */
-int 
+nchroms_t
 Demography::dg_get_num_nodes (void) const
 {
-  int     total = 0;
+  nchroms_t     total = 0;
 
   for (size_t i = 0; i < pops.size(); i++)
-		 total = dg_get_num_nodes_in_pop_by_index (i);
+		 total += dg_get_num_nodes_in_pop_by_index (i);
   return total;
 }
 

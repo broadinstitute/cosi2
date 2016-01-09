@@ -49,11 +49,11 @@ Coalesce::coalesce_get_rate (void) const
 		popsize = demography->dg_get_pop_size_by_index (i);
 		if (numnodes > 1  /*&& popsize > 0*/ ) {
 			prob_t coalRate = util::getFrac( numnodes * (numnodes - 1),
-																			 4 * std::max( popsize, 1 ) );
+																			 4 * std::max( popsize, nchroms_t(1) ) );
 #ifdef COSI_SUPPORT_COALAPX
 
 			if ( popptr->restrictingCoalescence() )
-				 coalRate = util::getFrac( popptr->getNumCoalesceableChromPairs(), 2.0 * std::max( popsize, 1 ) );
+				coalRate = util::getFrac( popptr->getNumCoalesceableChromPairs(), 2.0 * std::max( popsize, nchroms_t(1) ) );
 			
 #endif  // #ifdef COSI_SUPPORT_COALAPX			
 			
