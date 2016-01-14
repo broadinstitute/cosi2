@@ -1,5 +1,4 @@
 /* $Id: simulator.c,v 1.3 2011/05/04 15:46:19 sfs Exp $ */
-
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>

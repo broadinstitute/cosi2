@@ -8,8 +8,6 @@
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/foreach.hpp>
-#include <cosi_rand/random.h>
-#include <cosi_rand/mtwist.h>
 #include <cosi/general/utils.h>
 #include <cosi/general/mempool.h>
 #include <cosi/defs.h>

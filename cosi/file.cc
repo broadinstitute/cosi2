@@ -255,7 +255,8 @@ ParamFileReader::file_proc_buff(char *var, char* buffer, FILE* segfp)
 															 << boost::errinfo_errno( errno ) );
 			}
 			setRandGen( boost::make_shared<RandGen>( rseed ) );
-		}		
+		} else
+			 std::cerr << "ignoring random_seed from param file\n";
 	} else if (strcmp(var,"sweep_traj_file") == 0) {
 		if (buffer[strlen(buffer)-1] == '\n')
 			 buffer[strlen(buffer)-1] = '\0';

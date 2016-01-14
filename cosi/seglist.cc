@@ -51,7 +51,8 @@ clock_t time_gc;
  * the random seed or the generator used for seg levels, this should have no effect
  * on otherwise deterministic simulations that use the seglists.
  */
-static RandGen seglist_random_gen;
+static RandGen seglist_random_gen( 
+																	 RandGen::rseed_t( getenv( "COSI_SEGLIST_RSEED" ) ? atoi( getenv( "COSI_SEGLIST_RSEED" ) ) : 239239 ) );
 
 
 /* Static func: seglist_new_level */
@@ -216,8 +217,8 @@ void seglist_init_module(void) {
   segsumm_init_module();
   if ( !NIL ) {
 
-		seglist_random_gen.set_rng_seed( getenv( "COSI_SEGLIST_SEED" ) ?
-																		 atol( getenv( "COSI_SEGLIST_SEED" ) ) : 373737 );
+		// seglist_random_gen.set_rng_seed( getenv( "COSI_SEGLIST_SEED" ) ?
+		// 																 atol( getenv( "COSI_SEGLIST_SEED" ) ) : 373737 );
 		/*mts_goodseed( &seglist_random_state );*/
 
 		/*

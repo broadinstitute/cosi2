@@ -92,14 +92,14 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $
 libcosi_la_CPPFLAGS = $(COSI_CPPFLAGS)
 libcosi_la_CXXFLAGS = $(COSI_CXXFLAGS)
 libcosi_la_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
-libcosi_la_LIBADD = $(builddir)/libcosi_rand.la $(builddir)/libcosiutil.la $(BOOST_PROGRAM_OPTIONS_LIBS) \
-	$(BOOST_FILESYSTEM_LIBS) $(BOOST_TIMER_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
+libcosi_la_LIBADD = $(builddir)/libcosiutil.la $(BOOST_PROGRAM_OPTIONS_LIBS) \
+	$(BOOST_FILESYSTEM_LIBS) $(BOOST_TIMER_LIBS) $(BOOST_RANDOM_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
 
 coalescent_SOURCES = $(SD)/cosimain.cc
 coalescent_CPPFLAGS = $(COSI_CPPFLAGS)
 coalescent_CXXFLAGS = $(COSI_CXXFLAGS)
-coalescent_LDADD = $(builddir)/libcosi.la $(builddir)/libcosi_rand.la $(BOOST_PROGRAM_OPTIONS_LIBS)	\
-	$(BOOST_FILESYSTEM_LIBS) $(BOOST_TIMER_LIBS) $(BOOST_SERIALIZATION_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
+coalescent_LDADD = $(builddir)/libcosi.la $(BOOST_PROGRAM_OPTIONS_LIBS)	\
+	$(BOOST_FILESYSTEM_LIBS) $(BOOST_TIMER_LIBS) $(BOOST_RANDOM_LIBS) $(BOOST_SERIALIZATION_LIBS) #$(builddir)/libsigc++-2.3.1/sigc++/libsigc-2.0.la
 coalescent_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS)
 
 #if EHH
@@ -110,7 +110,7 @@ libcosi_la_SOURCES += $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
 
 #COSI_CXX_FLAGS_DEBUG += -O0 -UNDEBUG -D_GLIBCXX_DEBUG -fno-inline-functions -ggdb3
 
-COSISTATICSOURCES=$(COSISOURCES) $(SD)/cosimain.cc $(libprogopt_la_SOURCES) $(libcosifilesystem_la_SOURCES) $(libcosiserialization_la_SOURCES) $(libcositimer_la_SOURCES) $(libcosichrono_la_SOURCES) $(SD)/../cosi_rand/mtwist.c $(SD)/../cosi_rand/poisson.c $(SD)/../cosi_rand/ranbinom.c $(SD)/../cosi_rand/gammln.c $(SD)/../cosi_rand/rng.c $(SD)/../cosi_rand/expdev.c $(SD)/../cosi_rand/gamma.c
+COSISTATICSOURCES=$(COSISOURCES) $(SD)/cosimain.cc $(libprogopt_la_SOURCES) $(libcosifilesystem_la_SOURCES) $(libcosiserialization_la_SOURCES) $(libcositimer_la_SOURCES) $(libcosichrono_la_SOURCES) $(libcosirandom_la_SOURCES)
 
 coalescent_static: $(COSISTATICSOURCES)
 	g++ -v -static -o $@ -I$(SD)/.. -I$(SD)/boost $(COSI_CPPFLAGS) $(CPPFLAGS) $(COSI_CXXFLAGS) $(CXXFLAGS)  -Wno-error -pipe $(COSISTATICSOURCES) -lrt -lpthread

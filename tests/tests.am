@@ -14,7 +14,7 @@ seglist_test_SOURCES = $(TD)/seglist_test.cc $(SD)/seglist.cc $(SD)/seglist.h $(
 seglist_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
 seglist_test_CXXFLAGS = $(COSI_CXXFLAGS)
 seglist_test_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
-seglist_test_LDADD = $(builddir)/libcosi_rand_noinst.la $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)
+seglist_test_LDADD = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS) $(BOOST_RANDOM_LIBS)
 
 funcs_test_SOURCES = $(TD)/funcs_test.cc $(SD)/general/math/generalmath.h $(SD)/general/utils.h $(SD)/general/utils.cc
 funcs_test_CPPFLAGS = $(COSI_CPPFLAGS) -UNDEBUG -D_GLIBCXX_DEBUG
@@ -49,7 +49,7 @@ endif
 check_PROGRAMS += ost_test
 ost_test_SOURCES = $(TD)/ost_test.cpp $(SD)/general/datastruct/order_statistics.hpp $(SD)/general/utils.h \
 	$(SD)/general/utils.cc
-ost_test_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(builddir)/libcosi_rand.la
+ost_test_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(BOOST_RANDOM_LIBS)
 ost_test_CPPFLAGS = $(AM_CPPFLAGS) -UNDEBUG
 
 if HAVE_GTEST
@@ -57,7 +57,7 @@ check_PROGRAMS += ost_test_main
 ost_test_main_SOURCES = $(TD)/ost_test_main.cpp $(SD)/general/datastruct/order_statistics.hpp \
 	$(SD)/general/utils.h $(SD)/general/utils.cc
 ost_test_main_CPPFLAGS = $(AM_CPPFLAGS) -UNDEBUG -I$(GTEST_DIR)/include
-ost_test_main_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(builddir)/libcosi_rand.la
+ost_test_main_LDADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS) $(BOOST_RANDOM_LIBS)
 ost_test_main_LDFLAGS = $(AM_LDFLAGS) -L$(GTEST_DIR)/lib -lgtest
 endif  # if HAVE_GTEST
 

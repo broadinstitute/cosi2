@@ -1,0 +1,7 @@
+lib_LTLIBRARIES += libcosirandom.la
+
+RDM=$(BOOST_DIR)/libs/random/src
+libcosirandom_la_SOURCES = $(RDM)/random_device.cpp
+libcosirandom_la_CPPFLAGS=$(AM_CPPFLAGS)
+
+

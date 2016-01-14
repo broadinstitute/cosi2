@@ -1,18 +1,21 @@
-#include <cosi_rand/gammln.h>
-#include <cosi_rand/random.h>
-#include <cosi_rand/mtwist.h>
+// #include <cosi_rand/gammln.h>
+// #include <cosi_rand/random.h>
+// #include <cosi_rand/mtwist.h>
 #include <cosi/general/math/cosirand.h>
+#include <boost/random/exponential_distribution.hpp>
+#include <boost/random/poisson_distribution.hpp>
 
 namespace cosi {
 
 factor_t RandGen::expdev (void) {
-	double dum = 0;
+	return boost::exponential_distribution<>()( randEngine );
+	// double dum = 0;
 	
-	while (dum == 0.0)
-		 dum = (double) 1 - random_double();
-	return factor_t( -log (dum) );
+	// while (dum == 0.0)
+	// 	 dum = (double) 1 - random_double();
+	// return factor_t( -log (dum) );
 }
-
+#if 0
 int RandGen::ranbinom(int n, double p) 
 {
 /** 
@@ -194,20 +197,20 @@ int RandGen::poisson( double xm ) {
   }
   return (int) (em + 0.5);
 }
-
+#endif
 
 double
 RandGen::poisson_get_next (double rate) {
-	assert( rate > 0.0 );  
+	assert( rate > 0.0 );
   double ed;
   if (rate == 0) return -1;
   ed = ToDouble( expdev() );
   return (ed / rate);
 }
 
-bool_t random_bit(void) {
-  return ( mt_lrand() & 0x01 );
-}
+// bool_t random_bit(void) {
+//   return ( mt_lrand() & 0x01 );
+// }
 
 
 }  // namespace cosi
