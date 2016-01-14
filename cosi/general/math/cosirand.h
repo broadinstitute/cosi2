@@ -48,7 +48,7 @@ public:
 		 std::cerr << "orig seed=" << seed_ << "\n";
 		 // seed_ = seed_ & 0xFFFFFFFF;
 		 // uint32_t 
-		 randEngine.seed( static_cast<uint32_t>( seed_ & boost::low_bits_mask_t<32>::sig_bits ) ); u01.reset();
+		 randEngine.seed( static_cast<boost::uint32_t>( seed_ & boost::low_bits_mask_t<32>::sig_bits ) ); u01.reset();
 		 rseed = seed_;
 		 std::cerr << "got seed" << seed_ << "\n";
 	 }
