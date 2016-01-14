@@ -3,12 +3,16 @@
 /* model 0 = regionally uniform, flat or drawn from histogram, 
     = model 0 + gamma-distributed hotspots */
 /* Sequence numbering starts at 1. */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <cosi_rand/random.h>
-#include <cosi_rand/gamma.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#include <boost/random/random_device.hpp>
+#include <boost/integer/integer_mask.hpp>
+#include <boost/cstdint.hpp>
+#include <recosim/gamma.hpp>
 
 #define MAXBIN 200
 
@@ -106,15 +110,18 @@ int main(int argc, char **argv) {
 
   if (local_size > size) {local_size = size;}
 
+	boost::mt19937 rand_engine;
+	boost::uniform_01<> u01;	
+
   if (model > 0 || distrfile != NULL) {
-    if (seed > 0) {
-      set_rng_seed(seed);
+    if (seed == 0) {
+			boost::random_device rand_dev;
+			seed = rand_dev();
     }
-    else {
-      seed = seed_rng();
-    }
+		rand_engine.seed( static_cast<boost::uint32_t>( seed & boost::low_bits_mask_t<32>::sig_bits ) );
     printf("Recombination model seed: %ld\n", seed);
   }
+
   
   if (distrfile != NULL) {
     nbin = 0;
@@ -126,11 +133,11 @@ int main(int argc, char **argv) {
       fprintf(stderr, "Warning (recosim.c): Too many recombination bins. Increase MAXBIN.\n");
     }
     /* Pick from this distribution */
-    x = random_double();
+    x = u01(rand_engine);
     regRate = -1;
     for (ibin = 0; ibin < nbin; ibin++) {
       if (x <= prob[ibin]) {
-	regRate = start[ibin] + random_double() * (end[ibin] - start[ibin]);
+	regRate = start[ibin] + u01(rand_engine) * (end[ibin] - start[ibin]);
 	break;
       }
     }
@@ -150,16 +157,16 @@ int main(int argc, char **argv) {
     rhot = (1 - bkgdFract) * regRate;
     b = (meanSpace-1) / shape;
     if (local_shape != 0) {
-      rhot *= rndgamma(local_shape) / local_shape;
+      rhot *= rndgamma(local_shape,rand_engine) / local_shape;
       /*      if (rhot > 10) {rhot = 10.;} */ /* trim extreme values */
     }
     meanInten = meanSpace * rhot;
     filler = 60 * meanSpace;
     totDist = -filler;
-    thisd = b * rndgamma(shape);
+    thisd = b * rndgamma(shape,rand_engine);
     while (totDist + thisd < 1) {
       totDist += thisd;
-      thisd = b * rndgamma(shape);
+      thisd = b * rndgamma(shape,rand_engine);
     }
 
     if ((int) (totDist + thisd + 0.5) > 1) {
@@ -170,7 +177,7 @@ int main(int argc, char **argv) {
       if (totDist + thisd - start_local >= local_size) {
 	rhot = (1 - bkgdFract) * regRate;
 	if (local_shape != 0) {
-	  rhot *= rndgamma(local_shape) / local_shape;
+	  rhot *= rndgamma(local_shape,rand_engine) / local_shape;
 	  /*      if (rhot > 10) {rhot = 10.;} */ /* trim extreme values */
 	}
 	meanInten = meanSpace * rhot;
@@ -180,7 +187,7 @@ int main(int argc, char **argv) {
       totDist += thisd;
       rspot = meanInten;
       if (intensity_shape != 0) {
-	rspot *= rndgamma(intensity_shape) / intensity_shape;
+				rspot *= rndgamma(intensity_shape,rand_engine) / intensity_shape;
       }
       fprintf(outfile, "%d\t%.5e\n", (int) (totDist + 0.5), 
 	      (rspot  / spot_size + bkgdFract * regRate)*1.e-8);  
@@ -189,7 +196,7 @@ int main(int argc, char **argv) {
 		(bkgdFract * regRate)*1.e-8);  /* hotspot is spot_size bp wide */
       }
       totDist += spot_size;
-      thisd = b * rndgamma(shape);  /* distance to start of next hotspot */
+      thisd = b * rndgamma(shape,rand_engine);  /* distance to start of next hotspot */
     }
   }
   else {

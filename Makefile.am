@@ -11,7 +11,6 @@ AM_CPPFLAGS = -I$(srcdir) $(BOOST_CPPFLAGS) -DNDEBUG
 AM_CXXFLAGS = $(CXX11_CXXFLAGS) -O3
 
 include $(srcdir)/ext/boost/libs/make.am
-include $(srcdir)/cosi_rand/Makefile.am
 include $(srcdir)/cosi/Makefile.am
 include $(srcdir)/recosim/Makefile.am
 include $(srcdir)/tests/tests.am

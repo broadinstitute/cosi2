@@ -232,24 +232,6 @@ am__v_lt_1 =
 libcosi_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libcosi_la_CXXFLAGS) \
 	$(CXXFLAGS) $(libcosi_la_LDFLAGS) $(LDFLAGS) -o $@
-libcosi_rand_la_LIBADD =
-am_libcosi_rand_la_OBJECTS = libcosi_rand_la-expdev.lo \
-	libcosi_rand_la-gamma.lo libcosi_rand_la-gammln.lo \
-	libcosi_rand_la-mtwist.lo libcosi_rand_la-multinom.lo \
-	libcosi_rand_la-poisson.lo libcosi_rand_la-ranbinom.lo \
-	libcosi_rand_la-rng.lo
-libcosi_rand_la_OBJECTS = $(am_libcosi_rand_la_OBJECTS)
-libcosi_rand_noinst_la_LIBADD =
-am__objects_2 = libcosi_rand_noinst_la-expdev.lo \
-	libcosi_rand_noinst_la-gamma.lo \
-	libcosi_rand_noinst_la-gammln.lo \
-	libcosi_rand_noinst_la-mtwist.lo \
-	libcosi_rand_noinst_la-multinom.lo \
-	libcosi_rand_noinst_la-poisson.lo \
-	libcosi_rand_noinst_la-ranbinom.lo \
-	libcosi_rand_noinst_la-rng.lo
-am_libcosi_rand_noinst_la_OBJECTS = $(am__objects_2)
-libcosi_rand_noinst_la_OBJECTS = $(am_libcosi_rand_noinst_la_OBJECTS)
 libcosiatomic_la_LIBADD =
 am_libcosiatomic_la_OBJECTS = libcosiatomic_la-lockpool.lo
 libcosiatomic_la_OBJECTS = $(am_libcosiatomic_la_OBJECTS)
@@ -398,12 +380,14 @@ am_funcs_test_OBJECTS = funcs_test-funcs_test.$(OBJEXT) \
 funcs_test_OBJECTS = $(am_funcs_test_OBJECTS)
 funcs_test_DEPENDENCIES = $(BOOST_FILESYSTEM_LIBS) \
 	$(BOOST_SYSTEM_LIBS)
-am_get_recomap_OBJECTS = get_recomap.$(OBJEXT)
+am__objects_2 = get_recomap-random_device.$(OBJEXT)
+am_get_recomap_OBJECTS = get_recomap-get_recomap.$(OBJEXT) \
+	$(am__objects_2)
 get_recomap_OBJECTS = $(am_get_recomap_OBJECTS)
-get_recomap_DEPENDENCIES = $(LIBRAND)
-get_recomap_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(get_recomap_LDFLAGS) $(LDFLAGS) -o $@
+get_recomap_LDADD = $(LDADD)
+get_recomap_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(get_recomap_LDFLAGS) $(LDFLAGS) -o $@
 am__ldhist_SOURCES_DIST = $(TD)/ldhist.cc
 @HAVEROOT_TRUE@am_ldhist_OBJECTS = ldhist-ldhist.$(OBJEXT)
 ldhist_OBJECTS = $(am_ldhist_OBJECTS)
@@ -427,19 +411,23 @@ ost_test_main_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(AM_CXXFLAGS) $(CXXFLAGS) $(ost_test_main_LDFLAGS) $(LDFLAGS) \
 	-o $@
-am_recomap_hapmap2_OBJECTS = recomap_hapmap2.$(OBJEXT)
+am__objects_3 = recomap_hapmap2-random_device.$(OBJEXT)
+am_recomap_hapmap2_OBJECTS =  \
+	recomap_hapmap2-recomap_hapmap2.$(OBJEXT) $(am__objects_3)
 recomap_hapmap2_OBJECTS = $(am_recomap_hapmap2_OBJECTS)
-recomap_hapmap2_DEPENDENCIES = $(LIBRAND)
-recomap_hapmap2_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(recomap_hapmap2_LDFLAGS) $(LDFLAGS) \
-	-o $@
-am_recosimulate_OBJECTS = recosim.$(OBJEXT)
+recomap_hapmap2_LDADD = $(LDADD)
+recomap_hapmap2_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(AM_CXXFLAGS) $(CXXFLAGS) $(recomap_hapmap2_LDFLAGS) \
+	$(LDFLAGS) -o $@
+am__objects_4 = recosimulate-random_device.$(OBJEXT)
+am_recosimulate_OBJECTS = recosimulate-recosim.$(OBJEXT) \
+	$(am__objects_4)
 recosimulate_OBJECTS = $(am_recosimulate_OBJECTS)
-recosimulate_DEPENDENCIES = $(LIBRAND)
-recosimulate_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(recosimulate_LDFLAGS) $(LDFLAGS) -o $@
+recosimulate_LDADD = $(LDADD)
+recosimulate_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(recosimulate_LDFLAGS) $(LDFLAGS) -o $@
 am_sample_stats_extra_OBJECTS =  \
 	sample_stats_extra-sample_stats_extra.$(OBJEXT) \
 	sample_stats_extra-tajd.$(OBJEXT)
@@ -524,8 +512,7 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(libcosi_la_SOURCES) $(libcosi_rand_la_SOURCES) \
-	$(libcosi_rand_noinst_la_SOURCES) $(libcosiatomic_la_SOURCES) \
+SOURCES = $(libcosi_la_SOURCES) $(libcosiatomic_la_SOURCES) \
 	$(libcosichrono_la_SOURCES) $(libcosifilesystem_la_SOURCES) \
 	$(libcosiprogopt_la_SOURCES) $(libcosirandom_la_SOURCES) \
 	$(libcosiregex_la_SOURCES) $(libcosiserialization_la_SOURCES) \
@@ -537,8 +524,7 @@ SOURCES = $(libcosi_la_SOURCES) $(libcosi_rand_la_SOURCES) \
 	$(recomap_hapmap2_SOURCES) $(recosimulate_SOURCES) \
 	$(sample_stats_extra_SOURCES) $(seglist_test_SOURCES) \
 	$(test_arrproc_SOURCES) $(test_funcs_SOURCES)
-DIST_SOURCES = $(libcosi_la_SOURCES) $(libcosi_rand_la_SOURCES) \
-	$(libcosi_rand_noinst_la_SOURCES) $(libcosiatomic_la_SOURCES) \
+DIST_SOURCES = $(libcosi_la_SOURCES) $(libcosiatomic_la_SOURCES) \
 	$(libcosichrono_la_SOURCES) $(libcosifilesystem_la_SOURCES) \
 	$(libcosiprogopt_la_SOURCES) $(libcosirandom_la_SOURCES) \
 	$(libcosiregex_la_SOURCES) $(libcosiserialization_la_SOURCES) \
@@ -754,7 +740,6 @@ TEST_LOG_DRIVER = $(SHELL) $(top_srcdir)/build-aux/test-driver
 TEST_LOG_COMPILE = $(TEST_LOG_COMPILER) $(AM_TEST_LOG_FLAGS) \
 	$(TEST_LOG_FLAGS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/cosi/Makefile.am \
-	$(srcdir)/cosi_rand/Makefile.am \
 	$(srcdir)/ext/boost/libs/atomic/src/make.am \
 	$(srcdir)/ext/boost/libs/chrono/src/make.am \
 	$(srcdir)/ext/boost/libs/filesystem/src/make.am \
@@ -948,9 +933,8 @@ ACLOCAL_AMFLAGS = -I m4
 lib_LTLIBRARIES = libcosismart_ptr.la libcosiprogopt.la \
 	libcosiregex.la libcosifilesystem.la libcosisystem.la \
 	libcosichrono.la libcositimer.la libcosiserialization.la \
-	libcosiatomic.la libcosirandom.la libcosi_rand.la \
-	libcosiutil.la libcosi.la
-noinst_LTLIBRARIES = libcosi_rand_noinst.la
+	libcosiatomic.la libcosirandom.la libcosiutil.la libcosi.la
+noinst_LTLIBRARIES = 
 EXTRA_DIST = ext/boost examples doc \
 	$(srcdir)/tests/testScripts/tests/model001/t/run.sh \
 	$(srcdir)/tests/testScripts/tests/model001/t_u_001/run.sh \
@@ -1056,14 +1040,6 @@ libcosiatomic_la_CXXFLAGS = $(AM_CXXFLAGS)
 RDM = $(BOOST_DIR)/libs/random/src
 libcosirandom_la_SOURCES = $(RDM)/random_device.cpp
 libcosirandom_la_CPPFLAGS = $(AM_CPPFLAGS)
-RD = $(srcdir)/cosi_rand
-libcosi_rand_la_SOURCES = $(RD)/expdev.c $(RD)/gamma.c $(RD)/gammln.c $(RD)/mtwist.c $(RD)/multinom.c $(RD)/poisson.c \
-	$(RD)/ranbinom.c $(RD)/rng.c $(RD)/expdev.h $(RD)/gamma.h $(RD)/gammln.h $(RD)/mtwist.h $(RD)/multinom.h \
-	$(RD)/poisson.h $(RD)/ranbinom.h $(RD)/random.h
-
-libcosi_rand_la_CPPFLAGS = -I$(srcdir)
-libcosi_rand_noinst_la_SOURCES = $(libcosi_rand_la_SOURCES)
-libcosi_rand_noinst_la_CPPFLAGS = $(libcosi_rand_la_CPPFLAGS)
 
 #if COALAPX
 # Turn on support for approximating the coalescent by restricting coalescence to nodes whose
@@ -1146,15 +1122,15 @@ coalescent_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS
 COSISTATICSOURCES = $(COSISOURCES) $(SD)/cosimain.cc $(libprogopt_la_SOURCES) $(libcosifilesystem_la_SOURCES) $(libcosiserialization_la_SOURCES) $(libcositimer_la_SOURCES) $(libcosichrono_la_SOURCES) $(libcosirandom_la_SOURCES)
 COSIFLAGS = $(builddir)/coalescent.flags.txt
 MOSTLYCLEANFILES = $(COSIFLAGS)
-LIBRAND = $(builddir)/libcosi_rand.la
-recosimulate_SOURCES = $(srcdir)/recosim/recosim.c
-recosimulate_LDADD = $(LIBRAND)
+BOOSTRAND = $(srcdir)/ext/boost/libs/random/src/random_device.cpp $(srcdir)/ext/boost/libs/random/src/random_device.hpp
+recosimulate_SOURCES = $(srcdir)/recosim/recosim.cc $(srcdir)/recosim/gamma.hpp $(BOOSTRAND)
+recosimulate_CPPFLAGS = -I$(srcdir) -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
 recosimulate_LDFLAGS = -lm
-get_recomap_SOURCES = $(srcdir)/recosim/get_recomap.c
-get_recomap_LDADD = $(LIBRAND)
+get_recomap_SOURCES = $(srcdir)/recosim/get_recomap.cc $(BOOSTRAND)
+get_recomap_CPPFLAGS = -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
 get_recomap_LDFLAGS = -lm
-recomap_hapmap2_SOURCES = $(srcdir)/recosim/recomap_hapmap2.c
-recomap_hapmap2_LDADD = $(LIBRAND)
+recomap_hapmap2_SOURCES = $(srcdir)/recosim/recomap_hapmap2.cc $(BOOSTRAND)
+recomap_hapmap2_CPPFLAGS = -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
 recomap_hapmap2_LDFLAGS = -lm
 check_SCRIPTS = $(am__append_2)
 TD = $(srcdir)/tests
@@ -1208,7 +1184,7 @@ all: all-am
 .SUFFIXES: .c .cc .cpp .lo .log .o .obj .test .test$(EXEEXT) .trs
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/ext/boost/libs/make.am $(srcdir)/ext/boost/libs/smart_ptr/src/make.am $(srcdir)/ext/boost/libs/program_options/src/make.am $(srcdir)/ext/boost/libs/regex/src/make.am $(srcdir)/ext/boost/libs/filesystem/src/make.am $(srcdir)/ext/boost/libs/system/src/make.am $(srcdir)/ext/boost/libs/chrono/src/make.am $(srcdir)/ext/boost/libs/timer/src/make.am $(srcdir)/ext/boost/libs/serialization/src/make.am $(srcdir)/ext/boost/libs/atomic/src/make.am $(srcdir)/ext/boost/libs/random/src/make.am $(srcdir)/cosi_rand/Makefile.am $(srcdir)/cosi/Makefile.am $(srcdir)/recosim/Makefile.am $(srcdir)/tests/tests.am $(srcdir)/tests/cositests.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/ext/boost/libs/make.am $(srcdir)/ext/boost/libs/smart_ptr/src/make.am $(srcdir)/ext/boost/libs/program_options/src/make.am $(srcdir)/ext/boost/libs/regex/src/make.am $(srcdir)/ext/boost/libs/filesystem/src/make.am $(srcdir)/ext/boost/libs/system/src/make.am $(srcdir)/ext/boost/libs/chrono/src/make.am $(srcdir)/ext/boost/libs/timer/src/make.am $(srcdir)/ext/boost/libs/serialization/src/make.am $(srcdir)/ext/boost/libs/atomic/src/make.am $(srcdir)/ext/boost/libs/random/src/make.am $(srcdir)/cosi/Makefile.am $(srcdir)/recosim/Makefile.am $(srcdir)/tests/tests.am $(srcdir)/tests/cositests.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1230,7 +1206,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/ext/boost/libs/make.am $(srcdir)/ext/boost/libs/smart_ptr/src/make.am $(srcdir)/ext/boost/libs/program_options/src/make.am $(srcdir)/ext/boost/libs/regex/src/make.am $(srcdir)/ext/boost/libs/filesystem/src/make.am $(srcdir)/ext/boost/libs/system/src/make.am $(srcdir)/ext/boost/libs/chrono/src/make.am $(srcdir)/ext/boost/libs/timer/src/make.am $(srcdir)/ext/boost/libs/serialization/src/make.am $(srcdir)/ext/boost/libs/atomic/src/make.am $(srcdir)/ext/boost/libs/random/src/make.am $(srcdir)/cosi_rand/Makefile.am $(srcdir)/cosi/Makefile.am $(srcdir)/recosim/Makefile.am $(srcdir)/tests/tests.am $(srcdir)/tests/cositests.am $(am__empty):
+$(srcdir)/ext/boost/libs/make.am $(srcdir)/ext/boost/libs/smart_ptr/src/make.am $(srcdir)/ext/boost/libs/program_options/src/make.am $(srcdir)/ext/boost/libs/regex/src/make.am $(srcdir)/ext/boost/libs/filesystem/src/make.am $(srcdir)/ext/boost/libs/system/src/make.am $(srcdir)/ext/boost/libs/chrono/src/make.am $(srcdir)/ext/boost/libs/timer/src/make.am $(srcdir)/ext/boost/libs/serialization/src/make.am $(srcdir)/ext/boost/libs/atomic/src/make.am $(srcdir)/ext/boost/libs/random/src/make.am $(srcdir)/cosi/Makefile.am $(srcdir)/recosim/Makefile.am $(srcdir)/tests/tests.am $(srcdir)/tests/cositests.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -1289,12 +1265,6 @@ clean-noinstLTLIBRARIES:
 
 libcosi.la: $(libcosi_la_OBJECTS) $(libcosi_la_DEPENDENCIES) $(EXTRA_libcosi_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libcosi_la_LINK) -rpath $(libdir) $(libcosi_la_OBJECTS) $(libcosi_la_LIBADD) $(LIBS)
-
-libcosi_rand.la: $(libcosi_rand_la_OBJECTS) $(libcosi_rand_la_DEPENDENCIES) $(EXTRA_libcosi_rand_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) -rpath $(libdir) $(libcosi_rand_la_OBJECTS) $(libcosi_rand_la_LIBADD) $(LIBS)
-
-libcosi_rand_noinst.la: $(libcosi_rand_noinst_la_OBJECTS) $(libcosi_rand_noinst_la_DEPENDENCIES) $(EXTRA_libcosi_rand_noinst_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK)  $(libcosi_rand_noinst_la_OBJECTS) $(libcosi_rand_noinst_la_LIBADD) $(LIBS)
 
 libcosiatomic.la: $(libcosiatomic_la_OBJECTS) $(libcosiatomic_la_DEPENDENCIES) $(EXTRA_libcosiatomic_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libcosiatomic_la_LINK) -rpath $(libdir) $(libcosiatomic_la_OBJECTS) $(libcosiatomic_la_LIBADD) $(LIBS)
@@ -1401,7 +1371,7 @@ funcs_test$(EXEEXT): $(funcs_test_OBJECTS) $(funcs_test_DEPENDENCIES) $(EXTRA_fu
 
 get_recomap$(EXEEXT): $(get_recomap_OBJECTS) $(get_recomap_DEPENDENCIES) $(EXTRA_get_recomap_DEPENDENCIES) 
 	@rm -f get_recomap$(EXEEXT)
-	$(AM_V_CCLD)$(get_recomap_LINK) $(get_recomap_OBJECTS) $(get_recomap_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(get_recomap_LINK) $(get_recomap_OBJECTS) $(get_recomap_LDADD) $(LIBS)
 
 ldhist$(EXEEXT): $(ldhist_OBJECTS) $(ldhist_DEPENDENCIES) $(EXTRA_ldhist_DEPENDENCIES) 
 	@rm -f ldhist$(EXEEXT)
@@ -1417,11 +1387,11 @@ ost_test_main$(EXEEXT): $(ost_test_main_OBJECTS) $(ost_test_main_DEPENDENCIES) $
 
 recomap_hapmap2$(EXEEXT): $(recomap_hapmap2_OBJECTS) $(recomap_hapmap2_DEPENDENCIES) $(EXTRA_recomap_hapmap2_DEPENDENCIES) 
 	@rm -f recomap_hapmap2$(EXEEXT)
-	$(AM_V_CCLD)$(recomap_hapmap2_LINK) $(recomap_hapmap2_OBJECTS) $(recomap_hapmap2_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(recomap_hapmap2_LINK) $(recomap_hapmap2_OBJECTS) $(recomap_hapmap2_LDADD) $(LIBS)
 
 recosimulate$(EXEEXT): $(recosimulate_OBJECTS) $(recosimulate_DEPENDENCIES) $(EXTRA_recosimulate_DEPENDENCIES) 
 	@rm -f recosimulate$(EXEEXT)
-	$(AM_V_CCLD)$(recosimulate_LINK) $(recosimulate_OBJECTS) $(recosimulate_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(recosimulate_LINK) $(recosimulate_OBJECTS) $(recosimulate_LDADD) $(LIBS)
 
 sample_stats_extra$(EXEEXT): $(sample_stats_extra_OBJECTS) $(sample_stats_extra_DEPENDENCIES) $(EXTRA_sample_stats_extra_DEPENDENCIES) 
 	@rm -f sample_stats_extra$(EXEEXT)
@@ -1449,7 +1419,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cosiroot-cosiroot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/funcs_test-funcs_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/funcs_test-utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_recomap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_recomap-get_recomap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_recomap-random_device.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ldhist-ldhist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-calc_Fst_cosi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-calc_pop_stats_cosi.Plo@am__quote@
@@ -1487,22 +1458,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-sweep2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-sweep3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-traj.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-expdev.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-gamma.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-gammln.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-mtwist.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-multinom.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-poisson.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-ranbinom.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_la-rng.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-expdev.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-gamma.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-gammln.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-mtwist.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-multinom.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-poisson.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-ranbinom.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_rand_noinst_la-rng.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosiatomic_la-lockpool.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosichrono_la-chrono.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosichrono_la-process_cpu_clocks.Plo@am__quote@
@@ -1597,8 +1552,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ost_test-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ost_test_main-ost_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ost_test_main-utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recomap_hapmap2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recosim.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recomap_hapmap2-random_device.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recomap_hapmap2-recomap_hapmap2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recosimulate-random_device.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recosimulate-recosim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sample_stats_extra-sample_stats_extra.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sample_stats_extra-tajd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/seglist_test-leafset-counts.Po@am__quote@
@@ -1634,166 +1591,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
-libcosi_rand_la-expdev.lo: $(RD)/expdev.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-expdev.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-expdev.Tpo -c -o libcosi_rand_la-expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-expdev.Tpo $(DEPDIR)/libcosi_rand_la-expdev.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/expdev.c' object='libcosi_rand_la-expdev.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
-
-libcosi_rand_la-gamma.lo: $(RD)/gamma.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-gamma.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-gamma.Tpo -c -o libcosi_rand_la-gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-gamma.Tpo $(DEPDIR)/libcosi_rand_la-gamma.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gamma.c' object='libcosi_rand_la-gamma.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
-
-libcosi_rand_la-gammln.lo: $(RD)/gammln.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-gammln.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-gammln.Tpo -c -o libcosi_rand_la-gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-gammln.Tpo $(DEPDIR)/libcosi_rand_la-gammln.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gammln.c' object='libcosi_rand_la-gammln.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
-
-libcosi_rand_la-mtwist.lo: $(RD)/mtwist.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-mtwist.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-mtwist.Tpo -c -o libcosi_rand_la-mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-mtwist.Tpo $(DEPDIR)/libcosi_rand_la-mtwist.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/mtwist.c' object='libcosi_rand_la-mtwist.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
-
-libcosi_rand_la-multinom.lo: $(RD)/multinom.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-multinom.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-multinom.Tpo -c -o libcosi_rand_la-multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-multinom.Tpo $(DEPDIR)/libcosi_rand_la-multinom.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/multinom.c' object='libcosi_rand_la-multinom.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
-
-libcosi_rand_la-poisson.lo: $(RD)/poisson.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-poisson.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-poisson.Tpo -c -o libcosi_rand_la-poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-poisson.Tpo $(DEPDIR)/libcosi_rand_la-poisson.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/poisson.c' object='libcosi_rand_la-poisson.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
-
-libcosi_rand_la-ranbinom.lo: $(RD)/ranbinom.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-ranbinom.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-ranbinom.Tpo -c -o libcosi_rand_la-ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-ranbinom.Tpo $(DEPDIR)/libcosi_rand_la-ranbinom.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/ranbinom.c' object='libcosi_rand_la-ranbinom.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
-
-libcosi_rand_la-rng.lo: $(RD)/rng.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_la-rng.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_la-rng.Tpo -c -o libcosi_rand_la-rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_la-rng.Tpo $(DEPDIR)/libcosi_rand_la-rng.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/rng.c' object='libcosi_rand_la-rng.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_la-rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
-
-libcosi_rand_noinst_la-expdev.lo: $(RD)/expdev.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-expdev.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-expdev.Tpo -c -o libcosi_rand_noinst_la-expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-expdev.Tpo $(DEPDIR)/libcosi_rand_noinst_la-expdev.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/expdev.c' object='libcosi_rand_noinst_la-expdev.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-expdev.lo `test -f '$(RD)/expdev.c' || echo '$(srcdir)/'`$(RD)/expdev.c
-
-libcosi_rand_noinst_la-gamma.lo: $(RD)/gamma.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-gamma.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-gamma.Tpo -c -o libcosi_rand_noinst_la-gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-gamma.Tpo $(DEPDIR)/libcosi_rand_noinst_la-gamma.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gamma.c' object='libcosi_rand_noinst_la-gamma.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-gamma.lo `test -f '$(RD)/gamma.c' || echo '$(srcdir)/'`$(RD)/gamma.c
-
-libcosi_rand_noinst_la-gammln.lo: $(RD)/gammln.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-gammln.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-gammln.Tpo -c -o libcosi_rand_noinst_la-gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-gammln.Tpo $(DEPDIR)/libcosi_rand_noinst_la-gammln.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/gammln.c' object='libcosi_rand_noinst_la-gammln.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-gammln.lo `test -f '$(RD)/gammln.c' || echo '$(srcdir)/'`$(RD)/gammln.c
-
-libcosi_rand_noinst_la-mtwist.lo: $(RD)/mtwist.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-mtwist.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-mtwist.Tpo -c -o libcosi_rand_noinst_la-mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-mtwist.Tpo $(DEPDIR)/libcosi_rand_noinst_la-mtwist.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/mtwist.c' object='libcosi_rand_noinst_la-mtwist.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-mtwist.lo `test -f '$(RD)/mtwist.c' || echo '$(srcdir)/'`$(RD)/mtwist.c
-
-libcosi_rand_noinst_la-multinom.lo: $(RD)/multinom.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-multinom.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-multinom.Tpo -c -o libcosi_rand_noinst_la-multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-multinom.Tpo $(DEPDIR)/libcosi_rand_noinst_la-multinom.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/multinom.c' object='libcosi_rand_noinst_la-multinom.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-multinom.lo `test -f '$(RD)/multinom.c' || echo '$(srcdir)/'`$(RD)/multinom.c
-
-libcosi_rand_noinst_la-poisson.lo: $(RD)/poisson.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-poisson.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-poisson.Tpo -c -o libcosi_rand_noinst_la-poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-poisson.Tpo $(DEPDIR)/libcosi_rand_noinst_la-poisson.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/poisson.c' object='libcosi_rand_noinst_la-poisson.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-poisson.lo `test -f '$(RD)/poisson.c' || echo '$(srcdir)/'`$(RD)/poisson.c
-
-libcosi_rand_noinst_la-ranbinom.lo: $(RD)/ranbinom.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-ranbinom.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-ranbinom.Tpo -c -o libcosi_rand_noinst_la-ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-ranbinom.Tpo $(DEPDIR)/libcosi_rand_noinst_la-ranbinom.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/ranbinom.c' object='libcosi_rand_noinst_la-ranbinom.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-ranbinom.lo `test -f '$(RD)/ranbinom.c' || echo '$(srcdir)/'`$(RD)/ranbinom.c
-
-libcosi_rand_noinst_la-rng.lo: $(RD)/rng.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosi_rand_noinst_la-rng.lo -MD -MP -MF $(DEPDIR)/libcosi_rand_noinst_la-rng.Tpo -c -o libcosi_rand_noinst_la-rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_rand_noinst_la-rng.Tpo $(DEPDIR)/libcosi_rand_noinst_la-rng.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(RD)/rng.c' object='libcosi_rand_noinst_la-rng.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_rand_noinst_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosi_rand_noinst_la-rng.lo `test -f '$(RD)/rng.c' || echo '$(srcdir)/'`$(RD)/rng.c
-
 libcosiutil_la-gauss_legendre.lo: $(SD)/general/math/gauss_legendre.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcosiutil_la-gauss_legendre.lo -MD -MP -MF $(DEPDIR)/libcosiutil_la-gauss_legendre.Tpo -c -o libcosiutil_la-gauss_legendre.lo `test -f '$(SD)/general/math/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/general/math/gauss_legendre.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosiutil_la-gauss_legendre.Tpo $(DEPDIR)/libcosiutil_la-gauss_legendre.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(SD)/general/math/gauss_legendre.c' object='libcosiutil_la-gauss_legendre.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosiutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcosiutil_la-gauss_legendre.lo `test -f '$(SD)/general/math/gauss_legendre.c' || echo '$(srcdir)/'`$(SD)/general/math/gauss_legendre.c
-
-get_recomap.o: $(srcdir)/recosim/get_recomap.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT get_recomap.o -MD -MP -MF $(DEPDIR)/get_recomap.Tpo -c -o get_recomap.o `test -f '$(srcdir)/recosim/get_recomap.c' || echo '$(srcdir)/'`$(srcdir)/recosim/get_recomap.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/get_recomap.Tpo $(DEPDIR)/get_recomap.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(srcdir)/recosim/get_recomap.c' object='get_recomap.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o get_recomap.o `test -f '$(srcdir)/recosim/get_recomap.c' || echo '$(srcdir)/'`$(srcdir)/recosim/get_recomap.c
-
-get_recomap.obj: $(srcdir)/recosim/get_recomap.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT get_recomap.obj -MD -MP -MF $(DEPDIR)/get_recomap.Tpo -c -o get_recomap.obj `if test -f '$(srcdir)/recosim/get_recomap.c'; then $(CYGPATH_W) '$(srcdir)/recosim/get_recomap.c'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/get_recomap.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/get_recomap.Tpo $(DEPDIR)/get_recomap.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(srcdir)/recosim/get_recomap.c' object='get_recomap.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o get_recomap.obj `if test -f '$(srcdir)/recosim/get_recomap.c'; then $(CYGPATH_W) '$(srcdir)/recosim/get_recomap.c'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/get_recomap.c'; fi`
-
-recomap_hapmap2.o: $(srcdir)/recosim/recomap_hapmap2.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT recomap_hapmap2.o -MD -MP -MF $(DEPDIR)/recomap_hapmap2.Tpo -c -o recomap_hapmap2.o `test -f '$(srcdir)/recosim/recomap_hapmap2.c' || echo '$(srcdir)/'`$(srcdir)/recosim/recomap_hapmap2.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recomap_hapmap2.Tpo $(DEPDIR)/recomap_hapmap2.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(srcdir)/recosim/recomap_hapmap2.c' object='recomap_hapmap2.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o recomap_hapmap2.o `test -f '$(srcdir)/recosim/recomap_hapmap2.c' || echo '$(srcdir)/'`$(srcdir)/recosim/recomap_hapmap2.c
-
-recomap_hapmap2.obj: $(srcdir)/recosim/recomap_hapmap2.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT recomap_hapmap2.obj -MD -MP -MF $(DEPDIR)/recomap_hapmap2.Tpo -c -o recomap_hapmap2.obj `if test -f '$(srcdir)/recosim/recomap_hapmap2.c'; then $(CYGPATH_W) '$(srcdir)/recosim/recomap_hapmap2.c'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recomap_hapmap2.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recomap_hapmap2.Tpo $(DEPDIR)/recomap_hapmap2.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(srcdir)/recosim/recomap_hapmap2.c' object='recomap_hapmap2.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o recomap_hapmap2.obj `if test -f '$(srcdir)/recosim/recomap_hapmap2.c'; then $(CYGPATH_W) '$(srcdir)/recosim/recomap_hapmap2.c'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recomap_hapmap2.c'; fi`
-
-recosim.o: $(srcdir)/recosim/recosim.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT recosim.o -MD -MP -MF $(DEPDIR)/recosim.Tpo -c -o recosim.o `test -f '$(srcdir)/recosim/recosim.c' || echo '$(srcdir)/'`$(srcdir)/recosim/recosim.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosim.Tpo $(DEPDIR)/recosim.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(srcdir)/recosim/recosim.c' object='recosim.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o recosim.o `test -f '$(srcdir)/recosim/recosim.c' || echo '$(srcdir)/'`$(srcdir)/recosim/recosim.c
-
-recosim.obj: $(srcdir)/recosim/recosim.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT recosim.obj -MD -MP -MF $(DEPDIR)/recosim.Tpo -c -o recosim.obj `if test -f '$(srcdir)/recosim/recosim.c'; then $(CYGPATH_W) '$(srcdir)/recosim/recosim.c'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recosim.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosim.Tpo $(DEPDIR)/recosim.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(srcdir)/recosim/recosim.c' object='recosim.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o recosim.obj `if test -f '$(srcdir)/recosim/recosim.c'; then $(CYGPATH_W) '$(srcdir)/recosim/recosim.c'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recosim.c'; fi`
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -2747,6 +2550,34 @@ funcs_test-utils.obj: $(SD)/general/utils.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(funcs_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o funcs_test-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
 
+get_recomap-get_recomap.o: $(srcdir)/recosim/get_recomap.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(get_recomap_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT get_recomap-get_recomap.o -MD -MP -MF $(DEPDIR)/get_recomap-get_recomap.Tpo -c -o get_recomap-get_recomap.o `test -f '$(srcdir)/recosim/get_recomap.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/get_recomap.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/get_recomap-get_recomap.Tpo $(DEPDIR)/get_recomap-get_recomap.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/get_recomap.cc' object='get_recomap-get_recomap.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(get_recomap_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o get_recomap-get_recomap.o `test -f '$(srcdir)/recosim/get_recomap.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/get_recomap.cc
+
+get_recomap-get_recomap.obj: $(srcdir)/recosim/get_recomap.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(get_recomap_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT get_recomap-get_recomap.obj -MD -MP -MF $(DEPDIR)/get_recomap-get_recomap.Tpo -c -o get_recomap-get_recomap.obj `if test -f '$(srcdir)/recosim/get_recomap.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/get_recomap.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/get_recomap.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/get_recomap-get_recomap.Tpo $(DEPDIR)/get_recomap-get_recomap.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/get_recomap.cc' object='get_recomap-get_recomap.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(get_recomap_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o get_recomap-get_recomap.obj `if test -f '$(srcdir)/recosim/get_recomap.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/get_recomap.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/get_recomap.cc'; fi`
+
+get_recomap-random_device.o: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(get_recomap_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT get_recomap-random_device.o -MD -MP -MF $(DEPDIR)/get_recomap-random_device.Tpo -c -o get_recomap-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/get_recomap-random_device.Tpo $(DEPDIR)/get_recomap-random_device.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='get_recomap-random_device.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(get_recomap_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o get_recomap-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
+
+get_recomap-random_device.obj: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(get_recomap_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT get_recomap-random_device.obj -MD -MP -MF $(DEPDIR)/get_recomap-random_device.Tpo -c -o get_recomap-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/get_recomap-random_device.Tpo $(DEPDIR)/get_recomap-random_device.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='get_recomap-random_device.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(get_recomap_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o get_recomap-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
+
 ldhist-ldhist.o: $(TD)/ldhist.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ldhist_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ldhist-ldhist.o -MD -MP -MF $(DEPDIR)/ldhist-ldhist.Tpo -c -o ldhist-ldhist.o `test -f '$(TD)/ldhist.cc' || echo '$(srcdir)/'`$(TD)/ldhist.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/ldhist-ldhist.Tpo $(DEPDIR)/ldhist-ldhist.Po
@@ -2816,6 +2647,62 @@ ost_test_main-utils.obj: $(SD)/general/utils.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/general/utils.cc' object='ost_test_main-utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ost_test_main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ost_test_main-utils.obj `if test -f '$(SD)/general/utils.cc'; then $(CYGPATH_W) '$(SD)/general/utils.cc'; else $(CYGPATH_W) '$(srcdir)/$(SD)/general/utils.cc'; fi`
+
+recomap_hapmap2-recomap_hapmap2.o: $(srcdir)/recosim/recomap_hapmap2.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recomap_hapmap2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recomap_hapmap2-recomap_hapmap2.o -MD -MP -MF $(DEPDIR)/recomap_hapmap2-recomap_hapmap2.Tpo -c -o recomap_hapmap2-recomap_hapmap2.o `test -f '$(srcdir)/recosim/recomap_hapmap2.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/recomap_hapmap2.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recomap_hapmap2-recomap_hapmap2.Tpo $(DEPDIR)/recomap_hapmap2-recomap_hapmap2.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/recomap_hapmap2.cc' object='recomap_hapmap2-recomap_hapmap2.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recomap_hapmap2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recomap_hapmap2-recomap_hapmap2.o `test -f '$(srcdir)/recosim/recomap_hapmap2.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/recomap_hapmap2.cc
+
+recomap_hapmap2-recomap_hapmap2.obj: $(srcdir)/recosim/recomap_hapmap2.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recomap_hapmap2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recomap_hapmap2-recomap_hapmap2.obj -MD -MP -MF $(DEPDIR)/recomap_hapmap2-recomap_hapmap2.Tpo -c -o recomap_hapmap2-recomap_hapmap2.obj `if test -f '$(srcdir)/recosim/recomap_hapmap2.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/recomap_hapmap2.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recomap_hapmap2.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recomap_hapmap2-recomap_hapmap2.Tpo $(DEPDIR)/recomap_hapmap2-recomap_hapmap2.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/recomap_hapmap2.cc' object='recomap_hapmap2-recomap_hapmap2.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recomap_hapmap2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recomap_hapmap2-recomap_hapmap2.obj `if test -f '$(srcdir)/recosim/recomap_hapmap2.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/recomap_hapmap2.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recomap_hapmap2.cc'; fi`
+
+recomap_hapmap2-random_device.o: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recomap_hapmap2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recomap_hapmap2-random_device.o -MD -MP -MF $(DEPDIR)/recomap_hapmap2-random_device.Tpo -c -o recomap_hapmap2-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recomap_hapmap2-random_device.Tpo $(DEPDIR)/recomap_hapmap2-random_device.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='recomap_hapmap2-random_device.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recomap_hapmap2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recomap_hapmap2-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
+
+recomap_hapmap2-random_device.obj: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recomap_hapmap2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recomap_hapmap2-random_device.obj -MD -MP -MF $(DEPDIR)/recomap_hapmap2-random_device.Tpo -c -o recomap_hapmap2-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recomap_hapmap2-random_device.Tpo $(DEPDIR)/recomap_hapmap2-random_device.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='recomap_hapmap2-random_device.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recomap_hapmap2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recomap_hapmap2-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
+
+recosimulate-recosim.o: $(srcdir)/recosim/recosim.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosimulate-recosim.o -MD -MP -MF $(DEPDIR)/recosimulate-recosim.Tpo -c -o recosimulate-recosim.o `test -f '$(srcdir)/recosim/recosim.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/recosim.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosimulate-recosim.Tpo $(DEPDIR)/recosimulate-recosim.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/recosim.cc' object='recosimulate-recosim.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosimulate-recosim.o `test -f '$(srcdir)/recosim/recosim.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/recosim.cc
+
+recosimulate-recosim.obj: $(srcdir)/recosim/recosim.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosimulate-recosim.obj -MD -MP -MF $(DEPDIR)/recosimulate-recosim.Tpo -c -o recosimulate-recosim.obj `if test -f '$(srcdir)/recosim/recosim.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/recosim.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recosim.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosimulate-recosim.Tpo $(DEPDIR)/recosimulate-recosim.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/recosim.cc' object='recosimulate-recosim.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosimulate-recosim.obj `if test -f '$(srcdir)/recosim/recosim.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/recosim.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recosim.cc'; fi`
+
+recosimulate-random_device.o: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosimulate-random_device.o -MD -MP -MF $(DEPDIR)/recosimulate-random_device.Tpo -c -o recosimulate-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosimulate-random_device.Tpo $(DEPDIR)/recosimulate-random_device.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='recosimulate-random_device.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosimulate-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
+
+recosimulate-random_device.obj: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosimulate-random_device.obj -MD -MP -MF $(DEPDIR)/recosimulate-random_device.Tpo -c -o recosimulate-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosimulate-random_device.Tpo $(DEPDIR)/recosimulate-random_device.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='recosimulate-random_device.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosimulate-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
 
 sample_stats_extra-sample_stats_extra.o: $(TD)/sample_stats_extra.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sample_stats_extra_CPPFLAGS) $(CPPFLAGS) $(sample_stats_extra_CXXFLAGS) $(CXXFLAGS) -MT sample_stats_extra-sample_stats_extra.o -MD -MP -MF $(DEPDIR)/sample_stats_extra-sample_stats_extra.Tpo -c -o sample_stats_extra-sample_stats_extra.o `test -f '$(TD)/sample_stats_extra.cc' || echo '$(srcdir)/'`$(TD)/sample_stats_extra.cc

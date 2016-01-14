@@ -1,8 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <string.h>
-#include <cosi_rand/random.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#include <boost/random/random_device.hpp>
+#include <boost/integer/integer_mask.hpp>
+#include <boost/cstdint.hpp>
 
 int main(int argc, char **argv) {
   FILE *inf=NULL;
@@ -12,16 +16,23 @@ int main(int argc, char **argv) {
     command[128], seqstr[10];
   long min_pos, max_pos, *chrlen, seqtot=0, seqlen, sum=0;
   double x;
+
+	boost::mt19937 rand_engine;
+	boost::uniform_01<> u01;
+	boost::random_device rand_dev;
+
+	boost::uint32_t seed = rand_dev() & boost::low_bits_mask_t<32>::sig_bits;
+	rand_engine.seed( static_cast<boost::uint32_t>( seed ) );
   
   if (argc != 4) {
     fprintf(stderr, "Usage: recomap_hapmap2 <1kG map directory> <sequence length (bp)> <output file>\n");
     return 0;
   }
   seqlen = strtol(argv[2], NULL, 10);
-  chrlen = calloc(24, sizeof(long));
-  long_enough = calloc(24, sizeof(int));
-  fprintf(stdout, "random seed for choosing chromosome: %lu\n", seed_rng());
-  new_line = malloc((line_size + 1) * sizeof(char));
+  chrlen = (long *)calloc(24, sizeof(long));
+  long_enough = (int *)calloc(24, sizeof(int));
+  fprintf(stdout, "random seed for choosing chromosome: %lu\n", (unsigned long)seed);
+  new_line = (char *)malloc((line_size + 1) * sizeof(char));
   for (ichr = 1; ichr <= 22; ichr++) {
     strcpy(filename, argv[1]);
     strcat(filename, "/genetic_map_chr");
@@ -55,7 +66,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Requested sequence is longer than any single chromosome\n");
     return 0 ;
   }
-  x = random_double();
+  x = u01(rand_engine);
   for (ichr = 1; ichr <= 22; ichr++) {
     sum += chrlen[ichr];
     if ((double) sum / seqtot > x) {

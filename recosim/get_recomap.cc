@@ -1,8 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <string.h>
-#include <cosi_rand/random.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#include <boost/random/random_device.hpp>
+#include <boost/integer/integer_mask.hpp>
+#include <boost/cstdint.hpp>
 
 int main(int argc, char **argv) {
   FILE *inf=NULL, *outf=NULL;
@@ -11,11 +15,18 @@ int main(int argc, char **argv) {
   const int line_size = 256;
   int itoken, isite, max_site = 300000, nsite;
   double *rate=NULL;
+
+	boost::mt19937 rand_engine;
+	boost::uniform_01<> u01;
+	boost::random_device rand_dev;
+	
+	boost::uint32_t seed = rand_dev() & boost::low_bits_mask_t<32>::sig_bits;
+	rand_engine.seed( static_cast<boost::uint32_t>( seed ) );
   
-  fprintf(stdout, "get_recomap rng seed: %lu\n", seed_rng());
-  new_line = malloc((line_size + 1) * sizeof(char));
-  pos = malloc(max_site * sizeof(long));
-  rate = malloc(max_site * sizeof(double));
+  fprintf(stdout, "get_recomap rng seed: %lu\n", seed );
+  new_line = (char *)malloc((line_size + 1) * sizeof(char));
+  pos = (long int *)malloc(max_site * sizeof(long));
+  rate = (double *)malloc(max_site * sizeof(double));
   if (argc != 4) {
     fprintf(stderr, "Usage: get_recomap <genetic map file> <sequence length (bp)> <output file>\n");
     exit(0);
@@ -45,8 +56,8 @@ int main(int argc, char **argv) {
 	isite++;
 	if (isite == max_site) {
 	  max_site *= 2;
-	  rate = realloc(rate, max_site * sizeof(double));
-	  pos = realloc(pos, max_site * sizeof(long));
+	  rate = (double *)realloc(rate, max_site * sizeof(double));
+	  pos = (long int *)realloc(pos, max_site * sizeof(long));
 	}
       }
     }
@@ -56,7 +67,7 @@ int main(int argc, char **argv) {
   mapseq = pos[nsite-1] - pos[0];
   assert(mapseq >= seqlen);
   //  fprintf(stderr, "in map: %ld   requested: %ld\n", mapseq, seqlen);
-  pick_start = pos[0] + (long) ((mapseq - seqlen) * random_double());
+  pick_start = pos[0] + (long) ((mapseq - seqlen) * u01( rand_engine ) );
   isite = 0;
   while (pos[isite] < pick_start) {isite++;}
   if (pos[isite] == pick_start) {
