@@ -55,6 +55,7 @@
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/exception/all.hpp>
+#include <boost/cstdint.hpp>
 #include <cosi/general/utils.h>
 #include <cosi/general/math/gauss_legendre.h>
 
@@ -1597,10 +1598,10 @@ bool isStrictlyIncreasing( const Function<TDomain, TRange, TSpec>& f, TDomain a,
 template <typename TDomain, typename TRange, typename TSpec>
 TDomain
 evalInverse( const Function<TDomain, TRange, TSpec>& f, TDomain a, TDomain b, TRange targetVal,
-             typename DiffType<TRange>::type eps, unsigned maxSteps = 100000 ) {
+             typename DiffType<TRange>::type eps, boost::uint32_t maxSteps = 100000 ) {
   BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
 	assert( isStrictlyIncreasing( f, a, b ) );
-  unsigned nsteps = 0;
+  boost::uint32_t nsteps = 0;
   //PRINT5( a, b, targetVal, eps, typeid(f).name() );
   assert( !(boost::math::isnan)( a ) );
   assert( !(boost::math::isnan)( b ) );

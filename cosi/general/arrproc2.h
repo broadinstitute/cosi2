@@ -118,6 +118,8 @@ void add( ArrivalProcess<TTime, Stoch<URNG, Compound< TComponentSpec > > >&,
 #include <boost/utility/value_init.hpp>
 #include <boost/function.hpp>
 #include <boost/signals2/signal.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/cstdint.hpp>
 #include <cosi/general/typeutil.h>
 #include <cosi/general/math/generalmath.h>
 
@@ -191,11 +193,12 @@ public:
 		 label( label_ ) { }
 
    TTime nextArrivalTime( TTime fromTime, TTime maxTime, TRateFactor rateFactor_, URNG& randGen,
-													double eps = 1e-5, int maxSteps = 100000  ) const {
+													double eps = 1e-5, boost::uint32_t maxSteps = 1000000  ) const {
 		 double rateFactor = ToDouble( rateFactor_ );
 		 assert( rateFactor >= 0 );
      assert( fromTime >= TTime(0.0) );
      assert( maxTime >= fromTime );
+		 if ( getenv( "COSI_POIS_MAXSTEPS" ) ) maxSteps = boost::lexical_cast< boost::uint32_t >( getenv( "COSI_POIS_MAXSTEPS" ) );
 
 		 typedef typename get_rate_fn_integral<TTime, TRateFnSpec, TRateFactor>::integral_diff_type integral_diff_type;
 
