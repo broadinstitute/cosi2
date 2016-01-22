@@ -15,7 +15,9 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <typeinfo>
 //#include <ctime>
+#include <boost/core/demangle.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/exception/error_info.hpp>
 #include <boost/exception/exception.hpp>
@@ -30,12 +32,12 @@
 
 namespace cosi {
 
-using std::cout;
-using std::endl;
-using std::ofstream;
-using std::ios;
-using std::map;
-using util::chkCond;
+// using std::cout;
+// using std::endl;
+// using std::ofstream;
+// using std::ios;
+// using std::map;
+// using util::chkCond;
 
 GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_ ):
 	pd_range_len( length_ ) {
@@ -43,7 +45,7 @@ GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_ ):
 		try {
 			boost::filesystem::ifstream f( fname );
 			readFrom( f );
-		} catch( const std::ios_base::failure& e ) {
+		} catch( const std::ifstream::failure& e ) {
 			BOOST_THROW_EXCEPTION( cosi_io_error() << boost::errinfo_nested_exception( boost::copy_exception( e ) ) );
 		}			
 	} catch( boost::exception& e ) {
@@ -61,7 +63,7 @@ GenMap::GenMap( std::istream& f, const len_bp_t length_ ):
 void GenMap::readFrom( std::istream& recombfp ) {
 
 	boost::io::ios_exception_saver save_exceptions( recombfp );
-	recombfp.exceptions( std::ios::failbit | std::ios::badbit );
+	recombfp.exceptions( std::istream::failbit | std::istream::badbit );
 	
 	pd_locs.clear();
 	gd_locs.clear();
@@ -77,14 +79,30 @@ void GenMap::readFrom( std::istream& recombfp ) {
 			double lastRate = -1;
 
 			while ( recombfp ) {
+				if ( recombfp.eof() ) break;
+				line.clear();
 				try {
 					std::getline( recombfp, line );
-				} catch( std::ios::failure f ) { break; }
+				} catch( ::std::ios_base::failure const& f ) {
+					//std::cerr << "genMap::readFrom - caught exception\n";
+					break;
+				}
+				catch( std::exception const& e ) {
+					// std::cerr << "genMap::readFrom - caught UNKNOWN exception of type " <<
+					// 	 typeid( e ).name() << " demangled " << 
+					// 	 ( boost::core::demangle( typeid( e ).name() ) ) << " ; exception is " << e.what() << "\n";
+					break;
+				}
+				catch( ... ) {
+					//					std::cerr << "genMap::readFrom - caught UNKNOWN exception\n";
+					break;
+				}
 				//std::cerr << "line: " << line << "\n";
 				++lineNum;
 				loc_bp_int_t start;
 				double rate;
-			
+
+				//std::cerr << "reding line " << line << "\n";
 				int nread = sscanf(line.c_str(), "%ld %lf", &start, &rate);
 				if ( nread != 2 )
 					 BOOST_THROW_EXCEPTION( cosi_io_error() );
@@ -122,7 +140,7 @@ void GenMap::readFrom( std::istream& recombfp ) {
 			}
 			//std::cerr << pd_locs.back() << "\t" << gd_locs.back() << "\n";
 			
-		} catch( const std::ios_base::failure& e ) {
+		} catch( const std::istream::failure& e ) {
 			BOOST_THROW_EXCEPTION(
 				cosi_io_error()
 				<< boost::errinfo_nested_exception( boost::copy_exception( e ) )
@@ -155,9 +173,9 @@ void GenMap::setStart( pd_orig_loc_t start ) {
 	// struct timespec tm;
 	// clock_gettime( CLOCK_REALTIME, &tm );
 	BOOST_AUTO( pd_beg_it, boost::lower_bound( pd_locs, start ) );
-	chkCond( pd_beg_it != pd_locs.end() && *pd_beg_it >= start );
+	util::chkCond( pd_beg_it != pd_locs.end() && *pd_beg_it >= start );
 	BOOST_AUTO( pd_end_it, std::upper_bound( boost::next( pd_beg_it ), pd_locs.end(), start + pd_range_len ) );
-	chkCond( pd_beg_it != pd_end_it );
+	util::chkCond( pd_beg_it != pd_end_it );
 
 	BOOST_AUTO( gd_beg_it, gd_locs.begin() + ( pd_beg_it - pd_locs.begin() ) );
 	BOOST_AUTO( gd_end_it, gd_beg_it + ( pd_end_it - pd_beg_it ) );
