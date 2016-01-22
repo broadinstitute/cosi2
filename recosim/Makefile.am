@@ -2,7 +2,7 @@
 
 bin_PROGRAMS += recosimulate get_recomap recomap_hapmap2
 
-BOOSTRAND=$(srcdir)/ext/boost/libs/random/src/random_device.cpp $(srcdir)/ext/boost/libs/random/src/random_device.hpp
+BOOSTRAND=$(srcdir)/ext/boost/libs/random/src/random_device.cpp $(srcdir)/ext/boost/boost/random/random_device.hpp
 
 recosimulate_SOURCES = $(srcdir)/recosim/recosim.cc $(srcdir)/recosim/gamma.hpp $(BOOSTRAND)
 recosimulate_CPPFLAGS = -I$(srcdir) -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
