@@ -18,8 +18,10 @@
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/cstdint.hpp>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/move/unique_ptr.hpp>
+#include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cosi/general/utils.h>
 #include <cosi/general/math/cosirand.h>
@@ -32,6 +34,7 @@
 #include <cosi/mutlist.h>
 #include <cosi/demography.h>
 #include <cosi/msweep.h>
+#include <cosi/module.h>
 
 namespace cosi {
 
@@ -66,7 +69,7 @@ void setSweepInfo( BaseModel& baseModel,
 //
 // Note: some code here is adapted from simuPOP simulator by Bo Peng et al ; see
 // http://simupop.sourceforge.net/manual_svn/build/userGuide_ch7_sec2.html	 
-class MSweep {
+class MSweep: public Module {
 public:
 
 // *** Type: pop_traj_t - frequency trajectory of an allele in one pop	 
@@ -481,8 +484,22 @@ public:
 		 else
 			 BOOST_THROW_EXCEPTION( cosi::cosi_error() << error_msg( "no trajectory found within given number of attempts" ) );
 	 }  // simulateTrajFwd
+
+	 // Fn: defineParams - defines command-line params relevant to this module
+	 virtual void defineParams( boost::program_options::options_description& opts ) {
+		 namespace po = boost::program_options;
+		 po::options_description sweep_opts( "Sweep options" );
+
+		 sweep_opts.add_options()
+				( "sweep.max-fwd-traj-attempts", po::value(&maxFwdTrajAttempts)->default_value(1000000),
+					"max number of attempts to generate a forward trajectory during sweep simulations" );
+		 
+		 opts.add( sweep_opts );
+	 }
 	 
 private:
+	 boost::uint32_t maxFwdTrajAttempts;
+	 
 // *** Private methods
 	 
 // **** Fn: getNextXt - given the freq of selected allele in a pop at gen g, determine the freq at gen g-1.
@@ -520,6 +537,8 @@ MSweepP make_MSweep( DemographyP demography,
 										 BaseModelP baseModel, RandGenP randGen ) {
 	return boost::make_shared<MSweep>( demography, baseModel, randGen );
 }
+
+ModuleP as_Module( MSweepP msweep ) { return msweep; }
 
 BaseModelP getSweepModel( MSweepP msweep ) { return msweep->sweepModel; }
 

@@ -1101,7 +1101,7 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc \
 	$(SD)/coalescent.h $(SD)/mutlist.h \
 	$(SD)/output_coal_data_cosi.cc $(SD)/coal_data_cosi.h \
 	$(SD)/customstats.h $(SD)/calc_pop_stats_cosi.cc \
-	$(SD)/calc_Fst_cosi.cc $(COSIUTILHEADERS) \
+	$(SD)/calc_Fst_cosi.cc module.h $(COSIUTILHEADERS) \
 	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
 libcosi_la_CPPFLAGS = $(COSI_CPPFLAGS)
 libcosi_la_CXXFLAGS = $(COSI_CXXFLAGS)

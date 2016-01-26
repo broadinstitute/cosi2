@@ -14,6 +14,9 @@ namespace cosi {
 // ** Ctor: make_MSweep - construct an MSweep object.
 MSweepP make_MSweep( DemographyP, BaseModelP, RandGenP );
 
+// ** Fn: as_Module - cast this MSweep object to a Module
+ModuleP as_Module( MSweepP );
+
 // ** Fn: getSweepModel - returns the [[sweep model]].
 BaseModelP getSweepModel( MSweepP );
 
