@@ -1659,6 +1659,22 @@ compose( const Function<TRange1,TRange2,TSpec1>& f1, const Function<TDomain,TRan
 	return Function<TDomain,TRange2,Compose<TSpec1,TSpec2,TRange1> >( f1, f2 );
 }
 
+template <typename TDomain, typename TRange1, typename TRange2,
+          typename TSpec2>
+struct result_of_compose<TDomain,TRange1,TRange2,X_To<1>,TSpec2> {
+	 typedef Function<TRange1,TRange2,X_To<1> > f1_t;
+	 typedef Function<TDomain,TRange1,TSpec2> f2_t;
+	 typedef BOOST_TYPEOF_TPL(( fn_const<TDomain>( boost::declval<f1_t>().getFactor() ) * boost::declval<f2_t>() )) type;
+};
+
+template <typename TDomain, typename TRange1, typename TRange2,
+          typename TSpec2>
+typename result_of_compose<TDomain,TRange1,TRange2, X_To<1>,TSpec2>::type
+compose( const Function<TRange1,TRange2,X_To<1> >& f1, const Function<TDomain,TRange1,TSpec2>& f2 ) {
+	return fn_const<TDomain>( f1.getFactor() ) * f2;
+}
+
+
 #if 0
 template <typename TDomain, typename TFactor, typename TRange2, typename TSpec2>
 struct result_of_compose<TDomain, typename MultType<TFactor,TDomain>::type, TRange2,
