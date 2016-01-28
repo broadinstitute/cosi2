@@ -102,7 +102,7 @@ struct result_of_compose;
 
 template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
 typename result_of_compose<TDomain,TRange1,TRange2,TSpec1,TSpec2>::type
-compose( const Function<TDomain,TRange1,TSpec1>& f1, const Function<TRange1,TRange2,TSpec2>& f2 );
+compose( const Function<TRange1,TRange2,TSpec1>& f1, const Function<TDomain,TRange1,TSpec2>& f2 );
 
 
 BOOST_TTI_HAS_TYPE(type)
@@ -1620,7 +1620,7 @@ struct IsFunctionSpec< Compose< TSpec1, TSpec2, TRange >,
 template <typename TDomain, typename TRange1, typename TRange2,
           typename TSpec1, typename TSpec2>
 class Function<TDomain, TRange2, Compose<TSpec1, TSpec2, TRange1> >:
-		 public boost::compressed_pair< Function<TDomain, TRange1, TSpec1>, Function<TRange1, TRange2, TSpec2> > {
+		 public boost::compressed_pair< Function<TRange1, TRange2, TSpec1>, Function<TDomain, TRange1, TSpec2> > {
    BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec1> ));
    BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec2> ));
 public:
@@ -1632,8 +1632,8 @@ public:
    typedef TSpec1 spec1_type;
    typedef TSpec2 spec2_type;
    
-   typedef Function<TDomain, TRange1, TSpec1> function_type_1; 
-   typedef Function<TRange1, TRange2, TSpec2> function_type_2;
+   typedef Function<TRange1, TRange2, TSpec1> function_type_1;
+   typedef Function<TDomain, TRange1, TSpec2> function_type_2; 
 
    Function( const function_type_1& f1_, const function_type_2& f2_ ):
      boost::compressed_pair< function_type_1, function_type_2 >( f1_, f2_ ) { }
@@ -1655,13 +1655,13 @@ struct result_of_compose {
 template <typename TDomain, typename TRange1, typename TRange2,
           typename TSpec1, typename TSpec2>
 typename result_of_compose<TDomain,TRange1,TRange2,TSpec1,TSpec2>::type
-compose( const Function<TDomain,TRange1,TSpec1>& f1, const Function<TRange1,TRange2,TSpec2>& f2 ) {
+compose( const Function<TRange1,TRange2,TSpec1>& f1, const Function<TDomain,TRange1,TSpec2>& f2 ) {
 	return Function<TDomain,TRange2,Compose<TSpec1,TSpec2,TRange1> >( f1, f2 );
 }
 
 #if 0
 template <typename TDomain, typename TFactor, typename TRange2, typename TSpec2>
-struct result_of_compose<TDomain, typename MultType<TDomain,TFactor>::type, TRange2,
+struct result_of_compose<TDomain, typename MultType<TFactor,TDomain>::type, TRange2,
 												 X_To<1,TFactor>, TSpec2 > {
 	 typedef Function<TDomain, typename MultType<TDomain,TFactor>::type,X_To<1,TFactor> > f1_t;
 	 typedef Function< typename MultType<TDomain,TFactor>::type,TRange2,TSpec2>	f2_t;
@@ -1669,10 +1669,10 @@ struct result_of_compose<TDomain, typename MultType<TDomain,TFactor>::type, TRan
 };
 
 
-template <typename TDomain, typename TFactor, typename TRange2, typename TSpec2>
-typename result_of_compose<TDomain, typename MultType<TDomain,TFactor>::type, TRange2,
+template <typename TDomain, typename TRange1, typename TFactor, typename TRange2, typename TSpec2>
+typename result_of_compose<TDomain, TRange1, TRange2,
 													 X_To<1,TFactor>, TSpec2>::type
-compose( const Function<TDomain, typename MultType<TDomain,TFactor>::type,X_To<1,TFactor> >& f1,
+compose( const Function<TDomain, TRange1,X_To<1,TFactor> >& f1,
 				 const Function< typename MultType<TDomain,TFactor>::type,TRange2,TSpec2>& f2 ) {
 	return f1.getFactor() * f2;
 }
