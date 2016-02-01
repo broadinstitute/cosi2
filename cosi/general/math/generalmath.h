@@ -1,10 +1,75 @@
+#ifndef __INCLUDE_COSI_GENERALMATH_H
+#define __INCLUDE_COSI_GENERALMATH_H
+
+// #+TITLE: Module generalmath
+//
+// A general representation of functions of one variable.  Functions are represented as trees, and
+// various generic operations on functions are implemented: composition, inversion, differentiation,
+// integration etc.  Functions are represnted analytically, as opposed to just black boxes,
+// which allows exact analytic computation of many operations on functions, and permits detailed
+// type-checking.
+
+// * Interface
+
+#include <boost/core/enable_if.hpp>
+#include <boost/type_traits/is_convertible.hpp>
+
+namespace cosi {
+namespace math {
+
+// ** Template: Function - a function of one variable, from a specific domain to a specific range
+// Template params:
+//    TDomain - the domain type of the function.  Even if the function is constant, it still has a
+//      specific domain type.
+//    TRange - the range type of the function.
+//    TSpec - definition of the function: what the function is, i.e. how it computes its result from its argument.
+template <typename TDomain, typename TRange, typename TSpec> class Function;
+
+template <typename TFunc> struct DomainType;
+template <typename TFunc> struct RangeType;
+template <typename TFunc> struct SpecType;
+
+// ** Function: eval - evaluate a function at a given point.
+template <typename TDomain, typename TRange, typename TSpec, typename TArg>
+typename boost::enable_if< boost::is_convertible< TArg, TDomain >,
+													 TRange >::type
+eval( Function<TDomain, TRange, TSpec> const&, TArg val );
+
+template <typename TDomain, typename TRange, typename TSpec, typename Enable=void>
+struct result_of_indefiniteIntegral;
+
+template <typename TDomain, typename TRange, typename TSpec>
+typename result_of_indefiniteIntegral<TDomain, TRange, TSpec>::type
+indefiniteIntegral( const Function< TDomain, TRange, TSpec >& f);
+
+template <typename TDomain, typename TRange, typename TSpec> struct result_of_differentiate;
+
+template <typename TDomain, typename TRange, typename TSpec>
+typename result_of_differentiate<TDomain, TRange, TSpec>::type
+differentiate( const Function< TDomain, TRange, TSpec >& f);
+
+template <typename TDomain, typename TRange, typename TSpec> struct result_of_inverse;
+
+template <typename TDomain, typename TRange, typename TSpec>
+typename result_of_inverse<TDomain, TRange, TSpec>::type
+inverse( const Function< TDomain, TRange, TSpec >& f);
+
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
+struct result_of_compose;
+
+template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
+typename result_of_compose<TDomain,TRange1,TRange2,TSpec1,TSpec2>::type
+compose( const Function<TRange1,TRange2,TSpec1>& f1, const Function<TDomain,TRange1,TSpec2>& f2 );
+
+} // namespace math
+} // namespace cosi
+
+// * Implementation
 
 // * Preamble
 
 // ** Headers
-
-#ifndef __INCLUDE_COSI_GENERALMATH_H
-#define __INCLUDE_COSI_GENERALMATH_H
 
 #include <cmath>
 #include <stdexcept>
@@ -24,7 +89,6 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/typeof/typeof.hpp>
-#include <boost/type_traits/is_convertible.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/type_traits/has_multiplies.hpp>
@@ -63,48 +127,8 @@
 
 #include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()
 
-
 namespace cosi {
 namespace math {
-
-template <typename TDomain, typename TRange, typename TSpec> class Function;
-
-template <typename TFunc> struct DomainType;
-template <typename TFunc> struct RangeType;
-template <typename TFunc> struct SpecType;
-
-template <typename TDomain, typename TRange, typename TSpec, typename TArg>
-typename boost::enable_if< boost::is_convertible< TArg, TDomain >,
-													 TRange >::type
-eval( Function<TDomain, TRange, TSpec> const&, TArg val );
-
-template <typename TDomain, typename TRange, typename TSpec, typename Enable=void>
-struct result_of_indefiniteIntegral;
-
-template <typename TDomain, typename TRange, typename TSpec>
-typename result_of_indefiniteIntegral<TDomain, TRange, TSpec>::type
-indefiniteIntegral( const Function< TDomain, TRange, TSpec >& f);
-
-template <typename TDomain, typename TRange, typename TSpec> struct result_of_differentiate;
-
-template <typename TDomain, typename TRange, typename TSpec>
-typename result_of_differentiate<TDomain, TRange, TSpec>::type
-differentiate( const Function< TDomain, TRange, TSpec >& f);
-
-
-template <typename TDomain, typename TRange, typename TSpec> struct result_of_inverse;
-
-template <typename TDomain, typename TRange, typename TSpec>
-typename result_of_inverse<TDomain, TRange, TSpec>::type
-inverse( const Function< TDomain, TRange, TSpec >& f);
-
-
-template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
-struct result_of_compose;
-
-template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TSpec2>
-typename result_of_compose<TDomain,TRange1,TRange2,TSpec1,TSpec2>::type
-compose( const Function<TRange1,TRange2,TSpec1>& f1, const Function<TDomain,TRange1,TSpec2>& f2 );
 
 
 template <typename Op, typename T1, typename T2=void, typename T3=void, typename T4=void> struct rez;
