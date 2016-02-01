@@ -31,6 +31,7 @@
 #include <boost/type_traits/has_divides.hpp>
 #include <boost/type_traits/has_minus.hpp>
 #include <boost/type_traits/has_plus.hpp>
+#include <boost/core/demangle.hpp>
 #include <boost/tti/has_type.hpp>
 #include <boost/concept_check.hpp>
 #include <boost/proto/functional/std/utility.hpp>
@@ -56,6 +57,7 @@
 #include <boost/serialization/nvp.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/type_index.hpp>
 #include <cosi/general/utils.h>
 #include <cosi/general/math/gauss_legendre.h>
 
@@ -105,6 +107,18 @@ typename result_of_compose<TDomain,TRange1,TRange2,TSpec1,TSpec2>::type
 compose( const Function<TRange1,TRange2,TSpec1>& f1, const Function<TDomain,TRange1,TSpec2>& f2 );
 
 
+template <typename Op, typename T1, typename T2=void, typename T3=void, typename T4=void> struct rez;
+
+namespace ops {
+struct Add;
+struct Sub;
+struct Div;
+struct Mult;
+}
+
+template <typename TDomain1, typename TRange1, typename TSpec1,
+					typename TDomain2, typename TRange2, typename TSpec2> struct result_of_multiplies;
+
 BOOST_TTI_HAS_TYPE(type)
 
 //
@@ -117,10 +131,17 @@ template <typename TVal1, typename TVal2> struct MultType {
 	 typedef BOOST_TYPEOF_TPL( boost::declval<TVal1>() * boost::declval<TVal2>()) type;
 };
 
+// Metafunction: AddType
+// Returns the type of the multiplication of values of the given type.
+template <typename TVal1, typename TVal2=TVal1> struct AddType {
+	 typedef BOOST_TYPEOF_TPL( boost::declval<TVal1>() + boost::declval<TVal2>()) type;
+};
+
+
 // Metafunction: DiffType
 // Returns the type of the difference of values of the given type.
-template <typename TVal> struct DiffType {
-   typedef BOOST_TYPEOF_TPL( boost::declval<TVal>() - boost::declval<TVal>()) type;
+template <typename TVal1, typename TVal2 = TVal1> struct DiffType {
+   typedef BOOST_TYPEOF_TPL( boost::declval<TVal1>() - boost::declval<TVal2>()) type;
 };
 
 // Metafunction: DivType
@@ -353,13 +374,19 @@ public:
    typedef X_To<1,FactorType> spec_type;
    typedef FactorType factor_type;
 
-	 BOOST_MPL_ASSERT(( boost::is_convertible< typename MultType<FactorType, domain_diff_type >::type,
-	 										result_type >
-	 										));
+	 // BOOST_MPL_ASSERT(( boost::is_convertible< typename MultType<FactorType, TDomain >::type,
+	 // 										result_type >
+	 // 										));
+
+	 
+	 // BOOST_MPL_ASSERT(( boost::is_convertible< typename MultType<FactorType, domain_diff_type >::type,
+	 // 										result_type >
+	 // 										));
 
    Function( ): factor( 1.0 ) {}
    Function( factor_type factor_ ): factor( factor_ ) {}
-   result_type operator()( TDomain x ) const { return factor * ( x - static_cast< TDomain >( 0.0 ) ) ; }
+   //result_type operator()( TDomain x ) const { return factor * ( x - static_cast< TDomain >( 0.0 ) ) ; }
+	 result_type operator()( TDomain x ) const { return result_type( ToDouble( factor ) * ToDouble( x ) ); }
    factor_type getFactor() const { return factor; }
 
    friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
@@ -379,9 +406,9 @@ template <typename TDomain, typename TRange>
 Function< TDomain, TRange, X_To<1> > fn_x() { return Function< TDomain, TRange, X_To<1> >(); }
 
 template <typename TDomain, typename TFactor>
-Function< TDomain, typename MultType<TFactor,TDomain>::type,
+Function< TDomain, typename MultType<TFactor, typename DiffType<TDomain>::type >::type,
 					X_To<1,TFactor> > fn_x( TFactor c ) {
-	return Function< TDomain, typename MultType<TFactor,TDomain>::type,
+	return Function< TDomain, typename MultType<TFactor, typename DiffType<TDomain>::type >::type,
 									 X_To<1,TFactor> >( c );
 }
 
@@ -560,6 +587,20 @@ Function<TDomain, typename DivOp<TRange1,TRange2>::result_type, Const<> >
 operator/( const Function< TDomain, TRange1, Const<TConstSpec1> >& f1,
            const Function< TDomain, TRange2, Const<TConstSpec2> >& f2 ) {
   return Function< TDomain, typename DivOp<TRange1,TRange2>::result_type, Const<> >( evalConst( f1 ) / evalConst( f2 ) );
+}
+
+// template <typename TDomain1, typename TRange1, typename TSpec1, typename TDomain2, typename TRange2, typename TSpec2>
+// struct rez<ops::Mult, Function<TDomain1,TRange1,Const<> >, Function<TDomain2,TRange2,X_To<1> > > {
+// 	 typedef Function< TDomain, TRange, Const<> > f1_t;
+// 	 typedef Function<TDomain, TRange, X_To<1> > f2_t;
+// 	 typedef BOOST_TYPEOF_TPL(( 
+// };
+
+//typename rez<ops::Mult, Function< TDomain, TRange, Const<> >, Function<TDomain, TRange, X_To<1> > >::type
+template <typename TDomain, typename TRange1, typename TRange2>
+Function<TDomain, typename MultType<TRange1,TRange2>::type, X_To<1> >
+operator*( const Function< TDomain, TRange1, Const<> >& f1, const Function<TDomain, TRange2, X_To<1> >& f2 ) {
+	return Function<TDomain, typename MultType<TRange1,TRange2>::type, X_To<1> >( evalConst( f1 ) * f2.getFactor() );
 }
 
 template <typename TDomain, typename TRange1, typename TRange2, typename TRange3, typename TSpec>
@@ -1077,7 +1118,6 @@ struct result_of_mult {
 	 typedef Function< TDomain, range_type, Piecewise< piece_spec_type > > type;
 };
 
-
 template <typename TDomain, typename TRange1, typename TRange2, typename TSpec1, typename TPieceSpec2>
 typename result_of_mult<TDomain, TRange1, TRange2, TSpec1, TPieceSpec2>::type
 operator*( const Function<TDomain,TRange1,TSpec1>& f1, const Function<TDomain,TRange2,Piecewise<TPieceSpec2> >& f2 ) {
@@ -1187,6 +1227,51 @@ exp_( const Function<TDomain,double,Piecewise<TPieceSpec> >& f ) {
 		 f_result.getPieces().insert( std::make_pair( it->first, exp_( it->second ) ) );
 	return f_result;
 }
+
+namespace detail {
+template <typename TDomain, typename TRange, typename TPieceSpec>
+struct transformPiece {
+	 typedef Function<TDomain,TRange,TPieceSpec> piece_type;
+	 typedef typename result_of_inverse<TDomain, TRange, TPieceSpec>::type piece_inv_type;
+
+	 BOOST_MPL_ASSERT(( boost::is_same< typename DomainType<piece_inv_type>::type, TRange > ));
+	 BOOST_MPL_ASSERT(( boost::is_same< typename RangeType<piece_inv_type>::type, TDomain > ));
+	 BOOST_MPL_ASSERT(( IsFunctionSpec< typename SpecType<piece_inv_type>::type > ));
+	 
+	 typedef typename SpecType<piece_inv_type>::type piece_inv_spec_type;
+
+	 typedef std::pair<const TRange,piece_inv_type> result_type;
+	 result_type operator()( const std::pair<const TDomain, piece_type>& p  ) const {
+		 const TDomain& a = p.first;
+		 const piece_type& piece = p.second;
+		 TRange piece_at_a = eval( piece, a );
+		 piece_inv_type piece_inv = inverse( piece );
+		 return std::make_pair( piece_at_a, piece_inv );
+	 }
+};
+}
+
+template <typename TDomain, typename TRange, typename TPieceSpec>
+struct result_of_inverse<TDomain, TRange, Piecewise<TPieceSpec> > {
+	 typedef Function<TRange,TDomain,
+										Piecewise< typename detail::transformPiece<TDomain, TRange, TPieceSpec>::piece_inv_spec_type > >
+		type;
+	 
+	 type operator()( const Function<TDomain, TRange, Piecewise<TPieceSpec> >& f ) {
+		 return
+				type( boost::adaptors::transform( f.getPieces(),
+																					detail::transformPiece<TDomain,TRange,TPieceSpec>() ) );
+	 }
+
+	 BOOST_MPL_ASSERT(( boost::is_same< typename DomainType<type>::type, TRange > ));
+	 BOOST_MPL_ASSERT(( boost::is_same< typename RangeType<type>::type, TDomain > ));
+	 BOOST_MPL_ASSERT(( IsFunctionSpec< typename SpecType<type>::type > ));
+};
+
+// struct invert_piece {
+// 	 operator
+// };
+
 
 // template <typename TDomain, typename TPieceSpec>
 // exp_( Function< TDomain, double, UnaryOp< Piecewise<TPieceSpec>, Exp> const& f ) {
@@ -1650,15 +1735,19 @@ template <typename TDomain, typename TRange1, typename TRange2,
           typename TSpec1, typename TSpec2>
 struct result_of_compose {
 	 typedef Function<TDomain,TRange2,Compose<TSpec1,TSpec2,TRange1> > type;
+	 type operator()( const Function<TRange1,TRange2,TSpec1>& f1, const Function<TDomain,TRange1,TSpec2>& f2 ) {
+		 return type( f1, f2 );
+	 }
 };
 
 template <typename TDomain, typename TRange1, typename TRange2,
           typename TSpec1, typename TSpec2>
 typename result_of_compose<TDomain,TRange1,TRange2,TSpec1,TSpec2>::type
 compose( const Function<TRange1,TRange2,TSpec1>& f1, const Function<TDomain,TRange1,TSpec2>& f2 ) {
-	return Function<TDomain,TRange2,Compose<TSpec1,TSpec2,TRange1> >( f1, f2 );
+	return result_of_compose<TDomain,TRange1,TRange2,TSpec1,TSpec2>()( f1, f2 );
 }
 
+#if 0
 template <typename TDomain, typename TRange1, typename TRange2,
           typename TSpec2>
 struct result_of_compose<TDomain,TRange1,TRange2,X_To<1>,TSpec2> {
@@ -1673,7 +1762,7 @@ typename result_of_compose<TDomain,TRange1,TRange2, X_To<1>,TSpec2>::type
 compose( const Function<TRange1,TRange2,X_To<1> >& f1, const Function<TDomain,TRange1,TSpec2>& f2 ) {
 	return fn_const<TDomain>( f1.getFactor() ) * f2;
 }
-
+#endif
 
 #if 0
 template <typename TDomain, typename TFactor, typename TRange2, typename TSpec2>
@@ -1698,44 +1787,137 @@ compose( const Function<TDomain, TRange1,X_To<1,TFactor> >& f1,
 
 template <typename TDomain, typename TRange, typename TFactor>
 struct result_of_inverse<TDomain, TRange, X_To<1, TFactor> > {
-	 typedef Function< TDomain, TRange, X_To<1, TFactor> > f_t;
-	 typedef BOOST_TYPEOF_TPL( fn_x< TDomain>( 1. / boost::declval<f_t>().getFactor() ) ) type;
+	 typedef typename InvType<TFactor>::type TFactorInv;
+	 typedef Function< TRange, TDomain, X_To<1, TFactorInv> >  type;
+	 type operator()( const Function< TDomain, TRange, X_To<1, TFactor> >& f ) {
+		 return type( 1.0 / f.getFactor() );
+	 }
+	 BOOST_MPL_ASSERT(( boost::is_same< typename DomainType<type>::type, TRange > ));
+	 BOOST_MPL_ASSERT(( boost::is_same< typename RangeType<type>::type, TDomain > ));
+	 BOOST_MPL_ASSERT(( IsFunctionSpec< typename SpecType<type>::type > ));	 
 };
 
-template <typename TDomain, typename TRange, typename TFactor>
-typename result_of_inverse<TDomain, TRange, X_To<1, TFactor> >::type
-inverse( const Function< TDomain, TRange, X_To<1, TFactor> >& f) {
-	return fn_x< TDomain>( 1. / f.getFactor() );
+namespace detail {
+template < template <typename,typename> typename Op> struct slv;
+struct Arg1 {};
+struct Arg2 {};
+template <typename T1, typename T2> const T1& aux_get( Arg1, const boost::compressed_pair<T1,T2>& p )
+{ return p.first(); }
+template <typename T1, typename T2> const T2& aux_get( Arg2, const boost::compressed_pair<T1,T2>& p )
+{ return p.second(); }
+
+template <> struct slv< AddOp > {
+	 template <typename T2, typename TR>
+	 static typename SubOp<TR,T2>::result_type slv_for(Arg1, T2 v2, TR vr  ) { return vr - v2; }
+	 template <typename T1, typename TR>
+	 static typename SubOp<TR,T1>::result_type slv_for(Arg2, T1 v1, TR vr  ) { return vr - v1; }
+};
+template <> struct slv< MultOp > {
+	 template <typename T2, typename TR>
+	 static typename DivOp<TR,T2>::result_type slv_for(Arg1, T2 v2, TR vr  ) { return vr / v2; }
+	 template <typename T1, typename TR>
+	 static typename DivOp<TR,T1>::result_type slv_for(Arg2, T1 v1, TR vr  ) { return vr / v1; }
+};
+template <> struct slv< SubOp > {
+	 // v1 - v2 = vr
+	 template <typename T2, typename TR>
+	 static typename AddOp<T2,TR>::result_type slv_for(Arg1, T2 v2, TR vr  ) { return v2 + vr; }
+	 template <typename T1, typename TR>
+	 static typename SubOp<T1,TR>::result_type slv_for(Arg2, T1 v1, TR vr  ) { return v1 - vr; }
+};
+template <> struct slv< DivOp > {
+	 // v1 / v2 = vr
+	 template <typename T2, typename TR>
+	 static typename MultOp<T2,TR>::result_type slv_for(Arg1, T2 v2, TR vr  ) { return v2 * vr; }
+	 template <typename T1, typename TR>
+	 static typename DivOp<T1,TR>::result_type slv_for(Arg2, T1 v1, TR vr  ) { return v1 / vr; }
+};
+
+template <typename TDomain, typename TRange, typename TRangeC, typename TRangeF, typename TSpec,
+					template <typename,typename> typename Op, typename ArgC, typename ArgF, typename bin_op_t>
+struct result_of_inverse_aux {
+	 typedef Function< TDomain, TRange, bin_op_t > f_t;
+	 typedef typename result_of_inverse<TDomain, TRangeF, TSpec>::type f_inv_t;
+
+	 BOOST_MPL_ASSERT(( boost::is_same< typename DomainType<f_inv_t>::type, TRangeF > ));
+	 BOOST_MPL_ASSERT(( boost::is_same< typename RangeType<f_inv_t>::type, TDomain > ));
+	 BOOST_MPL_ASSERT(( IsFunctionSpec< typename SpecType<f_inv_t>::type > ));
+	 
+	 typedef Function<TRange,TRange,X_To<1> > x_t;
+	 typedef Function<TRange,TRangeC,Const<> >	 c_t;
+	 typedef BOOST_TYPEOF_TPL(( slv<Op>::slv_for( boost::declval<ArgF>(),
+																								boost::declval<c_t>(), boost::declval<x_t>() ) ))
+	 r_t;
+
+	 BOOST_MPL_ASSERT(( boost::is_same< typename DomainType<r_t>::type, TRange > ));
+	 BOOST_MPL_ASSERT(( boost::is_same< typename RangeType<r_t>::type, TRangeF > ));
+	 BOOST_MPL_ASSERT(( IsFunctionSpec< typename SpecType<r_t>::type > ));
+
+	 typedef BOOST_TYPEOF_TPL(( compose( boost::declval< f_inv_t >(), boost::declval< r_t >()
+																))) type;
+
+	 BOOST_MPL_ASSERT(( boost::is_same< typename DomainType<type>::type, TRange > ));
+	 BOOST_MPL_ASSERT(( boost::is_same< typename RangeType<type>::type, TDomain > ));
+	 BOOST_MPL_ASSERT(( IsFunctionSpec< typename SpecType<type>::type > ));
+	 
+	 type operator()( const f_t& f ) {
+		 return compose( inverse( aux_get( ArgF(), f) ),
+										 slv<Op>::slv_for( ArgF(), c_t( evalConst( aux_get( ArgC(), f ) ) ), x_t() ) );
+	 }
+};
+}  // namespace detail
+template <typename TDomain, typename TRange, typename TRangeC, typename TRangeF, typename TSpec,
+					template <typename,typename> typename Op>
+struct result_of_inverse<TDomain, TRange, BinOp< Const<>, TSpec, Op< TRangeC, TRangeF > > >:
+		 public detail::result_of_inverse_aux<TDomain,TRange, TRangeC, TRangeF, TSpec, Op, detail::Arg1, detail::Arg2,
+																					BinOp< Const<>, TSpec, Op< TRangeC, TRangeF > > > {
+};
+
+template <typename TDomain, typename TRange, typename TRangeC, typename TRangeF, typename TSpec,
+					template <typename,typename> typename Op>
+struct result_of_inverse<TDomain, TRange, BinOp< TSpec, Const<>, Op< TRangeF, TRangeC > > >:
+		 public detail::result_of_inverse_aux<TDomain,TRange, TRangeC, TRangeF, TSpec, Op, detail::Arg2, detail::Arg1,
+																					BinOp< TSpec, Const<>, Op< TRangeF, TRangeC > > > {
+};
+
+template <typename TDomain, typename TRange, typename TSpec>
+typename result_of_inverse<TDomain, TRange, TSpec>::type
+inverse( const Function<TDomain, TRange, TSpec>& f ) {
+	typedef typename result_of_inverse<TDomain, TRange, TSpec>::type type;
+	 BOOST_MPL_ASSERT(( boost::is_same< typename DomainType<type>::type, TRange > ));
+	 BOOST_MPL_ASSERT(( boost::is_same< typename RangeType<type>::type, TDomain > ));
+	 BOOST_MPL_ASSERT(( IsFunctionSpec< typename SpecType<type>::type > ));
+	
+	return result_of_inverse<TDomain,TRange,TSpec>()( f );
 }
 
 template <typename TDomain, typename TRange, typename TSpec>
-struct result_of_inverse<TDomain, TRange, BinOp< Const<>, TSpec, AddOp< TRange > > > {
-	 typedef Function< TDomain, TRange, BinOp< Const<>, TSpec, AddOp< TRange > > > f_t;
-	 typedef BOOST_TYPEOF_TPL( compose( inverse( boost::declval<f_t>().second() ),
-																			fn_x<TDomain,TRange>() - boost::declval<f_t>().first() ) ) type;
+struct result_of_inverse<TDomain, TRange, UnaryOp< TSpec, Exp > > {
+	 BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+	 BOOST_MPL_ASSERT(( boost::is_same< TRange, double > ));
+	 typedef Function< TDomain, TRange, UnaryOp< TSpec, Exp > > f_t;
+	 typedef Function< TDomain, TRange, TSpec > f_exponent_t;
+
+	 typedef BOOST_TYPEOF_TPL(( boost::declval<f_t>().getFunction() )) f_exponent_t2;
+	 
+	 BOOST_MPL_ASSERT(( boost::is_same< f_exponent_t, f_exponent_t2 > ));
+										 
+	 typedef BOOST_TYPEOF_TPL( inverse( boost::declval<f_exponent_t>() ) ) f_inv_t;
+
+	 BOOST_MPL_ASSERT(( boost::is_same< typename DomainType<f_inv_t>::type, TRange > ));
+	 BOOST_MPL_ASSERT(( boost::is_same< typename RangeType<f_inv_t>::type, TDomain > ));
+	 BOOST_MPL_ASSERT(( IsFunctionSpec< typename SpecType<f_inv_t>::type > ));
+	 
+	 typedef BOOST_TYPEOF_TPL( compose( boost::declval<f_inv_t>(),
+																			log_( fn_x<TRange,TRange>() ) ) ) type;
+	 
+	 BOOST_MPL_ASSERT(( boost::is_same< typename DomainType<type>::type, TRange > ));
+	 BOOST_MPL_ASSERT(( boost::is_same< typename RangeType<type>::type, TDomain > ));
+	 BOOST_MPL_ASSERT(( IsFunctionSpec< typename SpecType<type>::type > ));
+
+
+	 type operator()( const f_t& f ) { return compose( inverse( f.getFunction() ), log_( fn_x<TRange,TRange>() ) ); }
 };
-
-template <typename TDomain, typename TRange, typename TSpec>
-typename result_of_inverse<TDomain,TRange, BinOp< Const<>, TSpec, AddOp< TRange > > >::type
-inverse( const Function< TDomain, TRange, BinOp< Const<>, TSpec, AddOp< TRange > > >& f ) {
-	BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
-	return compose( inverse( f.second() ), fn_x<TDomain,TRange>() - f.first() );
-}
-
-template <typename TDomain, typename TRange, typename TSpec>
-struct result_of_inverse<TDomain, TRange, BinOp< Const<>, TSpec, MultOp< TRange > > > {
-	 typedef Function< TDomain, TRange, BinOp< Const<>, TSpec, MultOp< TRange > > > f_t;
-	 typedef BOOST_TYPEOF_TPL( compose( inverse( boost::declval<f_t>().second() ),
-																			fn_x<TDomain,TRange>() / boost::declval<f_t>().first() ) ) type;
-};
-
-template <typename TDomain, typename TRange, typename TSpec>
-typename result_of_inverse<TDomain,TRange, BinOp< Const<>, TSpec, MultOp< TRange > > >::type
-inverse( const Function< TDomain, TRange, BinOp< Const<>, TSpec, MultOp< TRange > > >& f ) {
-	BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
-	return compose( inverse( f.second() ), fn_x<TDomain,TRange>() / f.first() );
-}
-
 
 //
 // *** Function: evalInverse
@@ -1806,6 +1988,7 @@ template <typename TDomain, typename TRange, typename Enable = void>
 struct FunctionObjectConcept {
 	 virtual ~FunctionObjectConcept() {}
 	 virtual TRange doEval( TDomain ) const = 0;
+	 virtual Function< TRange, TDomain, Any<> > doInverse() const = 0;
 	 virtual void doOutput( std::ostream& ) const = 0;
 };
 
@@ -1813,6 +1996,7 @@ template <typename TDomain, typename TRange>
 struct FunctionObjectConcept<TDomain, TRange, typename boost::enable_if< has_area< TDomain, TRange > >::type > {
 	 virtual ~FunctionObjectConcept() {}
 	 virtual TRange doEval( TDomain ) const = 0;
+	 virtual Function< TRange, TDomain, Any<> > doInverse() const = 0;
 	 virtual void doOutput( std::ostream& ) const = 0;	 
 	 virtual Function< TDomain, typename AreaType< TDomain, TRange >::type, Any<> >
 	 do_indefiniteIntegral() const = 0;
@@ -1826,6 +2010,7 @@ public:
 	 FunctionObjectModel( const Function<TDomain, TRange, TSpec>& f_ ) : f( f_ ) {}
 	 virtual ~FunctionObjectModel() {}
 	 virtual TRange doEval( TDomain x ) const { return eval( f, x ); }
+	 virtual Function< TRange, TDomain, Any<> > doInverse() const { return inverse( f ); }
 	 virtual void doOutput( std::ostream& s ) const { s << f; }
 	 
 protected:
@@ -1854,6 +2039,7 @@ public:
 	 FunctionObjectModel( const Function<TDomain, TRange, TSpec>& f_ ) : f( f_ ) {}
 	 virtual ~FunctionObjectModel() {}
 	 virtual TRange doEval( TDomain x ) const { return eval( f, x ); }
+	 virtual Function< TRange, TDomain, Any<> > doInverse() const { return inverse( f ); }
 	 virtual void doOutput( std::ostream& s ) const { s << f; }
 
 	 
@@ -1912,10 +2098,44 @@ indefiniteIntegral( const Function< TDomain, TRange, Any<> >& f ) {
 		 return f.object->do_indefiniteIntegral();
 }
 
+template <typename TDomain, typename TRange>
+struct result_of_inverse<TDomain, TRange, Any<> > {
+	 typedef Function<TRange, TDomain, Any<> > type;
+	 type operator()( const Function< TDomain, TRange, Any<> >& f ) { return f.object->doInverse(); }
+};
+
 template <typename TDomain, typename TRange, typename TSpec> inline
 Function< TDomain, TRange, Any<> >
 fn_any( Function< TDomain, TRange, TSpec > const& f ) { return Function< TDomain, TRange, Any<> >( f ); }
 
+
+struct Bad;
+template <> struct IsFunctionSpec< Bad >: public boost::true_type {};
+template <typename TDomain, typename TRange>
+class Function<TDomain, TRange, Bad > {
+public:
+	 typedef TDomain argument_type;
+	 typedef TRange result_type;
+	 typedef Bad spec_type;
+
+	 Function() { }
+	 TRange operator()( TDomain ) const { return std::numeric_limits<TRange>::quiet_NaN(); }
+	 friend std::ostream& operator<<( std::ostream& s, const Function& ) {
+		 s << "Bad()";
+		 return s;
+	 }
+};
+
+template <typename TDomain, typename TRange, typename TSpec> struct result_of_inverse {
+ 	 typedef Function<TRange,TDomain,Bad> type;
+	 type operator()( const Function< TDomain, TRange, TSpec >& f ) {
+		 BOOST_MPL_ASSERT(( IsFunctionSpec<TSpec> ));
+		 //BOOST_STATIC_ASSERT_MSG( sizeof( f ) == 0, "don't know how to invert f" );
+		 throw std::invalid_argument( "cannot compute inverse for " +
+																	boost::core::demangle( typeid( f ).name() ) );
+		 return type();
+	 }
+};
 
 
 // * Arrival processes
@@ -2425,6 +2645,12 @@ BOOST_TYPEOF_REGISTER_TYPE(cosi::math::RunTime)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::CompileTime,1)
 
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::X_To,(int)(typename))
+BOOST_TYPEOF_REGISTER_TYPE(cosi::math::detail::Arg1);
+BOOST_TYPEOF_REGISTER_TYPE(cosi::math::detail::Arg2);
+BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::detail::slv,BOOST_TYPEOF_TEMPLATE(2))
+BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::detail::result_of_inverse_aux,
+															 (typename)(typename)(typename)(typename)(typename)BOOST_TYPEOF_TEMPLATE(2)
+															 (typename)(typename)(typename))
 
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::BinOp,3)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::AddOp,2)
@@ -2439,6 +2665,7 @@ BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::AreaType,2)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::detail::result_of_make_line_through,2)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::UnaryOp,2)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::result_of_indefiniteIntegral,3)
+BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::result_of_inverse,3)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::result_of_integralFromPoint,3)
 BOOST_TYPEOF_REGISTER_TYPE(cosi::math::Any)
 
@@ -2455,6 +2682,7 @@ BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Exp,1)
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::Log,1)
 
 BOOST_TYPEOF_REGISTER_TEMPLATE(cosi::math::CVal,1)
+BOOST_TYPEOF_REGISTER_TYPE(cosi::math::Bad)
 
 #endif  // #ifndef __INCLUDE_COSI_GENERALMATH_H
 // Postamble:1 ends here
