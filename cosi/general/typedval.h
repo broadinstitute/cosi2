@@ -91,7 +91,7 @@ const nan_t NAN_VAL();
 //         the parameter defaults to that.  The TypedVal must be explicitly converted
 //         from and to the underlying type; there deliberately are no implicit conversions.
 template <class T, typename ValT = cosi_double >
-struct TypedVal: public boost::totally_ordered<T>  {
+struct TypedVal  {
 	 // Field: val
 	 // The actual value.
 	 ValT val;
@@ -112,7 +112,11 @@ private:
 };  // struct TypedVal
 
 template <class T, typename V> inline bool operator==( const TypedVal<T,V>& f1, const TypedVal<T,V>& f2 ) { return f1.val == f2.val; }
+template <class T, typename V> inline bool operator!=( const TypedVal<T,V>& f1, const TypedVal<T,V>& f2 ) { return f1.val != f2.val; }
 template <class T, typename V> inline bool operator<( const TypedVal<T,V>& f1, const TypedVal<T,V>& f2 ) { return f1.val < f2.val; }
+template <class T, typename V> inline bool operator>( const TypedVal<T,V>& f1, const TypedVal<T,V>& f2 ) { return f1.val > f2.val; }
+template <class T, typename V> inline bool operator<=( const TypedVal<T,V>& f1, const TypedVal<T,V>& f2 ) { return f1.val <= f2.val; }
+template <class T, typename V> inline bool operator>=( const TypedVal<T,V>& f1, const TypedVal<T,V>& f2 ) { return f1.val >= f2.val; }
 
 template <class T, typename V> inline bool operator==( const TypedVal<T,V>& f, const zero_t& ) { return f.val == 0; }
 template <class T, typename V> inline bool operator!=( const TypedVal<T,V>& f, const zero_t& ) { return f.val != 0; }
@@ -133,6 +137,8 @@ template <class T, typename V> inline std::ostream& operator<<( std::ostream& s,
 template <class T, typename V> inline std::istream& operator>>( std::istream& s, TypedVal<T,V>& f ) { s >> f.val; return s; }
 
 template <class T> inline const TypedVal<T,cosi_double> cosi_fabs( const TypedVal<T,cosi_double>& val ) { return TypedVal<T,cosi_double>( ::fabs( ToDouble( val ) ) ); }
+template <class T> inline TypedVal<T,cosi_double> cosi_fabs( TypedVal<T,cosi_double>& val ) { return TypedVal<T,cosi_double>( ::fabs( ToDouble( val ) ) ); }
+
 inline cosi_double cosi_fabs( cosi_double x ) { return ::fabs( x ); }
 
 // Func: equal_eps
