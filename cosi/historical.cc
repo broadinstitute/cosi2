@@ -500,13 +500,16 @@ void Event_PopSizeExp::addToBaseModel( BaseModel& baseModel ) const {
 	BOOST_AUTO( &popInfo, baseModel.popInfos[ pop ] );
 	BOOST_AUTO( &pieces, popInfo.popSizeFn.getPieces() );
 
-	popInfo.setSizeFrom( gen, 
-		 Function< genid, popsize_float_t, Const <> >( popSizeBeg ) *
-			exp_(
-				cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
-				( ( Function< genid, gens_t, Const<> >( genBeg - ZERO_GEN ) -
-						Function< genid, gens_t, X_To<1> >() ) ) ) );
-											 
+	if ( cosi_fabs( popsize - popSizeBeg ) < popsize_float_t( 1. ) )
+		 popInfo.setSizeFrom( gen, fn_const<genid>( popsize ) );
+	else
+		 popInfo.setSizeFrom( gen, 
+													cval( popSizeBeg ) *
+													exp_(
+														cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
+														( ( cval( genBeg ) -
+																fn_x<genid,genid>() ) ) ) );
+	
 	if ( pieces.find( genBeg ) == pieces.end() )
 		 popInfo.setSizeFrom( genBeg, math::fn_const<genid>( popSizeBeg ) );
 }
@@ -586,13 +589,16 @@ void Event_PopSizeExp2::addToBaseModel( BaseModel& baseModel ) const {
 	BOOST_AUTO( &popInfo, baseModel.popInfos[ pop ] );
 	BOOST_AUTO( &pieces, popInfo.popSizeFn.getPieces() );
 
-	popInfo.setSizeFrom( gen, 
-		 Function< genid, popsize_float_t, Const <> >( popSizeBeg ) *
-			exp_(
-				cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
-				( ( Function< genid, gens_t, Const<> >( genBeg - ZERO_GEN ) -
-						Function< genid, gens_t, X_To<1> >() ) ) ) );
-											 
+	if ( cosi_fabs( popsize - popSizeBeg ) < popsize_float_t( 1. ) )
+		 popInfo.setSizeFrom( gen, fn_const<genid>( popsize ) );
+	else
+		 popInfo.setSizeFrom( gen, 
+													cval( popSizeBeg ) *
+													exp_(
+														cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
+														( ( cval( genBeg ) -
+																fn_x<genid,genid>() ) ) ) );
+	
 	if ( pieces.find( genBeg ) == pieces.end() )
 		 popInfo.setSizeFrom( genBeg, math::fn_const<genid>( popSizeBeg ) );
 }
