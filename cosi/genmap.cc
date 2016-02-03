@@ -47,7 +47,9 @@ GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_ ):
 			readFrom( f );
 		} catch( const std::ifstream::failure& e ) {
 			BOOST_THROW_EXCEPTION( cosi_io_error() << boost::errinfo_nested_exception( boost::copy_exception( e ) ) );
-		}			
+		} catch( const std::exception& e ) {
+			BOOST_THROW_EXCEPTION( cosi_io_error() << boost::errinfo_nested_exception( boost::copy_exception( e ) ) );
+		}	
 	} catch( boost::exception& e ) {
 		e << boost::errinfo_file_name( fname.string() )
 			<< error_msg3( "Error reading genetic map file" );
