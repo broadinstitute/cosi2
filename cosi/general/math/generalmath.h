@@ -151,7 +151,9 @@ BOOST_TTI_HAS_TYPE(type)
 
 // Metafunction: MultType
 // Returns the type of the multiplication of values of the given type.
-template <typename TVal1, typename TVal2> struct MultType {
+template <typename TVal1, typename TVal2, typename Enable=void> struct MultType;
+template <typename TVal1, typename TVal2>
+struct MultType<TVal1, TVal2, typename boost::enable_if< boost::has_multiplies< TVal1, TVal2 > >::type > {
 	 typedef BOOST_TYPEOF_TPL( boost::declval<TVal1>() * boost::declval<TVal2>()) type;
 };
 
@@ -431,7 +433,8 @@ Function< TDomain, TRange, X_To<1> > fn_x() { return Function< TDomain, TRange, 
 
 template <typename TDomain, typename TFactor>
 Function< TDomain, typename MultType<TFactor, typename DiffType<TDomain>::type >::type,
-					X_To<1,TFactor> > fn_x( TFactor c ) {
+						X_To<1,TFactor> >
+fn_x( TFactor c ) {
 	return Function< TDomain, typename MultType<TFactor, typename DiffType<TDomain>::type >::type,
 									 X_To<1,TFactor> >( c );
 }
