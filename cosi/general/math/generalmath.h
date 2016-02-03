@@ -1960,23 +1960,41 @@ evalInverse( const Function<TDomain, TRange, TSpec>& f, TDomain a, TDomain b, TR
 	assert( isStrictlyIncreasing( f, a, b ) );
   boost::uint32_t nsteps = 0;
   //PRINT5( a, b, targetVal, eps, typeid(f).name() );
-  assert( !(boost::math::isnan)( a ) );
-  assert( !(boost::math::isnan)( b ) );
-  assert( !(boost::math::isnan)( targetVal ) );
+	using util::chkCond;
+  chkCond( !(boost::math::isnan)( targetVal ), "evalInverse: targetVal is NaN" );
   while ( true ) {
-    assert( a <= b );
+		chkCond( !(boost::math::isnan)( a ), "evalInverse: a is NaN" );
+		chkCond( !(boost::math::isnan)( b ), "evalInverse: b is NaN" );
+		chkCond( a <= b, "evalInverse: a <= b is false" );
+
     TDomain mid = a + ( b-a ) / 2;
     typedef typename DiffType<TRange>::type range_diff_type;
-    range_diff_type curDiff = eval( f, mid ) - targetVal;
+		TRange curVal = eval( f, mid );
+		chkCond( !(boost::math::isnan)( curVal ), "evalInverse: eval returned NaN" );
+		BOOST_AUTO_TPL( curDiff, curVal - targetVal );
+		chkCond( !(boost::math::isnan)( curDiff ), "evalInverse: curDiff is NaN" );
+    BOOST_AUTO_TPL( curDiff_abs, cosi_fabs( curVal - targetVal ) );
+		chkCond( !(boost::math::isnan)( curDiff_abs ), "evalInverse: curDiff_abs is NaN" );
+		typedef BOOST_TYPEOF_TPL( curDiff_abs ) curDiff_abs_t;
+		if ( !( curDiff_abs >= curDiff_abs_t(0.) ) ) {
+			std::cerr << "findInfimum: curDiff_abs negative; eps=" << eps << " curDiff=" << curDiff <<
+				 " nsteps=" << nsteps << " maxSteps=" << maxSteps << " a=" << a << " b=" << b <<
+				 " targetVal=" << targetVal << " curVal=" << curVal <<
+				 " curDiff_abs >= curDiff_abs_t(0.) = " << ( curDiff_abs >= curDiff_abs_t(0.) ) << " f=" << f;
+		}
+		chkCond( curDiff_abs >= curDiff_abs_t(0.), "evalInverse: curDiff is negative" );
+		// check that it is not NAN
+		
     //PRINT5( a, b, mid, targetVal, curDiff );
-    if ( cosi_fabs( curDiff ) < eps ) {
+    if ( curDiff_abs < eps ) {
       return mid;
     }
     if ( nsteps++ > maxSteps ) {
 			std::ostringstream msg;
 			msg.precision(16);
 			msg << "findInfimum: too many steps; eps=" << eps << " curDiff=" << curDiff <<
-				 " nsteps=" << nsteps << " maxSteps=" << maxSteps << " a=" << a << " b=" << b << " f=" << f;
+				 " nsteps=" << nsteps << " maxSteps=" << maxSteps << " a=" << a << " b=" << b <<
+				 " targetVal=" << targetVal << " f=" << f;
 			throw std::runtime_error( msg.str() );
 		}
     assert( a < b );
