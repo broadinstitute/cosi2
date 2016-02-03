@@ -17,6 +17,7 @@
 #include <boost/random/uniform_real_distribution.hpp>
 #include <boost/random/triangle_distribution.hpp>
 #include <boost/random/exponential_distribution.hpp>
+#include <boost/core/demangle.hpp>
 #include <cosi/general/utils.h>
 #include <cosi/file.h>
 #include <cosi/recomb.h>
@@ -324,9 +325,19 @@ ParamFileReader::file_get_data (FILE *fileptr, FILE *segfp)
 			fscanf(fileptr, "%s", var);
 			file_killwhitespace(fileptr);
 			fgets(buffer, BUF_MAX, fileptr);
+			//strcat( buffer, " " );  // make sure no error if eof
 			try {
 				try { file_proc_buff(var, buffer, segfp); }
 				catch( const std::ios_base::failure& e ) {
+					BOOST_THROW_EXCEPTION( cosi_param_file_error()
+																 << boost::errinfo_errno( errno ) );
+				}
+				catch( std::exception const& e ) {
+
+					std::cerr << "genMap::readFrom - caught UNKNOWN exception of type " <<
+						 typeid( e ).name() << " demangled " << 
+						 ( boost::core::demangle( typeid( e ).name() ) ) << " ; exception is " << e.what() << "\n";
+					
 					BOOST_THROW_EXCEPTION( cosi_param_file_error()
 																 << boost::errinfo_errno( errno ) );
 				}
