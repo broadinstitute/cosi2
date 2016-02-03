@@ -90,7 +90,7 @@ void chkCond(int cond, const char *fmt, ...) {
   if ( cond ) return;
 
   chkCond_report_error();
-  fprintf( stderr, "%s: ", DateStr() );
+  fprintf( stderr, "%s: \n", DateStr() );
   
   va_start(ap, fmt);
   vfprintf (stderr, fmt, ap);
