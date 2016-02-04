@@ -1825,7 +1825,7 @@ struct result_of_inverse<TDomain, TRange, X_To<1, TFactor> > {
 };
 
 namespace detail {
-template < template <typename,typename> typename Op> struct slv;
+template < template <typename,typename> class Op> struct slv;
 struct Arg1 {};
 struct Arg2 {};
 template <typename T1, typename T2> const T1& aux_get( Arg1, const boost::compressed_pair<T1,T2>& p )
@@ -1861,7 +1861,7 @@ template <> struct slv< DivOp > {
 };
 
 template <typename TDomain, typename TRange, typename TRangeC, typename TRangeF, typename TSpec,
-					template <typename,typename> typename Op, typename ArgC, typename ArgF, typename bin_op_t>
+					template <typename,typename> class Op, typename ArgC, typename ArgF, typename bin_op_t>
 struct result_of_inverse_aux {
 	 typedef Function< TDomain, TRange, bin_op_t > f_t;
 	 typedef typename result_of_inverse<TDomain, TRangeF, TSpec>::type f_inv_t;
@@ -1894,14 +1894,14 @@ struct result_of_inverse_aux {
 };
 }  // namespace detail
 template <typename TDomain, typename TRange, typename TRangeC, typename TRangeF, typename TSpec,
-					template <typename,typename> typename Op>
+					template <typename,typename> class Op>
 struct result_of_inverse<TDomain, TRange, BinOp< Const<>, TSpec, Op< TRangeC, TRangeF > > >:
 		 public detail::result_of_inverse_aux<TDomain,TRange, TRangeC, TRangeF, TSpec, Op, detail::Arg1, detail::Arg2,
 																					BinOp< Const<>, TSpec, Op< TRangeC, TRangeF > > > {
 };
 
 template <typename TDomain, typename TRange, typename TRangeC, typename TRangeF, typename TSpec,
-					template <typename,typename> typename Op>
+					template <typename,typename> class Op>
 struct result_of_inverse<TDomain, TRange, BinOp< TSpec, Const<>, Op< TRangeF, TRangeC > > >:
 		 public detail::result_of_inverse_aux<TDomain,TRange, TRangeC, TRangeF, TSpec, Op, detail::Arg2, detail::Arg1,
 																					BinOp< TSpec, Const<>, Op< TRangeF, TRangeC > > > {
