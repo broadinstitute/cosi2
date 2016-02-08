@@ -1018,7 +1018,8 @@ make_line_through( TDomain x1, TRange y1, TDomain x2, TRange y2 ) {
 #if ( __GNUC__ > 4 ) || ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ > 5 ) )
 #pragma GCC diagnostic push
 #endif
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+// #if ( __GNUC__ > 4 ) || ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ > 6 ) )
+// #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
 
 template <typename TPieceSpec> struct Piecewise;

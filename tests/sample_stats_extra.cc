@@ -51,6 +51,7 @@
 #include <boost/numeric/conversion/bounds.hpp>
 #include <boost/assign/list_inserter.hpp>
 #include <boost/assign/std/map.hpp>
+#include <boost/assign/list_of.hpp> 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
@@ -1421,7 +1422,7 @@ int sample_stats_main(int argc, char *argv[])
 
 	nsims_t maxSims = 0;
 
-	boost::random::mt19937::result_type rng_seed;
+	//boost::random::mt19937::result_type rng_seed;
 
 	bool addQuantiles = false;
 
@@ -1606,7 +1607,7 @@ int sample_stats_main(int argc, char *argv[])
 		vector< acc_t > ld_r2( ldSeps.size() ), ld_Dprime( ldSeps.size() );
 		vector< vector< double > > ld_r2_vals( ldSeps.size() ), ld_Dprime_vals( ldSeps.size() );
 
-		boost::array<prob_t,5> probs = { .10, .25, .50, .75, .90 };
+		boost::array<prob_t,5> probs = boost::assign::list_of(.10)(.25)(.50)(.75)(.90);
 
 		// for ( size_t i = 0; i < ldSeps.size(); i++ ) {
 		// 	ld_r2.push_back( boost::make_shared< acc2_t >( acc::extended_p_square::probabilities = probs ) );

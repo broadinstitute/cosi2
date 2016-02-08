@@ -6,8 +6,7 @@ bin_PROGRAMS=
 EXTRA_DIST=ext/boost examples doc
 TESTS=
 
-BOOST_CPPFLAGS=-isystem $(srcdir)/ext/boost
-AM_CPPFLAGS = -I$(srcdir) $(BOOST_CPPFLAGS) -DNDEBUG 
+AM_CPPFLAGS = -I$(srcdir) -isystem $(srcdir)/ext/boost -DNDEBUG 
 AM_CXXFLAGS = $(CXX11_CXXFLAGS) -O3
 
 include $(srcdir)/ext/boost/libs/make.am

@@ -141,26 +141,21 @@ TESTS = tests/testScripts/tests/model001/t/run.sh \
 	tests/testScripts/tests/model017/t_u_001/run.sh \
 	tests/testScripts/tests/model017/t_u_0001/run.sh \
 	seglist_test$(EXEEXT) test_funcs$(EXEEXT)
-@DEVOPTS_TRUE@am__append_1 = --param max-inline-insns-single=1000 \
-@DEVOPTS_TRUE@	-Werror -Wall -Wextra -Wno-unused-function -Wuninitialized \
-@DEVOPTS_TRUE@	-Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat \
-@DEVOPTS_TRUE@	-Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op \
-@DEVOPTS_TRUE@	-Wmissing-declarations -Wdouble-promotion -Winit-self
-
 check_PROGRAMS = seglist_test$(EXEEXT) funcs_test$(EXEEXT) \
 	test_funcs$(EXEEXT) test_arrproc$(EXEEXT) ost_test$(EXEEXT) \
 	$(am__EXEEXT_2)
 XFAIL_TESTS =
-@HAVE_CMPDIST_TRUE@@HAVE_PYTHON_TRUE@am__append_2 = $(TD)/cmpdist.py $(TD)/runtest.py $(TD)/timecmd.sh
-@HAVE_GTEST_TRUE@am__append_3 = ost_test_main
+@HAVE_CMPDIST_TRUE@@HAVE_PYTHON_TRUE@am__append_1 = $(TD)/cmpdist.py $(TD)/runtest.py $(TD)/timecmd.sh
+@HAVE_GTEST_TRUE@am__append_2 = ost_test_main
 
 #
 # Section: Development/experimental options
 #
-@HAVEROOT_TRUE@am__append_4 = cosiroot ldhist
+@HAVEROOT_TRUE@am__append_3 = cosiroot ldhist
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/ax_cxx_compile_stdcxx_11.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
+	$(top_srcdir)/m4/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/m4/ax_python.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
@@ -256,6 +251,10 @@ am_libcosifilesystem_la_OBJECTS =  \
 	libcosifilesystem_la-windows_file_codecvt.lo \
 	libcosifilesystem_la-error_code.lo
 libcosifilesystem_la_OBJECTS = $(am_libcosifilesystem_la_OBJECTS)
+libcosifilesystem_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 libcosiprogopt_la_LIBADD =
 am_libcosiprogopt_la_OBJECTS = libcosiprogopt_la-cmdline.lo \
 	libcosiprogopt_la-config_file.lo libcosiprogopt_la-convert.lo \
@@ -870,6 +869,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WARNFLAGS = @WARNFLAGS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -984,8 +984,7 @@ EXTRA_DIST = ext/boost examples doc \
 	$(TD)/update_cosi_tests.py $(TD)/runtest.py \
 	$(TD)/make_cosi_tests2.py $(TD)/update_tests.py \
 	$(TD)/cmpdist.py $(TD)/timecmd.sh
-BOOST_CPPFLAGS = -isystem $(srcdir)/ext/boost
-AM_CPPFLAGS = -I$(srcdir) $(BOOST_CPPFLAGS) -DNDEBUG 
+AM_CPPFLAGS = -I$(srcdir) -isystem $(srcdir)/ext/boost -DNDEBUG 
 AM_CXXFLAGS = $(CXX11_CXXFLAGS) -O3
 BOOST_DIR = $(srcdir)/ext/boost
 BOOST_SMART_PTR_LIBS = $(builddir)/libcosismart_ptr.la
@@ -1010,10 +1009,11 @@ libcosiregex_la_SOURCES = $(RE)/cpp_regex_traits.cpp $(RE)/cregex.cpp $(RE)/c_re
 	$(RE)/regex_traits_defaults.cpp $(RE)/static_mutex.cpp $(RE)/usinstances.cpp $(RE)/w32_regex_traits.cpp $(RE)/wc_regex_traits.cpp \
 	$(RE)/wide_posix_api.cpp $(RE)/winstances.cpp
 
-libcosiregex_la_CXXFLAGS = $(AM_CXXFLAGS) -Wno-strict-overflow
+libcosiregex_la_CXXFLAGS = $(AM_CXXFLAGS) -Wno-missing-declarations -Wno-strict-overflow
 FS = $(BOOST_DIR)/libs/filesystem/src
 libcosifilesystem_la_SOURCES = $(FS)/codecvt_error_category.cpp $(FS)/operations.cpp $(FS)/path.cpp $(FS)/path_traits.cpp $(FS)/portability.cpp $(FS)/unique_path.cpp $(FS)/utf8_codecvt_facet.cpp $(FS)/windows_file_codecvt.cpp $(SY)/error_code.cpp
 libcosifilesystem_la_CPPFLAGS = $(AM_CPPFLAGS)
+libcosifilesystem_la_CXXFLAGS = $(AM_CXXFLAGS) $(BOOST_CXXFLAGS)
 SY = $(BOOST_DIR)/libs/system/src
 libcosisystem_la_SOURCES = $(SY)/error_code.cpp
 libcosisystem_la_CPPFLAGS = $(AM_CPPFLAGS)
@@ -1046,7 +1046,7 @@ libcosirandom_la_CPPFLAGS = $(AM_CPPFLAGS)
 # genetic material overlaps or nearly-overlaps.
 COSI_CPPFLAGS = $(AM_CPPFLAGS) -DCOSI_TRACK_LAST_COAL \
 	-DCOSI_SUPPORT_COALAPX
-COSI_CXXFLAGS = $(AM_CXXFLAGS) $(am__append_1)
+COSI_CXXFLAGS = $(AM_CXXFLAGS) $(WARNFLAGS)
 
 #AM_LDFLAGS = -L$(srcdir)/../cosi_rand
 AM_DEFAULT_SOURCE_EXT = .cc
@@ -1132,7 +1132,7 @@ get_recomap_LDFLAGS = -lm
 recomap_hapmap2_SOURCES = $(srcdir)/recosim/recomap_hapmap2.cc $(BOOSTRAND)
 recomap_hapmap2_CPPFLAGS = -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
 recomap_hapmap2_LDFLAGS = -lm
-check_SCRIPTS = $(am__append_2)
+check_SCRIPTS = $(am__append_1)
 TD = $(srcdir)/tests
 seglist_test_SOURCES = $(TD)/seglist_test.cc $(SD)/seglist.cc $(SD)/seglist.h $(SD)/leafset-tree.h \
 	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/leafset-counts.h \
@@ -1273,7 +1273,7 @@ libcosichrono.la: $(libcosichrono_la_OBJECTS) $(libcosichrono_la_DEPENDENCIES) $
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(libdir) $(libcosichrono_la_OBJECTS) $(libcosichrono_la_LIBADD) $(LIBS)
 
 libcosifilesystem.la: $(libcosifilesystem_la_OBJECTS) $(libcosifilesystem_la_DEPENDENCIES) $(EXTRA_libcosifilesystem_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(libdir) $(libcosifilesystem_la_OBJECTS) $(libcosifilesystem_la_LIBADD) $(LIBS)
+	$(AM_V_CXXLD)$(libcosifilesystem_la_LINK) -rpath $(libdir) $(libcosifilesystem_la_OBJECTS) $(libcosifilesystem_la_LIBADD) $(LIBS)
 
 libcosiprogopt.la: $(libcosiprogopt_la_OBJECTS) $(libcosiprogopt_la_DEPENDENCIES) $(EXTRA_libcosiprogopt_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libcosiprogopt_la_LINK) -rpath $(libdir) $(libcosiprogopt_la_OBJECTS) $(libcosiprogopt_la_LIBADD) $(LIBS)
@@ -1900,67 +1900,67 @@ libcosichrono_la-thread_clock.lo: $(CR)/thread_clock.cpp
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosichrono_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosichrono_la-thread_clock.lo `test -f '$(CR)/thread_clock.cpp' || echo '$(srcdir)/'`$(CR)/thread_clock.cpp
 
 libcosifilesystem_la-codecvt_error_category.lo: $(FS)/codecvt_error_category.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-codecvt_error_category.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-codecvt_error_category.Tpo -c -o libcosifilesystem_la-codecvt_error_category.lo `test -f '$(FS)/codecvt_error_category.cpp' || echo '$(srcdir)/'`$(FS)/codecvt_error_category.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-codecvt_error_category.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-codecvt_error_category.Tpo -c -o libcosifilesystem_la-codecvt_error_category.lo `test -f '$(FS)/codecvt_error_category.cpp' || echo '$(srcdir)/'`$(FS)/codecvt_error_category.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosifilesystem_la-codecvt_error_category.Tpo $(DEPDIR)/libcosifilesystem_la-codecvt_error_category.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(FS)/codecvt_error_category.cpp' object='libcosifilesystem_la-codecvt_error_category.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-codecvt_error_category.lo `test -f '$(FS)/codecvt_error_category.cpp' || echo '$(srcdir)/'`$(FS)/codecvt_error_category.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-codecvt_error_category.lo `test -f '$(FS)/codecvt_error_category.cpp' || echo '$(srcdir)/'`$(FS)/codecvt_error_category.cpp
 
 libcosifilesystem_la-operations.lo: $(FS)/operations.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-operations.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-operations.Tpo -c -o libcosifilesystem_la-operations.lo `test -f '$(FS)/operations.cpp' || echo '$(srcdir)/'`$(FS)/operations.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-operations.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-operations.Tpo -c -o libcosifilesystem_la-operations.lo `test -f '$(FS)/operations.cpp' || echo '$(srcdir)/'`$(FS)/operations.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosifilesystem_la-operations.Tpo $(DEPDIR)/libcosifilesystem_la-operations.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(FS)/operations.cpp' object='libcosifilesystem_la-operations.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-operations.lo `test -f '$(FS)/operations.cpp' || echo '$(srcdir)/'`$(FS)/operations.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-operations.lo `test -f '$(FS)/operations.cpp' || echo '$(srcdir)/'`$(FS)/operations.cpp
 
 libcosifilesystem_la-path.lo: $(FS)/path.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-path.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-path.Tpo -c -o libcosifilesystem_la-path.lo `test -f '$(FS)/path.cpp' || echo '$(srcdir)/'`$(FS)/path.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-path.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-path.Tpo -c -o libcosifilesystem_la-path.lo `test -f '$(FS)/path.cpp' || echo '$(srcdir)/'`$(FS)/path.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosifilesystem_la-path.Tpo $(DEPDIR)/libcosifilesystem_la-path.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(FS)/path.cpp' object='libcosifilesystem_la-path.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-path.lo `test -f '$(FS)/path.cpp' || echo '$(srcdir)/'`$(FS)/path.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-path.lo `test -f '$(FS)/path.cpp' || echo '$(srcdir)/'`$(FS)/path.cpp
 
 libcosifilesystem_la-path_traits.lo: $(FS)/path_traits.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-path_traits.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-path_traits.Tpo -c -o libcosifilesystem_la-path_traits.lo `test -f '$(FS)/path_traits.cpp' || echo '$(srcdir)/'`$(FS)/path_traits.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-path_traits.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-path_traits.Tpo -c -o libcosifilesystem_la-path_traits.lo `test -f '$(FS)/path_traits.cpp' || echo '$(srcdir)/'`$(FS)/path_traits.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosifilesystem_la-path_traits.Tpo $(DEPDIR)/libcosifilesystem_la-path_traits.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(FS)/path_traits.cpp' object='libcosifilesystem_la-path_traits.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-path_traits.lo `test -f '$(FS)/path_traits.cpp' || echo '$(srcdir)/'`$(FS)/path_traits.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-path_traits.lo `test -f '$(FS)/path_traits.cpp' || echo '$(srcdir)/'`$(FS)/path_traits.cpp
 
 libcosifilesystem_la-portability.lo: $(FS)/portability.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-portability.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-portability.Tpo -c -o libcosifilesystem_la-portability.lo `test -f '$(FS)/portability.cpp' || echo '$(srcdir)/'`$(FS)/portability.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-portability.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-portability.Tpo -c -o libcosifilesystem_la-portability.lo `test -f '$(FS)/portability.cpp' || echo '$(srcdir)/'`$(FS)/portability.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosifilesystem_la-portability.Tpo $(DEPDIR)/libcosifilesystem_la-portability.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(FS)/portability.cpp' object='libcosifilesystem_la-portability.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-portability.lo `test -f '$(FS)/portability.cpp' || echo '$(srcdir)/'`$(FS)/portability.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-portability.lo `test -f '$(FS)/portability.cpp' || echo '$(srcdir)/'`$(FS)/portability.cpp
 
 libcosifilesystem_la-unique_path.lo: $(FS)/unique_path.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-unique_path.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-unique_path.Tpo -c -o libcosifilesystem_la-unique_path.lo `test -f '$(FS)/unique_path.cpp' || echo '$(srcdir)/'`$(FS)/unique_path.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-unique_path.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-unique_path.Tpo -c -o libcosifilesystem_la-unique_path.lo `test -f '$(FS)/unique_path.cpp' || echo '$(srcdir)/'`$(FS)/unique_path.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosifilesystem_la-unique_path.Tpo $(DEPDIR)/libcosifilesystem_la-unique_path.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(FS)/unique_path.cpp' object='libcosifilesystem_la-unique_path.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-unique_path.lo `test -f '$(FS)/unique_path.cpp' || echo '$(srcdir)/'`$(FS)/unique_path.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-unique_path.lo `test -f '$(FS)/unique_path.cpp' || echo '$(srcdir)/'`$(FS)/unique_path.cpp
 
 libcosifilesystem_la-utf8_codecvt_facet.lo: $(FS)/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-utf8_codecvt_facet.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-utf8_codecvt_facet.Tpo -c -o libcosifilesystem_la-utf8_codecvt_facet.lo `test -f '$(FS)/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(FS)/utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-utf8_codecvt_facet.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-utf8_codecvt_facet.Tpo -c -o libcosifilesystem_la-utf8_codecvt_facet.lo `test -f '$(FS)/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(FS)/utf8_codecvt_facet.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosifilesystem_la-utf8_codecvt_facet.Tpo $(DEPDIR)/libcosifilesystem_la-utf8_codecvt_facet.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(FS)/utf8_codecvt_facet.cpp' object='libcosifilesystem_la-utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-utf8_codecvt_facet.lo `test -f '$(FS)/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(FS)/utf8_codecvt_facet.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-utf8_codecvt_facet.lo `test -f '$(FS)/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(FS)/utf8_codecvt_facet.cpp
 
 libcosifilesystem_la-windows_file_codecvt.lo: $(FS)/windows_file_codecvt.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-windows_file_codecvt.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-windows_file_codecvt.Tpo -c -o libcosifilesystem_la-windows_file_codecvt.lo `test -f '$(FS)/windows_file_codecvt.cpp' || echo '$(srcdir)/'`$(FS)/windows_file_codecvt.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-windows_file_codecvt.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-windows_file_codecvt.Tpo -c -o libcosifilesystem_la-windows_file_codecvt.lo `test -f '$(FS)/windows_file_codecvt.cpp' || echo '$(srcdir)/'`$(FS)/windows_file_codecvt.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosifilesystem_la-windows_file_codecvt.Tpo $(DEPDIR)/libcosifilesystem_la-windows_file_codecvt.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(FS)/windows_file_codecvt.cpp' object='libcosifilesystem_la-windows_file_codecvt.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-windows_file_codecvt.lo `test -f '$(FS)/windows_file_codecvt.cpp' || echo '$(srcdir)/'`$(FS)/windows_file_codecvt.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-windows_file_codecvt.lo `test -f '$(FS)/windows_file_codecvt.cpp' || echo '$(srcdir)/'`$(FS)/windows_file_codecvt.cpp
 
 libcosifilesystem_la-error_code.lo: $(SY)/error_code.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-error_code.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-error_code.Tpo -c -o libcosifilesystem_la-error_code.lo `test -f '$(SY)/error_code.cpp' || echo '$(srcdir)/'`$(SY)/error_code.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -MT libcosifilesystem_la-error_code.lo -MD -MP -MF $(DEPDIR)/libcosifilesystem_la-error_code.Tpo -c -o libcosifilesystem_la-error_code.lo `test -f '$(SY)/error_code.cpp' || echo '$(srcdir)/'`$(SY)/error_code.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosifilesystem_la-error_code.Tpo $(DEPDIR)/libcosifilesystem_la-error_code.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SY)/error_code.cpp' object='libcosifilesystem_la-error_code.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-error_code.lo `test -f '$(SY)/error_code.cpp' || echo '$(srcdir)/'`$(SY)/error_code.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosifilesystem_la_CPPFLAGS) $(CPPFLAGS) $(libcosifilesystem_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosifilesystem_la-error_code.lo `test -f '$(SY)/error_code.cpp' || echo '$(srcdir)/'`$(SY)/error_code.cpp
 
 libcosiprogopt_la-cmdline.lo: $(PO)/cmdline.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcosiprogopt_la_CXXFLAGS) $(CXXFLAGS) -MT libcosiprogopt_la-cmdline.lo -MD -MP -MF $(DEPDIR)/libcosiprogopt_la-cmdline.Tpo -c -o libcosiprogopt_la-cmdline.lo `test -f '$(PO)/cmdline.cpp' || echo '$(srcdir)/'`$(PO)/cmdline.cpp

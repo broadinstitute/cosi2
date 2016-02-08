@@ -12,7 +12,7 @@
 #SUBDIRS=libsigc++-2.3.1
 
 COSI_CPPFLAGS = $(AM_CPPFLAGS) -DCOSI_TRACK_LAST_COAL #-I$(builddir)/libsigc++-2.3.1 -I$(srcdir)/libsigc++-2.3.1 
-COSI_CXXFLAGS= $(AM_CXXFLAGS)
+COSI_CXXFLAGS= $(AM_CXXFLAGS) $(WARNFLAGS)
 
 #AM_LDFLAGS = -L$(srcdir)/../cosi_rand
 AM_DEFAULT_SOURCE_EXT = .cc
@@ -25,15 +25,6 @@ AM_DEFAULT_SOURCE_EXT = .cc
 
 lib_LTLIBRARIES += libcosiutil.la libcosi.la 
 bin_PROGRAMS += coalescent
-
-if DEVOPTS
-COSI_CXXFLAGS += --param max-inline-insns-single=1000 \
-	-Werror -Wall -Wextra -Wno-unused-function -Wuninitialized \
-	-Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat \
-	-Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op \
-	-Wmissing-declarations -Wdouble-promotion -Winit-self
-
-endif  # if DEVOPTS
 
 #if COALAPX
 # Turn on support for approximating the coalescent by restricting coalescence to nodes whose

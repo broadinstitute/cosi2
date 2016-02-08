@@ -3,5 +3,7 @@ lib_LTLIBRARIES += libcosifilesystem.la
 FS=$(BOOST_DIR)/libs/filesystem/src
 libcosifilesystem_la_SOURCES = $(FS)/codecvt_error_category.cpp $(FS)/operations.cpp $(FS)/path.cpp $(FS)/path_traits.cpp $(FS)/portability.cpp $(FS)/unique_path.cpp $(FS)/utf8_codecvt_facet.cpp $(FS)/windows_file_codecvt.cpp $(SY)/error_code.cpp
 libcosifilesystem_la_CPPFLAGS=$(AM_CPPFLAGS)
+libcosifilesystem_la_CXXFLAGS=$(AM_CXXFLAGS) $(BOOST_CXXFLAGS)
+
 
 

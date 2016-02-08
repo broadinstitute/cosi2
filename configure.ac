@@ -84,6 +84,14 @@ AC_LANG(C++)
 
 AX_CXX_COMPILE_STDCXX_11
 
+#AX_CXXFLAGS_WARN_ALL([AM_CXXFLAGS])
+AC_SUBST([WARNFLAGS])
+AX_CHECK_COMPILE_FLAG([-Werror], [WARNFLAGS="${WARNFLAGS} -Werror"], [], [])
+AX_CHECK_COMPILE_FLAG([-Wall], [WARNFLAGS="${WARNFLAGS} -Wall"], [], [])
+AX_CHECK_COMPILE_FLAG([-Wextra], [WARNFLAGS="${WARNFLAGS} -Wextra"], [], [])
+AX_CHECK_COMPILE_FLAG([-Wno-error], [BOOST_CXXFLAGS="${BOOST_CXXFLAGS} -Wno-error"], [], [])
+AX_CHECK_COMPILE_FLAG([-Wdouble-promotion], [WARNFLAGS="${WARNFLAGS} -Wdouble-promotion"], [], [])
+AX_CHECK_COMPILE_FLAG([--param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self], [WARNFLAGS="${WARNFLAGS} --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self"], [], [])
 
 #
 # LTO (link-time optimization)
