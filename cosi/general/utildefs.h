@@ -6,6 +6,8 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include <boost/core/enable_if.hpp>
+#include <boost/type_traits/is_convertible.hpp>
 #include <boost/filesystem.hpp>
 
 namespace cosi {
@@ -62,6 +64,21 @@ typedef boost::filesystem::path filename_t;
    std::string s = fname.string();
    return fopen( s.c_str(), mode );
  }
+
+template <typename TFrom, typename TTo, typename Enable=void> struct cosi_converter: public boost::false_type { };
+
+template <typename TTo, typename TFrom>
+typename boost::enable_if< cosi_converter<TFrom,TTo>, TTo>::type cosi_cvt( TFrom x ) {
+	return cosi_converter<TFrom,TTo>()( x );
+}
+
+template <typename TFrom, typename TTo>					
+struct cosi_converter<TFrom,TTo,
+											typename boost::enable_if< boost::is_convertible<TFrom,TTo> >::type >: public boost::true_type {
+	 TTo operator()( TFrom const& x ) const { return static_cast<TTo>( x ); }
+};
+
+// use boost TTI to test for existence of this expression?  check for limitations
 
 }  // namespace cosi
 
