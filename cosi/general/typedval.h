@@ -22,6 +22,8 @@
 #define __INCLUDE_COSI_TYPEDVAL_H
 
 #include <limits>
+#include <cstdlib>
+#include <cassert>
 #include <boost/operators.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -307,6 +309,12 @@ struct TypedValAbs: public TypedVal<T> {
 template <class T>
 inline int ToInt( const TypedVal<T,int>& v ) { return v.val; }
 
+template <typename T> struct cosi_converter< TypedVal<T,int>, std::size_t >: public boost::true_type {
+	 std::size_t operator()( const TypedVal<T,int>& v ) const {
+		 assert( v.val >= 0 );
+		 return static_cast<std::size_t>( v.val );
+	 }
+};
 
 #endif  // #ifndef COSI_TYPEDVAL_DISABLE 
 
