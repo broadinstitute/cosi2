@@ -1051,7 +1051,8 @@ COSI_CXXFLAGS = $(AM_CXXFLAGS) $(WARNFLAGS)
 #AM_LDFLAGS = -L$(srcdir)/../cosi_rand
 AM_DEFAULT_SOURCE_EXT = .cc
 SD = $(srcdir)/cosi
-COSIUTILHEADERS = $(SD)/general/utils.h $(SD)/arrival.h $(SD)/general/arrproc2.h $(SD)/general/arrproc.h \
+COSIUTILHEADERS = $(SD)/general/utils.h $(SD)/general/vecmap.h \
+	$(SD)/arrival.h $(SD)/general/arrproc2.h $(SD)/general/arrproc.h \
 	$(SD)/general/math/generalmath.h $(SD)/general/math/cosirand.h $(SD)/general/math/gauss_legendre.h \
 	$(SD)/general/dbg/valgrind.h $(SD)/general/dbg/evtgrp.h $(SD)/general/typedval.h \
 	$(SD)/general/datastruct/order_statistics.hpp $(SD)/general/datastruct/random_access_skip_list.h \
