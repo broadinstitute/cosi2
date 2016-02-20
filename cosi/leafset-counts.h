@@ -64,6 +64,15 @@ public:
 		 chromCounts[ popidx ] = 1;
 	 }
 
+	 leafset_struct( leaf_id_t fromLeaf, leaf_id_t toLeaf ):
+		 chromCounts( nchroms_t( 0 ), leafset_npops ) {
+		 for ( leaf_id_t leaf = fromLeaf; leaf < toLeaf; ++leaf ) {
+			 popid popName = (*leafset_leaf2popName)[ leaf ];
+			 pop_idx_t popidx = (*leafset_popname2idx)[ ToInt( popName ) ];
+			 chromCounts[ popidx ] = 1;
+		 }
+	 }
+
 	 leafset_struct( leafset_p childA_, leafset_p childB_ ):
 		 chromCounts( childA_->chromCounts + childB_->chromCounts ) { }
 	 
@@ -94,6 +103,11 @@ leaf_id_t leafset_get_max_leaf_id(void);
 /* FuncP: make_singleton_leafset */
 /* Returns the leafset containing only the specified leaf. */
 inline leafset_p make_singleton_leafset( leaf_id_t leaf ) { return new leafset_t( leaf ); }
+
+/* FuncP: make_range_leafset */
+/* Returns the leafset containing the given range of leaves. */
+inline leafset_p make_range_leafset( leaf_id_t fromLeaf, leaf_id_t toLeaf ) { return new leafset_t( fromLeaf, toLeaf  ); }
+
 
 inline leafset_p make_empty_leafset() { return LEAFSET_NULL; }
 
