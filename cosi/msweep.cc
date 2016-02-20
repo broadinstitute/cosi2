@@ -177,7 +177,7 @@ public:
 		 }  // if selCoeff nonzero
 		 else {
 				this->sweepModel = baseModel;
-				std::cerr << "GOT NO SWEEP\n";
+				//std::cerr << "GOT NO SWEEP\n";
 		 }
 	 }  // MSweep()
 
@@ -576,8 +576,9 @@ void addSelMut( MSweepP msweep, MutlistP muts ) {
 	if ( msweep->baseModel->sweepInfo && !leafset_is_empty( msweep->selLeaves ) ) {
 		SweepInfo const& si = *msweep->baseModel->sweepInfo;
 		muts->addMut( si.selPos, msweep->selLeaves, si.selGen, si.selPop );
-	} else 
-		 std::cerr << "addSelMut: NOT adding\n";
+	} else {
+		//	 std::cerr << "addSelMut: NOT adding\n";
+	}
 }
 
 
