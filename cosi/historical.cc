@@ -117,7 +117,7 @@ public:
 	 // Historical events are specified in the parameter file by lines of the form
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
-	 static const char *typeStr() { return "exp_change_size"; }
+	 static const char *typeStr() { return "exp_change_size_orig"; }
 
 	 virtual genid execute();
 	 virtual void addToBaseModel( BaseModel& ) const;
@@ -188,6 +188,7 @@ public:
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
 	 static const char *typeStr() { return "exp_change_size2"; }
+	 static const char *typeStr2() { return "exp_change_size"; }
 
 	 virtual genid execute();
 	 virtual void addToBaseModel( BaseModel& ) const;
@@ -820,7 +821,8 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 		is >> typestr;
 		if ( typestr == Event_PopSize::typeStr() ) event.reset( new Event_PopSize( this, is ) );
 		else if ( typestr == Event_PopSizeExp::typeStr() ) event.reset( new Event_PopSizeExp( this, is ) );
-		else if ( typestr == Event_PopSizeExp2::typeStr() ) event.reset( new Event_PopSizeExp2( this, is ) );
+		else if ( ( typestr == Event_PopSizeExp2::typeStr() ) ||
+							( typestr == Event_PopSizeExp2::typeStr2() ) ) event.reset( new Event_PopSizeExp2( this, is ) );
 		else if ( typestr == Event_Split::typeStr() ) event.reset( new Event_Split( this, is ) );
 		else if ( typestr == Event_MigrationRate::typeStr() ) event.reset( new Event_MigrationRate( this, is ) );
 		else if ( typestr == Event_Bottleneck::typeStr() ) event.reset( new Event_Bottleneck( this, is ) );

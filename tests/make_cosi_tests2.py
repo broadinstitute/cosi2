@@ -26,7 +26,8 @@ def makeCosiTests():
                          'tests/model006/t_u_001 tests/model006/t_u_0001 tests/model014/t_u_001 '
                          'tests/model014/t_u_0001 tests/model015/t_u_0001 tests/model015/t_u_001 '
                          'tests/model013/t_u_001 tests/model013/t_u_0001 '
-                         'tests/model016/t_u_0001 tests/model003/t_u_001'.split(),
+                         'tests/model016/t_u_0001 tests/model003/t_u_001 '
+                         'tests/model012/t_u_001'.split(),
                          help = 'skip these tests' )
     parser.add_argument( '--xfail', action = DefaultAppend, help = 'tests expected to fail',
                          default = () )
