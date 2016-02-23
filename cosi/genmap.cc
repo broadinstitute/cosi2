@@ -200,7 +200,7 @@ void GenMap::setStart( pd_orig_loc_t start ) {
 	
 	gd_range_len = gd_locs_range.back() - gd_locs_range.front();
 	
-	if ( gd_range_len <= static_cast< gd_orig_len_t >( 1e-16) )
+	if ( gd_range_len <= static_cast< gd_orig_len_t >( 1e-35 ) )
 		 BOOST_THROW_EXCEPTION( cosi_io_error() << error_msg( "genetic map length is zero!" ) );
 
 	// totClock += ( std::clock() - startTime );
