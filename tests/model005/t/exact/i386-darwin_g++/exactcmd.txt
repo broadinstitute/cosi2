@@ -1,1 +1,1 @@
-$cosiBinary -p $paramFN -R $genMapFN -m  -n 3 --seed 5018837481285932225
+$cosiBinary -p $paramFN -R $genMapFN -m  -n 3 --seed 2418515436945772259
