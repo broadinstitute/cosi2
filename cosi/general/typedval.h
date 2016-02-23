@@ -29,6 +29,9 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
+#include <boost/core/enable_if.hpp>
+#include <boost/core/ignore_unused.hpp>
+#include <boost/type_traits/is_convertible.hpp>
 #include <cosi/general/utildefs.h>
 
 #include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()
@@ -99,7 +102,9 @@ struct TypedVal  {
 	 ValT val;
 
 	 TypedVal(): val(0.0) { }
-	 explicit TypedVal( ValT val_ ): val( val_ ) { }
+	 template <typename FromT>
+	 explicit TypedVal( FromT val_, typename boost::enable_if< boost::is_convertible<FromT,ValT> >::type *dummy = 0 ): val( val_ ) { boost::ignore_unused(dummy); }
+	//explicit TypedVal( ValT  val_ ): val( val_ ) { }
 	 //operator ValT() const { return val; }
 	 TypedVal( const zero_t& ): val( 0 ) {}
 	 T& operator=( const zero_t& ) { val = 0; return (T&)*this; }

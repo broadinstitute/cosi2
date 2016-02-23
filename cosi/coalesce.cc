@@ -141,8 +141,8 @@ public:
 				return nchromPairs_float_t( pop->getNumCoalesceableChromPairs() );
 #endif		 
 		 return
-				nchroms_float_t( ToDouble( pop->pop_get_num_nodes() ) ) *
-				( nchroms_float_t( ToDouble( pop->pop_get_num_nodes() ) ) - nchroms_float_t(1.) ) / 2.; }
+				nchroms_float_t( pop->pop_get_num_nodes() ) *
+				( nchroms_float_t( pop->pop_get_num_nodes() ) - nchroms_float_t(1.) ) / 2.; }
 	 virtual void executeEvent( genid gen, RandGen& ) { demography->dg_coalesce_by_pop( pop, gen ); }
 };  // class CoalProcess
 

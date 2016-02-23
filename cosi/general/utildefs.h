@@ -45,16 +45,17 @@ inline bool equal_eps( cosi_double v1, cosi_double v2, cosi_double eps = 1e-14 )
 // Converts a value to the standard type 'cosi_double'.
 // Helps write generic code that works without change for primitive types
 // and for <typed values>.
-inline cosi_double ToDouble( const cosi_double& x ) { return x; }
-inline cosi_double ToDouble( int x ) { return x; }
-inline cosi_double ToDouble( short x ) { return x; }
-inline cosi_double ToDouble( unsigned int x ) { return x; }
-inline cosi_double ToDouble( unsigned short x ) { return x; }
-inline cosi_double ToDouble( long x ) { return x; }
-inline cosi_double ToDouble( unsigned long x ) { return x; }
-#ifdef COSI_LONG_DOUBLE
-inline cosi_double ToDouble( double x ) { return x; }
-#endif
+ template <typename T>
+	 inline typename boost::enable_if< boost::is_convertible<T,cosi_double>, cosi_double>::type ToDouble( T x ) { return static_cast<cosi_double>(x); }
+/* inline cosi_double ToDouble( int x ) { return x; } */
+/* inline cosi_double ToDouble( short x ) { return x; } */
+/* inline cosi_double ToDouble( unsigned int x ) { return x; } */
+/* inline cosi_double ToDouble( unsigned short x ) { return x; } */
+/* inline cosi_double ToDouble( long x ) { return x; } */
+/* inline cosi_double ToDouble( unsigned long x ) { return x; } */
+/* #ifdef COSI_LONG_DOUBLE */
+/* inline cosi_double ToDouble( double x ) { return x; } */
+/* #endif */
 
 inline int ToInt( const int& x ) { return x; }
 
