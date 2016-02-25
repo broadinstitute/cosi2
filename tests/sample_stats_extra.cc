@@ -193,6 +193,9 @@ inline bool is_null<double>( const double& loc ) { return (boost::math::isnan)( 
 // A length of a segment of the simulated region; a difference of two loc_t's.
 typedef double len_t;
 
+// Length in basepairs
+typedef double len_bp_t;
+
 // Logical type: gens_t
 // Length of a time interval, in generations.
 typedef double gens_t;
@@ -214,6 +217,8 @@ struct cosi_io_error: virtual cosi_error { };
 
 typedef boost::error_info<struct tag_errno_code,int> errno_code;
 typedef boost::error_info<struct tag_error_msg,std::string> error_msg;
+
+
 
 double tajd(int, int, double) ;
 
@@ -412,7 +417,62 @@ private:
 	 SumKeeper<ValT,CountT> sum, sumSq;
 	 std::string name;
 };  // class StatKeeper
-	
+
+struct Sim {
+	 nchroms_t nsam;
+	 char **trimmed_list;
+	 int trimmed_segsites;
+	 const loc_t *trimmed_posit;
+	 std::vector< nchroms_t > const& derCounts;
+
+	 Sim( nchroms_t nsam,
+				char **trimmed_list,
+				int trimmed_segsites,
+				const loc_t *trimmed_posit,
+				std::vector< nchroms_t > const& derCounts ):
+		 nsam( nsam ), trimmed_list( trimmed_list ), trimmed_segsites( trimmed_segsites ),
+		 trimmed_posit( trimmed_posit ), derCounts( derCounts ) { }
+
+};
+
+class AStats {
+public:
+	 void processSim( Sim const& sim ) {
+		 boost::fill( vals, std::numeric_limits<double>::quiet_NaN() );
+		 computeVals( sim, vals );
+		 for ( size_t i = 0; i < vals.size(); ++i ) {
+				stats[ i ].add( vals[ i ] );
+				// if ( i > 0 ) std::cout << "\t";
+				// std::cout << vals[i];
+		 }
+	 }
+	 void writeHeaders() const {
+		 std::vector< std::string > names = getNames();
+		 for ( size_t i = 0; i < names.size(); ++i ) {
+				if ( i > 0 ) std::cout << "\t";
+				std::cout << names[i];
+		 }
+	 }
+	 void writeSummaryStats() const {
+		 std::vector< std::string > names = getNames();
+		 //std::cerr << "got " << names.size() << " names!\n";
+		 for ( size_t i = 0; i < names.size(); ++i ) {
+			 std::cerr << "stat: " << names[i] <<
+					" mean=" << stats[i].getMean() << " std=" << stats[i].getStd() << " n=" << stats[i].getNumVals() << "\n";
+		 }
+	 }
+protected:
+	 AStats( size_t nvals ): vals( nvals ), stats( nvals ) { }
+	 virtual void computeVals( Sim const&, std::vector<double>& ) const = 0;
+	 virtual std::vector< std::string > getNames() const = 0;
+
+private:	 
+	 std::vector<double> vals;
+	 std::vector< StatKeeper<> > stats;
+};
+
+typedef boost::shared_ptr<AStats> AStatsP;
+
 
 //////////////////////////////////////////////////////
 
@@ -620,6 +680,59 @@ bool compute_LD( int site_A, int site_B, int nsam, char **list,
 								 double *r2, double *Dprime );
 bool compute_LD( snp_id_t site_A, snp_id_t site_B, nchroms_t bsam, nchroms_t nsam, char **list,
 								 double *r2, double *Dprime );
+
+class LDStats: public AStats {
+public:	 
+	 LDStats( len_t maxDist, size_t nbins, freq_t minMAF ):
+		 AStats( nbins ),
+		 maxDist( maxDist ), nbins( nbins ), minMAF( minMAF ), binSize( maxDist / nbins ),
+		 r2s( nbins ) {
+	 }
+	 
+protected:
+	 virtual std::vector< std::string > getNames() const {
+		 std::vector< std::string > names( nbins );
+		 for ( size_t i = 0; i < nbins; ++i )
+				names[ i ] = "r2_" + boost::lexical_cast< std::string >( i * binSize ) + "_" +
+					 boost::lexical_cast< std::string > ( (i+1)*binSize );
+		 std::cerr << "getNames: nbins=" << nbins << " names.size=" << names.size() << "\n";
+		 return names;
+	 }
+	 
+	 virtual void computeVals( Sim const& sim, std::vector<double>& vals ) const {
+		 //std::cerr << "getting vals\n";
+		 r2s.clear(); r2s.resize( nbins );
+		 nchroms_t minDerCount = minMAF * sim.nsam, maxDerCount = sim.nsam - minDerCount;
+		 for ( snp_id_t snp1 = 0; snp1 < sim.trimmed_segsites; ++snp1 )
+				if ( ( minDerCount <= sim.derCounts[ snp1 ] ) && ( sim.derCounts[ snp1 ] <= maxDerCount ) ) {
+					loc_t maxPos = sim.trimmed_posit[ snp1 ] + maxDist;
+					for ( snp_id_t snp2 = snp1+1; ( snp2 < sim.trimmed_segsites ) &&
+									 ( sim.trimmed_posit[ snp2 ] < maxPos ); ++snp2 )
+						 if ( ( minDerCount <= sim.derCounts[ snp2 ] ) && ( sim.derCounts[ snp2 ] <= maxDerCount ) ) {
+							 double r2, Dprime;
+							 if ( compute_LD( snp1, snp2, sim.nsam, sim.trimmed_list, &r2, &Dprime ) )
+									r2s[ getBin( sim.trimmed_posit[ snp2 ] - sim.trimmed_posit[ snp1 ] ) ].add( r2 );
+						 }
+				}
+		 for ( size_t i = 0; i < nbins; ++i ) {
+				vals[ i ] = r2s[ i ].getMean();
+				//std::cerr << "i=" << i << " count=" << r2s[i].getNumVals() << "\n";
+		 }
+		 //std::cerr << "got vals\n";
+	 }
+	 
+	 
+private:
+	 len_t maxDist;
+	 size_t nbins;
+	 freq_t minMAF;
+	 len_t binSize;
+	 mutable std::vector< SumKeeper<> > r2s;
+	 
+	 size_t getBin( len_t d ) const { return boost::algorithm::clamp<size_t>( size_t( d / binSize ), 0, nbins-1 ); }
+	 
+};  // class LDstats
+
 
 // ** Class ValRange
 //
@@ -1389,6 +1502,9 @@ int sample_stats_main(int argc, char *argv[])
 
  	StatKeeper<> piStats, nucdivStats, nsitesStats, dindStats;
 	StatKeeper<> n_under_10_stats, n_10_to_40_stats, n_over_40_stats;
+
+	std::vector< AStatsP > aStats;
+	
 	//vector< StatKeeper<> > statKeepers;
 
 	namespace po = boost::program_options;
@@ -1428,6 +1544,10 @@ int sample_stats_main(int argc, char *argv[])
 
 	bool addQuantiles = false;
 
+	len_bp_t ldHistMaxSepBp(0.);
+	unsigned ldHistNumBins(0);
+	freq_t ldHistMinMAF(0.);
+
 // ** program options
 	
 	po::options_description desc("Allowed options");
@@ -1462,6 +1582,9 @@ int sample_stats_main(int argc, char *argv[])
 		 ("max-sims", po::value( &maxSims )->default_value( 0 ), "max sims to consider" )
 		 ("quantiles,q", po::bool_switch( &addQuantiles), "add quantiles" )
 		 ("region-len-bp", po::value( &regionLen_bp )->default_value( -1 ), "length of simulated region (bp)")
+		 ("ld-hist-max-sep-bp", po::value( &ldHistMaxSepBp )->default_value( 0. ), "for LD histogram, max separation (bp)")
+		 ("ld-hist-num-bins", po::value( &ldHistNumBins )->default_value( 0. ), "for LD histogram, number of bins")
+		 ("ld-hist-min-maf", po::value( &ldHistMinMAF )->default_value( 0. ), "for LD histogram, ignore SNPs with minor allele freq less than this")
 		 
 		("progress-every,g", po::value(&progressEvery), "print progress every N sims")
 		 ;
@@ -1508,6 +1631,10 @@ int sample_stats_main(int argc, char *argv[])
 		treeEdgeSets.push_back( TreeEdgeSet( bind( &TreeEdge::genMoreRecent, arg1 ) == 0, "bot" ) );
 		treeEdgeSets.push_back( TreeEdgeSet( bind( &TreeEdge::genMoreRecent, arg1 ) == 0 && bind( &TreeEdge::containsLoc, arg1, .5 ), "botmid" ) );
 	}
+
+	if ( regionLen_bp > 0 && ldHistMaxSepBp > 0 && ldHistNumBins > 0 ) 
+		 aStats.push_back( boost::make_shared< LDStats >( len_t( Frac( ldHistMaxSepBp, regionLen_bp ) ),
+																											ldHistNumBins, ldHistMinMAF ) );
 
 	// chk( ( argc & 1 ) );
 
@@ -1603,12 +1730,15 @@ int sample_stats_main(int argc, char *argv[])
 
 	//PRINT( LDs.size() );
 
+	clock_t startTime = clock();
+
   count=0;
 	try {
 	while( howmany-count++ ) {
 
 		if ( progressEvery > 0 && !( (count-1) % progressEvery ) )
-			cerr << "sim " << (count-1) << " of " << howmany << " (" << static_cast<int>( static_cast<double>(count-1) / static_cast<double>( howmany ) * 100 ) << "%)" << endl;
+			 cerr << ( float( clock() - startTime ) / CLOCKS_PER_SEC )
+						<< ": sim " << (count-1) << " of " << howmany << " (" << static_cast<int>( static_cast<double>(count-1) / static_cast<double>( howmany ) * 100 ) << "%)" << endl;
 
 		vector< acc_t > ld_r2( ldSeps.size() ), ld_Dprime( ldSeps.size() );
 		vector< vector< double > > ld_r2_vals( ldSeps.size() ), ld_Dprime_vals( ldSeps.size() );
@@ -1952,6 +2082,7 @@ int sample_stats_main(int argc, char *argv[])
 				 n_under_10 << "\t" << n_10_to_40 << "\t" << n_over_40 << "\t"
 					 << tajd_val << "\t"
 					 << th << "\t"  << h;
+
 			if ( !perPopStats ) fout << "\t" << Frac( pi, trimmed_segsites );
 			else {
 				for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) {
@@ -1962,6 +2093,9 @@ int sample_stats_main(int argc, char *argv[])
 			if ( ld_use_cM ) fout << "\t" << regionLen_cM;
 		}
 // << "\t" << recombLocs.size() << "\t" << recombBegs.size() << "\t" << recombEnds.size();
+
+		Sim sim( nsam, trimmed_list, trimmed_segsites, trimmed_posit, derCounts );
+		ForEach( AStatsP aStat, aStats ) aStat->processSim( sim );
 
 		piStats.add( pi );
 		nucdivStats.add( Frac( pi, trimmed_segsites ) );
@@ -2124,6 +2258,9 @@ int sample_stats_main(int argc, char *argv[])
 	}
 
 	cerr << "\n";
+
+	ForEach( AStatsP aStat, aStats ) aStat->writeSummaryStats();
+	
 	cerr << "header=" << headerLine << "\n";
 	cerr << "pi.mean=" << piStats.getMean() << " pi.std=" << piStats.getStd() << " pi.count=" << piStats.getNumVals() << "\n";
 	cerr << "nucdiv.mean=" << nucdivStats.getMean() << " nucdiv.std=" << nucdivStats.getStd() << " nucdiv.count=" << nucdivStats.getNumVals() << "\n";
