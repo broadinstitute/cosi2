@@ -4,6 +4,7 @@
 #include <map>
 #include <stdexcept>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cosi/defs.h>
 #include <cosi/coalesce.h>
 #include <cosi/demography.h>
@@ -48,11 +49,11 @@ Coalesce::coalesce_get_rate (void) const
 		popsize = demography->dg_get_pop_size_by_index (i);
 		if (numnodes > 1  /*&& popsize > 0*/ ) {
 			prob_t coalRate = util::getFrac( numnodes * (numnodes - 1),
-																			 4 * std::max( popsize, 1 ) );
+																			 4 * std::max( popsize, nchroms_t(1) ) );
 #ifdef COSI_SUPPORT_COALAPX
 
 			if ( popptr->restrictingCoalescence() )
-				 coalRate = util::getFrac( popptr->getNumCoalesceableChromPairs(), 2.0 * std::max( popsize, 1 ) );
+				coalRate = util::getFrac( popptr->getNumCoalesceableChromPairs(), 2.0 * std::max( popsize, nchroms_t(1) ) );
 			
 #endif  // #ifdef COSI_SUPPORT_COALAPX			
 			
@@ -121,4 +122,54 @@ pop_idx_t Coalesce::coalesce_pick_popindex_nonhomog() const {
 
 }  // namespace coal
 
+}  // namespace cosi
+
+#include <cosi/general/arrproc2.h>
+
+namespace cosi {
+namespace coal {
+
+class CoalProcessDef: public arrival2::ArrivalProcessDef< genid, RandGen, nchromPairs_float_t > {
+	 DemographyP demography;
+	 Pop *pop;
+
+public:
+	 CoalProcessDef( DemographyP demography_, Pop *pop_ ): demography( demography_ ), pop( pop_ ) { }
+	 virtual nchromPairs_float_t getRateFactor() const {
+#ifdef COSI_SUPPORT_COALAPX
+		 if ( pop->restrictingCoalescence() )
+				return nchromPairs_float_t( pop->getNumCoalesceableChromPairs() );
+#endif		 
+		 return
+				nchroms_float_t( pop->pop_get_num_nodes() ) *
+				( nchroms_float_t( pop->pop_get_num_nodes() ) - nchroms_float_t(1.) ) / 2.; }
+	 virtual void executeEvent( genid gen, RandGen& ) { demography->dg_coalesce_by_pop( pop, gen ); }
+};  // class CoalProcess
+
+
+boost::shared_ptr< Coalesce::coal_processes_type >
+Coalesce::createCoalProcesses() {
+	using namespace arrival2;
+	using math::Any;
+	using math::Const;
+	using math::Piecewise;
+
+	boost::shared_ptr< coal_processes_type > coalProcs =
+		 boost::make_shared<coal_processes_type>();
+	for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
+			 pi != baseModel->popInfos.end(); ++pi ) {
+		Pop *pop = demography->dg_get_pop_by_name( pi->first );
+
+		std::string lbl = std::string( "coal_" ) + boost::lexical_cast<std::string>( pi->first );
+		ArrivalProcess< genid, Stoch< RandGen, Poisson< Piecewise< Any<> >, nchromPairs_float_t > > >
+			 coalProc( pi->second.coalRateFn, genid(0.), boost::make_shared<CoalProcessDef>( demography, pop ) );
+		add( *coalProcs,
+				 setLabel( coalProc,
+									 lbl ) );
+	}
+	return coalProcs;
+}  // createCoalProcesses
+
+
+}  // namespace coal
 }  // namespace cosi

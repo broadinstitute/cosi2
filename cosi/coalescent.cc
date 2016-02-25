@@ -8,8 +8,13 @@
 // parts of simulator behavior; <CoSi::runSim()> then runs the simulation.
 //
 
+//#define COSI_DEV_PRINT
+
+#include <cstdlib>
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/assign/std/map.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/hooks.h>
 #include <cosi/node.h>
 #include <cosi/coalescent.h>
@@ -27,13 +32,13 @@
 #include <cosi/recomb.h>
 #include <cosi/genmap.h>
 #include <cosi/migrate.h>
-#include <cosi/utils.h>
 #include <cosi/stats.h>
 #include <cosi/sweep1.h>
 #include <cosi/sweep2.h>
 #include <cosi/sweep3.h>
 #include <cosi/condsnp.h>
 #include <cosi/output.h>
+#include <cosi/msweep.h>
 
 namespace cosi {
 
@@ -51,7 +56,7 @@ CoSi::CoSi(): segfp( NULL ), logfp( NULL ), verbose( False ),
 						, maxCoalDist( plen_t( 1.0 ) ), maxCoalDistCvxHull( False )
 #endif
 						, genMapShift( 0 ), sweepFracSample( False ), outputARGedges( False ),
-							genmapRandomRegions( False )
+							genmapRandomRegions( False ), trajOnly( False )
 {
 	seglist::seglist_init_module();
 }
@@ -178,7 +183,9 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	migrate->setHooks( hooks );
 	params->getHistEvents()->historical_setMigrate( migrate );
 	simulator->sim_setMigrate( migrate );
-	
+
+	this->msweep = make_MSweep( demography, params->getBaseModel(), getRandGen() );
+
 	demography->dg_complete_initialization();
 
 	BOOST_AUTO( traj, params->get_pop2sizeTraj() );
@@ -187,9 +194,23 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		if ( !pop ) throw std::runtime_error( "trajectory specified for unknown population" );
 		pop->setSizeTraj( it->second, genid( 0.0 ) );
 	}
-	
+
 	mutate.reset( new Mutate( getRandGen(), params->getMu(), params->getLength() ) );
 	demography->dg_setMutate( mutate );
+
+	if ( getenv( "COSI_NEWSIM" ) ) {
+		migrate->setBaseModel( getSweepModel( msweep ) );
+		typedef arrival2::ArrivalProcess<genid, arrival2::Stoch< RandGen, arrival2::AnyProc > > any_proc;
+		add( simulator->arrProcs, any_proc( setLabel( *migrate->createMigrationProcesses(), "migrations" ) ) );
+		coalesce->setBaseModel( getSweepModel( msweep ) );
+		add( simulator->arrProcs, any_proc( setLabel( *coalesce->createCoalProcesses(), "coals" ) ) );
+		add( simulator->arrProcs, any_proc( setLabel( *recomb->createRecombProcesses(), "recombs" ) ) );
+		if ( params->getGeneConv2RecombRateRatio() > 0 ) 
+			 add( simulator->arrProcs, any_proc( setLabel( *geneConversion->createGeneConvProcesses(), "gcs" ) ) );
+
+		leafOrder = computeLeafOrder( msweep );
+	}
+	
 	
 	sweep->sweep_setGenMap( genMap );
 	sweep->sweep_setRecomb( recomb );

@@ -17,13 +17,13 @@
 #include <boost/random/lagged_fibonacci.hpp>
 #include <boost/random/discrete_distribution.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/decls.h>
 #include <cosi/node.h>
 #include <cosi/pop.h>
 #include <cosi/demography.h>
 #include <cosi/recomb.h>
 #include <cosi/geneconversion.h>
-#include <cosi/utils.h>
 #include <cosi/mutlist.h>
 #include <cosi/mutate.h>
 #include <cosi/migrate.h>
@@ -40,15 +40,15 @@ namespace cosi {
 
 #define ForEach BOOST_FOREACH  
   
-using std::vector;
-using std::map;
-using std::set;
-using std::ifstream;
-using std::ofstream;
-using util::map_get;
-using util::STLContains;
-using node::Node;
-using node::NodeList;
+// using std::vector;
+// using std::map;
+// using std::set;
+// using std::ifstream;
+// using std::ofstream;
+// using util::map_get;
+// using util::STLContains;
+// using node::Node;
+// using node::NodeList;
 
 //
 // Class impl: Sweep
@@ -87,13 +87,13 @@ void Sweep::setTrajFN( filename_t trajFN_ ) {
 void Sweep::sweep_load_traj() {
   if ( !trajFN.empty() ) {
     boost::filesystem::ifstream f( trajFN );
-		f.exceptions( ofstream::failbit | ofstream::badbit );
+		f.exceptions( std::ofstream::failbit | std::ofstream::badbit );
 		
 		while ( f ) {
 			genid gen;
 			freq_t freq;
 			try { f >> gen >> freq; }
-			catch( ios::failure fe ) { break; }
+			catch( std::ios::failure fe ) { break; }
 			//PRINT2( gen, freq );
 			selAlleleFreqTraj.addPt( gen, freq );
 		}
@@ -211,8 +211,8 @@ genid Sweep::sweep_execute(popid popname, gensInv_t sel_coeff, genid gen, loc_t 
 #endif	
 
 	boost::filesystem::ofstream trajOut;
-	trajOut.exceptions( ofstream::failbit | ofstream::badbit );
-	if ( !trajOutFN.empty() ) trajOut.open( trajOutFN, ifstream::out );
+	trajOut.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+	if ( !trajOutFN.empty() ) trajOut.open( trajOutFN, std::ifstream::out );
 
 	static int sweepCount=0;
 	sweepCount++;
@@ -1047,6 +1047,7 @@ public:
 		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq;
 	 }
 	 static const char *typeStr() { return "sweep_new"; }
+	 virtual eventKind_t getEventKind() const { return E_SWEEP; }	 
 				
 	 virtual ~Event_SweepNew();
 
@@ -1080,7 +1081,7 @@ private:
 	 // Field: origPops
 	 // The original pops we have split when we first encountered the end of the sweep during
 	 // backwards simulation.
-	 set<popid> origPops;
+	 std::set<popid> origPops;
 	 
 	 // Field: freqTraj
 	 // The frequency trajectory of the causal allele
@@ -1203,8 +1204,8 @@ void Event_SweepNew::init_() {
 		}
 		
 		// Record the correspondence between the anc-pop and the der-pop.
-		pop2companion.insert( make_pair( pop->pop_get_name(), derPop->pop_get_name() ) );
-		pop2companion.insert( make_pair( derPop->pop_get_name(), pop->pop_get_name() ) );
+		pop2companion.insert( std::make_pair( pop->pop_get_name(), derPop->pop_get_name() ) );
+		pop2companion.insert( std::make_pair( derPop->pop_get_name(), pop->pop_get_name() ) );
 		origPops.insert( pop->pop_get_name() );
 	}  // for each pop
 
@@ -1248,7 +1249,7 @@ genid Event_SweepNew::execute() {
 	bool_t someNotCoal = False;
 	ForEach( popid origPop, origPops ) {
 		Pop *ancPop = getDemography()->dg_get_pop_by_name( origPop );
-		Pop *derPop = getDemography()->dg_get_pop_by_name( map_get( pop2companion, origPop ) );
+		Pop *derPop = getDemography()->dg_get_pop_by_name( util::map_get( pop2companion, origPop ) );
 
 		someNotCoal = someNotCoal || ( derPop->pop_get_num_nodes() > 1 );
 
@@ -1258,9 +1259,9 @@ genid Event_SweepNew::execute() {
 
 #ifdef COSI_DEV		
 		{
-			static ofstream trajOut;
+			static std::ofstream trajOut;
 			if ( !trajOut.is_open() ) {
-				trajOut.open( "trajnew.tsv", ofstream::out );
+				trajOut.open( "trajnew.tsv", std::ofstream::out );
 				trajOut << "gen\tsel_freq\tnsel\tnsel_in_pop\tnunsel\tnunsel_in_pop\tnrecomb_sel\tnrecomb_unsel\tnnew_sel\tnnew_unsel\tncoal_sel\tncoal_unsel\tprob_coal_sel\tprob_coal_unsel\n";
 			}
 			frac_t sel_freq = freqTraj->getCurFreq( ancPop->pop_get_name() );
@@ -1310,7 +1311,7 @@ genid Event_SweepNew::execute() {
 		std::pair<popid,popid> p;
 		ForEach( popid origPop, origPops ) {
 			Pop *ancPop = getDemography()->dg_get_pop_by_name( origPop );
-			Pop *derPop = getDemography()->dg_get_pop_by_name( map_get( pop2companion, origPop ) );
+			Pop *derPop = getDemography()->dg_get_pop_by_name( util::map_get( pop2companion, origPop ) );
 			
 			getDemography()->dg_move_nodes_by_name( derPop->pop_get_name(), ancPop->pop_get_name(), 1.00, gen, /* exactFraction= */ True );
 		}  // for each split pop pair
@@ -1342,9 +1343,9 @@ Event_SweepNew::SweepHook::~SweepHook() {
 void Event_SweepNew::SweepHook::determineAlleleAtSelPos_( Node *node ) {
 	if ( node ) {
 		Pop *curPop = node->getPop();
-		Pop *companionPop = evt->getDemography()->dg_get_pop_by_name( map_get( evt->pop2companion, curPop->pop_get_name() ) );
+		Pop *companionPop = evt->getDemography()->dg_get_pop_by_name( util::map_get( evt->pop2companion, curPop->pop_get_name() ) );
 		Pop *derPop, *ancPop;
-		if ( STLContains( evt->origPops, curPop->pop_get_name() ) ) { ancPop = curPop; derPop = companionPop; nrecomb_unsel++; }
+		if ( util::STLContains( evt->origPops, curPop->pop_get_name() ) ) { ancPop = curPop; derPop = companionPop; nrecomb_unsel++; }
 		else { ancPop = companionPop; derPop = curPop; nrecomb_sel++; }
 
 		freq_t testFreq = evt->freqTraj->getCurFreq( ancPop->pop_get_name() );
@@ -1368,14 +1369,14 @@ void Event_SweepNew::SweepHook::handle_recomb( Node *node1, Node *node2, loc_t l
 
 
 void Event_SweepNew::SweepHook::handle_coal( Node *n ) {
-	( STLContains( evt->origPops, n->getPop()->pop_get_name() ) ? ncoal_unsel : ncoal_sel )++;
+	( util::STLContains( evt->origPops, n->getPop()->pop_get_name() ) ? ncoal_unsel : ncoal_sel )++;
 }
 
 void Event_SweepNew::SweepHook::handle_set_migrate_rate( popid from, popid to, prob_per_chrom_per_gen_t rate ) {
 	if ( !inHook ) {
 		inHook = True;
-		evt->getMigrate()->migrate_set_rate( map_get( evt->pop2companion, from ),
-																				 map_get( evt->pop2companion, to ), rate );
+		evt->getMigrate()->migrate_set_rate( util::map_get( evt->pop2companion, from ),
+																				 util::map_get( evt->pop2companion, to ), rate );
 	}
 }
 

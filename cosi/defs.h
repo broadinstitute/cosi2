@@ -15,11 +15,12 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/operators.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <boost/cstdint.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/nvp.hpp>
-#include <cosi/typedval.h>
-#include <cosi/utildefs.h>
+#include <cosi/general/typedval.h>
+#include <cosi/general/utildefs.h>
 
 #include BOOST_TYPEOF_INCREMENT_REGISTRATION_GROUP()
 
@@ -63,7 +64,7 @@ namespace cosi {
 // Logical type: nchroms_t
 // A count of chromosome instances: for example, the size of a population or a sample,
 // or a subset of either.
-typedef int nchroms_t;
+typedef boost::int_fast64_t nchroms_t;
 
 // Logical type: popsize_float_t
 // A floating-point representation of population size.  Real populations of course have integer
@@ -74,6 +75,9 @@ COSI_DEFINE_TYPEDVAL_REL(popsizeInv_float_t);
 COSI_DEFINE_TYPEDVAL_MULT( popsizeInv_float_t, popsize_float_t, factor_t );
 
 
+typedef popsize_float_t nchroms_float_t;
+
+
 // Logical type: nchromPairs_t
 // A count of chromosome pairs; has dimensions of nchroms_t * nchroms_t.
 typedef int nchromPairs_t;
@@ -81,6 +85,8 @@ typedef int nchromPairs_t;
 // Logical type: nsims_t
 // A count of simulations
 typedef int nsims_t;
+
+enum genotype_t { GT_AA, GT_Aa, GT_aa };
 
 // // Type: frac_t
 // // A fraction, in the interval [0.0,1.0]
@@ -108,10 +114,11 @@ typedef int nsims_t;
 // 	 explicit freq_t( double val_ ): frac_t( val_ ) { }
 // };
 
-COSI_DEFINE_TYPEDVAL_REL(prob_per_gen_t);
-COSI_DEFINE_TYPEDVAL_REL(prob_per_chrom_per_gen_t);
 
-COSI_DEFINE_TYPEDVAL_MULT(nchroms_t, prob_per_chrom_per_gen_t, prob_per_gen_t);
+
+//COSI_DEFINE_TYPEDVAL_REL(prob_per_gen_t);
+//COSI_DEFINE_TYPEDVAL_MULT(popsize_float_t, prob_per_chrom_per_gen_t, prob_per_gen_t);
+
 
 /**
  * Type: len_bp_t
@@ -144,9 +151,54 @@ COSI_DEFINE_TYPEDVAL_ABSREL(genid, gens_t, cosi_double);
 COSI_DEFINE_TYPEDVAL_REL(gensInv_t);
 COSI_DEFINE_TYPEDVAL_MULT( gensInv_t, gens_t, factor_t );
 
-COSI_DEFINE_TYPEDVAL_REL(popsizeInv_float_integral_t);
-COSI_DEFINE_TYPEDVAL_MULT(gens_t, popsizeInv_float_t, popsizeInv_float_integral_t);
-COSI_DEFINE_TYPEDVAL_MULT(popsizeInv_float_integral_t, popsize_float_t, gens_t);
+
+// COSI_DEFINE_TYPEDVAL_REL(popsizeInv_float_integral_t);
+// COSI_DEFINE_TYPEDVAL_MULT(gens_t, popsizeInv_float_t, popsizeInv_float_integral_t);
+// COSI_DEFINE_TYPEDVAL_MULT(popsizeInv_float_integral_t, popsize_float_t, gens_t);
+
+// COSI_DEFINE_TYPEDVAL_REL(popsize_float_integral_t);
+// COSI_DEFINE_TYPEDVAL_MULT(gens_t, popsize_float_t, popsize_float_integral_t);
+
+COSI_DEFINE_TYPEDVAL_REL(prob_per_chrom_per_gen_t);
+COSI_DEFINE_TYPEDVAL_MULT(popsize_float_t, prob_per_chrom_per_gen_t, gensInv_t);
+COSI_DEFINE_TYPEDVAL_MULT(gens_t, prob_per_chrom_per_gen_t, popsizeInv_float_t);
+COSI_DEFINE_TYPEDVAL_MULT(gensInv_t, popsizeInv_float_t, prob_per_chrom_per_gen_t);
+
+COSI_DEFINE_TYPEDVAL_REL(nchromPairs_float_t);
+COSI_DEFINE_TYPEDVAL_REL(nchromPairsInv_float_t);
+COSI_DEFINE_TYPEDVAL_MULT( nchromPairs_float_t, nchromPairsInv_float_t, factor_t );
+
+inline nchromPairs_float_t operator*( nchroms_float_t a, nchroms_float_t b ) {
+	return nchromPairs_float_t( ToDouble(a) * ToDouble(b) );
+}
+
+//COSI_DEFINE_TYPEDVAL_MULT( popsize_float_t, popsize_float_t, nchromPairs_float_t );
+//COSI_DEFINE_TYPEDVAL_MULT( popsizeInv_float_t, popsizeInv_float_t, nchromPairsInv_float_t );
+
+COSI_DEFINE_TYPEDVAL_REL(gens_times_popsize_float_t);
+COSI_DEFINE_TYPEDVAL_MULT(gens_t, popsize_float_t, gens_times_popsize_float_t);
+
+COSI_DEFINE_TYPEDVAL_REL(gens_times_popsizeInv_float_t);
+COSI_DEFINE_TYPEDVAL_MULT(gens_t, popsizeInv_float_t, gens_times_popsizeInv_float_t);
+COSI_DEFINE_TYPEDVAL_MULT(gens_times_popsizeInv_float_t,popsize_float_t, gens_t);
+
+COSI_DEFINE_TYPEDVAL_MULT( popsizeInv_float_t, gens_times_popsize_float_t, gens_t );
+
+COSI_DEFINE_TYPEDVAL_REL(gens_times_nchromPairs_float_t);
+COSI_DEFINE_TYPEDVAL_MULT(gens_times_popsize_float_t, popsize_float_t, gens_times_nchromPairs_float_t);
+
+
+COSI_DEFINE_TYPEDVAL_REL(prob_per_chromPair_per_gen_t);
+COSI_DEFINE_TYPEDVAL_MULT(gens_t, prob_per_chromPair_per_gen_t, nchromPairsInv_float_t );
+COSI_DEFINE_TYPEDVAL_MULT(nchromPairs_float_t, prob_per_chromPair_per_gen_t, gensInv_t);
+
+COSI_DEFINE_TYPEDVAL_MULT(gens_times_nchromPairs_float_t, prob_per_chromPair_per_gen_t, factor_t);
+COSI_DEFINE_TYPEDVAL_MULT(gens_times_nchromPairs_float_t, nchromPairsInv_float_t, gens_t);
+
+
+COSI_DEFINE_TYPEDVAL_MULT(gens_times_popsize_float_t, prob_per_chrom_per_gen_t, factor_t);
+// COSI_DEFINE_TYPEDVAL_REL(prob_per_chrom_per_gen_integral_t);
+// COSI_DEFINE_TYPEDVAL_MULT(gens_t, prob_per_chrom_per_gen_t, prob_per_chrom_per_gen_integral_t);
 
 /**
  * Logical type: genid

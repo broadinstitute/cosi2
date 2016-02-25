@@ -10,8 +10,8 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/parameter.hpp>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
-#include <cosi/cosirand.h>
 #include <cosi/stats.h>
 #include <cosi/decls.h>
 #include <cosi/nodefwd.h>
@@ -77,6 +77,9 @@ public:
 	 void set_recombfileFN( filename_t recombfileFN_ ) { this->recombfileFN = recombfileFN_; }
 	 void set_outputARGedges( bool outputARGedges_ ) { outputARGedges = outputARGedges_; }
 	 void set_genmapRandomRegions( bool genmapRandomRegions_ ) { genmapRandomRegions = genmapRandomRegions_; }
+
+	 void set_trajOnly( bool trajOnly_ ) { this->trajOnly = trajOnly_; }
+	 bool get_trajOnly() const { return this->trajOnly; }
 	 
 	 //
 	 // Group: Running the simulation
@@ -93,6 +96,7 @@ public:
 
 	 ParamFileReaderP getParams() const { return params; }
 	 SweepP getSweep() const { return sweep; }
+	 MSweepP getMSweep() const { return msweep; }
 	 DemographyP getDemography() const { return demography; }
 	 MutateP getMutate() const { return mutate; }
 	 RecombP getRecomb() const { return recomb; }
@@ -100,6 +104,8 @@ public:
 	 RecombRecorderP getRecombRecorder() const { return recombRecorder; }
 	 CondSnpMgrP getCondSnpMgr() const { return condSnpMgr; }
 	 GenMapP getGenMap() const { return genMap; }
+
+	 boost::shared_ptr< std::vector< leaf_id_t > > leafOrder;
 
 protected:
 
@@ -139,6 +145,10 @@ protected:
 	 // Manages selective sweeps (this field may be moved out of here).
 	 SweepP sweep;
 
+	 // Field: sweep
+	 // Manages selective sweeps (this field may be moved out of here).
+	 MSweepP msweep;
+	 
 	 // Field: nodePool
 	 // Managers the <nodes>, and implements <poisson events> (recombinations,
 	 // coalescences, gene conversions) on the nodes.
@@ -247,6 +257,9 @@ protected:
 	 // Whether to take for each simulation a different random region from the genetic map.
 	 bool_t genmapRandomRegions;
 
+	 // ** Field: trajOnly
+	 // Whether to only simulate trajectories and output present-day freqs
+	 bool trajOnly;
 };  // class CoSi
 
 

@@ -6,6 +6,7 @@
 #include <cerrno>
 #include <sstream>
 #include <fstream>
+#include <utility>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -15,6 +16,9 @@
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
 #include <boost/random/triangle_distribution.hpp>
+#include <boost/random/exponential_distribution.hpp>
+#include <boost/core/demangle.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/file.h>
 #include <cosi/recomb.h>
 #include <cosi/demography.h>
@@ -23,7 +27,6 @@
 #include <cosi/geneconversion.h>
 #include <cosi/historical.h>
 #include <cosi/sweep.h>
-#include <cosi/utils.h>
 
 namespace cosi {
 
@@ -54,6 +57,7 @@ void ParamFileReader::init() {
 //  rseed = 0;
 
 	histEvents = boost::make_shared<HistEvents>( demography );
+	baseModel = boost::make_shared<BaseModel>();
 	infSites = False;
 //	printSeed = True;
 	ignoreRecombsInPop = NULL_POPID;
@@ -80,6 +84,11 @@ void ParamFileReader::file_read(boost::filesystem::path filename, FILE *segfp)
 		}
 		file_get_data (infileptr, segfp);
 		fclose(infileptr);
+		if ( getenv( "COSI_NEWSIM" ) ) {
+			histEvents->constructBaseModel( baseModel );
+			// std::cerr.precision(16);
+			// std::cerr << *baseModel << "\n";
+		}
 	} catch( boost::exception& e ) {
 		e << boost::errinfo_file_name( filename.string() );
 		throw;
@@ -126,6 +135,19 @@ void ParamFileReader::sample_distribution_values( char *buf ) {
 							 boost::lexical_cast<std::string>( td( *getRandGen() ) ) );
 		strcpy( buf, s.c_str() );
 	}
+
+	while ( char *beg = strstr( buf, "E(" ) ) {
+		double lambda_arg = NAN;
+		if ( sscanf( beg, "E(%lf)", &lambda_arg ) != 1 )
+			 BOOST_THROW_EXCEPTION( cosi_param_file_error() <<
+															error_msg( "invalid parameter distribution spec" ) );
+		boost::random::exponential_distribution<double> ed( lambda_arg );
+		std::string s( buf );
+		s.replace( beg-buf, strchr( beg, ')' ) -  beg + 1,
+							 boost::lexical_cast<std::string>( ed( *getRandGen() ) ) );
+		strcpy( buf, s.c_str() );
+	}
+	
 }
 
 /*********************************************************/
@@ -196,6 +218,8 @@ ParamFileReader::file_proc_buff(char *var, char* buffer, FILE* segfp)
 		if (! demography->dg_set_pop_size_by_name (ZERO_GEN, popname, intarg))
 			 file_exit("file_proc_buff", 
 								 "parameter file - pop specified does not exist.");
+		
+		baseModel->popInfos[ popname ].setSizeFrom( ZERO_GEN, popsize_float_t( intarg ) );
 	}
 	else if (strcmp(var, "sample_size") == 0) {		
 		popname = popid( atoi(strtok (buffer, " ")) );
@@ -232,7 +256,8 @@ ParamFileReader::file_proc_buff(char *var, char* buffer, FILE* segfp)
 															 << boost::errinfo_errno( errno ) );
 			}
 			setRandGen( boost::make_shared<RandGen>( rseed ) );
-		}		
+		} else
+			 std::cerr << "ignoring random_seed from param file\n";
 	} else if (strcmp(var,"sweep_traj_file") == 0) {
 		if (buffer[strlen(buffer)-1] == '\n')
 			 buffer[strlen(buffer)-1] = '\0';
@@ -277,7 +302,7 @@ ParamFileReader::file_get_data (FILE *fileptr, FILE *segfp)
 	char c,
 		 buffer[BUF_MAX],
 		 var[50];
-	unsigned lineNum = 0;
+	unsigned lineNum = 1;
 
 	c = getc(fileptr);
 	while (c != EOF) {
@@ -300,9 +325,19 @@ ParamFileReader::file_get_data (FILE *fileptr, FILE *segfp)
 			fscanf(fileptr, "%s", var);
 			file_killwhitespace(fileptr);
 			fgets(buffer, BUF_MAX, fileptr);
+			//strcat( buffer, " " );  // make sure no error if eof
 			try {
 				try { file_proc_buff(var, buffer, segfp); }
 				catch( const std::ios_base::failure& e ) {
+					BOOST_THROW_EXCEPTION( cosi_param_file_error()
+																 << boost::errinfo_errno( errno ) );
+				}
+				catch( std::exception const& e ) {
+
+					std::cerr << "genMap::readFrom - caught UNKNOWN exception of type " <<
+						 typeid( e ).name() << " demangled " << 
+						 ( boost::core::demangle( typeid( e ).name() ) ) << " ; exception is " << e.what() << "\n";
+					
 					BOOST_THROW_EXCEPTION( cosi_param_file_error()
 																 << boost::errinfo_errno( errno ) );
 				}

@@ -15,7 +15,9 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <typeinfo>
 //#include <ctime>
+#include <boost/core/demangle.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/exception/error_info.hpp>
 #include <boost/exception/exception.hpp>
@@ -24,18 +26,18 @@
 #include <boost/foreach.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/exception/all.hpp>
-#include <cosi/utils.h>
-#include <cosi/cosirand.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/genmap.h>
 
 namespace cosi {
 
-using std::cout;
-using std::endl;
-using std::ofstream;
-using std::ios;
-using std::map;
-using util::chkCond;
+// using std::cout;
+// using std::endl;
+// using std::ofstream;
+// using std::ios;
+// using std::map;
+// using util::chkCond;
 
 GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_ ):
 	pd_range_len( length_ ) {
@@ -43,9 +45,11 @@ GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_ ):
 		try {
 			boost::filesystem::ifstream f( fname );
 			readFrom( f );
-		} catch( const std::ios_base::failure& e ) {
+		} catch( const std::ifstream::failure& e ) {
 			BOOST_THROW_EXCEPTION( cosi_io_error() << boost::errinfo_nested_exception( boost::copy_exception( e ) ) );
-		}			
+		} catch( const std::exception& e ) {
+			BOOST_THROW_EXCEPTION( cosi_io_error() << boost::errinfo_nested_exception( boost::copy_exception( e ) ) );
+		}	
 	} catch( boost::exception& e ) {
 		e << boost::errinfo_file_name( fname.string() )
 			<< error_msg3( "Error reading genetic map file" );
@@ -53,15 +57,15 @@ GenMap::GenMap( const boost::filesystem::path& fname, const len_bp_t length_ ):
 	}
 }
 
-GenMap::GenMap( istream& f, const len_bp_t length_ ):
+GenMap::GenMap( std::istream& f, const len_bp_t length_ ):
 	pd_range_len( length_ ) {
 	readFrom( f );
 }
 
-void GenMap::readFrom( istream& recombfp ) {
+void GenMap::readFrom( std::istream& recombfp ) {
 
 	boost::io::ios_exception_saver save_exceptions( recombfp );
-	recombfp.exceptions( ios::failbit | ios::badbit );
+	recombfp.exceptions( std::istream::failbit | std::istream::badbit );
 	
 	pd_locs.clear();
 	gd_locs.clear();
@@ -77,14 +81,30 @@ void GenMap::readFrom( istream& recombfp ) {
 			double lastRate = -1;
 
 			while ( recombfp ) {
+				if ( recombfp.eof() ) break;
+				line.clear();
 				try {
 					std::getline( recombfp, line );
-				} catch( std::ios::failure f ) { break; }
+				} catch( ::std::ios_base::failure const& f ) {
+					//std::cerr << "genMap::readFrom - caught exception\n";
+					break;
+				}
+				catch( std::exception const& e ) {
+					// std::cerr << "genMap::readFrom - caught UNKNOWN exception of type " <<
+					// 	 typeid( e ).name() << " demangled " << 
+					// 	 ( boost::core::demangle( typeid( e ).name() ) ) << " ; exception is " << e.what() << "\n";
+					break;
+				}
+				catch( ... ) {
+					//					std::cerr << "genMap::readFrom - caught UNKNOWN exception\n";
+					break;
+				}
 				//std::cerr << "line: " << line << "\n";
 				++lineNum;
 				loc_bp_int_t start;
 				double rate;
-			
+
+				//std::cerr << "reding line " << line << "\n";
 				int nread = sscanf(line.c_str(), "%ld %lf", &start, &rate);
 				if ( nread != 2 )
 					 BOOST_THROW_EXCEPTION( cosi_io_error() );
@@ -122,7 +142,7 @@ void GenMap::readFrom( istream& recombfp ) {
 			}
 			//std::cerr << pd_locs.back() << "\t" << gd_locs.back() << "\n";
 			
-		} catch( const std::ios_base::failure& e ) {
+		} catch( const std::istream::failure& e ) {
 			BOOST_THROW_EXCEPTION(
 				cosi_io_error()
 				<< boost::errinfo_nested_exception( boost::copy_exception( e ) )
@@ -155,9 +175,9 @@ void GenMap::setStart( pd_orig_loc_t start ) {
 	// struct timespec tm;
 	// clock_gettime( CLOCK_REALTIME, &tm );
 	BOOST_AUTO( pd_beg_it, boost::lower_bound( pd_locs, start ) );
-	chkCond( pd_beg_it != pd_locs.end() && *pd_beg_it >= start );
+	util::chkCond( pd_beg_it != pd_locs.end() && *pd_beg_it >= start );
 	BOOST_AUTO( pd_end_it, std::upper_bound( boost::next( pd_beg_it ), pd_locs.end(), start + pd_range_len ) );
-	chkCond( pd_beg_it != pd_end_it );
+	util::chkCond( pd_beg_it != pd_end_it );
 
 	BOOST_AUTO( gd_beg_it, gd_locs.begin() + ( pd_beg_it - pd_locs.begin() ) );
 	BOOST_AUTO( gd_end_it, gd_beg_it + ( pd_end_it - pd_beg_it ) );
@@ -180,7 +200,7 @@ void GenMap::setStart( pd_orig_loc_t start ) {
 	
 	gd_range_len = gd_locs_range.back() - gd_locs_range.front();
 	
-	if ( gd_range_len <= static_cast< gd_orig_len_t >( 1e-16) )
+	if ( gd_range_len <= static_cast< gd_orig_len_t >( 1e-35 ) )
 		 BOOST_THROW_EXCEPTION( cosi_io_error() << error_msg( "genetic map length is zero!" ) );
 
 	// totClock += ( std::clock() - startTime );

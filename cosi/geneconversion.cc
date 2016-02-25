@@ -10,8 +10,8 @@
 #include <limits>
 #include <stdexcept>
 #include <boost/math/distributions/geometric.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/geneconversion.h>
-#include <cosi/utils.h>
 #include <cosi/genmap.h>
 #include <cosi/demography.h>
 #include <cosi/node.h>
@@ -133,3 +133,32 @@ void GeneConversion::gc_execute (genid gen, frac_t frac) {
 
 }  // namespace cosi
 
+#include <cosi/general/arrproc2.h>
+
+namespace cosi {
+
+class GeneConvProcessDef: public arrival2::ArrivalProcessDef< genid, RandGen, double > {
+
+	 GeneConversion *geneConv;
+
+public:
+
+	 GeneConvProcessDef( GeneConversion *geneConv_ ):
+		 geneConv( geneConv_ ) {
+	 }
+
+	 virtual double getRateFactor() const { return ToDouble( geneConv->getAllNodesGeneConvRate() ); }
+	 virtual void executeEvent( genid gen, RandGen& ) {
+		 geneConv->gc_execute( gen, geneConv->random_double() );
+	 }
+};  // class GeneConvProcessDef
+
+
+boost::shared_ptr< GeneConversion::geneconv_processes_type >
+GeneConversion::createGeneConvProcesses() {
+	return boost::make_shared<geneconv_processes_type>(
+			 math::fn_const<genid>( gensInv_t( ToDouble( genMap->getRegionRecombRateAbs() ) ) ),
+			 boost::make_shared<GeneConvProcessDef>( this ) );
+}  // createGeneConvProcesses
+
+}  // namespace cosi

@@ -14,12 +14,12 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/intrusive/parent_from_member.hpp>
 #include <boost/optional.hpp>
+#include <cosi/general/utils.h>
+#include <cosi/general/mempool.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
-#include <cosi/utils.h>
 #include <cosi/leafset.h>
-#include <cosi/mempool.h>
-#include <cosi/cosirand.h>
 #include <cosi/hooks.h>
 #include <cosi/nodefwd.h>
 #include <cosi/hullmgr.h>
@@ -262,7 +262,7 @@ private:
 
 	 // Field: allNodes
 	 // All currently active nodes. NOTE: 0th element of this vector is unused!
-	 vector<Node *> allNodes;
+	 std::vector<Node *> allNodes;
 
 	 // Field: recombPartialSums
 	 // Partial sum tree of recomb rates.  Keeps the

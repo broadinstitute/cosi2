@@ -49,7 +49,9 @@
 #include <locale>
 #include <limits>
 #include <boost/numeric/conversion/bounds.hpp>
-#include <boost/assign.hpp>
+#include <boost/assign/list_inserter.hpp>
+#include <boost/assign/std/map.hpp>
+#include <boost/assign/list_of.hpp> 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
@@ -191,6 +193,9 @@ inline bool is_null<double>( const double& loc ) { return (boost::math::isnan)( 
 // A length of a segment of the simulated region; a difference of two loc_t's.
 typedef double len_t;
 
+// Length in basepairs
+typedef double len_bp_t;
+
 // Logical type: gens_t
 // Length of a time interval, in generations.
 typedef double gens_t;
@@ -213,6 +218,8 @@ struct cosi_io_error: virtual cosi_error { };
 typedef boost::error_info<struct tag_errno_code,int> errno_code;
 typedef boost::error_info<struct tag_error_msg,std::string> error_msg;
 
+
+
 double tajd(int, int, double) ;
 
 string Date( );
@@ -228,7 +235,7 @@ string Join( const string& sep, const string& s1, const string& s2, const string
 string Join( const string& sep, const string& s1, const string& s2, const string& s3, const string& s4 );
 string Join( const string& sep, const string& s1, const string& s2, const string& s3, const string& s4, const string& s5 );
 string MakeValidIdentifier( const string& s );
-double Frac( int a, int b );
+template <typename T1, typename T2> double Frac( T1 a, T2 b );
 
 class SNPCond;
 ostream& operator<<( ostream& os, const SNPCond& snpCond );
@@ -410,7 +417,62 @@ private:
 	 SumKeeper<ValT,CountT> sum, sumSq;
 	 std::string name;
 };  // class StatKeeper
-	
+
+struct Sim {
+	 nchroms_t nsam;
+	 char **trimmed_list;
+	 int trimmed_segsites;
+	 const loc_t *trimmed_posit;
+	 std::vector< nchroms_t > const& derCounts;
+
+	 Sim( nchroms_t nsam,
+				char **trimmed_list,
+				int trimmed_segsites,
+				const loc_t *trimmed_posit,
+				std::vector< nchroms_t > const& derCounts ):
+		 nsam( nsam ), trimmed_list( trimmed_list ), trimmed_segsites( trimmed_segsites ),
+		 trimmed_posit( trimmed_posit ), derCounts( derCounts ) { }
+
+};
+
+class AStats {
+public:
+	 void processSim( Sim const& sim ) {
+		 boost::fill( vals, std::numeric_limits<double>::quiet_NaN() );
+		 computeVals( sim, vals );
+		 for ( size_t i = 0; i < vals.size(); ++i ) {
+				stats[ i ].add( vals[ i ] );
+				// if ( i > 0 ) std::cout << "\t";
+				// std::cout << vals[i];
+		 }
+	 }
+	 void writeHeaders() const {
+		 std::vector< std::string > names = getNames();
+		 for ( size_t i = 0; i < names.size(); ++i ) {
+				if ( i > 0 ) std::cout << "\t";
+				std::cout << names[i];
+		 }
+	 }
+	 void writeSummaryStats() const {
+		 std::vector< std::string > names = getNames();
+		 //std::cerr << "got " << names.size() << " names!\n";
+		 for ( size_t i = 0; i < names.size(); ++i ) {
+			 std::cerr << "stat: " << names[i] <<
+					" mean=" << stats[i].getMean() << " std=" << stats[i].getStd() << " n=" << stats[i].getNumVals() << "\n";
+		 }
+	 }
+protected:
+	 AStats( size_t nvals ): vals( nvals ), stats( nvals ) { }
+	 virtual void computeVals( Sim const&, std::vector<double>& ) const = 0;
+	 virtual std::vector< std::string > getNames() const = 0;
+
+private:	 
+	 std::vector<double> vals;
+	 std::vector< StatKeeper<> > stats;
+};
+
+typedef boost::shared_ptr<AStats> AStatsP;
+
 
 //////////////////////////////////////////////////////
 
@@ -583,7 +645,8 @@ string MakeValidIdentifier( const string& s ) {
 	return result;
 }
 
-double Frac( int a, int b ) { return double(a) / double(b); }
+template <typename T1, typename T2>
+double Frac( T1 a, T2 b ) { return double(a) / double(b); }
 
 template <typename T> inline int isize( const vector<T>& v ) { return int( v.size() ); }
 
@@ -617,6 +680,59 @@ bool compute_LD( int site_A, int site_B, int nsam, char **list,
 								 double *r2, double *Dprime );
 bool compute_LD( snp_id_t site_A, snp_id_t site_B, nchroms_t bsam, nchroms_t nsam, char **list,
 								 double *r2, double *Dprime );
+
+class LDStats: public AStats {
+public:	 
+	 LDStats( len_t maxDist, size_t nbins, freq_t minMAF ):
+		 AStats( nbins ),
+		 maxDist( maxDist ), nbins( nbins ), minMAF( minMAF ), binSize( maxDist / nbins ),
+		 r2s( nbins ) {
+	 }
+	 
+protected:
+	 virtual std::vector< std::string > getNames() const {
+		 std::vector< std::string > names( nbins );
+		 for ( size_t i = 0; i < nbins; ++i )
+				names[ i ] = "r2_" + boost::lexical_cast< std::string >( i * binSize ) + "_" +
+					 boost::lexical_cast< std::string > ( (i+1)*binSize );
+		 std::cerr << "getNames: nbins=" << nbins << " names.size=" << names.size() << "\n";
+		 return names;
+	 }
+	 
+	 virtual void computeVals( Sim const& sim, std::vector<double>& vals ) const {
+		 //std::cerr << "getting vals\n";
+		 r2s.clear(); r2s.resize( nbins );
+		 nchroms_t minDerCount = minMAF * sim.nsam, maxDerCount = sim.nsam - minDerCount;
+		 for ( snp_id_t snp1 = 0; snp1 < sim.trimmed_segsites; ++snp1 )
+				if ( ( minDerCount <= sim.derCounts[ snp1 ] ) && ( sim.derCounts[ snp1 ] <= maxDerCount ) ) {
+					loc_t maxPos = sim.trimmed_posit[ snp1 ] + maxDist;
+					for ( snp_id_t snp2 = snp1+1; ( snp2 < sim.trimmed_segsites ) &&
+									 ( sim.trimmed_posit[ snp2 ] < maxPos ); ++snp2 )
+						 if ( ( minDerCount <= sim.derCounts[ snp2 ] ) && ( sim.derCounts[ snp2 ] <= maxDerCount ) ) {
+							 double r2, Dprime;
+							 if ( compute_LD( snp1, snp2, sim.nsam, sim.trimmed_list, &r2, &Dprime ) )
+									r2s[ getBin( sim.trimmed_posit[ snp2 ] - sim.trimmed_posit[ snp1 ] ) ].add( r2 );
+						 }
+				}
+		 for ( size_t i = 0; i < nbins; ++i ) {
+				vals[ i ] = r2s[ i ].getMean();
+				//std::cerr << "i=" << i << " count=" << r2s[i].getNumVals() << "\n";
+		 }
+		 //std::cerr << "got vals\n";
+	 }
+	 
+	 
+private:
+	 len_t maxDist;
+	 size_t nbins;
+	 freq_t minMAF;
+	 len_t binSize;
+	 mutable std::vector< SumKeeper<> > r2s;
+	 
+	 size_t getBin( len_t d ) const { return boost::algorithm::clamp<size_t>( size_t( d / binSize ), 0, nbins-1 ); }
+	 
+};  // class LDstats
+
 
 // ** Class ValRange
 //
@@ -1370,12 +1486,12 @@ int sample_stats_main(int argc, char *argv[])
 	int nsam, i,  howmany  ;
 	const size_t MAX_LINE_LEN = 65000;
 	char **list, line[MAX_LINE_LEN+1];
-	filename_t simFile, outFile;
+	//static filename_t simFile, outFile;
 	FILE *pfin ;
 	nsnps_t   segsites;
 	int count;
 	double pi , h, th  ,prob ;
-	char dum[20], astr[100] ;
+	char dum[4096], astr[100] ;
 	int precision(8);
 
 	vector< pair< double, double > > snpPairDists;
@@ -1384,8 +1500,12 @@ int sample_stats_main(int argc, char *argv[])
 	
 	cerr.precision(8);
 
- 	StatKeeper<> piStats, nsitesStats, dindStats;
-	vector< StatKeeper<> > statKeepers;
+ 	StatKeeper<> piStats, nucdivStats, nsitesStats, dindStats;
+	StatKeeper<> n_under_10_stats, n_10_to_40_stats, n_over_40_stats;
+
+	std::vector< AStatsP > aStats;
+	
+	//vector< StatKeeper<> > statKeepers;
 
 	namespace po = boost::program_options;
 
@@ -1405,7 +1525,7 @@ int sample_stats_main(int argc, char *argv[])
 
 	double regionLen_bp(-1);
 	double regionLen_cM(-1);
-	bool useAbsRegionLen = false;
+	//bool useAbsRegionLen = false;
 
 	loc_t dindLoc = 0.0;
 	snp_id_t dindLocIdx = -1;
@@ -1420,9 +1540,13 @@ int sample_stats_main(int argc, char *argv[])
 
 	nsims_t maxSims = 0;
 
-	boost::random::mt19937::result_type rng_seed;
+	//boost::random::mt19937::result_type rng_seed;
 
 	bool addQuantiles = false;
+
+	len_bp_t ldHistMaxSepBp(0.);
+	unsigned ldHistNumBins(0);
+	freq_t ldHistMinMAF(0.);
 
 // ** program options
 	
@@ -1430,8 +1554,8 @@ int sample_stats_main(int argc, char *argv[])
 	desc.add_options()
 		 ("help,h", "produce help message")
 
-		 ("simfile,i", po::value(&simFile), "name of file containing simulator output (default is to read from stdin)")
-		 ("outfile,o", po::value(&outFile), "name of output file (default is to write to stdout)")
+		 // ("simfile,i", po::value(&simFile), "name of file containing simulator output (default is to read from stdin)")
+		 // ("outfile,o", po::value(&outFile), "name of output file (default is to write to stdout)")
 			 
 		 ("precision,p", po::value(&precision)->default_value(8), "specify precision of output")
 		 
@@ -1458,6 +1582,9 @@ int sample_stats_main(int argc, char *argv[])
 		 ("max-sims", po::value( &maxSims )->default_value( 0 ), "max sims to consider" )
 		 ("quantiles,q", po::bool_switch( &addQuantiles), "add quantiles" )
 		 ("region-len-bp", po::value( &regionLen_bp )->default_value( -1 ), "length of simulated region (bp)")
+		 ("ld-hist-max-sep-bp", po::value( &ldHistMaxSepBp )->default_value( 0. ), "for LD histogram, max separation (bp)")
+		 ("ld-hist-num-bins", po::value( &ldHistNumBins )->default_value( 0. ), "for LD histogram, number of bins")
+		 ("ld-hist-min-maf", po::value( &ldHistMinMAF )->default_value( 0. ), "for LD histogram, ignore SNPs with minor allele freq less than this")
 		 
 		("progress-every,g", po::value(&progressEvery), "print progress every N sims")
 		 ;
@@ -1505,6 +1632,10 @@ int sample_stats_main(int argc, char *argv[])
 		treeEdgeSets.push_back( TreeEdgeSet( bind( &TreeEdge::genMoreRecent, arg1 ) == 0 && bind( &TreeEdge::containsLoc, arg1, .5 ), "botmid" ) );
 	}
 
+	if ( regionLen_bp > 0 && ldHistMaxSepBp > 0 && ldHistNumBins > 0 ) 
+		 aStats.push_back( boost::make_shared< LDStats >( len_t( Frac( ldHistMaxSepBp, regionLen_bp ) ),
+																											ldHistNumBins, ldHistMinMAF ) );
+
 	// chk( ( argc & 1 ) );
 
 	// double MARGIN = getVal<double>( argv[1] );
@@ -1515,18 +1646,21 @@ int sample_stats_main(int argc, char *argv[])
 
 
 /* read in first two lines of output  (parameters and seed) */
-  pfin = simFile.empty() ? stdin : fopen( simFile.c_str(), "rt" );
-	if ( !pfin ) throw std::logic_error( "sample_stats: could not open file " + simFile );
+  // pfin = simFile.empty() ? stdin : fopen( simFile.c_str(), "rt" );
+	// if ( !pfin ) throw std::logic_error( "sample_stats: could not open file " + simFile );
+	pfin = stdin;
 
 	std::ofstream outStrm;
 	outStrm.exceptions( std::ios::failbit | std::ios::badbit );
-	if ( !outFile.empty() ) outStrm.open( outFile.c_str() );
-	ostream& fout = outFile.empty() ? cout : outStrm;
+	// if ( !outFile.empty() ) outStrm.open( outFile.c_str() );
+	// ostream& fout = outFile.empty() ? cout : outStrm;
+	ostream& fout = cout;
 
 	fout.precision( precision );
 	
   chk( fgets( line, MAX_LINE_LEN, pfin) );
 	cerr << line;
+	std::string headerLine( line );
   chk( sscanf(line," %s  %d %d", dum,  &nsam, &howmany) == 3 );
 
 	if ( maxSims > 0 && howmany > maxSims ) howmany = maxSims;
@@ -1596,16 +1730,20 @@ int sample_stats_main(int argc, char *argv[])
 
 	//PRINT( LDs.size() );
 
+	clock_t startTime = clock();
+
   count=0;
+	try {
 	while( howmany-count++ ) {
 
 		if ( progressEvery > 0 && !( (count-1) % progressEvery ) )
-			cerr << "sim " << (count-1) << " of " << howmany << " (" << static_cast<int>( static_cast<double>(count-1) / static_cast<double>( howmany ) * 100 ) << "%)" << endl;
+			 cerr << ( float( clock() - startTime ) / CLOCKS_PER_SEC )
+						<< ": sim " << (count-1) << " of " << howmany << " (" << static_cast<int>( static_cast<double>(count-1) / static_cast<double>( howmany ) * 100 ) << "%)" << endl;
 
 		vector< acc_t > ld_r2( ldSeps.size() ), ld_Dprime( ldSeps.size() );
 		vector< vector< double > > ld_r2_vals( ldSeps.size() ), ld_Dprime_vals( ldSeps.size() );
 
-		boost::array<prob_t,5> probs = { .10, .25, .50, .75, .90 };
+		boost::array<prob_t,5> probs = boost::assign::list_of(.10)(.25)(.50)(.75)(.90);
 
 		// for ( size_t i = 0; i < ldSeps.size(); i++ ) {
 		// 	ld_r2.push_back( boost::make_shared< acc2_t >( acc::extended_p_square::probabilities = probs ) );
@@ -1629,8 +1767,8 @@ int sample_stats_main(int argc, char *argv[])
 		//
 
 
-		int statIdx = 0;
-		vector<double> statVals;
+		//int statIdx = 0;
+		//vector<double> statVals;
 		set<loc_t> recombLocs, recombBegs, recombEnds;
 
 		ForEach( TreeEdgeSet& treeEdgeSet, treeEdgeSets ) treeEdgeSet.clear();
@@ -1664,22 +1802,23 @@ int sample_stats_main(int argc, char *argv[])
 				recombEnds.insert( treeEdge.end );
 			}
 // **** process generic stats
-			else if ( StartsWith( line, "stat " ) ) {
-				string dummy, statName;
-				double statVal;
-				istringstream istrm( line );
-				istrm.exceptions( std::ios::failbit | std::ios::badbit );
-				istrm >> dummy >> statName >> statVal;
-				//cerr << "statName=" << statName << " statVal=" << statVal << endl;
-				// if ( count == 1 )
-				// 	statNames->push_back( boost::make_shared<string>( statName.c_str() ) );
-				// else
-				// 	chk( *( statNames->at( statIdx ) ) == statName );
-				statVals.push_back( statVal );
-				if ( count == 1 ) statKeepers.push_back( StatKeeper<>( statName ) );
-				else chk( statKeepers[ statIdx ].getName() == statName );
-				statKeepers[ statIdx++ ].add( statVal );
-			} else
+			// else if ( StartsWith( line, "stat " ) ) {
+			// 	string dummy, statName;
+			// 	double statVal;
+			// 	istringstream istrm( line );
+			// 	istrm.exceptions( std::ios::failbit | std::ios::badbit );
+			// 	istrm >> dummy >> statName >> statVal;
+			// 	//cerr << "statName=" << statName << " statVal=" << statVal << endl;
+			// 	// if ( count == 1 )
+			// 	// 	statNames->push_back( boost::make_shared<string>( statName.c_str() ) );
+			// 	// else
+			// 	// 	chk( *( statNames->at( statIdx ) ) == statName );
+			// 	statVals.push_back( statVal );
+			// 	if ( count == 1 ) statKeepers.push_back( StatKeeper<>( statName ) );
+			// 	else chk( statKeepers[ statIdx ].getName() == statName );
+			// 	statKeepers[ statIdx++ ].add( statVal );
+			// }
+			else
 				 throw std::logic_error( string("unknown input line: ") + string( line ) );
 		}
 // *** read SNP locs
@@ -1793,6 +1932,17 @@ int sample_stats_main(int argc, char *argv[])
 			ForEach( nchroms_t thisSnpCount, derCounts ) globalAFS( ((double)thisSnpCount) / ((double)nsam), 1 );
 		}
 
+		nsnps_t n_under_10(0), n_10_to_40(0), n_over_40(0);
+		
+		ForEach( nchroms_t thisSnpCount, derCounts ) {
+			freq_t derFreq = ((double)thisSnpCount) / ((double)nsam);
+			freq_t ancFreq = 1.0 - derFreq;
+			freq_t minFreq = std::min( derFreq, ancFreq );
+			if ( minFreq < .1 ) ++n_under_10;
+			else if ( minFreq <= .4 ) ++n_10_to_40;
+			else ++n_over_40;
+		}
+
 		if ( !ldSeps.empty() ) {
 			size_t highestDistIdx = ldSeps.size();
 			for ( snp_id_t snp1 = 0; snp1 < trimmed_segsites; snp1++ ) {
@@ -1840,15 +1990,17 @@ int sample_stats_main(int argc, char *argv[])
 		
 		if ( count == 1 && !summaryOnly ) {
 //			fout << "pi\tss\tD\ttheta\tH\tnrecombLocs\tnrecombBegs\tnrecombEnds";
-			fout << "pi\tss\tD\ttheta\tH";
+			fout << "pi\tss\tssu10\tssu40\tsso40\tD\ttheta\tH";
 			if ( !perPopStats ) fout << "\tnucdiv";
 			else {
 				for ( size_t popNum = 0; popNum < popNames.size(); ++popNum )
 					 fout << "\tnucdiv_" << popNames[ popNum ];
 			}
 			if ( ld_use_cM ) fout << "\tregionLen_cM";
-			BOOST_FOREACH( const StatKeeper<>& sk, statKeepers )
-				fout << "\t" << sk.getName();
+			// BOOST_FOREACH( const StatKeeper<>& sk, statKeepers )
+			// 	fout << "\t" << sk.getName();
+			// for ( std::vector< StatKeeper<> >::const_iterator sk = statKeepers.begin(); sk != statKeepers.end(); ++sk )
+			// 	 fout << "\t" << sk->getName();
 
 			ForEach( const TreeEdgeSet& treeEdgeSet, treeEdgeSets ) {
 				treeEdgeSet.writeHeadings( fout );
@@ -1925,25 +2077,37 @@ int sample_stats_main(int argc, char *argv[])
 			dind_val = sumDer / sumAnc;
 		}
 
-		if ( !summaryOnly )
-			fout << pi << "\t" << trimmed_segsites << "\t" << tajd_val << "\t"
+		if ( !summaryOnly ) {
+			fout << pi << "\t" << trimmed_segsites << "\t" <<
+				 n_under_10 << "\t" << n_10_to_40 << "\t" << n_over_40 << "\t"
+					 << tajd_val << "\t"
 					 << th << "\t"  << h;
-		if ( !perPopStats ) fout << "\t" << Frac( pi, trimmed_segsites );
-		else {
-			for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) {
-				fout << "\t" << Frac( nucdiv(sampleStarts[popNum], sampleSizes[popNum], trimmed_segsites, trimmed_list), trimmed_segsites );
-			}
-		}
 
-		if ( ld_use_cM ) fout << "\t" << regionLen_cM;
+			if ( !perPopStats ) fout << "\t" << Frac( pi, trimmed_segsites );
+			else {
+				for ( size_t popNum = 0; popNum < popNames.size(); ++popNum ) {
+					fout << "\t" << Frac( nucdiv(sampleStarts[popNum], sampleSizes[popNum], trimmed_segsites, trimmed_list), trimmed_segsites );
+				}
+			}
+
+			if ( ld_use_cM ) fout << "\t" << regionLen_cM;
+		}
 // << "\t" << recombLocs.size() << "\t" << recombBegs.size() << "\t" << recombEnds.size();
 
+		Sim sim( nsam, trimmed_list, trimmed_segsites, trimmed_posit, derCounts );
+		ForEach( AStatsP aStat, aStats ) aStat->processSim( sim );
+
 		piStats.add( pi );
+		nucdivStats.add( Frac( pi, trimmed_segsites ) );
 		nsitesStats.add( static_cast< cosi_double >( trimmed_segsites ) );
 		dindStats.add( dind_val );
 
+		n_under_10_stats.add( static_cast< cosi_double >( n_under_10 ) );
+		n_10_to_40_stats.add( static_cast< cosi_double >( n_10_to_40 ) );
+		n_over_40_stats.add( static_cast< cosi_double >( n_over_40 ) );
+
 		if ( !summaryOnly ) {
-			ForEach( double statVal, statVals ) fout << "\t" << statVal;
+			//ForEach( double statVal, statVals ) fout << "\t" << statVal;
 
 			ForEach( const TreeEdgeSet& treeEdgeSet, treeEdgeSets ) treeEdgeSet.writeData( fout );
 		}
@@ -1990,9 +2154,11 @@ int sample_stats_main(int argc, char *argv[])
 			}
 
 			std::vector<acc_t>::const_iterator popPairIter = FSTs.begin();
-			for ( size_t popNum1 = 0; popNum1 < popNames.size(); ++popNum1 )
-				for ( size_t popNum2 = popNum1+1; popNum2 < popNames.size(); ++popNum2 )
-					fout << "\t" << acc::mean( *popPairIter++ );
+			if ( !summaryOnly ) {
+				for ( size_t popNum1 = 0; popNum1 < popNames.size(); ++popNum1 )
+					 for ( size_t popNum2 = popNum1+1; popNum2 < popNames.size(); ++popNum2 )
+							fout << "\t" << acc::mean( *popPairIter++ );
+			}
 		}
 		
 
@@ -2065,6 +2231,10 @@ int sample_stats_main(int argc, char *argv[])
 		if ( !summaryOnly ) fout << "\n";
 		
   }  // while( howmany-count++ )
+
+	} catch( std::logic_error const& e ) {
+		std::cerr << "logic error at count " << count << " : " << e.what() << "\n";
+	}
 	
 // * post-loop processing
 
@@ -2088,18 +2258,27 @@ int sample_stats_main(int argc, char *argv[])
 	}
 
 	cerr << "\n";
+
+	ForEach( AStatsP aStat, aStats ) aStat->writeSummaryStats();
+	
+	cerr << "header=" << headerLine << "\n";
 	cerr << "pi.mean=" << piStats.getMean() << " pi.std=" << piStats.getStd() << " pi.count=" << piStats.getNumVals() << "\n";
+	cerr << "nucdiv.mean=" << nucdivStats.getMean() << " nucdiv.std=" << nucdivStats.getStd() << " nucdiv.count=" << nucdivStats.getNumVals() << "\n";
 	cerr << "nsites.mean=" << nsitesStats.getMean() << " nsites.std=" << nsitesStats.getStd() << " nsites.count=" << nsitesStats.getNumVals() << "\n";
+
+	cerr << "n_under_10.mean=" << n_under_10_stats.getMean() << " n_under_10.std=" << n_under_10_stats.getStd() << " n_under_10.count=" << n_under_10_stats.getNumVals() << "\n";
+	cerr << "n_10_to_40.mean=" << n_10_to_40_stats.getMean() << " n_10_to_40.std=" << n_10_to_40_stats.getStd() << " n_10_to_40.count=" << n_10_to_40_stats.getNumVals() << "\n";
+	cerr << "n_over_40.mean=" << n_over_40_stats.getMean() << " n_over_40.std=" << n_over_40_stats.getStd() << " n_over_40.count=" << n_over_40_stats.getNumVals() << "\n";	
 	if ( dindLoc > 0 ) 
 		 cerr << "dind.mean=" << dindStats.getMean() << " dind.std=" << dindStats.getStd() << " dind.count=" << dindStats.getNumVals() << "\n";	
 	//PRINT2( statKeepers.size(), statNames->size() );
 	//cerr << "got " << statKeepers.size() << " stats." << endl;
-	BOOST_FOREACH( const StatKeeper<>& sk, statKeepers ) {
-		string sname = sk.getName();
-		cerr << sname << ".mean=" << sk.getMean() << " " << sname << ".std=" << sk.getStd() <<
-			" " << sname << ".count=" << sk.getNumVals() << "\n";
-	}
-	cerr << "\n";
+	// BOOST_FOREACH( const StatKeeper<>& sk, statKeepers ) {
+	// 	string sname = sk.getName();
+	// 	cerr << sname << ".mean=" << sk.getMean() << " " << sname << ".std=" << sk.getStd() <<
+	// 		" " << sname << ".count=" << sk.getNumVals() << "\n";
+	// }
+	// cerr << "\n";
 
 	free_cmatrix( list, nsam );
 	free( trimmed_list );
@@ -2220,11 +2399,11 @@ thetah( int nsam, int segsites, char **list)
 }
 
 
-int
-frequency( char allele,int site,int nsam,  char **list);
+// int
+// frequency( char allele,int site,int nsam,  char **list);
 
-int
-frequency( char allele,int site,nchroms_t bsam, nchroms_t nsam,  char **list);
+// int
+// frequency( char allele,int site,nchroms_t bsam, nchroms_t nsam,  char **list);
 
 
 void get_freqs( int site_i, int site_j, int nsam, char **list,

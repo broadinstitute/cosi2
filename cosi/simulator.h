@@ -3,9 +3,10 @@
 #ifndef __INCLUDE_COSI_SIMULATOR_H
 #define __INCLUDE_COSI_SIMULATOR_H
 #include <cstdio>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/arrproc2.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
-#include <cosi/cosirand.h>
 
 namespace cosi {
 
@@ -30,6 +31,9 @@ public:
 	 void sim_setRecomb( RecombP recomb_ ) { recomb = recomb_; }
 	 void sim_setCoalesce( CoalesceP coalesce_ );
 
+
+	 arrival2::ArrivalProcess< genid, arrival2::Stoch< RandGen, arrival2::Compound< arrival2::AnyProc > > > arrProcs;
+	 
 private:
 	 DemographyP demography;
 	 GenMapP genMap;
@@ -46,7 +50,7 @@ private:
 	 MutateP mutate;
 	 CoalesceP coalesce;
 
-	 prob_t sim_get_poisson_rate(void);
+	 prob_t sim_get_poisson_rate( genid gen );
 	 int sim_do_poisson (genid gen);
 	 bool_t sim_complete (void) const;
 	 gens_t sim_get_time_till_next_hist_event (genid gen);

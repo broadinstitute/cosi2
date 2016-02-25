@@ -19,6 +19,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
+#include <boost/optional/optional_io.hpp>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/hooks.h>
@@ -89,7 +90,7 @@ private:
 	 // Map from population to the frequency restriction in that population.
 	 pop2cond_map_t pop2cond;
 	 
-	 friend std::ostream& operator<<( ostream& s, const CondSnpDef& condSnpDef ) {
+	 friend std::ostream& operator<<( std::ostream& s, const CondSnpDef& condSnpDef ) {
 		 s << condSnpDef.loc << "/" << condSnpDef.pop2cond;
 		 return s; 
 	 }

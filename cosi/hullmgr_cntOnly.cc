@@ -45,8 +45,8 @@
 
 #include <boost/foreach.hpp>
 #include <boost/utility.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/hullmgr.h>
-#include <cosi/utils.h>
 
 
 namespace cosi {

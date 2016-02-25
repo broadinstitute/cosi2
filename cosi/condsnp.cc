@@ -17,8 +17,8 @@
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/assume_abstract.hpp>
-#include <cosi/utils.h>
-#include <cosi/generalmath.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/genmap.h>
 #include <cosi/mutlist.h>
 #include <cosi/demography.h>
@@ -208,7 +208,7 @@ bool CondSnpDef::sampleFreqsMatch( const std::map< popid, nchroms_t >& pop2Count
 	for ( pop2cond_map_t::const_iterator it = pop2cond.begin(); it != pop2cond.end(); it++ ) {
 //		using namespace util;
 //		PRINT( it->first );
-		if ( !( it->second( util::map_get( pop2Counts, it->first, 0 ) ) ) ) return false;
+		if ( !( it->second( util::map_get( pop2Counts, it->first, nchroms_t(0) ) ) ) ) return false;
 	}
 	return true;
 }

@@ -7,9 +7,10 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 #include <boost/random/geometric_distribution.hpp>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/arrproc2.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
-#include <cosi/cosirand.h>
 
 namespace cosi {
 
@@ -105,6 +106,12 @@ public:
 	 //      fraction of the total sum of these per-node probabilities.  
 	 //
 	 void gc_execute (genid gen, frac_t frac);
+
+	 typedef
+	 arrival2::ArrivalProcess< genid, arrival2::Stoch< RandGen, arrival2::Poisson< math::Const<>, double > > >
+	 geneconv_processes_type;
+
+	 boost::shared_ptr< geneconv_processes_type > createGeneConvProcesses();
 
 private:
 	 // Field: demography

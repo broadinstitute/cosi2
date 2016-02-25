@@ -10,6 +10,8 @@
  *
  */
 
+//#define COSI_DEV_PRINT
+
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
@@ -18,9 +20,11 @@
 #include <ios>
 #include <sstream>
 #include <algorithm>
+#include <iterator>
 #include <boost/make_shared.hpp>
 #include <boost/next_prior.hpp>
-#include <cosi/utils.h>
+#include <boost/exception/all.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/pop.h>
 #include <cosi/historical.h>
 #include <cosi/demography.h>
@@ -29,9 +33,14 @@
 #include <cosi/sweep1.h>
 #include <cosi/sweep2.h>
 #include <cosi/sweep3.h>
-#include <cosi/generalmath.h>
+//#include <cosi/generalmath.h>
+#include <cosi/basemodel.h>
+#include <cosi/msweep.h>
 
 namespace cosi {
+
+struct cosi_hist_event_error: virtual cosi_io_error {};
+typedef boost::error_info<struct errinfo_hist_err_detail_,std::string> errinfo_hist_err_detail;
 
 HistEvents::HistEvents( DemographyP demography_ ):
 	demography( demography_ ) { }
@@ -48,9 +57,12 @@ namespace histevents {
 class Event_PopSize: public HistEvents::Event {
 public:
 	 Event_PopSize( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, nchroms_t popsize_ ):
-		 Event( histEvents_, label_, gen_ ), pop( pop_ ), popsize( popsize_ ) { }
+		 Event( histEvents_, label_, gen_ ), pop( pop_ ), popsize( popsize_ ) {
+		 chkRep();
+	 }
 	 Event_PopSize( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
 		 is >> pop >> gen >> popsize;
+		 chkRep();
 	 }
 	 virtual ~Event_PopSize();
 
@@ -62,6 +74,9 @@ public:
 	 static const char *typeStr() { return "change_size"; }
 			
 	 virtual genid execute();
+	 virtual void addToBaseModel( BaseModel& ) const;
+
+	 virtual eventKind_t getEventKind() const { return E_POPSIZE; }
 
 private:
 	 // Field: pop
@@ -71,6 +86,12 @@ private:
 	 // Field: popsize
 	 // The new population size
 	 nchroms_t popsize;
+
+	 void chkRep() const {
+		 if ( popsize < nchroms_t(0) )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+															 << error_msg( "pop size negative" ) );
+	 }
 };  // class Event_PopSize
 
 // Class: Event_PopSizeExp
@@ -80,10 +101,12 @@ public:
 	 Event_PopSizeExp( HistEvents *histEvents_, const string& label_, genid gen_, popid pop_, nchroms_t popsize_,
 										 genid genBeg_, nchroms_t popSizeBeg_ ):
 		 Event( histEvents_, label_, gen_ ), pop( pop_ ) , popsize( popsize_ ), genBeg( genBeg_ ), popSizeBeg( popSizeBeg_ ) {
+		 PRINT6( pop, gen, genBeg, popsize, popSizeBeg, expansionRate );
 		 calcExpansionRate();
 	 }
 	 Event_PopSizeExp( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
 		 is >> pop >> gen >> genBeg >> popsize >> popSizeBeg;
+		 PRINT6( pop, gen, genBeg, popsize, popSizeBeg, expansionRate );
 		 calcExpansionRate();
 		 PRINT6( pop, gen, genBeg, popsize, popSizeBeg, expansionRate );
 	 }
@@ -94,9 +117,12 @@ public:
 	 // Historical events are specified in the parameter file by lines of the form
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
-	 static const char *typeStr() { return "exp_change_size"; }
+	 static const char *typeStr() { return "exp_change_size_orig"; }
 
 	 virtual genid execute();
+	 virtual void addToBaseModel( BaseModel& ) const;
+
+	 virtual eventKind_t getEventKind() const { return E_POPSIZEEXP; }	 
 
 	 // Const: STEP
 	 // By how many generations to step each time while we implement the exponential expansion?
@@ -124,7 +150,15 @@ private:
 	 // The expansion rate at each step
 	 gensInv_t expansionRate;
 
-	 void calcExpansionRate() { expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen ); }
+	 void calcExpansionRate() {
+		 if ( genBeg <= gen )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+															 << error_msg( "pop size expansion ends before it starts" ) );
+		 // if ( popSizeBeg >= popsize ) 
+		 // 		BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+		 // 													 << error_msg( "pop size expansion: size does not increase" ) );
+		 expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen );
+	 }
 
 };  // class Event_PopSizeExp 
 
@@ -154,8 +188,11 @@ public:
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
 	 static const char *typeStr() { return "exp_change_size2"; }
+	 static const char *typeStr2() { return "exp_change_size"; }
 
 	 virtual genid execute();
+	 virtual void addToBaseModel( BaseModel& ) const;
+	 virtual eventKind_t getEventKind() const { return E_POPSIZEEXP; }	 
 
 private:
 	 // Field: pop
@@ -182,7 +219,16 @@ private:
 	 int procName;
 	 std::string procNameStr;
 
-	 void calcExpansionRate() { expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen ); }
+	 void calcExpansionRate() {
+		 if ( genBeg <= gen )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+															 << error_msg( "pop size expansion ends before it starts" ) );
+		 // if ( popSizeBeg >= popsize ) 
+		 // 		BOOST_THROW_EXCEPTION( cosi_hist_event_error()
+		 // 													 << error_msg( "pop size expansion: size does not increase" ) );
+		 
+		 expansionRate = log( popSizeBeg / popsize ) / ( genBeg - gen );
+	 }
 
 };  // class Event_PopSizeExp2 
 
@@ -204,6 +250,8 @@ public:
 	 static const char *typeStr() { return "split"; }
 
 	 virtual genid execute();
+	 virtual eventKind_t getEventKind() const { return E_SPLIT; }	 
+	 virtual void addToBaseModel( BaseModel& ) const;
 			
 private:
 	 // Field: fromPop
@@ -234,8 +282,10 @@ public:
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
 	 static const char *typeStr() { return "migration_rate"; }
+	 virtual eventKind_t getEventKind() const { return E_MIGRATIONRATE; }	 
 
 	 virtual genid execute();
+	 virtual void addToBaseModel( BaseModel& baseModel ) const;
 			
 private:
 	 // Field: fromPop
@@ -267,8 +317,10 @@ public:
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
 	 static const char *typeStr() { return "bottleneck"; }
+	 virtual eventKind_t getEventKind() const { return E_BOTTLENECK; }	 
 
 	 virtual genid execute();
+	 virtual void addToBaseModel( BaseModel& ) const;
 			
 private:
 	 // Field: pop
@@ -295,10 +347,12 @@ public:
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
 	 static const char *typeStr() { return "admix"; }
+	 virtual eventKind_t getEventKind() const { return E_ADMIX; }	 
 
 	 virtual ~Event_Admix();
 
 	 virtual genid execute();
+	 void addToBaseModel( BaseModel& baseModel ) const;
 			
 private:
 	 // When does the 
@@ -332,6 +386,7 @@ public:
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
 	 static const char *typeStr() { return "sweep_orig"; }
+	 virtual eventKind_t getEventKind() const { return E_SWEEP; }	 
 				
 	 virtual ~Event_Sweep();
 
@@ -356,6 +411,51 @@ private:
 };  // class Event_Sweep
 
 
+// Class: Event_MSweep
+// A selective sweep .
+class Event_MSweep: public HistEvents::Event {
+public:
+	 Event_MSweep( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
+		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq;
+		 if ( !( final_sel_freq.getMin() && final_sel_freq.getMax() &&
+						 0. <= final_sel_freq.getMin() && final_sel_freq.getMin() <= 1. ) )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error() << error_msg( "invalid final freq range" ) );
+	 }
+
+	 // Method: typeStr
+	 // Return the string denoting this type of historical event in the <parameter file>.
+	 // Historical events are specified in the parameter file by lines of the form
+	 // pop_event <eventType> <eventParams>
+	 // This method specifies the eventType.
+	 static const char *typeStr() { return "sweep_mult"; }
+	 virtual eventKind_t getEventKind() const { return E_SWEEP; }
+
+	 virtual void addToBaseModel( BaseModel& m ) const {
+		 setSweepInfo( m, gen, selCoeff, selPos, sweepPop, final_sel_freq  );
+	 }
+				
+	 virtual ~Event_MSweep();
+
+	 virtual genid execute();
+			
+private:
+	 // Field: sweepPop
+	 // The population in which the sweep happens.
+	 popid sweepPop;
+
+	 // Field: selCoeff
+	 // The selection coefficient.
+	 double selCoeff;
+
+	 // Field: selPos
+	 // The location of the causal mutation.
+	 loc_t selPos;
+
+	 // Field: final_sel_freq
+	 // The frequency of the derived allele at the end of the sweep.
+	 util::ValRange<freq_t> final_sel_freq;
+};  // class Event_MSweep
+
 
 Event_PopSize::~Event_PopSize() {}
 Event_PopSizeExp::~Event_PopSizeExp() {}
@@ -365,18 +465,24 @@ Event_MigrationRate::~Event_MigrationRate() {}
 Event_Admix::~Event_Admix() {}
 Event_Split::~Event_Split() {}
 Event_Sweep::~Event_Sweep() {}
+Event_MSweep::~Event_MSweep() {}
 
 genid Event_PopSize::execute() {
 	getDemography()->dg_set_pop_size_by_name( gen, pop, popsize );
 	return gen;
 }
 
+void Event_PopSize::addToBaseModel( BaseModel& baseModel ) const {
+	baseModel.popInfos[ pop ].setSizeFrom( gen, popsize_float_t( popsize ) );
+}
+
+
 // Const: STEP
 // By how many generations to step each time while we implement the exponential expansion?
 const gens_t Event_PopSizeExp::STEP( getenv( "COSI_POPSIZEEXP_STEP" ) ? atof( getenv( "COSI_POPSIZEEXP_STEP" ) ) : 10.0 );
 
 genid Event_PopSizeExp::execute() {
-	PRINT( STEP );
+	//	PRINT( STEP );
 	getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( ToDouble( popsize + static_cast< popsize_float_t >( .5 ) ) ) );
 	genid oldgen = gen;
 	if ( gen < genBeg ) {
@@ -389,10 +495,29 @@ genid Event_PopSizeExp::execute() {
 	return oldgen;
 }
 
+void Event_PopSizeExp::addToBaseModel( BaseModel& baseModel ) const {
+	using namespace math;
+
+	BOOST_AUTO( &popInfo, baseModel.popInfos[ pop ] );
+	BOOST_AUTO( &pieces, popInfo.popSizeFn.getPieces() );
+
+	if ( cosi_fabs( popsize - popSizeBeg ) < popsize_float_t( 1. ) )
+		 popInfo.setSizeFrom( gen, fn_const<genid>( popsize ) );
+	else
+		 popInfo.setSizeFrom( gen, 
+													cval( popSizeBeg ) *
+													exp_(
+														cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
+														( ( cval( genBeg ) -
+																fn_x<genid,genid>() ) ) ) );
+	
+	if ( pieces.find( genBeg ) == pieces.end() )
+		 popInfo.setSizeFrom( genBeg, math::fn_const<genid>( popSizeBeg ) );
+}
+
 int Event_PopSizeExp2::procCount = 0;
 
 genid Event_PopSizeExp2::execute() {
-
 
 	genid oldgen = gen;
 	Pop *popPtr = getDemography()->dg_get_pop_by_name( pop );
@@ -459,6 +584,25 @@ genid Event_PopSizeExp2::execute() {
 	return oldgen;
 }
 
+void Event_PopSizeExp2::addToBaseModel( BaseModel& baseModel ) const {
+	using namespace math;
+
+	BOOST_AUTO( &popInfo, baseModel.popInfos[ pop ] );
+	BOOST_AUTO( &pieces, popInfo.popSizeFn.getPieces() );
+
+	if ( cosi_fabs( popsize - popSizeBeg ) < popsize_float_t( 1. ) )
+		 popInfo.setSizeFrom( gen, fn_const<genid>( popsize ) );
+	else
+		 popInfo.setSizeFrom( gen, 
+													cval( popSizeBeg ) *
+													exp_(
+														cval( log( popsize / popSizeBeg ) / ( genBeg - gen ) ) *
+														( ( cval( genBeg ) -
+																fn_x<genid,genid>() ) ) ) );
+	
+	if ( pieces.find( genBeg ) == pieces.end() )
+		 popInfo.setSizeFrom( genBeg, math::fn_const<genid>( popSizeBeg ) );
+}
 
 genid Event_Bottleneck::execute() {
   Pop* the_pop = getDemography()->dg_get_pop_by_name(pop);
@@ -485,8 +629,28 @@ genid Event_Bottleneck::execute() {
 	return gen;  // FIXME - should return t?
 }  // Event_Bottleneck::execute()
 
+void Event_Bottleneck::addToBaseModel( BaseModel& baseModel ) const {
+
+	BOOST_AUTO( &popInfo, baseModel.popInfos[ pop ] );
+	BOOST_AUTO( &pieces, popInfo.popSizeFn.getPieces() );
+	BOOST_AUTO( &pieces_coalRate, popInfo.coalRateFn.getPieces() );
+
+  popsize_float_t effective_N( - 1.0 / ( 2.0 * log (1.0 - inbreedingCoefficient)) );
+	pieces[ gen + gens_t( 1 ) ] = pieces.lower_bound( gen )->second;
+	pieces_coalRate[ gen + gens_t( 1 ) ] = pieces_coalRate.lower_bound( gen )->second;
+	popInfo.setSizeFrom( gen, math::fn_const< genid >( effective_N ) );
+
+	// baseModel.popInfos[ pop ].setSizeFrom( gen + gens_t(1),
+	// 																			 baseModel.popInfos[ pop ].popSizeFn
+	//baseModel.popInfos[ pop ].setSizeFrom( gen, effective_N );
+}
+
 genid Event_Sweep::execute() {
 	return getSweep()->sweep_execute( sweepPop, selCoeff, gen, selPos, final_sel_freq );
+}
+
+genid Event_MSweep::execute() {
+	return gen;
 }
 
 genid Event_MigrationRate::execute() {
@@ -498,6 +662,10 @@ genid Event_MigrationRate::execute() {
 	if ( !fromPopPtr->isInactive() && !toPopPtr->isInactive() )
 		 getMigrate()->migrate_set_rate (fromPop, toPop, rate);
 	return gen;
+}
+
+void Event_MigrationRate::addToBaseModel( BaseModel& baseModel ) const {
+	baseModel.popInfos[ fromPop ].setMigrRate( toPop, gen, rate );
 }
 
 genid Event_Admix::execute() {
@@ -520,6 +688,18 @@ genid Event_Admix::execute() {
 	return gen;
 }
 
+void Event_Admix::addToBaseModel( BaseModel& baseModel ) const {
+	BOOST_AUTO( &popInfo, baseModel.popInfos[ admixedPop ] );
+	BOOST_AUTO( &pieces, popInfo.migrRateTo[ sourcePop ].getPieces() );
+
+	if ( pieces.empty() )
+		 pieces[ ZERO_GEN ] =
+				math::fn_const< genid >( prob_per_chrom_per_gen_t( 0. ) );
+	
+	pieces.insert( std::make_pair( gen + gens_t( 1 ), pieces.lower_bound( gen )->second ) );
+	pieces.insert( std::make_pair( gen, math::fn_const< genid >( prob_per_chrom_per_gen_t( admixFrac ) ) ) );
+}
+
 genid Event_Split::execute() {
 	Pop *fromPopPtr = getDemography()->dg_get_pop_by_name( fromPop );
 	Pop *newPopPtr = getDemography()->dg_get_pop_by_name( newPop );
@@ -538,7 +718,47 @@ genid Event_Split::execute() {
 	return gen;
 }
 
+void Event_Split::addToBaseModel( BaseModel& baseModel ) const {
+	baseModel.popInfos[ newPop ].setMigrRate( fromPop, gen, prob_per_chrom_per_gen_t( 1.0 ) );
+}
+
+////////////////////////
+
 }  // namespace histevents
+
+void HistEvents::constructBaseModel( BaseModelP baseModel ) {
+	typedef std::pair<genid,EventP> pair_t;
+	BOOST_FOREACH( pair_t e, events )
+		 if ( e.second->getEventKind() != Event::E_BOTTLENECK &&
+					e.second->getEventKind() != Event::E_ADMIX )
+				e.second->addToBaseModel( *baseModel );
+
+	//std::cerr << "\nb4 bnecks:" << *baseModel << "\n";
+
+	BOOST_FOREACH( pair_t e, events )
+		 if ( e.second->getEventKind() == Event::E_BOTTLENECK ||
+					e.second->getEventKind() == Event::E_ADMIX )
+				e.second->addToBaseModel( *baseModel );
+
+	events.clear();
+#if 0
+	size_t prevSize;
+	do {
+		prevSize = events.size();
+
+		for( BOOST_AUTO( e, events.begin() ); e != events.end();  ++e )  {
+			if ( true || e->second->getEventKind() == Event::E_BOTTLENECK ||
+					 e->second->getEventKind() == Event::E_POPSIZEEXP ) {
+				events.erase( e );
+				break;
+			}
+		}
+		
+	} while ( events.size() < prevSize );
+#endif
+	
+	
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -601,7 +821,8 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 		is >> typestr;
 		if ( typestr == Event_PopSize::typeStr() ) event.reset( new Event_PopSize( this, is ) );
 		else if ( typestr == Event_PopSizeExp::typeStr() ) event.reset( new Event_PopSizeExp( this, is ) );
-		else if ( typestr == Event_PopSizeExp2::typeStr() ) event.reset( new Event_PopSizeExp2( this, is ) );
+		else if ( ( typestr == Event_PopSizeExp2::typeStr() ) ||
+							( typestr == Event_PopSizeExp2::typeStr2() ) ) event.reset( new Event_PopSizeExp2( this, is ) );
 		else if ( typestr == Event_Split::typeStr() ) event.reset( new Event_Split( this, is ) );
 		else if ( typestr == Event_MigrationRate::typeStr() ) event.reset( new Event_MigrationRate( this, is ) );
 		else if ( typestr == Event_Bottleneck::typeStr() ) event.reset( new Event_Bottleneck( this, is ) );
@@ -611,6 +832,7 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 		else if ( typestr == sweep1::Event_SweepOnePop_typeStr() ) event = sweep1::make_shared_Event_SweepOnePop( this, is );
 		else if ( typestr == sweep2::Event_SweepOnePop2_typeStr() ) event = sweep2::make_shared_Event_SweepOnePop2( this, is );
 		else if ( typestr == sweep3::Event_SweepOnePop3_typeStr() ) event = sweep3::make_shared_Event_SweepOnePop3( this, is );
+		else if (  typestr == Event_MSweep::typeStr() ) event.reset( new Event_MSweep( this, is ) );
 		else chkCond( False, "could not parse event %s", buffer );
 	} catch( ios::failure e ) {
 		chkCond( False, "could not parse event %s", buffer );
@@ -619,7 +841,7 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 }
 
 void HistEvents::addEvent( EventP event ) {
-	events.insert( make_pair( event->getGen(), event ) );
+	events.insert( std::make_pair( event->getGen(), event ) );
 }
 
 }  // namespace cosi

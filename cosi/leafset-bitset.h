@@ -14,9 +14,9 @@
 #include <string>
 #include <boost/scoped_array.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <cosi/general/utils.h>
+#include <cosi/general/mempool.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
-#include <cosi/mempool.h>
 
 namespace cosi {
 

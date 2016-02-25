@@ -9,6 +9,10 @@
 
 void calc_Fst_main( int numReps, int NPOPS,
 										int excludePopIdx,
+										void (*get_coal_data_from_cosi)( coal_data *, int /* irep */, int /* ipop */ ) ) ;
+
+void calc_Fst_main( int numReps, int NPOPS,
+										int excludePopIdx,
 										void (*get_coal_data_from_cosi)( coal_data *, int /* irep */, int /* ipop */ ) ) {
     // char outfilename[264];
     // char basefile[264], filebase[264];
@@ -21,14 +25,14 @@ void calc_Fst_main( int numReps, int NPOPS,
 	int NPOPPAIRS = NPOPS_adj * ( NPOPS_adj - 1 ) / 2;
 	
 	coal_data data;
-    int nsnp;
+    int nsnp = 0;
     int irep, ipop, jpop, isnp, isamp, ipopPair;
     int ni, nj;
-    int nai[2], naj[2], na_both[2];
+    int nai[2], naj[2];
     double fst_total;
     int *nall1[NPOPS+1], *nall2[NPOPS+1];
     FILE *outf=NULL;
-    double msp, msg, p[2], nc, num, pmean, nic, njc, fwh, denom;
+    double msp, msg, p[2], nc, num, pmean, nic, njc, denom;
   	double fst_vals[NPOPS+1][NPOPS+1], fst_numvals[NPOPS+1][NPOPS+1];
   	double fst_ave[NPOPPAIRS];
   	double sumsquaredif[NPOPPAIRS]; //for calculating variance
@@ -112,8 +116,8 @@ void calc_Fst_main( int numReps, int NPOPS,
 					if (nall1[jpop] == NULL) {continue;}
 					naj[0] = nall1[jpop][isnp];
 					naj[1] = nall2[jpop][isnp];
-					na_both[0] = nai[0] + naj[0];
-					na_both[1] = nai[1] + naj[1];
+					// na_both[0] = nai[0] + naj[0];
+					// na_both[1] = nai[1] + naj[1];
 					nj = naj[0] + naj[1];
 					p[1] = (double) naj[0] / nj;
 					if ((nai[0] == 0 && naj[0] == 0) || (nai[1] == 0 && naj[1] == 0)) {continue;}
@@ -128,11 +132,11 @@ void calc_Fst_main( int numReps, int NPOPS,
 					  	msg = (ni * p[0] * (1. - p[0]) + nj * p[1] * (1. - p[1])) / (ni - 1 + nj - 1);
 					  	num = msp - msg;
 					  	denom = msp + (nc - 1) * msg;
-					  	fwh = -99.;
+//					  	fwh = -99.;
 					  	if (denom != 0) {
 					    	fst_vals[ipop][jpop] += (num/denom);
 					    	fst_numvals[ipop][jpop]++;
-					    	fwh = num / denom; 
+//					    	fwh = num / denom; 
 					  	} // end if denom != 0
 					}
 	      		} // jpop

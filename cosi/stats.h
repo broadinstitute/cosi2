@@ -26,8 +26,8 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
 #include <cosi/hooks.h>
 
 namespace cosi {

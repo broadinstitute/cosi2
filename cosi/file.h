@@ -4,11 +4,12 @@
 #include <cstdio>
 #include <string>
 #include <boost/filesystem.hpp>
+#include <cosi/general/math/generalmath.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/geneconversion.h>
-#include <cosi/generalmath.h>
-#include <cosi/cosirand.h>
+#include <cosi/basemodel.h>
 
 namespace cosi {
 
@@ -36,6 +37,7 @@ public:
 	 len_bp_int_t getGeneConversionMinTractLength() const { return geneConversionMinTractLength; }
 	 GeneConversion::GCModel getGeneConversionModel() const { return geneConversionModel; }
 	 HistEventsP getHistEvents() const { return histEvents; }
+	 BaseModelP getBaseModel() const { return baseModel; }
 	 bool_t getInfSites() const { return infSites; }
 
 //	 void setPrintSeed( bool_t printSeed_ ) { printSeed = printSeed_; }
@@ -87,6 +89,10 @@ private:
 	 // Field: pop2sizeTraj
 	 // Map from pop to trajectory specification for that pop.
 	 pop2sizeTraj_t pop2sizeTraj;
+
+	 // Field: baseModel
+	 // The demographic model, expressed in terms of basic primitives.
+	 BaseModelP baseModel;
 
 	 void init();
 	 int file_get_data (FILE * fileptr, FILE *);

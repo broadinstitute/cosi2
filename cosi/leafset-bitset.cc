@@ -8,7 +8,7 @@
 #include <cassert>
 #include <sstream>
 #include <boost/scoped_array.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 #include <cosi/leafset-bitset.h>
 
 namespace cosi {

@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <string>
 #include <cassert>
-#include <boost/typeof/std/utility.hpp>
 #include <boost/typeof/std/vector.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/accumulators/framework/accumulator_set.hpp>
@@ -25,8 +24,9 @@
 #include <boost/accumulators/statistics/covariance.hpp>
 #include <boost/accumulators/statistics/variates/covariate.hpp>
 #include <boost/accumulators/statistics/extended_p_square_quantile.hpp>
-#include <cosi/typedval.h>
-#include <cosi/generalmath.h>
+#include <boost/core/demangle.hpp>
+#include <cosi/general/typedval.h>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/coalrate.h>
 
 namespace cosi {
@@ -250,9 +250,10 @@ void test_funcs2() {
 	BOOST_AUTO( f, ( f_const_7 * ( f_x - f_const_3 ) ) );
 	
 	BOOST_AUTO( e, exp_( f ) );
-	
 	BOOST_AUTO( i, indefiniteIntegral( e ) );
+	PRINT3( f, e, i );
 	
+#if 0
 	
 	typedef BOOST_TYPEOF( e ) e_type;
 	
@@ -262,7 +263,7 @@ void test_funcs2() {
 	PRINT( e );
 	PRINT(( boost::is_same< SpecType< r_d >::type, Const<> >::type::value ));
 	PRINT( i );
-
+#endif
 	//PRINT( typeid( e_spec ).name() );
 
 //	typedef result_of_differentiate<double,double, SpecType<   >::spec_type s_t;
@@ -272,5 +273,41 @@ void test_funcs2() {
 
 int main( int /*argc*/, char ** /*argv */ ) {
 	cosi::test_funcs2();
+
+	using namespace cosi::math;
+
+	typedef double genid;
+	typedef double popsize_float_t;
+
+	Function< genid, popsize_float_t, Const<> > c_m1( -1. );
+	Function< genid, popsize_float_t, Const<> > c_2( 2. );
+	Function< genid, popsize_float_t, Const<> > c_3( 3. );
+	Function< genid, popsize_float_t, X_To<1> > c_x;
+
+//	BOOST_AUTO( f0, exp_( c_2 * ( c_3 - c_x ) ) );
+	BOOST_AUTO( f0, c_3 * exp_( c_x ) );
+	PRINT( f0 );
+	BOOST_AUTO( f, fn_any( cval(1.0) / f0  ) );
+	PRINT( f );
+	PRINT( indefiniteIntegral( f ) );
+
+	std::map< genid, Function< genid, popsize_float_t, Any<> > > v;
+	v.insert( std::make_pair( 0., f ) );
+	v.insert( std::make_pair(  1., fn_any( Function< genid, popsize_float_t, Const<> >( 239.0 ) ) ) );
+	Function< genid, popsize_float_t, Piecewise< Any<> > > pw( v );
+	PRINT( pw );
+	PRINT( indefiniteIntegral( pw ) );
+
+	BOOST_AUTO( g, exp_( c_m1 * f ) );
+	PRINT( g );
+
+	BOOST_AUTO( h, exp_( c_2 * c_x ) );
+	PRINT( h );
+
+	using boost::core::demangle;
+	
+	PRINT( demangle( typeid( h ).name() ) );
+	//PRINT( indefiniteIntegral(g) );
+	
 	return EXIT_SUCCESS;
 }

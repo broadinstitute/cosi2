@@ -6,9 +6,9 @@
 
 #include <string>
 #include <boost/optional.hpp>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/coalescent.h>
 #include <cosi/output.h>
-#include <cosi/cosirand.h>
 #include <cosi/condsnp.h>
 
 namespace cosi {
@@ -70,7 +70,7 @@ private:
 
 	 // Field: outputMutContextsFor
 	 // Mutations for which to output the context
-	 vector< loc_bp_int_t > outputMutContextsFor;
+	 std::vector< loc_bp_int_t > outputMutContextsFor;
 
 	 // Field: randSeed
 	 // Random seed to be used.
@@ -138,6 +138,10 @@ private:
 	 // ** Field: customStatsExcludePop
 	 // Whether to exclude a given pop from custom stats output
 	 popid customStatsExcludePop;
+
+	 // ** Field: trajOnly
+	 // Whether to only simulate trajectories and output present-day freqs
+	 bool trajOnly;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

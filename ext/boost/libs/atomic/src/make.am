@@ -1,0 +1,5 @@
+lib_LTLIBRARIES += libcosiatomic.la
+AT=$(BOOST_DIR)/libs/atomic/src
+libcosiatomic_la_SOURCES = $(AT)/lockpool.cpp
+libcosiatomic_la_CXXFLAGS = $(AM_CXXFLAGS)
+

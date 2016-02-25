@@ -8,8 +8,8 @@
 #define COSI_INCLUDE_COALRATE_H
 
 #include <boost/call_traits.hpp>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/defs.h>
-#include <cosi/generalmath.h>
 
 namespace cosi {
 
@@ -51,7 +51,7 @@ public:
 		 return basePopSize * ( epsilon / (epsilon + (1 - epsilon) * exp(sel_coeff*(t + end_shift - tend))) );
 	 }
 
-   friend ostream& operator<<( ostream& s, const Function& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
 		 s << "SweepPopSizeTraj[basePopSize=" << f.basePopSize << ", sel_coeff=" << f.sel_coeff <<
 				", epsilon=" << f.epsilon << ", end_shift=" << f.end_shift << ", tend=" << f.tend << "]";
 		 return s;
@@ -90,7 +90,7 @@ public:
 					( epsilon / (epsilon + (1 - epsilon) * exp(sel_coeff*(t + end_shift - tend))) ) );
 	 }
 	 
-   friend ostream& operator<<( ostream& s, const Function& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
 		 s << "SweepPopSizeComplementTraj[basePopSize=" << f.basePopSize << ", sel_coeff=" << f.sel_coeff <<
 				", epsilon=" << f.epsilon << ", end_shift=" << f.end_shift << ", tend=" << f.tend << "]";
 		 return s;
@@ -145,7 +145,7 @@ public:
 		 
 	 }
 	 
-   friend ostream& operator<<( ostream& s, const Function& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
 		 s << "SweepPopRateIntegral[basePopSize=" << f.basePopSize << ", selCoeff=" << f.selCoeff <<
 				", epsilon=" << f.epsilon << ", end_shift=" << f.end_shift << ", tend=" << f.tend << "]";
 		 return s;
@@ -212,7 +212,7 @@ public:
 		 
 	 }
 	 
-   friend ostream& operator<<( ostream& s, const Function& f ) {
+   friend std::ostream& operator<<( std::ostream& s, const Function& f ) {
 		 s << "SweepPopRateComplementIntegral[basePopSize=" << f.basePopSize << ", selCoeff=" << f.selCoeff <<
 				", epsilon=" << f.epsilon << ", end_shift=" << f.end_shift << ", tend=" << f.tend << "]";
 		 return s;

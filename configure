@@ -662,6 +662,7 @@ ROOTLIBDIR
 ROOTCINT
 ROOTEXEC
 ROOTCONF
+WARNFLAGS
 CXX11_CXXFLAGS
 CXXCPP
 am__fastdepCXX_FALSE
@@ -15869,6 +15870,218 @@ $as_echo "$ac_res" >&6; }
 $as_echo "$as_me: C++11 features not supported, disabling corresponding compiler flags." >&6;}
   fi
 
+
+#AX_CXXFLAGS_WARN_ALL([AM_CXXFLAGS])
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -Werror" >&5
+$as_echo_n "checking whether C++ compiler accepts -Werror... " >&6; }
+if ${ax_cv_check_cxxflags___Werror+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  -Werror"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_check_cxxflags___Werror=yes
+else
+  ax_cv_check_cxxflags___Werror=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags___Werror" >&5
+$as_echo "$ax_cv_check_cxxflags___Werror" >&6; }
+if test "x$ax_cv_check_cxxflags___Werror" = xyes; then :
+  WARNFLAGS="${WARNFLAGS} -Werror"
+else
+  :
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -Wall" >&5
+$as_echo_n "checking whether C++ compiler accepts -Wall... " >&6; }
+if ${ax_cv_check_cxxflags___Wall+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  -Wall"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_check_cxxflags___Wall=yes
+else
+  ax_cv_check_cxxflags___Wall=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags___Wall" >&5
+$as_echo "$ax_cv_check_cxxflags___Wall" >&6; }
+if test "x$ax_cv_check_cxxflags___Wall" = xyes; then :
+  WARNFLAGS="${WARNFLAGS} -Wall"
+else
+  :
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -Wextra" >&5
+$as_echo_n "checking whether C++ compiler accepts -Wextra... " >&6; }
+if ${ax_cv_check_cxxflags___Wextra+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  -Wextra"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_check_cxxflags___Wextra=yes
+else
+  ax_cv_check_cxxflags___Wextra=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags___Wextra" >&5
+$as_echo "$ax_cv_check_cxxflags___Wextra" >&6; }
+if test "x$ax_cv_check_cxxflags___Wextra" = xyes; then :
+  WARNFLAGS="${WARNFLAGS} -Wextra"
+else
+  :
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -Wno-error" >&5
+$as_echo_n "checking whether C++ compiler accepts -Wno-error... " >&6; }
+if ${ax_cv_check_cxxflags___Wno_error+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  -Wno-error"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_check_cxxflags___Wno_error=yes
+else
+  ax_cv_check_cxxflags___Wno_error=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags___Wno_error" >&5
+$as_echo "$ax_cv_check_cxxflags___Wno_error" >&6; }
+if test "x$ax_cv_check_cxxflags___Wno_error" = xyes; then :
+  BOOST_CXXFLAGS="${BOOST_CXXFLAGS} -Wno-error"
+else
+  :
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -Wdouble-promotion" >&5
+$as_echo_n "checking whether C++ compiler accepts -Wdouble-promotion... " >&6; }
+if ${ax_cv_check_cxxflags___Wdouble_promotion+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  -Wdouble-promotion"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_check_cxxflags___Wdouble_promotion=yes
+else
+  ax_cv_check_cxxflags___Wdouble_promotion=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags___Wdouble_promotion" >&5
+$as_echo "$ax_cv_check_cxxflags___Wdouble_promotion" >&6; }
+if test "x$ax_cv_check_cxxflags___Wdouble_promotion" = xyes; then :
+  WARNFLAGS="${WARNFLAGS} -Wdouble-promotion"
+else
+  :
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self" >&5
+$as_echo_n "checking whether C++ compiler accepts --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self... " >&6; }
+if ${ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self=yes
+else
+  ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self" >&5
+$as_echo "$ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self" >&6; }
+if test "x$ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self" = xyes; then :
+  WARNFLAGS="${WARNFLAGS} --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self"
+else
+  :
+fi
 
 
 #

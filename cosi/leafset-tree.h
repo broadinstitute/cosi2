@@ -15,8 +15,8 @@
 #include <stack>
 #include <boost/intrusive_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
 
 namespace cosi {
 namespace leafset_tree {
@@ -107,6 +107,9 @@ inline leafset_p leafset_union( leafset_p leafset1, leafset_p leafset2 ) {
 	return new leafset_t( leafset1, leafset2 );
 }
 
+leafset_p make_range_leafset( leaf_id_t fromLeaf, leaf_id_t toLeaf );
+
+
 bool leafset_equal( leafset_p leafset1, leafset_p leafset2 );
 
 leafset_p leafset_intersection( leafset_p leafset1, leafset_p leafset2 );
@@ -149,24 +152,26 @@ void leafset_get_leaves( leafset_p leafset, OutputIter result ) {
 	}
 }
 
-#define COSI_FOR_LEAFSET(leafset,leaf_var,body) do {	\
-		std::stack<const leafset_t *> s;									\
-		s.push( leafset.get() );													\
-		while( !s.empty() ) {															\
-			const leafset_t *p = s.top();										\
-			s.pop();																				\
-			if ( p->leafId != NULL_LEAF_ID ) {							\
-				leaf_id_t leaf_var = p->leafId;								\
-				{ body; }																			\
-			} else {																				\
-				s.push( p->childA.get() );										\
-				s.push( p->childB.get() );										\
-			}																								\
-		}																									\
+#define COSI_FOR_LEAFSET(leafset,leaf_var,body) do {	  \
+	  if ( !leafset_is_empty( leafset ) ) {               \
+		  std::stack<const leafset_t *> s;									\
+		  s.push( leafset.get() );													\
+		  while( !s.empty() ) {															\
+			  const leafset_t *p = s.top();										\
+			  s.pop();																				\
+			  if ( p->leafId != NULL_LEAF_ID ) {							\
+		  		leaf_id_t leaf_var = p->leafId;								\
+				 { body; }																			\
+			  } else {																				\
+				  s.push( p->childA.get() );										\
+				  s.push( p->childB.get() );										\
+			  }  																							\
+		  }  /* while( !s.empty() ) */											\
+	  }  /* if leafset nonempty */										    \
   } while(0)
 
 
-ostream& operator<<( std::ostream& s, leafset_p leafset );
+std::ostream& operator<<( std::ostream& s, leafset_p leafset );
 
 } // namespace leafset_tree
 
