@@ -1,5 +1,4 @@
 /* $Id: simulator.c,v 1.3 2011/05/04 15:46:19 sfs Exp $ */
-
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
@@ -44,6 +43,23 @@ Simulator::Simulator( DemographyP demography_, GenMapP genMap_ ):
 genid
 Simulator::sim_execute (void) 
 {
+	if ( getenv( "COSI_NEWSIM" ) ) {
+		genid INF(1e30);
+		genid gen( 0. );
+		while( !demography->dg_done_coalescent() ) {
+			genid nextEvtTime = nextEventTime( arrProcs, gen, INF, *getRandGen() );
+			// std::cerr << "gen=" << gen << " nextEvt=" << nextEvtTime
+			// 					<< "nnodes1=" << demography->dg_get_pop_by_name( popid( 1 ) )->pop_get_num_nodes()
+			// 					<< "nnodes2=" << demography->dg_get_pop_by_name( popid( 2 ) )->pop_get_num_nodes() <<
+			// 	 "\n";
+			if ( nextEvtTime >= INF ) break;
+
+			executeNextEvent( arrProcs, nextEvtTime, *getRandGen() );
+			gen = nextEvtTime;
+		}
+		return gen;
+	}
+	
 	genid gen = ZERO_GEN;
 	gens_t historical_event_time;
 	gens_t poisson_event_time;	
@@ -58,9 +74,12 @@ Simulator::sim_execute (void)
 	  
 #ifdef COSI_DEV_PRINT
 			PRINT7( gen, recombination_rate, coalesce_rate, migrate_rate, geneconv_rate, poisson_event_time, historical_event_time );
-			for ( int i = 0; i < demography->dg_get_num_pops(); i++ )
-				 std::cerr << "|" << i << " " << demography->dg_get_pop_name_by_index( i ) << " " << demography->dg_get_pop_size_by_index( i ) << " " << demography->dg_get_pop_by_index( i )->pop_get_num_nodes() ;
-			std::cerr << "\n";
+		 if ( !cosi::util::noDbgPrint ) {
+
+			 for ( int i = 0; i < demography->dg_get_num_pops(); i++ )
+					std::cerr << "|" << i << " " << demography->dg_get_pop_name_by_index( i ) << " " << demography->dg_get_pop_size_by_index( i ) << " " << demography->dg_get_pop_by_index( i )->pop_get_num_nodes() ;
+			 std::cerr << "\n";
+		 }
 #endif
 
 	  if ( is_null( historical_event_time )
@@ -101,7 +120,7 @@ Simulator::sim_get_time_till_next_hist_event (genid gen)
 gens_t
 Simulator::sim_get_time_till_next_pois_event (genid gen, gens_t maxWaitTime) 
 {
-	gens_t time_till_homog_poisson = gens_t( poisson_get_next (sim_get_poisson_rate()) );
+	gens_t time_till_homog_poisson = gens_t( poisson_get_next (sim_get_poisson_rate( gen )) );
 	gens_t waitTimeBound = time_till_homog_poisson;
 	if ( !is_null( maxWaitTime) && maxWaitTime < time_till_homog_poisson )
 		 waitTimeBound = maxWaitTime;
@@ -126,10 +145,10 @@ Simulator::sim_get_time_till_next_pois_event (genid gen, gens_t maxWaitTime)
 }
 
 prob_t
-Simulator::sim_get_poisson_rate(void)
+Simulator::sim_get_poisson_rate( genid gen )
 {
 	coalesce_rate = coalesce->coalesce_get_rate();
-	migrate_rate = ToDouble( migrate->migrate_get_all_nodes_rate() );
+	migrate_rate = ToDouble( migrate->migrate_get_all_nodes_rate( gen ) );
 	recombination_rate = ToDouble( recomb->getAllNodesRecombRate() * genMap->getRegionRecombRateAbs() );
 	geneconv_rate = ToDouble( geneConversion->getAllNodesGeneConvRate() * genMap->getRegionRecombRateAbs() );
 

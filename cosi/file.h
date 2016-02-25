@@ -4,10 +4,12 @@
 #include <cstdio>
 #include <string>
 #include <boost/filesystem.hpp>
+#include <cosi/general/math/generalmath.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/geneconversion.h>
-#include <cosi/generalmath.h>
+#include <cosi/basemodel.h>
 
 namespace cosi {
 
@@ -18,18 +20,16 @@ namespace cosi {
 // as needed to construct a programmatic representation of the demographic model
 // to be simulated, and stores some parameters inside itself for later retrieval.
 //
-class ParamFileReader {
+class ParamFileReader: public HasRandGen {
 public:
-	 ParamFileReader( DemographyP demography_ );
-
-	 
+	 ParamFileReader( DemographyP demography_, RandGenP randGen_ );
 
 	 // MethodP: file_read
 	 // Parse the specified parameter file.
 	 void file_read( boost::filesystem::path filename, FILE *segfp );
 	 
-	 GenMapP getGenMap() const { return genMap; }
-	 unsigned long getRandomSeed() const { return rseed; }
+	 //unsigned long getRandomSeed() const { return rseed; }
+	 //RandGenP getRandGen() const { return randGen; }
 	 len_bp_int_t getLength() const { return length; }
 	 prob_per_bp_per_gen_t getMu() const { return mu; }
 	 factor_t getGeneConv2RecombRateRatio() const { return geneConv2RecombRateRatio; }
@@ -37,14 +37,16 @@ public:
 	 len_bp_int_t getGeneConversionMinTractLength() const { return geneConversionMinTractLength; }
 	 GeneConversion::GCModel getGeneConversionModel() const { return geneConversionModel; }
 	 HistEventsP getHistEvents() const { return histEvents; }
+	 BaseModelP getBaseModel() const { return baseModel; }
 	 bool_t getInfSites() const { return infSites; }
 
-	 void setPrintSeed( bool_t printSeed_ ) { printSeed = printSeed_; }
-	 void set_genMapShift( ploc_bp_diff_t genMapShift_ ) { this->genMapShift = genMapShift_; }
+//	 void setPrintSeed( bool_t printSeed_ ) { printSeed = printSeed_; }
 	 void set_recombfileFN( filename_t recombfileFN_ ) { this->recombfileFN = recombfileFN_; }
 
-	 unsigned long getRandSeed() const { return rseed; }
-	 bool_t isSeeded() const { return seeded; }
+	 filename_t get_recombfileFN() const { return this->recombfileFN; }
+
+	 //unsigned long getRandSeed() const { return rseed; }
+//	 bool_t isSeeded() const { return seeded; }
 
 	 popid getIgnoreRecombsInPop() const { return this->ignoreRecombsInPop; }
 
@@ -62,7 +64,7 @@ private:
 
 	 // Field: seeded
 	 // Whether a random seed has been specified in the parameter file.
-	 bool_t seeded;
+//	 bool_t seeded;
 
 	 
 	 int popsize;
@@ -74,19 +76,11 @@ private:
 	 len_bp_int_t geneConversionMeanTractLength;
 	 len_bp_int_t geneConversionMinTractLength;
 	 GeneConversion::GCModel geneConversionModel;
-	 // Private field: rseed
-	 // The random seed, if specified in the parameter file. 
-	 unsigned long rseed;
-	 GenMapP genMap;
 	 HistEventsP histEvents;
 	 bool_t infSites;
-	 bool_t printSeed;
+//	 bool_t printSeed;
 	 popid ignoreRecombsInPop;
 	 boost::filesystem::path paramFileName;
-
-	 // Field: genMapShift
-	 // A shift applied to the genetic map: added to all physical positions in the genetic map file.
-	 ploc_bp_diff_t genMapShift;
 
 	 // Field: recombfileFN
 	 // If non-empty, overrides the recomb file specified in the paramfile
@@ -96,13 +90,18 @@ private:
 	 // Map from pop to trajectory specification for that pop.
 	 pop2sizeTraj_t pop2sizeTraj;
 
+	 // Field: baseModel
+	 // The demographic model, expressed in terms of basic primitives.
+	 BaseModelP baseModel;
+
 	 void init();
 	 int file_get_data (FILE * fileptr, FILE *);
 	 int file_proc_buff(char * var, char* buffer, FILE*);
 	 int file_killwhitespace(FILE * fileptr);
-	 void file_proc_recombfile (const char*  filename);
 	 void file_exit(const char* , const char*);
 	 void file_error_nonfatal(const char* , const char*);
+
+	 void sample_distribution_values( char *buf );
 };
 
 typedef boost::shared_ptr<ParamFileReader> ParamFileReaderP;

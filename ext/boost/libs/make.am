@@ -1,0 +1,24 @@
+BOOST_DIR=$(srcdir)/ext/boost
+
+BOOST_SMART_PTR_LIBS = $(builddir)/libcosismart_ptr.la
+BOOST_PROGRAM_OPTIONS_LIBS = $(builddir)/libcosiprogopt.la
+BOOST_REGEX_LIBS = $(builddir)/libcosiregex.la
+BOOST_FILESYSTEM_LIBS = $(builddir)/libcosifilesystem.la
+BOOST_SYSTEM_LIBS = $(builddir)/libcosisystem.la
+BOOST_CHRONO_LIBS = $(builddir)/libcosichrono.la
+BOOST_TIMER_LIBS = $(builddir)/libcositimer.la
+BOOST_SERIALIZATION_LIBS = $(builddir)/libcosiserialization.la
+BOOST_ATOMIC_LIBS = $(builddir)/libcosiatomic.la
+BOOST_RANDOM_LIBS = $(builddir)/libcosirandom.la
+
+include $(srcdir)/ext/boost/libs/smart_ptr/src/make.am
+include $(srcdir)/ext/boost/libs/program_options/src/make.am
+include $(srcdir)/ext/boost/libs/regex/src/make.am
+include $(srcdir)/ext/boost/libs/filesystem/src/make.am
+include $(srcdir)/ext/boost/libs/system/src/make.am
+include $(srcdir)/ext/boost/libs/chrono/src/make.am
+include $(srcdir)/ext/boost/libs/timer/src/make.am
+include $(srcdir)/ext/boost/libs/serialization/src/make.am
+include $(srcdir)/ext/boost/libs/atomic/src/make.am
+include $(srcdir)/ext/boost/libs/random/src/make.am
+

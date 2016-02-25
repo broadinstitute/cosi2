@@ -14,9 +14,10 @@
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/range/algorithm/copy.hpp>
+#include <boost/foreach.hpp>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
-#include <cosi/cosirand.h>
 #include <cosi/hooks.h>
 #include <cosi/leafset.h>
 #include <cosi/nodefwd.h>
@@ -182,7 +183,20 @@ public:
 			 });
 		 boost::copy( counts, it );
 	 }
-	 
+
+	 typedef struct populate_request {
+			popid popname;
+			int members;
+			genid gen;
+	 } populate_request_t;
+
+	 populate_request_t *find_pop_request( popid popname ) {
+		 BOOST_FOREACH( populate_request_t& pr, populate_requests )
+				if ( pr.popname == popname ) return &(pr);
+		 BOOST_THROW_EXCEPTION( cosi_error() << error_msg( "unknown pop request" ) );
+	 }
+
+	 vector< leafset_p > const& get_pop2leaves() const { return pop2leaves; }
 	 
 private:
 	 // Field: pops
@@ -198,11 +212,9 @@ private:
 	 // For each pop, the size of the present-day sample from that pop.
 	 vector< nchroms_t > sampleSizes;
 
-#ifdef COSI_EHH	 
 	 // Field: pop2leaves
 	 // For each pop, a leafset containing the leaves in that pop.
 	 vector< leafset_p > pop2leaves;
-#endif
 
 	 // Field: leaf2popName
 	 // For each leaf, the name of the pop from which that leaf comes
@@ -216,12 +228,6 @@ private:
 
 	 Pop *dg_get_pop_from_list(int index) const;
 
-	 typedef struct populate_request {
-			popid popname;
-			int members;
-			genid gen;
-	 } populate_request_t;
-	 
 	 vector<populate_request_t> populate_requests;
 
 	 vector<pop_idx_t> popname2idx;

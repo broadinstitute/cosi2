@@ -1,0 +1,69 @@
+# sample file
+# comments have #s in front of them
+# newlines don't matter.
+
+#-- options that could be uncommented
+#infinite_sites yes
+#random_seed 12345   # Specifies a particular random number seed
+#number_mutation_sites 2000  # Fixed number of mutation sites
+
+# in bp.
+length 250000
+
+# per bp per generation
+mutation_rate 1.5e-8
+
+recomb_file model.test
+#gene_conversion_rate 4.5e-9
+
+gene_conversion_relative_rate 2.3
+
+# population info
+
+pop_define 1 european
+#pop_define 3 african-american
+pop_define 4 asian
+pop_define 5 african
+
+#european
+pop_size 1 100000
+sample_size 1 100
+
+#african american
+#pop_size 3 100000
+#sample_size 3 100
+
+#asian
+pop_size 4 100000
+sample_size 4 100
+
+#african
+pop_size 5 100000
+sample_size 5 100
+
+pop_event migration_rate "afr->eur migration" 5 1 0. .000032
+pop_event migration_rate "eur->afr migration" 1 5 0 .000032
+pop_event migration_rate "afr->as migration" 5 4 0. .000008
+pop_event migration_rate "as->afr migration" 4 5 0 .000008
+#pop_event admix "african american admix" 3 1 5. .2
+#pop_event split "african to aa" 5 3 7.0
+
+pop_event change_size "agriculture - african" 5 200 24000
+pop_event change_size "agriculture - european" 1 350 7700
+pop_event change_size "agriculture - asian" 4 400 7700
+pop_event bottleneck "african bottleneck" 5 1997 .008
+pop_event bottleneck "asian bottleneck" 4 1998 .067
+pop_event bottleneck "european bottleneck" 1 1999 .02
+
+pop_event split "asian and european split" 1 4 2000
+pop_event migration_rate "afr->eur migration" 5 1 1996 0
+pop_event migration_rate "eur->afr migration" 1 5 1995 0
+pop_event migration_rate "afr->as migration" 5 4 1994 0
+pop_event migration_rate "as->afr migration" 4 5 1993 0
+
+pop_event bottleneck "OoA bottleneck" 1 3499 .085
+pop_event split "out of Africa" 5 1 3500
+
+pop_event change_size "african pop size" 5 17000 12500
+
+

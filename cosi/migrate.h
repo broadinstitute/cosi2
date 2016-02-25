@@ -4,9 +4,11 @@
 #define __INCLUDE_COSI_MIGRATE_H
 
 #include <boost/shared_ptr.hpp>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/arrproc2.h>
 #include <cosi/decls.h>
 #include <cosi/hooks.h>
-#include <cosi/cosirand.h>
+#include <cosi/basemodel.h>
 
 namespace cosi {
 
@@ -37,17 +39,32 @@ public:
 	 
 	 // MethodP: migrate_get_all_nodes_rate
 	 // Return the probability of one of the active nodes (chroms) migrating to another pop.
-	 prob_per_gen_t migrate_get_all_nodes_rate (void) const;
+	 gensInv_t migrate_get_all_nodes_rate (genid) const;
 
 	 // MethodP: migrate_execute
 	 // Pick one node to migrate based on the current migration rates, and migrate it.
 	 void migrate_execute (genid gen);
 
+	 void setBaseModel( BaseModelP baseModel_ ) { baseModel = baseModel_; }
+
+	 typedef
+	 arrival2::ArrivalProcess< genid,
+														 arrival2::Stoch< RandGen,
+																							arrival2::Compound<
+																								arrival2::Poisson<
+																									math::Piecewise< math::Const<> >, popsize_float_t > > > >
+	 migr_processes_type;
+
+	 boost::shared_ptr< migr_processes_type >
+	 createMigrationProcesses();
+	 
+
 private:
 	 DemographyP demography;
+	 BaseModelP baseModel;
 
 	 MigrateRate *migrations;
-	 mutable prob_per_gen_t mig_lastrate;
+	 mutable gensInv_t mig_lastrate;
 
 	 void migrate_add (popid from, popid to, prob_per_chrom_per_gen_t rate);
 	 void migrate_delete (popid from, popid to);

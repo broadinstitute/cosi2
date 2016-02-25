@@ -17,8 +17,8 @@
 #include <vector>
 #include <boost/intrusive_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
-#include <cosi/utils.h>
 
 namespace cosi {
 namespace leafset_counts {
@@ -57,11 +57,20 @@ public:
    void operator delete (void *p);
 
 	 leafset_struct( leaf_id_t leafId_ ):
-		 chromCounts( 0, leafset_npops ) {
+	 chromCounts( nchroms_t(0), leafset_npops ) {
 		 ::cosi::util::chk( leafset_leaf2popName, "did not set leafset info" );
 		 popid popName = (*leafset_leaf2popName)[ leafId_ ];
 		 pop_idx_t popidx = (*leafset_popname2idx)[ ToInt( popName ) ];
 		 chromCounts[ popidx ] = 1;
+	 }
+
+	 leafset_struct( leaf_id_t fromLeaf, leaf_id_t toLeaf ):
+		 chromCounts( nchroms_t( 0 ), leafset_npops ) {
+		 for ( leaf_id_t leaf = fromLeaf; leaf < toLeaf; ++leaf ) {
+			 popid popName = (*leafset_leaf2popName)[ leaf ];
+			 pop_idx_t popidx = (*leafset_popname2idx)[ ToInt( popName ) ];
+			 chromCounts[ popidx ] = 1;
+		 }
 	 }
 
 	 leafset_struct( leafset_p childA_, leafset_p childB_ ):
@@ -94,6 +103,11 @@ leaf_id_t leafset_get_max_leaf_id(void);
 /* FuncP: make_singleton_leafset */
 /* Returns the leafset containing only the specified leaf. */
 inline leafset_p make_singleton_leafset( leaf_id_t leaf ) { return new leafset_t( leaf ); }
+
+/* FuncP: make_range_leafset */
+/* Returns the leafset containing the given range of leaves. */
+inline leafset_p make_range_leafset( leaf_id_t fromLeaf, leaf_id_t toLeaf ) { return new leafset_t( fromLeaf, toLeaf  ); }
+
 
 inline leafset_p make_empty_leafset() { return LEAFSET_NULL; }
 
@@ -138,7 +152,7 @@ inline bool leafset_is_full( leafset_p leafset ) { return leafset_size( leafset 
 
 #define COSI_FOR_LEAFSET(leafset,leaf_var,body) do {	assert(0); } while(0)
 
-ostream& operator<<( std::ostream& s, leafset_p leafset );
+std::ostream& operator<<( std::ostream& s, leafset_p leafset );
 
 } // namespace leafset_counts
 

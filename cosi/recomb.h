@@ -8,8 +8,9 @@
 #include <utility>
 #include <boost/noncopyable.hpp>
 #include <boost/multi_array.hpp>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/arrproc2.h>
 #include <cosi/decls.h>
-#include <cosi/cosirand.h>
 #include <cosi/hooks.h>
 #include <cosi/nodefwd.h>
 
@@ -42,6 +43,12 @@ public:
 	 void setIgnoreRecombsInPop( popid ignoreRecombsInPop_ ) {
 		 this->ignoreRecombsInPop = ignoreRecombsInPop_;
 	 }
+
+	 typedef
+	 arrival2::ArrivalProcess< genid, arrival2::Stoch< RandGen, arrival2::Poisson< math::Const<>, double > > >
+	 recomb_processes_type;
+
+	 boost::shared_ptr< recomb_processes_type > createRecombProcesses();
 
 private:
 	 DemographyP demography;

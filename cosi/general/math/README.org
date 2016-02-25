@@ -1,0 +1,4 @@
+
+* Folder: math/
+
+	Representation and manipulation of mathematical objects.

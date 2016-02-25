@@ -3,18 +3,18 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cosi/general/utils.h>
 #include <cosi/pop.h>
 #include <cosi/node.h>
 #include <cosi/hullmgr.h>
 #include <cosi/seglist.h>
-#include <cosi/utils.h>
 
 namespace cosi {
 
 using std::string;
 using util::chkCond;
 
-Pop::Pop(popid name_, int popsize_, const string& label_) :
+Pop::Pop(popid name_, nchroms_t popsize_, const string& label_) :
 	name( name_ ), popsize( popsize_ ), label( label_ ),
 	isRestrictingCoalescence( false )
 #ifdef COSI_SUPPORT_COALAPX
@@ -23,6 +23,7 @@ Pop::Pop(popid name_, int popsize_, const string& label_) :
 #ifdef COSI_DEV	
 	, coalRate( 0.0 )
 #endif
+	, _isInactive( false )
 {
 	chkCond( popsize >= 0, "creating pop with negative size" );
 }

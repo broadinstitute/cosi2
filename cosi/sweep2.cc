@@ -20,11 +20,11 @@
 #include <limits>
 #include <boost/make_shared.hpp>
 #include <boost/foreach.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/decls.h>
 #include <cosi/node.h>
 #include <cosi/pop.h>
 #include <cosi/demography.h>
-#include <cosi/utils.h>
 #include <cosi/mutlist.h>
 #include <cosi/mutate.h>
 #include <cosi/historical.h>
@@ -122,6 +122,7 @@ public:
      is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq;
    }
    static const char *typeStr() { return "sweep2"; }
+	 virtual eventKind_t getEventKind() const { return E_SWEEP; }	 
         
    virtual ~Event_SweepOnePop();
 // Constructor\,\ destructor\,\ housekeeping\ code:1 ends here

@@ -14,7 +14,7 @@
 #include <boost/accumulators/statistics/variates/covariate.hpp>
 #include <boost/accumulators/statistics/extended_p_square_quantile.hpp>
 
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 #include <cosi/arrival.h>
 
 namespace cosi {

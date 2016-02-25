@@ -39,7 +39,8 @@ typedef boost::multi_array< std::pair<loc_t,loc_t>, 2 > recomblessNeighborhoods_
 //    mutlist - the list of mutations
 //    inf_sites - whether to use an infinite-sites model (if not, of mutations falling on the same integer coordinate only
 //      the first is kept)
-void print_haps( DemographyP demography, const string& filebase, len_bp_int_t length, MutlistP mutlist, bool_t inf_sites );
+void print_haps( DemographyP demography, const string& filebase, len_bp_int_t length, MutlistP mutlist,
+								 bool_t inf_sites, int outputPrecision );
 
 void print_mut_contexts( DemographyP demography, const string& filebase, len_bp_int_t length,
 												 const mutcontext::mutContexts_t& mutContexts );

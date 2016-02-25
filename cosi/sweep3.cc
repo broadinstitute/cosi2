@@ -31,11 +31,11 @@
 #include <boost/optional.hpp>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/decls.h>
 #include <cosi/node.h>
 #include <cosi/pop.h>
 #include <cosi/demography.h>
-#include <cosi/utils.h>
 #include <cosi/mutlist.h>
 #include <cosi/mutate.h>
 #include <cosi/historical.h>
@@ -291,6 +291,7 @@ public:
      is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq;
    }
    static const char *typeStr() { return "sweep"; }
+	 virtual eventKind_t getEventKind() const { return E_SWEEP; }	 
 
 	 virtual ~Event_SweepOnePop();
 

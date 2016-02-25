@@ -1,0 +1,7 @@
+
+real	42m8.367s
+user	37m32.645s
+sys	0m53.837s
+retcode 0
+hostnode1371
+unameLinux node1371 2.6.18-194.8.1.el5 #1 SMP Thu Jul 1 19:04:48 EDT 2010 x86_64 GNU/Linux

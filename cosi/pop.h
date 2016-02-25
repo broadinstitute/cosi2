@@ -14,10 +14,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/utility/declval.hpp>
+#include <cosi/general/math/generalmath.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/nodelist.h>
-#include <cosi/generalmath.h>
 #include <cosi/coalrate.h>
 
 namespace cosi {
@@ -108,6 +108,22 @@ public:
 					 )));
 	 }
 
+	 template <typename TSpec>
+	 void setCoalRateFn( const math::Function< genid, popsizeInv_float_t, TSpec >& coalRateFn, genid gen ) {
+		 setCoalArrivalProcess(
+			 math::ArrivalProcess< genid, math::Any< RandGen > >(
+				 math::makeNonHomogeneousPoissonProcess (
+					 coalRateFn, gen, std::string( "coal in pop " + label )
+					 )));
+	 }
+	 
+
+	 bool isInactive() const { return _isInactive; }
+	 void makeInactive() {
+		 util::chkCond( empty(), "error: pop must be empty before being inactivated" );
+		 _isInactive = true;
+	 }
+
 #ifdef COSI_DEV	 
 	 prob_t getCoalRate() const { return coalRate; }
 	 void setCoalRate( prob_t coalRate_ ) { coalRate = coalRate_; }
@@ -162,6 +178,10 @@ private:
 #ifdef COSI_DEV	 
 	 prob_t coalRate;
 #endif
+
+	 // Field: isInactive
+	 // Is this population inactive, i.e. has it been merged into its parent population (in the backward sense)?
+	 bool _isInactive;
 
 	 bool useCoalApx() const;
 

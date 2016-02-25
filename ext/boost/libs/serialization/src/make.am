@@ -1,0 +1,13 @@
+lib_LTLIBRARIES += libcosiserialization.la
+
+SR=$(BOOST_DIR)/libs/serialization/src
+libcosiserialization_la_SOURCES = $(SR)/archive_exception.cpp $(SR)/basic_archive.cpp $(SR)/basic_iarchive.cpp $(SR)/basic_iserializer.cpp $(SR)/basic_oarchive.cpp $(SR)/basic_oserializer.cpp \
+ $(SR)/basic_pointer_iserializer.cpp $(SR)/basic_pointer_oserializer.cpp $(SR)/basic_serializer_map.cpp $(SR)/basic_text_iprimitive.cpp $(SR)/basic_text_oprimitive.cpp \
+ $(SR)/basic_text_wiprimitive.cpp $(SR)/basic_text_woprimitive.cpp $(SR)/basic_xml_archive.cpp $(SR)/binary_iarchive.cpp $(SR)/binary_oarchive.cpp \
+ $(SR)/binary_wiarchive.cpp $(SR)/binary_woarchive.cpp $(SR)/codecvt_null.cpp $(SR)/extended_type_info.cpp $(SR)/extended_type_info_no_rtti.cpp $(SR)/extended_type_info_typeid.cpp \
+ $(SR)/polymorphic_iarchive.cpp $(SR)/polymorphic_oarchive.cpp $(SR)/stl_port.cpp $(SR)/text_iarchive.cpp $(SR)/text_oarchive.cpp $(SR)/text_wiarchive.cpp \
+ $(SR)/text_woarchive.cpp $(SR)/utf8_codecvt_facet.cpp $(SR)/void_cast.cpp $(SR)/xml_archive_exception.cpp $(SR)/xml_grammar.cpp $(SR)/xml_iarchive.cpp $(SR)/xml_oarchive.cpp \
+ $(SR)/xml_wgrammar.cpp $(SR)/xml_wiarchive.cpp $(SR)/xml_woarchive.cpp
+libcosiserialization_la_CPPFLAGS = $(AM_CPPFLAGS)
+
+

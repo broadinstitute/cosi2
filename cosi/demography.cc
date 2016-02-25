@@ -13,12 +13,12 @@
 #include <vector>
 #include <boost/make_shared.hpp>
 #include <boost/range/algorithm/find_if.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/defs.h>
 #include <cosi/pop.h>
 #include <cosi/node.h>
 #include <cosi/seglist.h>
 #include <cosi/demography.h>
-#include <cosi/utils.h>
 #include <cosi/leafset.h>
 #include <cosi/seglist.h>
 #include <cosi/mutate.h>
@@ -123,9 +123,9 @@ void Demography::dg_complete_initialization() {
   ForVec( populate_request, req, populate_requests ) {
 		popNames.push_back( req->popname );
 		sampleSizes.push_back( req->members );
-#ifdef COSI_EHH	 
+
 		pop2leaves.push_back( make_range_leafset( leafFrom, leafFrom + req->members ) );
-#endif
+
 		for ( leaf_id_t leaf = leafFrom; leaf < leafFrom + req->members; leaf++ )
 			 this->leaf2popName[ leaf ] = req->popname;
 		leafFrom += req->members;
@@ -459,6 +459,14 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
   from_popptr = dg_get_pop_by_name (frompop);
   to_popptr = dg_get_pop_by_name(topop);
 
+	util::chk( from_popptr, "move_nodes: unknown frompop" );
+	util::chk( to_popptr, "move_nodes: unknown topop" );
+
+	if ( to_popptr->isInactive() ) {
+		std::cerr << "WARNING: moving nodes to inactive pop " << topop << " at gen " << gen << " - ignored\n";
+		return;
+	}
+
   num_to_move = exactFraction ? nchroms_t( fractionToMove * from_popptr->pop_get_num_nodes() ) : ranbinom(from_popptr->pop_get_num_nodes(), fractionToMove);
 	PRINT11( "moving_nodes", gen, frompop, topop, fractionToMove, bool_t(exactFraction), num_to_move,
 					 from_popptr->pop_get_size(), from_popptr->pop_get_num_nodes(), to_popptr->pop_get_size(), to_popptr->pop_get_num_nodes() );
@@ -478,13 +486,13 @@ Demography::dg_move_nodes_by_name (popid frompop, popid topop, frac_t fractionTo
 /* NODE FUNCTIONS */
 
 /* GET_NUM_NODES */
-int 
+nchroms_t
 Demography::dg_get_num_nodes (void) const
 {
-  int     total = 0;
+  nchroms_t     total = 0;
 
   for (size_t i = 0; i < pops.size(); i++)
-		 total = dg_get_num_nodes_in_pop_by_index (i);
+		 total += dg_get_num_nodes_in_pop_by_index (i);
   return total;
 }
 

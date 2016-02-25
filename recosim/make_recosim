@@ -1,2 +1,0 @@
-all:
-	gcc -O3 -o recosimulate -lm recosim.c ../cosi_rand/libcosi_rand.a && gcc -O3 -o get_recomap get_recomap.c ../cosi_rand/libcosi_rand.a && gcc -O3 -o recomap_hapmap2 recomap_hapmap2.c ../cosi_rand/libcosi_rand.a

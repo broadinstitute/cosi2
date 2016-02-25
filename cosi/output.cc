@@ -7,8 +7,8 @@
 #include <boost/scoped_array.hpp>
 #include <boost/foreach.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <cosi/general/utils.h>
 #include <cosi/mutlist.h>
-#include <cosi/utils.h>
 #include <cosi/demography.h>
 #include <cosi/output.h>
 
@@ -29,7 +29,8 @@ namespace cosi {
 //    mutlist - the list of mutations
 //    inf_sites - whether to use an infinite-sites model (if not, of mutations falling on the same integer coordinate only
 //      the first is kept)
-void print_haps(DemographyP demography, const string& filebase, len_bp_int_t length, MutlistP mutlist, bool_t inf_sites) {
+void print_haps(DemographyP demography, const string& filebase, len_bp_int_t length, MutlistP mutlist, bool_t inf_sites,
+								int outputPrecision ) {
 
   FILE *outf = NULL;
   freq_t freq;
@@ -96,12 +97,13 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
       for (size_t im = 0; im < nmuts; im++, it++) {
 				freq = (freq_t) mutcount[im] / sampleSizes[ipop];
 				if (inf_sites) {
-					fprintf(outf, "%d\t1\t%.4f\t1\t%.4f\t2\t%.4f\n", (int)(it->mutIdOrig+1), double( length * get_loc( it->loc ) ), 
-									double( freq ), double( 1 - freq ) );
+					fprintf(outf, "%d\t1\t%.*f\t1\t%.*f\t2\t%.*f\n", (int)(it->mutIdOrig+1),
+									outputPrecision, double( length * get_loc( it->loc ) ), 
+									outputPrecision, double( freq ), outputPrecision, double( 1 - freq ) );
 				}
 				else {
-					fprintf(outf, "%d\t1\t%d\t1\t%.4f\t2\t%.4f\n", (int)(it->mutIdOrig+1), (int) (length * get_loc( it->loc ) ), 
-									double( freq ), double( 1 - freq ) );
+					fprintf(outf, "%d\t1\t%d\t1\t%.*f\t2\t%.*f\n", (int)(it->mutIdOrig+1), (int) (length * get_loc( it->loc ) ), 
+									outputPrecision, double( freq ), outputPrecision, double( 1 - freq ) );
 				}
 			}
 		}  // if this pop is nonempty

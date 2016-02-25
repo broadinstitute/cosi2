@@ -10,6 +10,8 @@
 #ifndef __INCLUDE_COSI_HISTORICAL_H
 #define __INCLUDE_COSI_HISTORICAL_H
 
+//#define COSI_DEV_PRINT
+
 #include <cstdlib>
 #include <cmath>
 #include <vector>
@@ -19,8 +21,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/foreach.hpp>
-#include <cosi/utils.h>
-#include <cosi/cosirand.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 
@@ -58,6 +60,8 @@ public:
 	 EventP parseEvent( const char *buffer );
 	 void addEvent( EventP event );
 
+	 void constructBaseModel( BaseModelP );
+
 	 void historical_setMigrate( MigrateP migrate_ ) { migrate = migrate_; }
 	 void historical_setSweep( SweepP sweep_ ) { sweep = sweep_; }
 
@@ -93,6 +97,9 @@ public:
 	 class Event: virtual public boost::enable_shared_from_this<Event> {
 	 public:
 
+			enum eventKind_t { E_POPSIZE, E_POPSIZEEXP, E_SPLIT, E_MIGRATIONRATE,
+												 E_BOTTLENECK, E_ADMIX, E_SWEEP };
+
 			// Method: getGen
 			// Returns the time when this events occurs (for instantenous events),
 			// or -- for events taking place over a time interval -- the time when the event
@@ -111,7 +118,11 @@ public:
 			// backwards simulation should continue after this event has completed.
 			virtual genid execute() = 0;
 
+			virtual eventKind_t getEventKind() const = 0;
+
 			virtual void processSimEnd( genid /*gen*/ ) { }
+
+			virtual void addToBaseModel( BaseModel& ) const { }
 			
 	 private:
 			// Field: histEventsP

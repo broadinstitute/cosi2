@@ -1,11 +1,14 @@
+
+// * Header cositop.h - top-level 
+
 #ifndef __COSI_INCLUDE_COSITOP_H
 #define __COSI_INCLUDE_COSITOP_H
 
 #include <string>
 #include <boost/optional.hpp>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/coalescent.h>
 #include <cosi/output.h>
-#include <cosi/cosirand.h>
 #include <cosi/condsnp.h>
 
 namespace cosi {
@@ -67,7 +70,7 @@ private:
 
 	 // Field: outputMutContextsFor
 	 // Mutations for which to output the context
-	 vector< loc_bp_int_t > outputMutContextsFor;
+	 std::vector< loc_bp_int_t > outputMutContextsFor;
 
 	 // Field: randSeed
 	 // Random seed to be used.
@@ -111,6 +114,34 @@ private:
 	 // Field: freqsOnly
 	 // Output allele freqs only.
 	 bool_t freqsOnly;
+
+	 // Field: dropSingletonsFrac
+	 // Drop this fraction of SNPs which appear on only one chrom across all pops
+	 frac_t dropSingletonsFrac;
+
+	 // ** Field: genmapRandomRegions
+	 // Whether to take for each simulation a different random region from the genetic map.
+	 bool_t genmapRandomRegions;
+
+	 // ** Field: outputPopInfo
+	 // Whether to output population info (in ms output mode).
+	 bool_t outputPopInfo;
+	 
+	 // ** Field: outputGenMap
+	 // Whether to output the genetic map (in ms output mode).
+	 bool_t outputGenMap;
+
+	 // ** Field: customStats
+	 // Whether to compute custom stats.
+	 bool_t customStats;
+
+	 // ** Field: customStatsExcludePop
+	 // Whether to exclude a given pop from custom stats output
+	 popid customStatsExcludePop;
+
+	 // ** Field: trajOnly
+	 // Whether to only simulate trajectories and output present-day freqs
+	 bool trajOnly;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

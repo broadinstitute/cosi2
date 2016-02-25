@@ -1,0 +1,7 @@
+
+real	8m52.456s
+user	7m52.433s
+sys	0m15.202s
+retcode 0
+host node1745
+uname Linux node1745 2.6.18-194.8.1.el5 #1 SMP Thu Jul 1 19:04:48 EDT 2010 x86_64 GNU/Linux

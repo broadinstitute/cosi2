@@ -1,0 +1,6 @@
+
+real	37m44.841s
+user	15m20.203s
+sys	1m21.976s
+retcode 0
+host node1378

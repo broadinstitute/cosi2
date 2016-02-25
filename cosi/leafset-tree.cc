@@ -9,9 +9,9 @@
 #include <algorithm>
 #include <iterator>
 #include <boost/function_output_iterator.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
+#include <cosi/general/mempool.h>
 #include <cosi/leafset-tree.h>
-#include <cosi/mempool.h>
 
 namespace cosi {
 namespace leafset_tree {
@@ -115,10 +115,10 @@ const char *leafset_str( leafset_p /*leafset*/ ) {
   return "unimpl";
 }
 
-ostream& operator<<( std::ostream& s, leafset_p leafset ) {
+std::ostream& operator<<( std::ostream& s, leafset_p leafset ) {
 	if ( leafset_is_empty( leafset ) ) { s << "{}"; return s; }
 	s << "{(" << leafset_size( leafset ) << ") ";
-	vector<leaf_id_t> leaves;
+	std::vector<leaf_id_t> leaves;
 	leafset_get_leaves( leafset, back_inserter( leaves ) );
 	std::sort( leaves.begin(), leaves.end() );
 	std::copy( leaves.begin(), leaves.end(), std::ostream_iterator<leaf_id_t>( std::cout, " " ) );
@@ -129,7 +129,7 @@ ostream& operator<<( std::ostream& s, leafset_p leafset ) {
 #ifdef COSI_R2
 void leafset_struct::computeLeaves() const {
 	if ( !leaves ) {
-		leaves = boost::scoped_ptr< vector< leaf_id_t > >( new vector< leaf_id_t >() );
+		leaves = boost::scoped_ptr< std::vector< leaf_id_t > >( new std::vector< leaf_id_t >() );
 		leafset_get_leaves( leafset_p( (leafset_t *)this ), std::back_inserter( *leaves ) );
 		std::sort( leaves->begin(), leaves->end() );
 	}
@@ -170,6 +170,15 @@ cosi_double leafset_struct::compute_r2( leafset_p leafset1, leafset_p leafset2 )
 	return num_sqrt * num_sqrt / ( p_a * ( 1.0 - p_a ) * p_b * ( 1.0 - p_b ) );
 }  // leafset_struct::compute_r2
 #endif // ifdef COSI_R2
+
+/* FuncP: make_range_leafset */
+/* Returns the leafset containing the given range of leaves. */
+leafset_p make_range_leafset( leaf_id_t fromLeaf, leaf_id_t toLeaf ) {
+	leafset_p result = make_empty_leafset();
+	for( leaf_id_t leaf = fromLeaf; leaf < toLeaf; ++leaf )
+		 result = leafset_union( result, make_singleton_leafset( leaf ) );
+	return result;
+}
 
 }  // namespace leafset_tree
 }  // namespace cosi

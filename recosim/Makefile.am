@@ -1,19 +1,21 @@
-ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -I$(srcdir)/..
-AM_LDFLAGS = -L$(srcdir)/../cosi_rand -lm
 
-bin_PROGRAMS = recosimulate get_recomap recomap_hapmap2
 
-LIBRAND = $(abs_top_builddir)/../cosi_rand/libcosi_rand.la
+bin_PROGRAMS += recosimulate get_recomap recomap_hapmap2
 
-recosimulate_SOURCES = recosim.c
-recosimulate_LDADD = $(LIBRAND)
+BOOSTRAND=$(srcdir)/ext/boost/libs/random/src/random_device.cpp $(srcdir)/ext/boost/boost/random/random_device.hpp
 
-get_recomap_SOURCES = get_recomap.c
-get_recomap_LDADD = $(LIBRAND)
+recosimulate_SOURCES = $(srcdir)/recosim/recosim.cc $(srcdir)/recosim/gamma.hpp $(BOOSTRAND)
+recosimulate_CPPFLAGS = -I$(srcdir) -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
+recosimulate_LDFLAGS = -lm
 
-recomap_hapmap2_SOURCES = recomap_hapmap2.c
-recomap_hapmap2_LDADD = $(LIBRAND)
+get_recomap_SOURCES = $(srcdir)/recosim/get_recomap.cc $(BOOSTRAND)
+get_recomap_CPPFLAGS = -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
+get_recomap_LDFLAGS = -lm
+
+recomap_hapmap2_SOURCES = $(srcdir)/recosim/recomap_hapmap2.cc $(BOOSTRAND)
+recomap_hapmap2_CPPFLAGS = -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
+recomap_hapmap2_LDFLAGS = -lm
+
 
 
 

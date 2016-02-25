@@ -1,0 +1,7 @@
+
+real	6m2.676s
+user	5m45.956s
+sys	0m1.554s
+retcode 0
+hostnode1064
+unameLinux node1064 2.6.18-194.8.1.el5 #1 SMP Thu Jul 1 19:04:48 EDT 2010 x86_64 GNU/Linux

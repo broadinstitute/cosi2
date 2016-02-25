@@ -1,0 +1,7 @@
+
+real	71m12.764s
+user	61m22.132s
+sys	1m35.020s
+retcode 0
+host node1099
+uname Linux node1099 2.6.18-194.8.1.el5 #1 SMP Thu Jul 1 19:04:48 EDT 2010 x86_64 GNU/Linux

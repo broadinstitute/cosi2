@@ -1,6 +1,6 @@
 #include <ios>
 #include <boost/filesystem/fstream.hpp>
-#include <cosi/utils.h>
+#include <cosi/general/utils.h>
 #include <cosi/traj.h>
 
 namespace cosi {
@@ -18,19 +18,19 @@ TrajFromFile::TrajFromFile( filename_t fname, genid firstGen_, freq_t firstFreq_
 	using std::ios;
 	boost::filesystem::ifstream trajStrm( fname );
 	trajStrm.exceptions( ios::failbit | ios::badbit | ios::eofbit );
-	traj.insert( make_pair( firstGen_, firstFreq_ ) );
+	traj.insert( std::make_pair( firstGen_, firstFreq_ ) );
 	while ( True ) {
 		try {
 			genid a_gen;
 			freq_t a_freq;
 			trajStrm >> a_gen >> a_freq;
-			traj.insert( make_pair( a_gen, a_freq ) );
+			traj.insert( std::make_pair( a_gen, a_freq ) );
 		} catch( std::ifstream::failure e ) {
 			break;
 		}
 	}
 	if ( traj.rbegin()->second > static_cast<freq_t>(0.0) )
-		traj.insert( make_pair( traj.rbegin()->first + gens_t( 1.0 ), freq_t( 0.0 ) ) );
+		traj.insert( std::make_pair( traj.rbegin()->first + gens_t( 1.0 ), freq_t( 0.0 ) ) );
 	curTrajPt = traj.begin();
 }
 

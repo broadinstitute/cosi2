@@ -1,0 +1,9 @@
+lib_LTLIBRARIES += libcosiregex.la
+
+RE=$(BOOST_DIR)/libs/regex/src
+libcosiregex_la_SOURCES = $(RE)/cpp_regex_traits.cpp $(RE)/cregex.cpp $(RE)/c_regex_traits.cpp $(RE)/fileiter.cpp $(RE)/icu.cpp \
+	$(RE)/instances.cpp $(RE)/internals.hpp $(RE)/posix_api.cpp $(RE)/regex.cpp $(RE)/regex_debug.cpp $(RE)/regex_raw_buffer.cpp \
+	$(RE)/regex_traits_defaults.cpp $(RE)/static_mutex.cpp $(RE)/usinstances.cpp $(RE)/w32_regex_traits.cpp $(RE)/wc_regex_traits.cpp \
+	$(RE)/wide_posix_api.cpp $(RE)/winstances.cpp
+libcosiregex_la_CXXFLAGS = $(AM_CXXFLAGS) -Wno-missing-declarations -Wno-strict-overflow
+

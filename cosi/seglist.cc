@@ -9,14 +9,16 @@
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/foreach.hpp>
+#include <cosi/general/utils.h>
+#include <cosi/general/mempool.h>
+#include <cosi/general/math/cosirand.h>
+#ifdef COSI_DEV_CALLGRIND
+#include <cosi/general/dbg/callgrind.h>
+#include <cosi/general/dbg/evtgrp.h>
+#endif
 #include <cosi/defs.h>
-#include <cosi/utils.h>
 #include <cosi/leafset.h>
-#include <cosi/mempool.h>
 #include <cosi/seglist.h>
-#include <cosi/cosirand.h>
-#include <cosi/callgrind.h>
-#include <cosi/evtgrp.h>
 
 namespace cosi {
 
@@ -49,7 +51,8 @@ clock_t time_gc;
  * the random seed or the generator used for seg levels, this should have no effect
  * on otherwise deterministic simulations that use the seglists.
  */
-static RandGen seglist_random_gen;
+static RandGen seglist_random_gen( 
+																	 RandGen::rseed_t( getenv( "COSI_SEGLIST_RSEED" ) ? atoi( getenv( "COSI_SEGLIST_RSEED" ) ) : 239239 ) );
 
 
 /* Static func: seglist_new_level */
@@ -214,8 +217,8 @@ void seglist_init_module(void) {
   segsumm_init_module();
   if ( !NIL ) {
 
-		seglist_random_gen.set_rng_seed( getenv( "COSI_SEGLIST_SEED" ) ?
-																		 atol( getenv( "COSI_SEGLIST_SEED" ) ) : 373737 );
+		// seglist_random_gen.set_rng_seed( getenv( "COSI_SEGLIST_SEED" ) ?
+		// 																 atol( getenv( "COSI_SEGLIST_SEED" ) ) : 373737 );
 		/*mts_goodseed( &seglist_random_state );*/
 
 		/*
@@ -795,9 +798,9 @@ typedef struct seglist_builder {
 	 bool_t finger_at_end;
 } Seglist_builder;
 
-ostream& operator<<( ostream& s, const Seglist_builder& b );
+std::ostream& operator<<( std::ostream& s, const Seglist_builder& b );
 
-ostream& operator<<( ostream& s, const Seglist_builder& b ) {
+std::ostream& operator<<( std::ostream& s, const Seglist_builder& b ) {
 	s << "{B:" << *b.seglist << "}";
 	return s;
 }
@@ -1682,14 +1685,14 @@ void seglist_write_dot_helper( const Seglist *seglist, const Finger *finger, con
 }
 #endif	// #if 0
 
-ostream& operator<<( ostream& buf, const Seg *seg ) {
+std::ostream& operator<<( std::ostream& buf, const Seg *seg ) {
 	buf << "[Seg: " << seg->beg << "-" << seg->end << "|" << seg->leafset;
 	IF_COSI_TRACK_LAST_COAL( buf << "|" << seg->lastCoalGen );
 	buf << "]";
 	return buf;
 }
 
-ostream& operator<<( ostream& buf, const Seglist *seglist ) {
+std::ostream& operator<<( std::ostream& buf, const Seglist *seglist ) {
   buf << "[";
   const Seg *seg = seglist_first_seg_const( seglist );
   bool_t is_first = True;
@@ -1935,7 +1938,7 @@ struct node *seglist_get_node( const Seglist *seglist ) { return NULL; /*seglist
 #endif
 
 
-ostream& operator<<( ostream& s, const Seg& seg ) {
+std::ostream& operator<<( std::ostream& s, const Seg& seg ) {
 	if ( &seg == NIL )
 		 s << "(NIL)";
 	else
@@ -1943,7 +1946,7 @@ ostream& operator<<( ostream& s, const Seg& seg ) {
 	return s;
 }
 
-ostream& operator<<( ostream& s, const Seglist& seglist ) {
+std::ostream& operator<<( std::ostream& s, const Seglist& seglist ) {
 	s.precision( 16 );
 	s << "[";
 	for ( const Seg *seg = seglist_first_seg_const( &seglist ); seg!= NIL; seg = seglist_next_seg_const( seg ) )

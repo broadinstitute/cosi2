@@ -4,11 +4,11 @@
 #define __INCLUDE_COSI_SWEEP_H
 
 #include <string>
+#include <cosi/general/math/generalmath.h>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/nodefwd.h>
-#include <cosi/cosirand.h>
-#include <cosi/generalmath.h>
 
 namespace cosi {
 

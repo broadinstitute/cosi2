@@ -3,11 +3,11 @@
 #define __INCLUDE_COSI_MUTATE_H
 #include <cstdio>
 #include <iostream>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/leafset.h>
 #include <cosi/seglistfwd.h>
-#include <cosi/cosirand.h>
 
 namespace cosi {
 

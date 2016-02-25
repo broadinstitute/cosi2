@@ -12,7 +12,10 @@
 #include <vector>
 #include <boost/random/discrete_distribution.hpp>
 #include <cosi/decls.h>
-#include <cosi/cosirand.h>
+#include <cosi/general/math/generalmath.h>
+#include <cosi/general/math/cosirand.h>
+#include <cosi/general/arrproc2.h>
+#include <cosi/basemodel.h>
 
 namespace cosi {
 
@@ -34,9 +37,24 @@ public:
 
 	 gens_t coalesce_get_wait_time_nonhomog( genid, gens_t /* maxWaitTime */ ) const;
 	 pop_idx_t coalesce_pick_popindex_nonhomog() const;
+
+	 void setBaseModel( BaseModelP baseModel_ ) { baseModel = baseModel_; }
+
+	 typedef
+	 arrival2::ArrivalProcess< genid,
+														 arrival2::Stoch< RandGen,
+																							arrival2::Compound<
+																								arrival2::Poisson<
+																									math::Piecewise< math::Any<> >, nchromPairs_float_t > > > >
+	 coal_processes_type;
+
+	 boost::shared_ptr< coal_processes_type >
+	 createCoalProcesses();
+	 
 	 
 private:
 	 DemographyP demography;
+	 BaseModelP baseModel;
 	 mutable double lastrate;
 	 mutable std::vector<double> popRates;
 	 mutable pop_idx_t nonhomogPopIdx;

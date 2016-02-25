@@ -3,10 +3,10 @@
 
 #include <cstdlib>
 #include <utility>
+#include <cosi/general/utils.h>
+#include <cosi/general/datastruct/order_statistics.hpp>
+#include <cosi/general/math/cosirand.h>
 #include <cosi/defs.h>
-#include <cosi/order_statistics.hpp>
-#include <cosi/utils.h>
-#include <cosi/cosirand.h>
 
 namespace cosi {
 
