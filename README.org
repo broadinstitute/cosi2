@@ -4,25 +4,139 @@
 cosi2 is an efficient coalescent simulator with support for selection, population structure, variable recombination rates,
 and gene conversion.  It supports exact and approximate simulation modes.
 
-Two working examples are included in the examples/ subdirectory, and
-documentation is in the documentation/ directory.
+This is the user's manual for cosi2 coalescent simulator.
 
+*  Downloading and installing cosi2
 
-Conditional defines that affect cosi compilation:
+cosi2 can be downloaded from http://broadinstitute.org/~ilya/
 
-Defines that affect behavior:
+* Running cosi2
 
-COSI_RECOMB_CONSTRATE - if defined, optimizes cosi to support only constant
-  recombination rate.  By default, cosi supports variation of recombination rate
-  across the region.
+The basic invocation format is
 
-COSI_GC_DISABLE - if defined, disables support for gene conversion.
-  
-Defines that affect only CPU and memory requirements, but not the output:
+coalescent -p paramfile -m
 
-COSI_IMPL_STORE_GLOC_IN_LOC - if defined, genetic map locations are stored with each physical location.
-  This allows constant-time mapping between the two, at the cost of extra memory usage; is useful when
-  the region is large and the recombination rate changes at many points in the region.
+The -p paramfile option specifies the parameter file, which is a text file that describes the demographic model to be simulated. The -m option requests output to be written to stdout in the format of Richard Hudson's ms simulator (described here ; see
+section "The output").
 
-COSI_SLOWRECOMB - use the slower method of choosing recomb rates
+*** Format of the parameter file
 
+	The parameter file defines the population structure and other controlling parameters for the run, using keywords. Comments are indicated by "#" at the beginning of a line.
+
+***** Specifying the simulated region
+
+		The length of the simulated region, in basepairs, is specified as:
+
+		: length <length in bp>
+
+		The mutation rate is specified as:
+
+		: mutation_rate <mutation rate per bp per generation>
+
+		The recombination rate is specified as follows:
+
+		: recomb_file <file-name>
+
+		specifies the file describing the genetic map. The file has two columns, separated by whitespace. The first column gives a basepair position; the second column sets the crossover recombination rate, per generation, from that point until either the end
+		of the region or the position specified by the next line. The basepair positions in the first column must be in strictly increasing order. The first line of the genetic map file also specifies the recombination rate from the beginning of the region to
+		the basepair position of that line.
+
+		Gene conversion is specified by the following parameters:
+
+		: gene_conversion_relative_rate <rate of gene conversion initiation relative to crossover recombination rate>
+		: gene_conversion_mean_tract_length <mean gene conversion tract length in bp>
+		: gene_conversion_min_tract_length <minimum gene conversion tract length in bp>
+
+***** Specifying the populations
+
+		Any population that appears in the simulation, either as a source of samples or in the history of those samples, must be defined in the parameter file; at least one sampled population is required. The syntax for defining a population is
+
+		: pop_define <pop id> <label>
+		: pop_size <pop id> <size>
+		: sample_size <pop id> <n samples>
+
+		<pop id> is an integer ID of the population, used to refer to the population when specifying demographic events. <label> is human-readable name for the population (a string, with no spaces, and not put in quotes).
+
+		For example, the following entries
+
+		: pop_define 1 European
+		: pop_size 1 10000
+		: sample_size 1 50
+
+		define population 1 (with the label "European") and set the effective present-day population size to be 10,000 and the number of sampled chromosomes to be 50.
+
+***** Specifying the demographic history
+
+		Parameters that define the demographic history of the populations are specified as follows. They can be supplied in any order.
+
+		: pop_event migration_rate <label> <source pop id> <target pop id> <T> <probability of migration/chrom/gen>
+		: pop_event split <label> <source pop id> <new pop id> <T>
+		: pop_event change_size <label> <pop id> <T> <size for time > T>
+		: pop_event exp_change_size <label> <pop id> <Tend> <Tstart> <final size> <start size>
+		: pop_event bottleneck <label> <pop id> <T> <inbreeding coefficient> 
+		: pop_event admix <label> <admixed pop id> <source pop id> <T> <fraction of admixed chroms from source>
+
+		In these entries, the time =<T>= is measured in generations (which can be fractional) and increases going into the past
+		(present = 0). Labels are used only to provide human readable output. =change_size= sets the size for all times prior to T. A bottleneck
+		is a point-like reduction in population size. =exp_change_size= is an exponential change, e.g.
+
+		: pop_event exp_change_size "expansion" 1 50 500 10000 1000
+
+		represents an exponential population increase in population 1 that started 500 generations ago and ended 50 generations ago, increasing from 1000 to 10000. Prior to 500 generations, the size remains at 1000 (unless changed by another pop[event]
+		parameter); more recently than 50 generations ago, the population size is whatever was set by the =pop_size= command.
+
+		Specifying the selected sweep:
+
+		: pop_event sweep <pop> <Tend> <selection coefficient> <position of causal allele (0.0-1.0)> <present-day frequency of causal allele>
+
+		pop gives the population in which the advantageous allele is born. =<Tend>= gives the generation at which sweep ends (in the forward-time sense). The position of the advantageous allele is specified as a floating-point number in the range 0.0-1.0,
+		giving its relative position within the simulated region (for example, 0.5 puts the advantageous allele in the middle
+		of the region). The of the advantageous allele at time =<Tend>= is specified as a number in the range 0.0-1.0 (not as a
+		chromosome count).
+
+*** Command-line options
+
+	The following describes the main command-line options of cosi2.
+
+#+BEGIN_EXAMPLE	
+	Specifying the model:
+		-p [ --paramfile ] arg          parameter file
+		-R [ --recombfile ] arg         genetic map file (if specified, overrides the
+																		one in paramfile)
+		-n [ --nsims ] arg (=1)         number of simulations to output
+		-r [ --seed ] arg (=0)          random seed (0 to use current time)
+
+		-J [ --trajfile ] arg           file from which to read sweep trajectory.  
+																		It has two columns: first column gives the generation, second gives the fraction of
+	chromosomes in the sweep population carrying the derived (advantageous) allele.
+
+		-u [ --max-coal-dist ] arg (=1) for Markovian approximation mode, the level 
+																		of approximation: the maximum distance 
+																		between node hulls for coalescence to be 
+																		allowed.  Distance is specified as a fraction
+																		of the total length of the simulated region, 
+																		in the range [0.0-1.0]; 1.0 (default) means 
+																		no approximation.
+
+	Specifying the output format:
+		-o [ --outfilebase ] arg base name for output files in cosi format
+		-m [ --outms ]           write output to stdout in ms format
+
+	Specifying output details:
+		-P [ --output-precision ] arg number of decimal places used for floats in the
+																	outputs
+		-M [ --write-mut-ages ]       output mutation ages
+		-L [ --write-recomb-locs ]    output recombination locations
+
+	Misc options:
+		-h [ --help ]                      produce help message
+		-V [ --version ]                   print version info and compile-time 
+																			 options
+		-v [ --verbose ]                   verbose output
+		-g [ --show-progress ] [=arg(=10)] print a progress message every N 
+																			 simulations
+
+#+END_EXAMPLE
+
+	Two working examples are included in the examples/ subdirectory.
+	

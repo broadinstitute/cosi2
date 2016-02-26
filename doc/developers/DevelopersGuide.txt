@@ -82,4 +82,23 @@ The distribution of the output should, of course, remain the same; but this comm
 invalidate past test cases that checked for specific (random-seed,output) pairs.
 
 
+	Conditional defines that affect cosi compilation:
+
+	Defines that affect behavior:
+
+	COSI_RECOMB_CONSTRATE - if defined, optimizes cosi to support only constant
+		recombination rate.  By default, cosi supports variation of recombination rate
+		across the region.
+
+	COSI_GC_DISABLE - if defined, disables support for gene conversion.
+  
+	Defines that affect only CPU and memory requirements, but not the output:
+
+	COSI_IMPL_STORE_GLOC_IN_LOC - if defined, genetic map locations are stored with each physical location.
+		This allows constant-time mapping between the two, at the cost of extra memory usage; is useful when
+		the region is large and the recombination rate changes at many points in the region.
+
+	COSI_SLOWRECOMB - use the slower method of choosing recomb rates
+
+
 
