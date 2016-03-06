@@ -1500,7 +1500,7 @@ int sample_stats_main(int argc, char *argv[])
 	
 	cerr.precision(8);
 
- 	StatKeeper<> piStats, nucdivStats, nsitesStats, dindStats;
+ 	StatKeeper<> piStats, hetStats, nucdivStats, nsitesStats, dindStats;
 	StatKeeper<> n_under_10_stats, n_10_to_40_stats, n_over_40_stats;
 
 	std::vector< AStatsP > aStats;
@@ -2098,6 +2098,7 @@ int sample_stats_main(int argc, char *argv[])
 		ForEach( AStatsP aStat, aStats ) aStat->processSim( sim );
 
 		piStats.add( pi );
+		if ( regionLen_bp > 0 ) hetStats.add( Frac( pi, regionLen_bp ) );
 		nucdivStats.add( Frac( pi, trimmed_segsites ) );
 		nsitesStats.add( static_cast< cosi_double >( trimmed_segsites ) );
 		dindStats.add( dind_val );
@@ -2262,6 +2263,9 @@ int sample_stats_main(int argc, char *argv[])
 	ForEach( AStatsP aStat, aStats ) aStat->writeSummaryStats();
 	
 	cerr << "header=" << headerLine << "\n";
+
+	if ( hetStats.getNumVals() > 0 )
+		 cerr << "het.mean=" << hetStats.getMean() << " het.std=" << hetStats.getStd() << " het.count=" << hetStats.getNumVals() << "\n";
 	cerr << "pi.mean=" << piStats.getMean() << " pi.std=" << piStats.getStd() << " pi.count=" << piStats.getNumVals() << "\n";
 	cerr << "nucdiv.mean=" << nucdivStats.getMean() << " nucdiv.std=" << nucdivStats.getStd() << " nucdiv.count=" << nucdivStats.getNumVals() << "\n";
 	cerr << "nsites.mean=" << nsitesStats.getMean() << " nsites.std=" << nsitesStats.getStd() << " nsites.count=" << nsitesStats.getNumVals() << "\n";
