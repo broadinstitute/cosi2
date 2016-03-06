@@ -525,61 +525,67 @@ genid Event_PopSizeExp2::execute() {
 	//std::cerr << "exp2 exec: gen=" << gen << " procName=" << procName << " pop=" << pop << " nodes=" << popPtr->pop_get_num_nodes() << "\n";
 	if ( procName == -1 ) {
 		procName = ++procCount;
+
 		std::ostringstream procNameStrm;
 		procNameStrm << "exp" << ++procCount;
 		procNameStr = procNameStrm.str();
 
-		using namespace math;
+		getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( ToDouble( popsize + static_cast< popsize_float_t >( .5 ) ) ) );
+		if ( cosi_fabs( popsize - popSizeBeg ) > popsize_float_t( .9 ) ) {
+			using namespace math;
+			//std::cerr << "SETTING EXP PROCESS\n";
 
-		BOOST_AUTO( exponent,
-								( Function< genid, gensInv_t, Const<> >( expansionRate ) *
-									(
-										Function< genid, gens_t, Const<> >( genBeg - static_cast<genid>( 0.0 ) )
+			BOOST_AUTO( exponent,
+									( Function< genid, gensInv_t, Const<> >( expansionRate ) *
+										(
+										 Function< genid, gens_t, Const<> >( genBeg - static_cast<genid>( 0.0 ) )
 										 -
 										 Function< genid, gens_t, X_To<1> >()
-										) ) );
-		BOOST_AUTO( with_exp, exp_( exponent ) );
-		BOOST_AUTO( f, ( Function<genid,popsizeInv_float_t,Const<> >( 1. / popSizeBeg ) * with_exp ) );
+										 ) ) );
+			BOOST_AUTO( with_exp, exp_( exponent ) );
+			BOOST_AUTO( f, ( Function<genid,popsizeInv_float_t,Const<> >( 1. / popSizeBeg ) * with_exp ) );
 
-		PRINT4( popsize, popSizeBeg, 1.0 / eval( f, gen ), 1.0 / eval( f, genBeg ) );
+			PRINT4( popsize, popSizeBeg, 1.0 / eval( f, gen ), 1.0 / eval( f, genBeg ) );
 
-		BOOST_AUTO( coalRateFn, ( Function< genid, double, Const<> >( .5 ) * ( f ) ) );
+			BOOST_AUTO( coalRateFn, ( Function< genid, double, Const<> >( .5 ) * ( f ) ) );
 
 #if 0
-		{
-			std::cerr.precision( 15 );
-			const genid g_beg( 10.0 ), g_end( 150.0 );
-			const gens_t g_step( 1.0 );
-			genid g( g_beg );
-			while( g < g_end ) {
-				PRINT2( g, eval( coalRateFn, g ) );
-				g += g_step;
-			}
+			{
+				std::cerr.precision( 15 );
+				const genid g_beg( 10.0 ), g_end( 150.0 );
+				const gens_t g_step( 1.0 );
+				genid g( g_beg );
+				while( g < g_end ) {
+					PRINT2( g, eval( coalRateFn, g ) );
+					g += g_step;
+				}
 
-			for( int n = 1; n < 25; ++n ) {
-				PRINT2( n, ( integrateNumerically( coalRateFn, g_beg, g_end, n ) ) );
+				for( int n = 1; n < 25; ++n ) {
+					PRINT2( n, ( integrateNumerically( coalRateFn, g_beg, g_end, n ) ) );
+				}
+				PRINT( definiteIntegral( coalRateFn, g_beg, g_end ) );
 			}
-			PRINT( definiteIntegral( coalRateFn, g_beg, g_end ) );
-		}
 #endif		
 		
-		popPtr->
-			 setCoalArrivalProcess(
-				 ArrivalProcess< genid, Any< RandGen > >(
-					 makeNonHomogeneousPoissonProcess
-					 ( coalRateFn, gen, procNameStr ) ) );
+			popPtr->
+				setCoalArrivalProcess(
+															ArrivalProcess< genid, Any< RandGen > >(
+																																			makeNonHomogeneousPoissonProcess
+																																			( coalRateFn, gen, procNameStr ) ) );
 
-		PRINT( popPtr->getCoalArrivalProcess() );
+			PRINT( popPtr->getCoalArrivalProcess() );
+		}
 
 		gen = genBeg;
 		addEvent( shared_from_this() );
 	} else {
 		if ( popPtr->getCoalArrivalProcess() && popPtr->getCoalArrivalProcess().getLabel() == procNameStr ) {
 			 popPtr->clearCoalArrivalProcess();
+			 //std::cerr << "gen " << gen << ": CLEARED ARRIVAL PROCESS\n";
 			 
 			 PRINT( "clearedArrivalProcess" );
-			 getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( ToDouble( popSizeBeg + static_cast< popsize_float_t >( .5 ) ) ) );			 
 		}
+		getDemography()->dg_set_pop_size_by_name( gen, pop, nchroms_t( ToDouble( popSizeBeg + static_cast< popsize_float_t >( .5 ) ) ) );
 	}
 	return oldgen;
 }
