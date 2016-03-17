@@ -684,23 +684,27 @@ bool compute_LD( snp_id_t site_A, snp_id_t site_B, nchroms_t bsam, nchroms_t nsa
 class LDStats: public AStats {
 public:	 
 	 LDStats( len_t maxDist, size_t nbins, freq_t minMAF ):
-		 AStats( nbins ),
+		 AStats( 2*nbins ),
 		 maxDist( maxDist ), nbins( nbins ), minMAF( minMAF ), binSize( maxDist / nbins ),
-		 r2s( nbins ) {
+		 rs( nbins ), r2s( nbins ) {
 	 }
 	 
 protected:
 	 virtual std::vector< std::string > getNames() const {
-		 std::vector< std::string > names( nbins );
-		 for ( size_t i = 0; i < nbins; ++i )
-				names[ i ] = "r2_" + boost::lexical_cast< std::string >( i * binSize ) + "_" +
+		 std::vector< std::string > names( 2*nbins );
+		 for ( size_t i = 0; i < nbins; ++i ) {
+				names[ 2*i ] = "r_" + boost::lexical_cast< std::string >( i * binSize ) + "_" +
 					 boost::lexical_cast< std::string > ( (i+1)*binSize );
+				names[ 2*i + 1 ] = "r2_" + boost::lexical_cast< std::string >( i * binSize ) + "_" +
+					 boost::lexical_cast< std::string > ( (i+1)*binSize );
+		 }
 		 std::cerr << "getNames: nbins=" << nbins << " names.size=" << names.size() << "\n";
 		 return names;
 	 }
 	 
 	 virtual void computeVals( Sim const& sim, std::vector<double>& vals ) const {
 		 //std::cerr << "getting vals\n";
+		 rs.clear(); rs.resize( nbins );
 		 r2s.clear(); r2s.resize( nbins );
 		 nchroms_t minDerCount = minMAF * sim.nsam, maxDerCount = sim.nsam - minDerCount;
 		 for ( snp_id_t snp1 = 0; snp1 < sim.trimmed_segsites; ++snp1 )
@@ -710,12 +714,16 @@ protected:
 									 ( sim.trimmed_posit[ snp2 ] < maxPos ); ++snp2 )
 						 if ( ( minDerCount <= sim.derCounts[ snp2 ] ) && ( sim.derCounts[ snp2 ] <= maxDerCount ) ) {
 							 double r2, Dprime;
-							 if ( compute_LD( snp1, snp2, sim.nsam, sim.trimmed_list, &r2, &Dprime ) )
-									r2s[ getBin( sim.trimmed_posit[ snp2 ] - sim.trimmed_posit[ snp1 ] ) ].add( r2 );
+							 if ( compute_LD( snp1, snp2, sim.nsam, sim.trimmed_list, &r2, &Dprime ) ) {
+									size_t bin = getBin( sim.trimmed_posit[ snp2 ] - sim.trimmed_posit[ snp1 ] );
+									rs[ bin ].add( sqrt(r2) );
+									r2s[ bin ].add( r2 );
+							 }
 						 }
 				}
 		 for ( size_t i = 0; i < nbins; ++i ) {
-				vals[ i ] = r2s[ i ].getMean();
+				vals[ 2*i ] = rs[ i ].getMean();
+				vals[ 2*i+1 ] = r2s[ i ].getMean();
 				//std::cerr << "i=" << i << " count=" << r2s[i].getNumVals() << "\n";
 		 }
 		 //std::cerr << "got vals\n";
@@ -727,7 +735,7 @@ private:
 	 size_t nbins;
 	 freq_t minMAF;
 	 len_t binSize;
-	 mutable std::vector< SumKeeper<> > r2s;
+	 mutable std::vector< SumKeeper<> > rs, r2s;
 	 
 	 size_t getBin( len_t d ) const { return boost::algorithm::clamp<size_t>( size_t( d / binSize ), 0, nbins-1 ); }
 	 
