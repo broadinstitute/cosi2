@@ -275,11 +275,12 @@ public:
 																	std::string( "_sel" ), genid(0.) );
 			 nchroms_t sampSz = demography->find_pop_request( unsPop )->members;
 			 using boost::algorithm::clamp;
+			 //std::cerr << "unsPop=" << unsPop << " fn=" << util::at( pop2freqSelFn, unsPop ) << "\n";
 			 nchroms_t selSampleSize( clamp( int( util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) *
 																						ToDouble( sampSz ) ), 0, sampSz ) );
 
 			 // std::cerr << "makeSweepModel: selPop=" << selPop << " unsPop=" << unsPop <<
-			 // 	 " sampSz=" << sampSz << " frac=" << util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) << "\n";
+			 // 		" sampSz=" << sampSz << " frac=" << util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) << "\n";
 			 
 			 demography->dg_populate_by_name( selPop,
 																				selSampleSize );
@@ -498,11 +499,13 @@ public:
 			 BOOST_THROW_EXCEPTION( cosi::cosi_error() << error_msg( "no trajectory found within given number of attempts" ) );
 	 }  // simulateTrajFwd
 
-	 static bool readTsvLine( std::istream& s, std::vector< std::string >& vec, size_t& lineNo ) {
+	 static bool readTsvLine( std::istream& s, std::vector< std::string >& vec, size_t& lineNo,
+														std::streampos *savePos = NULL ) {
 		 cosi_using2(boost::tokenizer,boost::char_separator);
 		 typedef tokenizer< char_separator<char> > Tokenizer;
 		 std::string line;
 		 vec.clear();
+		 if ( savePos ) *savePos = s.tellg();
 		 if ( !s || !std::getline( s, line ) ) return false;
 		 else {
 			 //std::cerr << "got line: " << line << " lineNo was " << lineNo << "\n";
@@ -546,9 +549,12 @@ public:
 				 vector<string> vals;
 				 genid lastGen(NULL_GEN);
 				 bool isFirst = true;
-				 while ( readTsvLine( is, vals, lineNo ) ) {
+				 std::streampos is_pos(0);
+				 std::string simIdStr = lexical_cast<string>( simId );
+				 unsigned linesRead = 0;
+				 while ( readTsvLine( is, vals, lineNo, &is_pos ) ) {
 					 chkCond( vals.size() == col2pop.size(), "bad traj file line" );
-					 chkCond( vals[0] == lexical_cast<string>( simId ), "bad traj file line" );
+					 if ( vals[0] != simIdStr ) BOOST_THROW_EXCEPTION( cosi_io_error() << error_msg("wrong sim id") );
 					 genid gen = lexical_cast<genid>( vals[1] );
 					 for( size_t i=2; i<vals.size(); ++i )
 							set( (*pop2freqSelFn)[ col2pop[i] ], gen, lexical_cast<freq_t>(vals[i]) );
@@ -556,8 +562,17 @@ public:
 					 
 					 isFirst = false;
 					 lastGen = gen;
-					 if ( gen == genid(0) ) break;
+					 ++linesRead;
+					 if ( gen < genid(1) ) {
+						 if ( gen != genid(0) ) {
+							 for( size_t i=2; i<vals.size(); ++i )
+									set( (*pop2freqSelFn)[ col2pop[i] ], genid(0), lexical_cast<freq_t>(vals[i]) );
+						 }
+						 break;
+					 }
 				 }
+				 if ( linesRead < 1 ) BOOST_THROW_EXCEPTION( cosi_io_error() << error_msg("traj too short" ) );
+				 
 				 return pop2freqSelFn;
 			 } cosi_pkg_exception3( cosi_io_error(), ifstream::failure, bad_lexical_cast, std::exception );
 		 } catch( boost::exception& e ) {
@@ -651,18 +666,23 @@ computeLeafOrder( MSweepP msweep ) {
 						leafOrder->push_back( leaf );
 					});
 			}  // if ( STLContains( msweep->selPops, pop ) )
+			else {
+				//std::cerr << "pop not in selPops\n";
+			}
 		} cosi_end_for;  // cosi_for_map( popInfo, sweepModel->popInfos )
 	}
 	return leafOrder;
 }  // computeLeafOrder()
 
 void addSelMut( MSweepP msweep, MutlistP muts ) {
-	//	std::cerr << "addSelMut: adding\n";
+	// std::cerr << "addSelMut: adding\n";
+	// std::cerr << "sweepInfo null? " << ( !msweep->baseModel || !msweep->baseModel->sweepInfo ) << "\n";
+	// std::cerr << "selLeaves size: " << leafset_size( msweep->selLeaves ) << "\n";
 	if ( msweep->baseModel->sweepInfo && !leafset_is_empty( msweep->selLeaves ) ) {
 		SweepInfo const& si = *msweep->baseModel->sweepInfo;
 		muts->addMut( si.selPos, msweep->selLeaves, si.selGen, si.selPop );
 	} else {
-		//	 std::cerr << "addSelMut: NOT adding\n";
+		//std::cerr << "addSelMut: NOT adding\n";
 	}
 }
 
