@@ -102,7 +102,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = coalescent$(EXEEXT) recosimulate$(EXEEXT) \
+bin_PROGRAMS = coalescent$(EXEEXT) recosim$(EXEEXT) \
 	get_recomap$(EXEEXT) recomap_hapmap2$(EXEEXT) $(am__EXEEXT_1) \
 	sample_stats_extra$(EXEEXT)
 TESTS = tests/testScripts/tests/model001/t/run.sh \
@@ -418,14 +418,13 @@ recomap_hapmap2_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(AM_CXXFLAGS) $(CXXFLAGS) $(recomap_hapmap2_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__objects_4 = recosimulate-random_device.$(OBJEXT)
-am_recosimulate_OBJECTS = recosimulate-recosim.$(OBJEXT) \
-	$(am__objects_4)
-recosimulate_OBJECTS = $(am_recosimulate_OBJECTS)
-recosimulate_LDADD = $(LDADD)
-recosimulate_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+am__objects_4 = recosim-random_device.$(OBJEXT)
+am_recosim_OBJECTS = recosim-recosim.$(OBJEXT) $(am__objects_4)
+recosim_OBJECTS = $(am_recosim_OBJECTS)
+recosim_LDADD = $(LDADD)
+recosim_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(recosimulate_LDFLAGS) $(LDFLAGS) -o $@
+	$(CXXFLAGS) $(recosim_LDFLAGS) $(LDFLAGS) -o $@
 am_sample_stats_extra_OBJECTS =  \
 	sample_stats_extra-sample_stats_extra.$(OBJEXT) \
 	sample_stats_extra-tajd.$(OBJEXT)
@@ -519,7 +518,7 @@ SOURCES = $(libcosi_la_SOURCES) $(libcosiatomic_la_SOURCES) \
 	$(coalescent_SOURCES) $(cosiroot_SOURCES) \
 	$(funcs_test_SOURCES) $(get_recomap_SOURCES) $(ldhist_SOURCES) \
 	$(ost_test_SOURCES) $(ost_test_main_SOURCES) \
-	$(recomap_hapmap2_SOURCES) $(recosimulate_SOURCES) \
+	$(recomap_hapmap2_SOURCES) $(recosim_SOURCES) \
 	$(sample_stats_extra_SOURCES) $(seglist_test_SOURCES) \
 	$(test_arrproc_SOURCES) $(test_funcs_SOURCES)
 DIST_SOURCES = $(libcosi_la_SOURCES) $(libcosiatomic_la_SOURCES) \
@@ -532,7 +531,7 @@ DIST_SOURCES = $(libcosi_la_SOURCES) $(libcosiatomic_la_SOURCES) \
 	$(funcs_test_SOURCES) $(get_recomap_SOURCES) \
 	$(am__ldhist_SOURCES_DIST) $(ost_test_SOURCES) \
 	$(am__ost_test_main_SOURCES_DIST) $(recomap_hapmap2_SOURCES) \
-	$(recosimulate_SOURCES) $(sample_stats_extra_SOURCES) \
+	$(recosim_SOURCES) $(sample_stats_extra_SOURCES) \
 	$(seglist_test_SOURCES) $(test_arrproc_SOURCES) \
 	$(test_funcs_SOURCES)
 am__can_run_installinfo = \
@@ -1124,9 +1123,12 @@ COSISTATICSOURCES = $(COSISOURCES) $(SD)/cosimain.cc $(libprogopt_la_SOURCES) $(
 COSIFLAGS = $(builddir)/coalescent.flags.txt
 MOSTLYCLEANFILES = $(COSIFLAGS)
 BOOSTRAND = $(srcdir)/ext/boost/libs/random/src/random_device.cpp $(srcdir)/ext/boost/boost/random/random_device.hpp
-recosimulate_SOURCES = $(srcdir)/recosim/recosim.cc $(srcdir)/recosim/gamma.hpp $(BOOSTRAND)
-recosimulate_CPPFLAGS = -I$(srcdir) -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
-recosimulate_LDFLAGS = -lm
+recosim_SOURCES = $(srcdir)/recosim/recosim.cc $(srcdir)/recosim/gamma.hpp $(BOOSTRAND)
+recosim_CPPFLAGS = -I$(srcdir) -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
+recosim_LDFLAGS = -lm
+
+# The programs below are used to extract a genetic map from a random region of the
+# 1000 Genomes genetic map.
 get_recomap_SOURCES = $(srcdir)/recosim/get_recomap.cc $(BOOSTRAND)
 get_recomap_CPPFLAGS = -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
 get_recomap_LDFLAGS = -lm
@@ -1390,9 +1392,9 @@ recomap_hapmap2$(EXEEXT): $(recomap_hapmap2_OBJECTS) $(recomap_hapmap2_DEPENDENC
 	@rm -f recomap_hapmap2$(EXEEXT)
 	$(AM_V_CXXLD)$(recomap_hapmap2_LINK) $(recomap_hapmap2_OBJECTS) $(recomap_hapmap2_LDADD) $(LIBS)
 
-recosimulate$(EXEEXT): $(recosimulate_OBJECTS) $(recosimulate_DEPENDENCIES) $(EXTRA_recosimulate_DEPENDENCIES) 
-	@rm -f recosimulate$(EXEEXT)
-	$(AM_V_CXXLD)$(recosimulate_LINK) $(recosimulate_OBJECTS) $(recosimulate_LDADD) $(LIBS)
+recosim$(EXEEXT): $(recosim_OBJECTS) $(recosim_DEPENDENCIES) $(EXTRA_recosim_DEPENDENCIES) 
+	@rm -f recosim$(EXEEXT)
+	$(AM_V_CXXLD)$(recosim_LINK) $(recosim_OBJECTS) $(recosim_LDADD) $(LIBS)
 
 sample_stats_extra$(EXEEXT): $(sample_stats_extra_OBJECTS) $(sample_stats_extra_DEPENDENCIES) $(EXTRA_sample_stats_extra_DEPENDENCIES) 
 	@rm -f sample_stats_extra$(EXEEXT)
@@ -1555,8 +1557,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ost_test_main-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recomap_hapmap2-random_device.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recomap_hapmap2-recomap_hapmap2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recosimulate-random_device.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recosimulate-recosim.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recosim-random_device.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recosim-recosim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sample_stats_extra-sample_stats_extra.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sample_stats_extra-tajd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/seglist_test-leafset-counts.Po@am__quote@
@@ -2677,33 +2679,33 @@ recomap_hapmap2-random_device.obj: $(srcdir)/ext/boost/libs/random/src/random_de
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recomap_hapmap2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recomap_hapmap2-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
 
-recosimulate-recosim.o: $(srcdir)/recosim/recosim.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosimulate-recosim.o -MD -MP -MF $(DEPDIR)/recosimulate-recosim.Tpo -c -o recosimulate-recosim.o `test -f '$(srcdir)/recosim/recosim.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/recosim.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosimulate-recosim.Tpo $(DEPDIR)/recosimulate-recosim.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/recosim.cc' object='recosimulate-recosim.o' libtool=no @AMDEPBACKSLASH@
+recosim-recosim.o: $(srcdir)/recosim/recosim.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosim_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosim-recosim.o -MD -MP -MF $(DEPDIR)/recosim-recosim.Tpo -c -o recosim-recosim.o `test -f '$(srcdir)/recosim/recosim.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/recosim.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosim-recosim.Tpo $(DEPDIR)/recosim-recosim.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/recosim.cc' object='recosim-recosim.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosimulate-recosim.o `test -f '$(srcdir)/recosim/recosim.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/recosim.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosim_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosim-recosim.o `test -f '$(srcdir)/recosim/recosim.cc' || echo '$(srcdir)/'`$(srcdir)/recosim/recosim.cc
 
-recosimulate-recosim.obj: $(srcdir)/recosim/recosim.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosimulate-recosim.obj -MD -MP -MF $(DEPDIR)/recosimulate-recosim.Tpo -c -o recosimulate-recosim.obj `if test -f '$(srcdir)/recosim/recosim.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/recosim.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recosim.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosimulate-recosim.Tpo $(DEPDIR)/recosimulate-recosim.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/recosim.cc' object='recosimulate-recosim.obj' libtool=no @AMDEPBACKSLASH@
+recosim-recosim.obj: $(srcdir)/recosim/recosim.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosim_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosim-recosim.obj -MD -MP -MF $(DEPDIR)/recosim-recosim.Tpo -c -o recosim-recosim.obj `if test -f '$(srcdir)/recosim/recosim.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/recosim.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recosim.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosim-recosim.Tpo $(DEPDIR)/recosim-recosim.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/recosim/recosim.cc' object='recosim-recosim.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosimulate-recosim.obj `if test -f '$(srcdir)/recosim/recosim.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/recosim.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recosim.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosim_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosim-recosim.obj `if test -f '$(srcdir)/recosim/recosim.cc'; then $(CYGPATH_W) '$(srcdir)/recosim/recosim.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/recosim/recosim.cc'; fi`
 
-recosimulate-random_device.o: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosimulate-random_device.o -MD -MP -MF $(DEPDIR)/recosimulate-random_device.Tpo -c -o recosimulate-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosimulate-random_device.Tpo $(DEPDIR)/recosimulate-random_device.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='recosimulate-random_device.o' libtool=no @AMDEPBACKSLASH@
+recosim-random_device.o: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosim_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosim-random_device.o -MD -MP -MF $(DEPDIR)/recosim-random_device.Tpo -c -o recosim-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosim-random_device.Tpo $(DEPDIR)/recosim-random_device.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='recosim-random_device.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosimulate-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosim_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosim-random_device.o `test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp' || echo '$(srcdir)/'`$(srcdir)/ext/boost/libs/random/src/random_device.cpp
 
-recosimulate-random_device.obj: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosimulate-random_device.obj -MD -MP -MF $(DEPDIR)/recosimulate-random_device.Tpo -c -o recosimulate-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosimulate-random_device.Tpo $(DEPDIR)/recosimulate-random_device.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='recosimulate-random_device.obj' libtool=no @AMDEPBACKSLASH@
+recosim-random_device.obj: $(srcdir)/ext/boost/libs/random/src/random_device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosim_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT recosim-random_device.obj -MD -MP -MF $(DEPDIR)/recosim-random_device.Tpo -c -o recosim-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recosim-random_device.Tpo $(DEPDIR)/recosim-random_device.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(srcdir)/ext/boost/libs/random/src/random_device.cpp' object='recosim-random_device.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosimulate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosimulate-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(recosim_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o recosim-random_device.obj `if test -f '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; then $(CYGPATH_W) '$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/ext/boost/libs/random/src/random_device.cpp'; fi`
 
 sample_stats_extra-sample_stats_extra.o: $(TD)/sample_stats_extra.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sample_stats_extra_CPPFLAGS) $(CPPFLAGS) $(sample_stats_extra_CXXFLAGS) $(CXXFLAGS) -MT sample_stats_extra-sample_stats_extra.o -MD -MP -MF $(DEPDIR)/sample_stats_extra-sample_stats_extra.Tpo -c -o sample_stats_extra-sample_stats_extra.o `test -f '$(TD)/sample_stats_extra.cc' || echo '$(srcdir)/'`$(TD)/sample_stats_extra.cc
