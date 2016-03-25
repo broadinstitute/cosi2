@@ -934,7 +934,7 @@ lib_LTLIBRARIES = libcosismart_ptr.la libcosiprogopt.la \
 	libcosichrono.la libcositimer.la libcosiserialization.la \
 	libcosiatomic.la libcosirandom.la libcosiutil.la libcosi.la
 noinst_LTLIBRARIES = 
-EXTRA_DIST = ext/boost examples doc \
+EXTRA_DIST = ext/boost examples doc release-info makedist.sh \
 	$(srcdir)/tests/testScripts/tests/model001/t/run.sh \
 	$(srcdir)/tests/testScripts/tests/model001/t_u_001/run.sh \
 	$(srcdir)/tests/testScripts/tests/model001/t_u_0001/run.sh \
@@ -3415,6 +3415,9 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	$(MAKE) $(AM_MAKEFLAGS) \
+	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
+	  dist-hook
 	-test -n "$(am__skip_mode_fix)" \
 	|| find "$(distdir)" -type d ! -perm -755 \
 		-exec chmod u+rwx,go+rx {} \; -o \
@@ -3673,20 +3676,21 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 	clean-checkPROGRAMS clean-cscope clean-generic \
 	clean-libLTLIBRARIES clean-libtool clean-noinstLTLIBRARIES \
 	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
-	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
-	distcheck distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distcleancheck distdir \
-	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-libLTLIBRARIES install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	recheck tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-libLTLIBRARIES
+	dist-gzip dist-hook dist-lzip dist-shar dist-tarZ dist-xz \
+	dist-zip distcheck distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags \
+	distcleancheck distdir distuninstallcheck dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am recheck tags tags-am \
+	uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-libLTLIBRARIES
 
 .PRECIOUS: Makefile
 
@@ -3722,12 +3726,8 @@ $(COSIFLAGS): $(builddir)/coalescent$(EXEEXT)
 
 all-local: $(COSIFLAGS)
 
-#BOOST_PROGRAM_OPTIONS_LIBS = libprogopt.la
-#lib_LTLIBRARIES += $(BOOST_PROGRAM_OPTIONS_LIBS) 
-#BOOST_DIR=$(srcdir)/ext/boost
-
-#PO=$(BOOST_DIR)/libs/program_options/src
-#libprogopt_la_SOURCES = $(PO)/cmdline.cpp $(PO)/config_file.cpp $(PO)/convert.cpp $(PO)/options_description.cpp $(PO)/parsers.cpp $(PO)/positional_options.cpp $(PO)/split.cpp $(PO)/utf8_codecvt_facet.cpp $(PO)/value_semantic.cpp $(PO)/variables_map.cpp $(PO)/winmain.cpp
+dist-hook:
+	$(srcdir)/makedist.sh $(srcdir) $(distdir)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
