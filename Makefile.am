@@ -3,7 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 lib_LTLIBRARIES=
 noinst_LTLIBRARIES=
 bin_PROGRAMS=
-EXTRA_DIST=ext/boost examples doc release-info makedist.sh
+EXTRA_DIST=ext/boost examples doc release-info makedist.sh README.org README.html
 TESTS=
 
 AM_CPPFLAGS = -I$(srcdir) -isystem $(srcdir)/ext/boost -DNDEBUG 
@@ -16,3 +16,4 @@ include $(srcdir)/tests/tests.am
 
 dist-hook:
 	$(srcdir)/makedist.sh $(srcdir) $(distdir)
+

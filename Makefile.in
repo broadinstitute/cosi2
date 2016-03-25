@@ -935,6 +935,7 @@ lib_LTLIBRARIES = libcosismart_ptr.la libcosiprogopt.la \
 	libcosiatomic.la libcosirandom.la libcosiutil.la libcosi.la
 noinst_LTLIBRARIES = 
 EXTRA_DIST = ext/boost examples doc release-info makedist.sh \
+	README.org README.html \
 	$(srcdir)/tests/testScripts/tests/model001/t/run.sh \
 	$(srcdir)/tests/testScripts/tests/model001/t_u_001/run.sh \
 	$(srcdir)/tests/testScripts/tests/model001/t_u_0001/run.sh \

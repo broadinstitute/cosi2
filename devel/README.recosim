@@ -1,0 +1,8 @@
+The cosi package is written in C and is available as a tar file,
+cosi_package.tar.  The code can be extracted from the tar file with
+the command "tar xfp cosi_package.tar".  Code is contained in three
+subdirectories: cosi/, cosi_rand/ and recomap.  Two working examples
+are included in the examples/ subdirectory.  The code compiles under
+gcc (with or without the -ansi flag) and is known to run on several
+platforms (alpha, Mac OS-X, linux).  Invoking "make" in the top-level
+directory should compile and link the executables.
