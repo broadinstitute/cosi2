@@ -1,0 +1,6 @@
+This directory contains information about this cosi release.
+git-commit.txt contains the git hash, and git-diff.txt contains the diff between
+the git commit in git-commit.txt and the working tree from which the release was built.
+
+
+

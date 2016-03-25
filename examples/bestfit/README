@@ -1,14 +1,27 @@
 This directory (bestfit) contains an example of the use of the cosi
 simulation, implementing the calibrated model for three human
-populations published in Genome Research (currently in press).  The
-script "run.pl" runs both the program for generating a random local
-recombination map ("recosim") and the coalescent program itself
-("coalescent").  "recosim" is controlled by the parameters in the file
+populations published in Genome Research (see Genome Res. 2005 Nov;15(11):1576-83.
+Calibrating a coalescent simulation of human genome sequence variation.
+Schaffner SF1, Foo C, Gabriel S, Reich D, Daly MJ, Altshuler D.).  
+
+To run this example, first copy the contents of this directory to a writeable
+directory, and make sure the compiled programs 'recosim' and 'coalescent' are in your PATH.
+Then, to generate the genetic map, run recosim:
+
+recosim recParams 250000
+
+(The second parameter specifies the length of the simulated region, and must match the value of
+the "length" parameter in the "params" file that is used by the program "coalescent".)
+This will write the genetic map to the file "model.test", as specified within the file "recParams".
+
+Then, run the simulation by running
+
+coalescent -p params -m
+
+"recosim" is controlled by the parameters in the file
 "recParams"; "coalescent" is controlled by the parameters in the file
 "params".  See the documentation directory for definitions of the 
-parameters.  The only other thing "run.pl" does (besides calling the two
-programs) is extract the sequence length to be simulated from the
-params file, to guarantee that the two programs use the same length.
+parameters.
 
 "recosim" outputs the recombination map in the file "model.test" (the
 name is set as a parameter in "recParams").  The regional
@@ -28,5 +41,3 @@ Out-of-Africa model of an ancestral population that splits into
 Africans and non-Africans, and then into Europeans and Asians; African
 Americans are modeled as a recent admixture of the African and
 European populations.
-
-

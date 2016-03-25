@@ -1,0 +1,5 @@
+A model based on 1000 genomes populations.
+The file model.test contains a genetic map extracted from a randomly chosen region
+of the 1000 genomes genetic map.
+
+To run: coalescent -p params -m .

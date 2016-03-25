@@ -322,9 +322,9 @@ ParamFileReader::file_get_data (FILE *fileptr, FILE *segfp)
 			break;
 		default:
 			ungetc(c, fileptr);
-			fscanf(fileptr, "%s", var);
+			(void)fscanf(fileptr, "%s", var);
 			file_killwhitespace(fileptr);
-			fgets(buffer, BUF_MAX, fileptr);
+			(void)fgets(buffer, BUF_MAX, fileptr);
 			//strcat( buffer, " " );  // make sure no error if eof
 			try {
 				try { file_proc_buff(var, buffer, segfp); }

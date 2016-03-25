@@ -6,22 +6,38 @@ and gene conversion.  It supports exact and approximate simulation modes.
 
 This is the user's manual for cosi2 coalescent simulator.
 
-*  Downloading and installing cosi2
+* Downloading and installing cosi2
 
-cosi2 can be downloaded from http://broadinstitute.org/~ilya/
+cosi2 can be downloaded from http://broadinstitute.org/mpg/cosi2 .
+
+Quick start instructions:
+
+#+BEGIN_EXAMPLE
+tar xvfz cosi-2.0.tar.gz
+cd cosi-2.0
+./configure
+make
+#+END_EXAMPLE
+
+Then,
+
+: coalescent -p paramfile -m
+
+will execute the simulation, writing results to standard output in ms simulator format.
 
 * Running cosi2
 
 The basic invocation format is
 
-coalescent -p paramfile -m
+: coalescent -p paramfile -m
 
-The -p paramfile option specifies the parameter file, which is a text file that describes the demographic model to be simulated. The -m option requests output to be written to stdout in the format of Richard Hudson's ms simulator (described here ; see
-section "The output").
+The -p paramfile option specifies the parameter file, which is a text file that describes the demographic model to be
+simulated. The -m option requests output to be written to stdout in the format of Richard Hudson's [[http://home.uchicago.edu/rhudson1/source/mksamples.html][ms simulator]].
 
 *** Format of the parameter file
 
-	The parameter file defines the population structure and other controlling parameters for the run, using keywords. Comments are indicated by "#" at the beginning of a line.
+	The parameter file defines the population structure and other controlling parameters for the run, using
+	keywords. Comments are indicated by "#" at the beginning of a line.
 
 ***** Specifying the simulated region
 
@@ -37,9 +53,18 @@ section "The output").
 
 		: recomb_file <file-name>
 
-		specifies the file describing the genetic map. The file has two columns, separated by whitespace. The first column gives a basepair position; the second column sets the crossover recombination rate, per generation, from that point until either the end
-		of the region or the position specified by the next line. The basepair positions in the first column must be in strictly increasing order. The first line of the genetic map file also specifies the recombination rate from the beginning of the region to
-		the basepair position of that line.
+		specifies the file describing the genetic map. The file has two columns, separated by whitespace. The first column
+		gives a basepair position; the second column sets the crossover recombination rate, per generation, from that point
+		until either the end of the region or the position specified by the next line. The basepair positions in the first
+		column must be in strictly increasing order. The first line of the genetic map file also specifies the recombination
+		rate from the beginning of the region to the basepair position of that line.  Thus a one-line genetic map file
+		specifies a constant recombination rate for the region.
+
+		The command-line parameter =-R= can be used to specify the genetic map file, overriding any specified in the
+		parameter file.
+
+		The program =recosim=, described later in this manual, can be used to generate a genetic map file with a
+		specified distribution of recombination hotspots.
 
 		Gene conversion is specified by the following parameters:
 
@@ -47,15 +72,26 @@ section "The output").
 		: gene_conversion_mean_tract_length <mean gene conversion tract length in bp>
 		: gene_conversion_min_tract_length <minimum gene conversion tract length in bp>
 
+		The parameter =gene_conversion_relative_rate= is a proportionality factor giving the ratio of the
+		gene conversion initiation rate to the crossover recombination rate.  If omitted, it is set to zero,
+		disabling gene conversion.  Gene conversion tract length is distributed geometrically, with the mean
+		given by =gene_conversion_mean_tract_length=; the distribution is sampled until a value of at least
+		=gene_conversion_min_tract_length= is obtained.
+
 ***** Specifying the populations
 
-		Any population that appears in the simulation, either as a source of samples or in the history of those samples, must be defined in the parameter file; at least one sampled population is required. The syntax for defining a population is
+		Any population that appears in the simulation, either as a source of samples or in the history of those samples,
+		must be defined in the parameter file; at least one sampled population is required. The syntax for defining a
+		population is
 
 		: pop_define <pop id> <label>
 		: pop_size <pop id> <size>
 		: sample_size <pop id> <n samples>
 
-		<pop id> is an integer ID of the population, used to refer to the population when specifying demographic events. <label> is human-readable name for the population (a string, with no spaces, and not put in quotes).
+		=<pop id>= is an integer ID of the population, used to refer to the population when specifying demographic
+		events. =<label>= is human-readable name for the population (a string, with no spaces, and not put in quotes).
+		Population size, here and elsewhere, is specified as the number of _diploids_ in the population.
+		Sample size is specified as the number of _haploid_ samples.
 
 		For example, the following entries
 
@@ -63,40 +99,81 @@ section "The output").
 		: pop_size 1 10000
 		: sample_size 1 50
 
-		define population 1 (with the label "European") and set the effective present-day population size to be 10,000 and the number of sampled chromosomes to be 50.
+		define population 1 (with the label "European") and set the effective present-day population size to be 10,000
+		diploid individuals and the number of sampled haploid chromosomes to be 50.
 
 ***** Specifying the demographic history
 
-		Parameters that define the demographic history of the populations are specified as follows. They can be supplied in any order.
+		Parameters that define the demographic history of the populations are specified as follows. They can be supplied in
+		any order.  In the entries below, the time =<T>= is measured in generations (which can be fractional) and increases
+		going into the past (present = 0). Labels are used only to provide documentation; they must be enclosed in double
+		quotes.  =<pop id>= denoes the integer population id from the =pop_define= line.  Population sizes are given
+		as the number of diploid individuals.
 
-		: pop_event migration_rate <label> <source pop id> <target pop id> <T> <probability of migration/chrom/gen>
-		: pop_event split <label> <source pop id> <new pop id> <T>
 		: pop_event change_size <label> <pop id> <T> <size for time > T>
+
+		Set the size of the population =<pop id>= from time =<T>= pastward.  The setting affects the population size
+		from time =<T>= pastward until the next (in the pastward direction) =pop_event= that affects population size.
+		Note that the size at generation 0 is set by a =pop_size= line when the population is defined.
+
 		: pop_event exp_change_size <label> <pop id> <Tend> <Tstart> <final size> <start size>
-		: pop_event bottleneck <label> <pop id> <T> <inbreeding coefficient> 
-		: pop_event admix <label> <admixed pop id> <source pop id> <T> <fraction of admixed chroms from source>
 
-		In these entries, the time =<T>= is measured in generations (which can be fractional) and increases going into the past
-		(present = 0). Labels are used only to provide human readable output. =change_size= sets the size for all times prior to T. A bottleneck
-		is a point-like reduction in population size. =exp_change_size= is an exponential change, e.g.
-
+		Specify exponential expansion (in the forward time sense) from size =<start size>= at generation
+		=<Tstart>= to size =<final size>= at generation =<Tend>=.  =<Tstart>= must be pastward of
+		(numerically greater than) =<Tend>=.  Population size pastward from =<Tstart>= remains =<start size>= until
+		changed by another =pop_event=.  For example,
+		
 		: pop_event exp_change_size "expansion" 1 50 500 10000 1000
 
-		represents an exponential population increase in population 1 that started 500 generations ago and ended 50 generations ago, increasing from 1000 to 10000. Prior to 500 generations, the size remains at 1000 (unless changed by another pop[event]
-		parameter); more recently than 50 generations ago, the population size is whatever was set by the =pop_size= command.
+		represents an exponential population increase in population 1 that started 500 generations ago and ended 50
+		generations ago, increasing from 1000 to 10000.
+
+		: pop_event bottleneck <label> <pop id> <T> <inbreeding coefficient>
+
+		defines a population bottleneck (point-like reduction in population size) in population =<pop id>= at time =<T>=,
+		with bottleneck strength given by =<inbreeding coefficient>=.
+		
+		: pop_event migration_rate <label> <source pop id> <target pop id> <T> <probability of migration/chrom/gen>
+
+		sets the migration rate from population =<source pop id>= to population =<new pop id>= from time =<T>= pastward,
+		as the probability of migration per chromosome per generation.  
+		
+		: pop_event split <label> <source pop id> <new pop id> <T>
+
+		specifies a population  split goint forward (population  join going pastward).  In the forward sense,
+		this specifies the origin of population =<new pop id>=, when it splits off from population =<source  pop id>=;
+		prior to time =<T>, the population =<new pop id>= does not exist (is empty).
+		
+		: pop_event admix <label> <admixed pop id> <source pop id> <T> <fraction of admixed chroms from source>
+
+		specifies an admixture event.
 
 		Specifying the selected sweep:
 
-		: pop_event sweep <pop> <Tend> <selection coefficient> <position of causal allele (0.0-1.0)> <present-day frequency of causal allele>
+		: pop_event sweep <pop> <Tend> <selection coefficient> <position of causal allele (0.0-1.0)> <freq at Tend>
 
-		pop gives the population in which the advantageous allele is born. =<Tend>= gives the generation at which sweep ends (in the forward-time sense). The position of the advantageous allele is specified as a floating-point number in the range 0.0-1.0,
-		giving its relative position within the simulated region (for example, 0.5 puts the advantageous allele in the middle
-		of the region). The of the advantageous allele at time =<Tend>= is specified as a number in the range 0.0-1.0 (not as a
-		chromosome count).
+		=<pop>= gives the population in which the advantageous allele is born. =<Tend>= gives the generation at which sweep
+		ends (in the forward-time sense). The position of the advantageous allele is specified as a floating-point number in
+		the range 0.0-1.0, giving its relative position within the simulated region (for example, 0.5 puts the advantageous
+		allele in the middle of the region). The frequency of the advantageous allele at time =<Tend>= is specified as a
+		number in the range 0.0-1.0 (not as a chromosome count).
+
+		
+***** Misc parameters
+
+		: random_seed <integer seed>
+
+		specifies the random seed used for the simulations.  This value can be overridden by the =-r= command-line option.
+
+		: infinite_sites yes
+
+		tells cosi to use the infinite-sites model.  This is the default with the new =ms= output format, but with the legacy
+		output format (described below) this option must be specified; otherwise, mutations are filtered so that at most one
+		lands within each basepair-length stretch of the simulated region.
 
 *** Command-line options
 
-	The following describes the main command-line options of cosi2.
+	The following describes the main command-line options of =cosi2=.
 
 #+BEGIN_EXAMPLE	
 	Specifying the model:
@@ -138,5 +215,129 @@ section "The output").
 
 #+END_EXAMPLE
 
-	Two working examples are included in the examples/ subdirectory.
+*** Output formats
+
+		The main output format, specified by the =-m= option, is that used by Richard Hudson's [[http://home.uchicago.edu/rhudson1/source/mksamples.html][ms simulator]] .
+		The samples are written to the standard output.
+
+		When using =-m=, the generation at which each mutation occurred can be additionally output by adding the -M option.
+    The mutation times are output following a "muttimes:" header on a line immediately after the "positions:" line of each
+    simulated sample.  (See ms documentation for details of ms output format).  Also, recombination locations can be output
+    by adding the =-L= option; recombination locations are then output following a "recomblocs: " header on a line after the
+    "positions" line, and after the "muttimes" line if present.  Precision (number of digits after the decimal point) of the
+    output may controlled by adding =-P <ndigits>= command-line option; it is especially useful when using recombination
+    hotspots, since many recombination locations will then share the first few decimal digits.
+
+		A legacy format, used by older versions of =cosi=, is also supported.  It is specified by the =-o= option.
+		If =-o basename= is specified, then for each population =<pop id>=,
+		the mutation locations are written to the file named =basename.pos-<pop id>= and the haplotypes are written
+		to =basename.hap-<pop id>=.  If multiple simulations are done in one run with the =-n= command-line option,
+		the simulation number is appended to =basename=.  In the =.hap-= files, '1' denotes the derived allele and '2'
+		the ancestral allele.  Note that in the legacy format, a finite-sites mutation model is used unless
+		=infinite_sites yes= is specified in the parameter file.
+
+*** Generating recombination maps using =recosim=
+
+		Usage: =recosim <parameter file name> <region size (bp)>=.
+		(Executing =recosim= without arguments prints the list of
+		valid parameters.)
+
+		Valid entries in the parameter file are as follows.  They can 
+		be in any order, and all are optional.
+
+		#+BEGIN_EXAMPLE
+    outfile <output file name>    [default="model.out"]
+    model <0,1>    [default=0]
+     model 0: uniform recombination, constant or drawn from distribution.
+     model 1: model 0 + gamma-distributed hotspots.
+    baserate <mean recomb (cM/Mb)>    [default=1.0]
+    distribution <recomb distr. file name>    [default=none (const value)]
+    space <mean hotspot spacing (bp)>    [default=9000]
+    distance_shape <gamma function shape param>    [default=1.0]
+    intensity_shape <gamma function shape param>    [default=0.3]
+    local_shape <gamma function shape param, local variation>    [default=0.3]
+    local_size <size of region of local variation (bp) (e.g. 100000)>    [default=50000000]
+    bkgd <fraction in flat bkgd>    [default=0.1]
+    random_seed <integer seed> (0=>picked by program based on time and PID) [default=0]
+		#+END_EXAMPLE	
+
+		If model 0 is selected, the recombination rate for the region will be
+		constant.  The constant value can be set directly, using the
+		=baserate= keyword, or alternatively the value can be chosen at random
+		from a distribution file supplied with the =distribution= keyword.
+		(Note: =distribution= overrides =baserate=.)  The format for the 
+		distribution file is three records per line:
+
+		: bin_start bin_end cumulative_fraction
+
+		Where =bin_start= and =bin_end= specify a range of recombination rates (in
+		cM/Mb) and the cumulative fraction is the probability that the
+		recombination rate lies within this or earlier bins.  Entries should
+		be in order of increasing rate; see
+		=examples/bestfit/autosomes_deCODE.distr= for an example.
+
+		If model 1 is selected, the recombination rate varies across the
+		region; the variation can be on both local and fine scales.  With this
+		model, the =baserate= or =distribution= parameters are still valid,
+		but they now set the expected value of the recombination rate in the
+		entire region, the value around which local rates vary.  A fraction of
+		the mean rate can be kept constant across the region, using the =bkgd=
+		parameter.  The remainder of the recombination rate varies locally in
+		windows across the region, with the size of the window controlled by
+		the parameter =local_size=; that is, if =local_size= is set to 100 kb, a
+		new value is chosen every 100 kb.  The value is chosen from a gamma
+		distribution (with shape parameter set by =local_shape=), with a mean
+		value determined by the regional rate (and the background fraction).
+		Within each window, recombination is clustered into point-like
+		hotspots of recombination.  These have a gamma-distributed intensity
+		with shape parameter =intensity_shape= (and mean determined by the
+		local rate), and a gamma-distributed spacing with shape parameter
+		=distance_shape= and mean set by parameter =space=.
+
+		With model=1 and a small value for =intensity_shape=, there is 
+		a small but extended tail at very high recombination rates; when
+		simulating long sequences, this can make the coalescent simulator take
+		orders of magnitude longer on a small fraction of runs.  I have
+		therefore found it useful to truncate the tail within recosim.  (There
+		is a commented-out line for doing so in the code.)
+
+		A final option is =random_seed=, which permits the user to specify a 
+		seed for the random number generator; this is useful for debugging or 
+		recreating a previous run.  If a seed of zero is supplied, or
+		the keyword is not found, a random seed will be generated from the 
+		time and process id of the job.  In any case, the random seed used is 
+		always output to stdout during execution.  
+
+		========================================================================
+
+		User-supplied recombination map
+
+		As an alternative to using =recosim=, you can supply your own recombination map to
+		=coalescent=; the (tab-delimited) file format is
+
+		: <position (kb)> <recomb prob/bp/generation>
+
+		Each line specifies the recombination rate that will be used from that
+		position until the next specified position, or the end of the
+		sequence.  The first line also specifies the recombination rate from the beginning
+		of the simulated region to that line's position.
+
+*** Examples
+
+	Some working examples are included in the =examples/= subdirectory.
+
+*** References
+
+		http://bioinformatics.oxfordjournals.org/content/30/23/3427
+
+		"Cosi2: an efficient simulator of exact and approximate coalescent with selection",
+		by Ilya Shlyakhter Pardis C. Sabeti and Stephen F. Schaffner,
+		Bioinformatics (2014) 30 (23): 3427-3429.  doi: 10.1093/bioinformatics/btu562 .
+
+*** Questions?
+
+		Please contact =ilya_shl@alum.mit.edu= .
+
+		
+	
 	

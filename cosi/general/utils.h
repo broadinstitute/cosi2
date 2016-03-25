@@ -106,6 +106,7 @@ typedef boost::error_info<struct tag_error_msg2,std::string> error_msg2;
 typedef boost::error_info<struct tag_error_msg3,std::string> error_msg3;
 typedef boost::error_info<struct tag_error_msg4,std::string> error_msg4;
 typedef boost::error_info<struct tag_error_msg5,std::string> error_msg5;
+typedef boost::error_info<struct tag_stage,std::string> error_stage;
 
 namespace util {
 
@@ -1041,6 +1042,11 @@ private:
 	using id3;													 \
 	using id4;													 \
 	using id5
+
+#define cosi_pkg_exception3( boost_ex, ex1, ex2, ex3 ) \
+	catch( ex1 const& e ) { BOOST_THROW_EXCEPTION( boost_ex << boost::errinfo_nested_exception( boost::copy_exception( e ) ) ); } \
+	catch( ex2 const& e ) { BOOST_THROW_EXCEPTION( boost_ex << boost::errinfo_nested_exception( boost::copy_exception( e ) ) ); } \
+	catch( ex3 const& e ) { BOOST_THROW_EXCEPTION( boost_ex << boost::errinfo_nested_exception( boost::copy_exception( e ) ) ); }
 
 #ifdef NDEBUG 
 #define COSI_IF_DEBUG(x)

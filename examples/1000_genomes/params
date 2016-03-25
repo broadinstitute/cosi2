@@ -4,8 +4,10 @@ length 250000
 # per bp per generation
 mutation_rate 2.36e-8
 
-gene_conversion_rate 4.5e-9
+gene_conversion_relative_rate 0.45
 
+# the recombination model was generated from a randomly picked region
+# of the 1000 genomes recombination map.
 recomb_file model.test
 
 pop_define 1 YRI
