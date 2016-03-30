@@ -8,7 +8,7 @@ To run this example, first copy the contents of this directory to a writeable
 directory, and make sure the compiled programs 'recosim' and 'coalescent' are in your PATH.
 Then, to generate the genetic map, run recosim:
 
-recosim recParams 250000
+recosimulate recParams 250000
 
 (The second parameter specifies the length of the simulated region, and must match the value of
 the "length" parameter in the "params" file that is used by the program "coalescent".)
@@ -18,12 +18,12 @@ Then, run the simulation by running
 
 coalescent -p params -m
 
-"recosim" is controlled by the parameters in the file
+"recosimulate" is controlled by the parameters in the file
 "recParams"; "coalescent" is controlled by the parameters in the file
 "params".  See the documentation directory for definitions of the 
 parameters.
 
-"recosim" outputs the recombination map in the file "model.test" (the
+"recosimulate" outputs the recombination map in the file "model.test" (the
 name is set as a parameter in "recParams").  The regional
 recombination rate is picked from a distribution found in
 "autosomes_deCODE.distr" (which is, not surprisingly, the distribution

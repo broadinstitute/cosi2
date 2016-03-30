@@ -238,9 +238,11 @@ simulated. The -m option requests output to be written to stdout in the format o
 
 *** Generating recombination maps using =recosim=
 
-		Usage: =recosim <parameter file name> <region size (bp)>=.
-		(Executing =recosim= without arguments prints the list of
-		valid parameters.)
+		Usage: =recosimulate <parameter file name> <region size (bp)>=.
+		(Executing =recosimulate= without arguments prints the list of
+		valid parameters.  Note that the binary name is =recosimulate=,
+		but the program is called =recosim= and its source is in the =recosim/=
+		subdirectory.)
 
 		Valid entries in the parameter file are as follows.  They can 
 		be in any order, and all are optional.
@@ -298,7 +300,7 @@ simulated. The -m option requests output to be written to stdout in the format o
 		a small but extended tail at very high recombination rates; when
 		simulating long sequences, this can make the coalescent simulator take
 		orders of magnitude longer on a small fraction of runs.  I have
-		therefore found it useful to truncate the tail within recosim.  (There
+		therefore found it useful to truncate the tail within =recosim=.  (There
 		is a commented-out line for doing so in the code.)
 
 		A final option is =random_seed=, which permits the user to specify a 
