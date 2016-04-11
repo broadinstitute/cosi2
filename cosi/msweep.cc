@@ -231,8 +231,8 @@ public:
 				 selPop = demography->dg_get_pop_by_name( pop_this );
 				 unsPop = demography->dg_get_pop_by_name( pop_othr );
 			 } else {
-				 popsize_sel = popsize_this;
-				 popsize_uns = popsize_othr;
+				 popsize_sel = popsize_othr;
+				 popsize_uns = popsize_this;
 				 selPop = demography->dg_get_pop_by_name( pop_othr );
 				 unsPop = demography->dg_get_pop_by_name( pop_this );
 			 }
