@@ -34,6 +34,7 @@
 #include <cosi/general/math/generalmath.h>
 #include <cosi/defs.h>
 #include <cosi/decls.h>
+#include <cosi/genmap.h>
 #include <cosi/basemodel.h>
 #include <cosi/node.h>
 #include <cosi/hooks.h>
@@ -101,7 +102,7 @@ public:
 	 COSI_DECL(SweepHook);
 	 SweepHookP sweepHook;
 
-	 MSweep( DemographyP demography_, BaseModelP baseModel_, RandGenP randGen_ ):
+	 MSweep( DemographyP demography_, GenMapP genMap_, BaseModelP baseModel_, RandGenP randGen_ ):
 		 demography( demography_ ), baseModel( baseModel_ ), randGen( randGen_ ) {
 
 		 selLeaves = make_empty_leafset();
@@ -185,6 +186,7 @@ public:
 			
 			 this->sweepModel = this->makeSweepModel( this->baseModel, *this->mtraj,
 																								sweepInfo.selPos, this->pop2sib );
+			 demography->getNodePool()->setSelPosGd( genMap_->getGdPos( sweepInfo.selPos ) );
 		 }  // if selCoeff nonzero
 		 else {
 				this->sweepModel = baseModel;
@@ -633,9 +635,9 @@ private:
 	 }
 };  // class MSweep
 
-MSweepP make_MSweep( DemographyP demography,
+MSweepP make_MSweep( DemographyP demography, GenMapP genMap,
 										 BaseModelP baseModel, RandGenP randGen ) {
-	return boost::make_shared<MSweep>( demography, baseModel, randGen );
+	return boost::make_shared<MSweep>( demography, genMap, baseModel, randGen );
 }
 
 ModuleP as_Module( MSweepP msweep ) { return msweep; }

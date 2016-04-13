@@ -12,7 +12,7 @@ namespace cosi {
 // * Class: MSweepP - implements functionality related to selected sweeps.
 
 // ** Ctor: make_MSweep - construct an MSweep object.
-MSweepP make_MSweep( DemographyP, BaseModelP, RandGenP );
+MSweepP make_MSweep( DemographyP, GenMapP, BaseModelP, RandGenP );
 
 // ** Fn: as_Module - cast this MSweep object to a Module
 ModuleP as_Module( MSweepP );

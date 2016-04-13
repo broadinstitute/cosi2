@@ -169,6 +169,8 @@ public:
 	 void setOutputMuts( bool_t outputMuts_ ) { outputMuts = outputMuts_; }
 	 void setMaxCoalDist( plen_t maxCoalDist_ );
 
+	 void setSelPosGd( gloc_t selPosGd_ ) { selPosGd = selPosGd_; }
+
 	 //
 	 // Method group: Manipulating <Nodes>
 	 //
@@ -288,6 +290,10 @@ private:
 	 // If true, we keep track of gene conversion rate for each node;
 	 // if false, we don't.
 	 bool_t enableGeneConv;
+
+	 // Field: selPosGd
+	 // If set, the genetic map location of the selected mutation.
+	 boost::optional<gloc_t> selPosGd;
 
 //	 boost::optional<loc_t> selPos;
 

@@ -435,6 +435,10 @@ glen_t NodePool::compute_node_recomb_rate( Node *n ) const {
 	gloc_t gd_end = genMap->getGdPos( segs_end );
 	gloc_t gd_beg = genMap->getGdPos( segs_beg );
 	PRINT2( gd_beg, gd_end );
+	if ( selPosGd ) {
+		if ( gd_beg > *selPosGd ) gd_beg = *selPosGd;
+		else if ( gd_end < *selPosGd ) gd_end = *selPosGd;
+	}
 	return gd_end - gd_beg;
 }
 
