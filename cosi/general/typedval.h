@@ -200,6 +200,11 @@ const factor_t ZERO_FACTOR(0.0);
 	inline TypeA operator/( const TypeR& r, const TypeB& b ) { return TypeA( ToDouble( r ) / ToDouble( b ) ); } \
 	inline TypeB operator/( const TypeR& r, const TypeA& a ) { return TypeB( ToDouble( r ) / ToDouble( a ) ); }
 
+#define COSI_DEFINE_TYPEDVAL_SQ(TypeA, TypeR)									\
+	inline TypeR operator*( const TypeA& a, const TypeA& b ) { return TypeR( ToDouble( a ) * ToDouble( b ) ); } \
+	inline TypeA operator/( const TypeR& r, const TypeA& b ) { return TypeA( ToDouble( r ) / ToDouble( b ) ); }
+
+
 // Multiplying a dimensionless <factor_t> by a <typed value> yields a value of the same type.
 template <typename T, typename V> inline T operator*( const factor_t& f, const TypedVal<T,V>& v ) { return T( ToDouble( f ) * ToDouble( v ) ); }
 template <typename T, typename V> inline T operator*( const TypedVal<T,V>& v, const factor_t& f ) { return T( ToDouble( f ) * ToDouble( v ) ); }
