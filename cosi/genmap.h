@@ -1,4 +1,6 @@
-/* $Id: recomb.h,v 1.3 2011/05/04 15:46:19 sfs Exp $ */
+// * genmap: representing the genetic map
+
+// * prelims
 
 #ifndef __INCLUDE_COSI_GENMAP_H
 #define __INCLUDE_COSI_GENMAP_H
@@ -15,24 +17,22 @@
 
 namespace cosi {
 
-template <typename TScale> struct scale_loc_type;
-template <typename TScale> struct scale_len_type;
-template <typename TScale> typename scale_loc_type<TScale>::type scale_min( const TScale& );
-template <typename TScale> typename scale_loc_type<TScale>::type scale_max( const TScale& );
-template <typename TScale> typename scale_len_type<TScale>::type scale_len( const TScale& s ) {
-	return scale_max( s ) - scale_min( s );
-}
+// template <typename TScale> struct scale_loc_type;
+// template <typename TScale> struct scale_len_type;
+// template <typename TScale> typename scale_loc_type<TScale>::type scale_min( const TScale& );
+// template <typename TScale> typename scale_loc_type<TScale>::type scale_max( const TScale& );
+// template <typename TScale> typename scale_len_type<TScale>::type scale_len( const TScale& s ) {
+// 	return scale_max( s ) - scale_min( s );
+// }
 
-template <typename TScaleIn, typename TScaleOut>
-typename scale_loc_type<TScaleOut>::type cvt( TScaleIn& scaleIn, TScaleOut& scaleOut,
-																							typename scale_loc_type<TScaleIn>::type x ) {
-	return scale_min( scaleOut ) + ( ( x - scale_min( scaleIn ) ) / scale_len( scaleIn ) ) * scale_len( scaleOut );
-}
+// template <typename TScaleIn, typename TScaleOut>
+// typename scale_loc_type<TScaleOut>::type cvt( TScaleIn& scaleIn, TScaleOut& scaleOut,
+// 																							typename scale_loc_type<TScaleIn>::type x ) {
+// 	return scale_min( scaleOut ) + ( ( x - scale_min( scaleIn ) ) / scale_len( scaleIn ) ) * scale_len( scaleOut );
+// }
 
 
-// Class: GenMap
-//
-// Keeps the correspondence between physical locations and genetic map locations. 
+// * Class: GenMap - Keeps the correspondence between physical locations and genetic map locations. 
 class GenMap: boost::noncopyable {
 	 // Types for representing physical distance (pd) and genetic distance (pd),
 	 // as locations (loc) or lengths (len), and in the original untis (orig: bp for pd,
@@ -75,16 +75,29 @@ public:
 		 return is_nan ? orig2norm_gd( pd2gd( norm2orig_pd( get_ploc( loc ) ) ) ) : loc.gdVal;
 	 }
 
+// ** Fn: getLoc - return a [[full loc]] given just the [[genetic loc]].
 	 loc_t getLoc( gloc_t gdPos ) const {
 		 return make_loc( get_ploc_from_gloc( gdPos ), gdPos );
 	 }
 
+// ** Fn: add - return a loc that is a given distance to the right of the given loc
+// Clamp the result to be within the simulated region.
 	 loc_t add( const loc_t& loc, const plen_t& plen ) const {
 		 ploc_t result_ploc = std::min( get_ploc( loc ) + plen, MAX_PLOC );
 		 return make_loc( result_ploc, orig2norm_gd( pd2gd( norm2orig_pd( result_ploc ) ) ) );
 	 }
+
+// ** Fn: sub - return a loc that is a given distance to the right of the given loc
+// Clamp the result to be within the simulated region.
 	 loc_t sub( const loc_t& loc, const plen_t& plen ) const {
 		 ploc_t result_ploc = std::max( get_ploc( loc ) - plen, MIN_PLOC );
+		 return make_loc( result_ploc, orig2norm_gd( pd2gd( norm2orig_pd( result_ploc ) ) ) );
+	 }
+
+// ** Fn: with_gloc - given a [[full loc]] that contains the physical loc but may not contain the genetic loc,
+// ensure that the genetic loc is included.
+	 loc_t with_gloc( const loc_t& loc ) const {
+		 ploc_t result_ploc = get_ploc(loc);
 		 return make_loc( result_ploc, orig2norm_gd( pd2gd( norm2orig_pd( result_ploc ) ) ) );
 	 }
 
