@@ -197,6 +197,9 @@ COSI_DEFINE_TYPEDVAL_MULT(gens_times_nchromPairs_float_t, nchromPairsInv_float_t
 
 
 COSI_DEFINE_TYPEDVAL_MULT(gens_times_popsize_float_t, prob_per_chrom_per_gen_t, factor_t);
+
+COSI_DEFINE_TYPEDVAL_REL(gens_sq_t);
+COSI_DEFINE_TYPEDVAL_SQ(gens_t,gens_sq_t);
 // COSI_DEFINE_TYPEDVAL_REL(prob_per_chrom_per_gen_integral_t);
 // COSI_DEFINE_TYPEDVAL_MULT(gens_t, prob_per_chrom_per_gen_t, prob_per_chrom_per_gen_integral_t);
 
