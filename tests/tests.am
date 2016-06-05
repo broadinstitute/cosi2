@@ -36,16 +36,6 @@ EXTRA_DIST += $(TD)/make_cosi_tests.py $(TD)/update_cosi_tests.py $(TD)/runtest.
 
 TESTS += seglist_test test_funcs
 
-if HAVE_PYTHON
-if HAVE_CMPDIST
-check_SCRIPTS += $(TD)/cmpdist.py $(TD)/runtest.py $(TD)/timecmd.sh
-endif
-endif
-
-#bin_PROGRAMS += test_random_access
-#test_random_access_SOURCES = test_random_access.cpp random_access_skip_list.h skip_list_detail.h test_types.h catch.hpp 
-#test_random_access_CXXFLAGS = -Wno-unknown-pragmas
-
 check_PROGRAMS += ost_test
 ost_test_SOURCES = $(TD)/ost_test.cpp $(SD)/general/datastruct/order_statistics.hpp $(SD)/general/utils.h \
 	$(SD)/general/utils.cc
