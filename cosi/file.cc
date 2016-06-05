@@ -27,6 +27,7 @@
 #include <cosi/geneconversion.h>
 #include <cosi/historical.h>
 #include <cosi/sweep.h>
+#include <cosi/basemodel.h>
 
 namespace cosi {
 

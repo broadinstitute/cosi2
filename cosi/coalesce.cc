@@ -125,6 +125,7 @@ pop_idx_t Coalesce::coalesce_pick_popindex_nonhomog() const {
 }  // namespace cosi
 
 #include <cosi/general/arrproc2.h>
+#include <cosi/basemodel.h>
 
 namespace cosi {
 namespace coal {

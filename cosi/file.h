@@ -9,7 +9,6 @@
 #include <cosi/defs.h>
 #include <cosi/decls.h>
 #include <cosi/geneconversion.h>
-#include <cosi/basemodel.h>
 
 namespace cosi {
 

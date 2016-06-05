@@ -8,7 +8,6 @@
 #include <cosi/general/arrproc2.h>
 #include <cosi/decls.h>
 #include <cosi/hooks.h>
-#include <cosi/basemodel.h>
 
 namespace cosi {
 

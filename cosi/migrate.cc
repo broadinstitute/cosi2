@@ -12,6 +12,7 @@
 #include <cosi/migrate.h>
 #include <cosi/demography.h>
 #include <cosi/pop.h>
+#include <cosi/basemodel.h>
 
 namespace cosi {
 

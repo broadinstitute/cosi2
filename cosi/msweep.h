@@ -4,7 +4,6 @@
 #include <vector>
 #include <cosi/general/utils.h>
 #include <cosi/decls.h>
-#include <cosi/basemodel.h>
 #include <cosi/leafset.h>
 
 namespace cosi {

@@ -15,7 +15,6 @@
 #include <cosi/general/math/generalmath.h>
 #include <cosi/general/math/cosirand.h>
 #include <cosi/general/arrproc2.h>
-#include <cosi/basemodel.h>
 
 namespace cosi {
 
