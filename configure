@@ -705,8 +705,6 @@ GITSTATE_FALSE
 GITSTATE_TRUE
 DEVOPTS_FALSE
 DEVOPTS_TRUE
-HAVE_CMPDIST_FALSE
-HAVE_CMPDIST_TRUE
 HAVE_PYTHON_FALSE
 HAVE_PYTHON_TRUE
 PYTHON_LIB
@@ -4307,15 +4305,6 @@ fi
 else
   HAVE_PYTHON_TRUE='#'
   HAVE_PYTHON_FALSE=
-fi
-
-
- if $srcdir/tests/cmpdist.py dummyfile -c 1; then
-  HAVE_CMPDIST_TRUE=
-  HAVE_CMPDIST_FALSE='#'
-else
-  HAVE_CMPDIST_TRUE='#'
-  HAVE_CMPDIST_FALSE=
 fi
 
 
@@ -16769,10 +16758,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_PYTHON_TRUE}" && test -z "${HAVE_PYTHON_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_PYTHON\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${HAVE_CMPDIST_TRUE}" && test -z "${HAVE_CMPDIST_FALSE}"; then
-  as_fn_error $? "conditional \"HAVE_CMPDIST\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEVOPTS_TRUE}" && test -z "${DEVOPTS_FALSE}"; then

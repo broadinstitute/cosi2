@@ -15,8 +15,6 @@ AM_INIT_AUTOMAKE([1.9 tar-pax parallel-tests -Wall])
 AX_PYTHON
 AM_CONDITIONAL([HAVE_PYTHON], [test x${PYTHON_BIN} != x])
 
-AM_CONDITIONAL([HAVE_CMPDIST], [$srcdir/tests/cmpdist.py dummyfile -c 1])
-
 #
 # Section: Optional features/modules
 #
