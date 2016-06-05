@@ -144,13 +144,12 @@ check_PROGRAMS = seglist_test$(EXEEXT) funcs_test$(EXEEXT) \
 	test_funcs$(EXEEXT) test_arrproc$(EXEEXT) ost_test$(EXEEXT) \
 	$(am__EXEEXT_2)
 XFAIL_TESTS =
-@HAVE_CMPDIST_TRUE@@HAVE_PYTHON_TRUE@am__append_1 = $(TD)/cmpdist.py $(TD)/runtest.py $(TD)/timecmd.sh
-@HAVE_GTEST_TRUE@am__append_2 = ost_test_main
+@HAVE_GTEST_TRUE@am__append_1 = ost_test_main
 
 #
 # Section: Development/experimental options
 #
-@HAVEROOT_TRUE@am__append_3 = cosiroot ldhist
+@HAVEROOT_TRUE@am__append_2 = cosiroot ldhist
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -216,8 +215,8 @@ am_libcosi_la_OBJECTS = libcosi_la-coalesce.lo \
 	libcosi_la-mutcontext.lo libcosi_la-condsnp.lo \
 	libcosi_la-hullmgr.lo libcosi_la-output_coal_data_cosi.lo \
 	libcosi_la-calc_pop_stats_cosi.lo libcosi_la-calc_Fst_cosi.lo \
-	$(am__objects_1) libcosi_la-leafset-tree.lo \
-	libcosi_la-leafset-counts.lo
+	libcosi_la-nthevt.lo $(am__objects_1) \
+	libcosi_la-leafset-tree.lo libcosi_la-leafset-counts.lo
 libcosi_la_OBJECTS = $(am_libcosi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -1070,7 +1069,7 @@ COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/fi
 	$(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
 	$(SD)/sweep.cc $(SD)/msweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
 	$(SD)/traj.cc $(SD)/cositop.cc $(SD)/mutcontext.cc \
-	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
+	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/nthevt.cc
 
 
 #if EHH
@@ -1102,8 +1101,9 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc \
 	$(SD)/coalescent.h $(SD)/mutlist.h \
 	$(SD)/output_coal_data_cosi.cc $(SD)/coal_data_cosi.h \
 	$(SD)/customstats.h $(SD)/calc_pop_stats_cosi.cc \
-	$(SD)/calc_Fst_cosi.cc $(SD)/module.h $(COSIUTILHEADERS) \
-	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc
+	$(SD)/calc_Fst_cosi.cc $(SD)/module.h $(SD)/nthevt.cc \
+	$(SD)/nthevt.h $(COSIUTILHEADERS) $(SD)/leafset-tree.cc \
+	$(SD)/leafset-counts.cc
 libcosi_la_CPPFLAGS = $(COSI_CPPFLAGS)
 libcosi_la_CXXFLAGS = $(COSI_CXXFLAGS)
 libcosi_la_LDFLAGS = $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
@@ -1136,7 +1136,7 @@ get_recomap_LDFLAGS = -lm
 recomap_hapmap2_SOURCES = $(srcdir)/recosim/recomap_hapmap2.cc $(BOOSTRAND)
 recomap_hapmap2_CPPFLAGS = -I$(srcdir)/ext/boost -DBOOST_ERROR_CODE_HEADER_ONLY
 recomap_hapmap2_LDFLAGS = -lm
-check_SCRIPTS = $(am__append_1)
+check_SCRIPTS = 
 TD = $(srcdir)/tests
 seglist_test_SOURCES = $(TD)/seglist_test.cc $(SD)/seglist.cc $(SD)/seglist.h $(SD)/leafset-tree.h \
 	$(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/leafset-counts.h \
@@ -1449,6 +1449,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-mutcontext.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-mutlist.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-node.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-nthevt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-output.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-output_coal_data_cosi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-pop.Plo@am__quote@
@@ -1860,6 +1861,13 @@ libcosi_la-calc_Fst_cosi.lo: $(SD)/calc_Fst_cosi.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/calc_Fst_cosi.cc' object='libcosi_la-calc_Fst_cosi.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-calc_Fst_cosi.lo `test -f '$(SD)/calc_Fst_cosi.cc' || echo '$(srcdir)/'`$(SD)/calc_Fst_cosi.cc
+
+libcosi_la-nthevt.lo: $(SD)/nthevt.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -MT libcosi_la-nthevt.lo -MD -MP -MF $(DEPDIR)/libcosi_la-nthevt.Tpo -c -o libcosi_la-nthevt.lo `test -f '$(SD)/nthevt.cc' || echo '$(srcdir)/'`$(SD)/nthevt.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_la-nthevt.Tpo $(DEPDIR)/libcosi_la-nthevt.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/nthevt.cc' object='libcosi_la-nthevt.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-nthevt.lo `test -f '$(SD)/nthevt.cc' || echo '$(srcdir)/'`$(SD)/nthevt.cc
 
 libcosi_la-leafset-tree.lo: $(SD)/leafset-tree.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -MT libcosi_la-leafset-tree.lo -MD -MP -MF $(DEPDIR)/libcosi_la-leafset-tree.Tpo -c -o libcosi_la-leafset-tree.lo `test -f '$(SD)/leafset-tree.cc' || echo '$(srcdir)/'`$(SD)/leafset-tree.cc

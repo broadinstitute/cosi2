@@ -21,7 +21,6 @@
 #include <boost/cstdint.hpp>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/move/unique_ptr.hpp>
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -88,7 +87,7 @@ public:
 	 DemographyP demography;
 
 // *** Field: mtraj - the frequency trajectory of the selected allele in each pop
-	boost::movelib::unique_ptr<mpop_traj_t> mtraj;
+	boost::shared_ptr<mpop_traj_t> mtraj;
 	 BaseModelP baseModel;
 	 BaseModelP sweepModel;
 
@@ -102,7 +101,7 @@ public:
 	 COSI_DECL(SweepHook);
 	 SweepHookP sweepHook;
 
-	 MSweep( DemographyP demography_, GenMapP genMap_, BaseModelP baseModel_, RandGenP randGen_ ):
+	 MSweep( DemographyP demography_, BaseModelP baseModel_, RandGenP randGen_ ):
 		 demography( demography_ ), baseModel( baseModel_ ), randGen( randGen_ ) {
 
 		 selLeaves = make_empty_leafset();
@@ -143,6 +142,18 @@ public:
 					this->mtraj = this->simulateTrajFwd( baseModel, fits, sweepInfo.selGen,
 																							 begFreqs, endFreqs,
 																							 *randGen, maxAttempts );
+
+			 if(0){
+				 std::cerr << "traj  is:\n";
+				 gens_t STEP(1);
+				 for ( genid gen = sweepInfo.selGen; gen >= genid(0); gen -= STEP ) {
+					 std::cerr << gen;
+					 cosi_for_map_values( traj, *mtraj ) {
+						 std::cerr << "\t" << traj( gen );
+					 } cosi_end_for;
+					 std::cerr << "\n";
+				 }
+			 }
 
 			 using util::operator<<;
 			 if ( getenv( "COSI_SAVE_TRAJ") ) {
@@ -185,13 +196,16 @@ public:
 			 // }
 			
 			 this->sweepModel = this->makeSweepModel( this->baseModel, *this->mtraj,
-																								sweepInfo.selPos, this->pop2sib );
-			 demography->getNodePool()->setSelPosGd( genMap_->getGdPos( sweepInfo.selPos ) );
+																								sweepInfo.selPos, this->pop2sib, this->randGen );
+			 demography->getNodePool()->setSelPos( sweepInfo.selPos );
 		 }  // if selCoeff nonzero
 		 else {
 				this->sweepModel = baseModel;
 				//std::cerr << "GOT NO SWEEP\n";
 		 }
+
+		 //std::cerr << "baseModel=" << *baseModel << "\n";
+		 //std::cerr << "sweepModel=" << *sweepModel << "\n";
 	 }  // MSweep()
 
 	 class SweepHook: public Hook {
@@ -256,7 +270,8 @@ public:
 //    and one for those carrying the unselected allele.  
 	 BaseModelP makeSweepModel( boost::shared_ptr<const BaseModel> baseModel,
 															mpop_traj_t const& pop2freqSelFn, loc_t selPos,
-															std::map< popid, popid >& pop2sib
+															std::map< popid, popid >& pop2sib, 
+															RandGenP randGen_
 															
 		 ) {
 		 BaseModelP sweepModel = boost::make_shared<BaseModel>();
@@ -264,6 +279,7 @@ public:
 		 int nextPopId = ToInt( baseModel->popInfos.rbegin()->first ) + 1;
 		 
 		 using namespace math;
+		 using util::at;
 //		 using boost::units::simplify_typename;
 		 
 		 for( BOOST_AUTO( pi, baseModel->popInfos.begin() );
@@ -278,8 +294,12 @@ public:
 			 nchroms_t sampSz = demography->find_pop_request( unsPop )->members;
 			 using boost::algorithm::clamp;
 			 //std::cerr << "unsPop=" << unsPop << " fn=" << util::at( pop2freqSelFn, unsPop ) << "\n";
-			 nchroms_t selSampleSize( clamp( int( util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) *
-																						ToDouble( sampSz ) ), 0, sampSz ) );
+
+			 freq_t selFreq = at( pop2freqSelFn, unsPop )( genid( 0. ) );
+			 //std::cerr << "unsPop=" << unsPop << " selPop=" << selPop << " selFreq=" << selFreq << "\n";
+			 boost::random::binomial_distribution<nchroms_t> bdist( sampSz, selFreq );
+
+			 nchroms_t selSampleSize = bdist(*randGen_);
 
 			 // std::cerr << "makeSweepModel: selPop=" << selPop << " unsPop=" << unsPop <<
 			 // 		" sampSz=" << sampSz << " frac=" << util::at( pop2freqSelFn, unsPop )( genid( 0. ) ) << "\n";
@@ -288,7 +308,8 @@ public:
 																				selSampleSize );
 			 nchroms_t unsSampleSize( sampSz - selSampleSize );
 			 demography->find_pop_request( unsPop )->members = unsSampleSize;
-			 //std::cerr << "selSampleSize=" << selSampleSize << " unsSampleSize=" << unsSampleSize << "\n";
+			 // std::cerr << "selPop=" << selPop << " unsPop=" << unsPop << " sampSz=" << sampSz << " selFreq=" << selFreq << 
+			 // 	 " selSampleSize=" << selSampleSize << " unsSampleSize=" << unsSampleSize << "\n";
 		 }
 		 sweepHook = boost::make_shared<SweepHook>( this, selPos );
 		 demography->addHook( sweepHook );
@@ -322,6 +343,7 @@ public:
 			 }
 
 			 genid selBegGen = freqSelFn.getPieces().begin()->first;
+			 //std::cerr << "selBegGen=" << selBegGen << "\n";
 
 			 {
 				 BOOST_AUTO( lb, popInfo.popSizeFn.getPieces().lower_bound( selBegGen ) );
@@ -363,7 +385,7 @@ public:
 //
 //  Note: some code adapted from simuPOP by Bo Peng et al
 	 template <typename URNG>
-	 static boost::movelib::unique_ptr<mpop_traj_t>
+	 static boost::shared_ptr<mpop_traj_t>
 	 simulateTrajFwd( boost::shared_ptr<const BaseModel> baseModel,
 										std::map<popid, std::map<genotype_t,double> > pop2fits,
 										genid begGen, std::map<popid,freq_t> begFreqs,
@@ -373,7 +395,7 @@ public:
 		 cosi_using5( util::at, std::map, boost::assign::insert, boost::adaptors::map_keys,
 									boost::range::push_back );
 		 
-		 boost::movelib::unique_ptr<mpop_traj_t> pop2freqSelFn( new mpop_traj_t );
+		 boost::shared_ptr<mpop_traj_t> pop2freqSelFn( new mpop_traj_t );
 
 		 std::vector<popid> pops;
 		 push_back( pops, baseModel->popInfos | map_keys );
@@ -519,7 +541,7 @@ public:
 		 }
 	 }
 
-	 static boost::movelib::unique_ptr<mpop_traj_t>
+	 static boost::shared_ptr<mpop_traj_t>
 	 loadTraj( filename_t fname ) {
 		 cosi_using5(std::vector,std::string,util::chkCond,boost::algorithm::starts_with,boost::filesystem::ifstream);
 		 cosi_using2(boost::lexical_cast,boost::bad_lexical_cast);
@@ -529,6 +551,10 @@ public:
 				 static ifstream is;
 				 static unsigned simId = 0;
 				 static vector<popid> col2pop(2,NULL_POPID);
+				 static boost::shared_ptr<mpop_traj_t> pop2freqSelFn;
+
+				 bool repeatTraj = (bool)getenv( "COSI_REPEAT_TRAJ" );
+
 
 				 ++simId;
 				 lineNo=0;
@@ -545,9 +571,15 @@ public:
 					 for( size_t i=2; i<titles.size(); ++i ) {
 						 chkCond( starts_with( titles[i], "selfreq_" ), "bad traj file header" );
 						 col2pop.push_back( lexical_cast<popid>( titles[i].substr( strlen("selfreq_") ) ) );
+						 //std::cerr << "col2pop.size=" << col2pop.size() << " back=" << col2pop.back() << "\n";
+					 }
+				 } else {
+					 if ( repeatTraj ) {
+						 //std::cerr << "returning repeatTraj\n";
+						 return pop2freqSelFn;
 					 }
 				 }
-				 boost::movelib::unique_ptr<mpop_traj_t> pop2freqSelFn( new mpop_traj_t );
+				 pop2freqSelFn.reset( new mpop_traj_t );
 				 vector<string> vals;
 				 genid lastGen(NULL_GEN);
 				 bool isFirst = true;
@@ -558,6 +590,7 @@ public:
 					 chkCond( vals.size() == col2pop.size(), "bad traj file line" );
 					 if ( vals[0] != simIdStr ) BOOST_THROW_EXCEPTION( cosi_io_error() << error_msg("wrong sim id") );
 					 genid gen = lexical_cast<genid>( vals[1] );
+					 //std::cerr << "gen=" << gen << " vals[2]=" << vals[2] << "\n";
 					 for( size_t i=2; i<vals.size(); ++i )
 							set( (*pop2freqSelFn)[ col2pop[i] ], gen, lexical_cast<freq_t>(vals[i]) );
 					 chkCond( isFirst || (gen < lastGen), "generations do not decrease" );
@@ -635,9 +668,8 @@ private:
 	 }
 };  // class MSweep
 
-MSweepP make_MSweep( DemographyP demography, GenMapP genMap,
-										 BaseModelP baseModel, RandGenP randGen ) {
-	return boost::make_shared<MSweep>( demography, genMap, baseModel, randGen );
+MSweepP make_MSweep( DemographyP demography, BaseModelP baseModel, RandGenP randGen ) {
+	return boost::make_shared<MSweep>( demography, baseModel, randGen );
 }
 
 ModuleP as_Module( MSweepP msweep ) { return msweep; }

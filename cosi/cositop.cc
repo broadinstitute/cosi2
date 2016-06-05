@@ -31,6 +31,7 @@
 #include <cosi/cosicfg.h>
 #include <cosi/customstats.h>
 #include <cosi/msweep.h>
+#include <cosi/nthevt.h>
 
 namespace cosi {
 

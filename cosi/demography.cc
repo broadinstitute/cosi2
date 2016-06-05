@@ -23,6 +23,7 @@
 #include <cosi/seglist.h>
 #include <cosi/mutate.h>
 #include <cosi/hooks.h>
+#include <cosi/nthevt.h>
 
 namespace cosi {
 
@@ -278,6 +279,7 @@ Demography::dg_coalesce_by_pop(Pop* popptr, genid gen, bool forceCoalescence )
 
 	ncoals++;
 
+	nthevt::record_evt(nthevt::EVT_COAL, gen);
 	if ( newnode ) {
 
 		/* Add the new coalesced node into the population, in place of its two child nodes */
@@ -354,6 +356,7 @@ void Demography::dg_recombine (Node *node, genid gen, loc_t loc, Node** nodes_ou
 
 		// seglist_add_straight_branch_length( newnode1->getSegs(), edge_len );
 		// seglist_add_straight_branch_length( newnode2->getSegs(), edge_len );
+		nthevt::record_evt(nthevt::EVT_RECOMB, gen);
 
 		dg_log (RECOMBINE, gen, node, newnode1, newnode2, popptr, get_loc( loc ) );
 	 
@@ -437,6 +440,7 @@ Demography::dg_migrate_one_chrom (Pop* from_popptr, Pop* to_popptr, genid gen)
   from_popptr->pop_remove_node (tempnode);
   to_popptr->pop_add_node (tempnode);
 
+	nthevt::record_evt(nthevt::EVT_MIGR, gen);
   dg_log(MOVE, gen, tempnode, from_popptr, to_popptr);
 }
 

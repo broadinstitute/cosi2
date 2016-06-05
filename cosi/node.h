@@ -169,7 +169,7 @@ public:
 	 void setOutputMuts( bool_t outputMuts_ ) { outputMuts = outputMuts_; }
 	 void setMaxCoalDist( plen_t maxCoalDist_ );
 
-	 void setSelPosGd( gloc_t selPosGd_ ) { selPosGd = selPosGd_; }
+	void setSelPos( loc_t selPos_ );
 
 	 //
 	 // Method group: Manipulating <Nodes>
@@ -293,7 +293,7 @@ private:
 
 	 // Field: selPosGd
 	 // If set, the genetic map location of the selected mutation.
-	 boost::optional<gloc_t> selPosGd;
+	 boost::optional<loc_t> selPos;
 
 //	 boost::optional<loc_t> selPos;
 

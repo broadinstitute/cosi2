@@ -184,7 +184,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	params->getHistEvents()->historical_setMigrate( migrate );
 	simulator->sim_setMigrate( migrate );
 
-	this->msweep = make_MSweep( demography, genMap, params->getBaseModel(), getRandGen() );
+	this->msweep = make_MSweep( demography, params->getBaseModel(), getRandGen() );
 
 	demography->dg_complete_initialization();
 

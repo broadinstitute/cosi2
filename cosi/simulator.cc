@@ -15,6 +15,7 @@
 #include <cosi/mutlist.h>
 #include <cosi/mutate.h>
 #include <cosi/sweep3.h>
+#include <cosi/nthevt.h>
 
 namespace cosi {
 
@@ -46,7 +47,16 @@ Simulator::sim_execute (void)
 	if ( getenv( "COSI_NEWSIM" ) ) {
 		genid INF(1e30);
 		genid gen( 0. );
+		int stepNum=0;
 		while( !demography->dg_done_coalescent() ) {
+			if(0){
+				++stepNum;
+				std::cerr << "stepNum=" << stepNum << " gen=" << gen << " npops=" << demography->dg_get_num_pops() << " ";
+				for ( int popIdx=0; popIdx < demography->dg_get_num_pops(); popIdx++ ) 
+					std::cerr << " " << demography->dg_get_pop_name_by_index(popIdx) << ":" << 
+						demography->dg_get_num_nodes_in_pop_by_index(popIdx);
+				std::cerr << "\n";
+			}
 			genid nextEvtTime = nextEventTime( arrProcs, gen, INF, *getRandGen() );
 			// std::cerr << "gen=" << gen << " nextEvt=" << nextEvtTime
 			// 					<< "nnodes1=" << demography->dg_get_pop_by_name( popid( 1 ) )->pop_get_num_nodes()
@@ -56,6 +66,7 @@ Simulator::sim_execute (void)
 
 			executeNextEvent( arrProcs, nextEvtTime, *getRandGen() );
 			gen = nextEvtTime;
+			if ( nthevt::skipRest() ) break;
 		}
 		return gen;
 	}
