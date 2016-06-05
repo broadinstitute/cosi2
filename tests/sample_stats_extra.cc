@@ -1494,7 +1494,7 @@ int sample_stats_main(int argc, char *argv[])
 	int nsam, i,  howmany  ;
 	const size_t MAX_LINE_LEN = 65000;
 	char **list, line[MAX_LINE_LEN+1];
-	//static filename_t simFile, outFile;
+	static filename_t /*simFile,*/ outFile;
 	FILE *pfin ;
 	nsnps_t   segsites;
 	int count;
@@ -1563,7 +1563,7 @@ int sample_stats_main(int argc, char *argv[])
 		 ("help,h", "produce help message")
 
 		 // ("simfile,i", po::value(&simFile), "name of file containing simulator output (default is to read from stdin)")
-		 // ("outfile,o", po::value(&outFile), "name of output file (default is to write to stdout)")
+		 ("outfile,o", po::value(&outFile), "name of output file (default is to write to stdout)")
 			 
 		 ("precision,p", po::value(&precision)->default_value(8), "specify precision of output")
 		 
@@ -1658,11 +1658,11 @@ int sample_stats_main(int argc, char *argv[])
 	// if ( !pfin ) throw std::logic_error( "sample_stats: could not open file " + simFile );
 	pfin = stdin;
 
-	std::ofstream outStrm;
+	static std::ofstream outStrm;
 	outStrm.exceptions( std::ios::failbit | std::ios::badbit );
-	// if ( !outFile.empty() ) outStrm.open( outFile.c_str() );
-	// ostream& fout = outFile.empty() ? cout : outStrm;
-	ostream& fout = cout;
+	if ( !outFile.empty() ) outStrm.open( outFile.c_str() );
+	ostream& fout = outFile.empty() ? cout : outStrm;
+	//ostream& fout = cout;
 
 	fout.precision( precision );
 	
@@ -1942,13 +1942,21 @@ int sample_stats_main(int argc, char *argv[])
 
 		nsnps_t n_under_10(0), n_10_to_40(0), n_over_40(0);
 		
+		int derCountsIdx=0;
 		ForEach( nchroms_t thisSnpCount, derCounts ) {
 			freq_t derFreq = ((double)thisSnpCount) / ((double)nsam);
 			freq_t ancFreq = 1.0 - derFreq;
 			freq_t minFreq = std::min( derFreq, ancFreq );
-			if ( minFreq < .1 ) ++n_under_10;
+			if ( trimmed_posit[derCountsIdx] == .5 ) {
+				std::cerr << "derFreq=" << derFreq << " ancFreq=" << ancFreq << " thisSnpCount=" << thisSnpCount << 
+					" nsam=" << nsam << " derCountsIdx=" << derCountsIdx << " pos=" << trimmed_posit[derCountsIdx] << "\n";
+			}
+			if ( minFreq < .1 ) {
+				++n_under_10;
+			}
 			else if ( minFreq <= .4 ) ++n_10_to_40;
 			else ++n_over_40;
+			++derCountsIdx;
 		}
 
 		if ( !ldSeps.empty() ) {
