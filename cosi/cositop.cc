@@ -48,7 +48,8 @@ void on_print(const std::string& str)
 
 CoSiMain::CoSiMain():
 	deltaTfactor( 1.0 ),
-	msOutput( False ), outputMutGens( False ), outputRecombLocs( False ), segfp( NULL ), logfp( NULL ), len_length(-1),
+	msOutput( False ),
+	outputMutGens( False ), outputRecombLocs( False ), segfp( NULL ), logfp( NULL ), len_length(-1),
 	sim_only( False ), showProgress( 0 ), verbose( False ), treeSizeOnly( False ), nsims( 1 ),
 	showNumRecombs( False ), outputTreeStats( False ), outputPrecision( 6 ), randSeed( 0 )
 #ifdef COSI_SUPPORT_COALAPX	
@@ -128,6 +129,7 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 	output_options.add_options()
 		 ( "outfilebase,o", po::value(&outfilebase), "base name for output files in cosi format" )
 		 ( "outms,m", po::bool_switch(&msOutput), "write output to stdout in ms format" )
+		 ( "tped", po::value(&tpedOutputPfx), "write output to stdout in tped format, to files pfx-rep-pop.tped" )
 		 ( "output-pop-info", po::bool_switch(&outputPopInfo), "output pop info in ms format output" )
 		 ( "output-gen-map", po::bool_switch(&outputGenMap), "output genetic map in ms format output" )
 		 ;
@@ -287,7 +289,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 
 		if ( simNum == 0 ) {
 			randGen = cosi.getRandGen();
-			if ( !msOutput ) std::cerr << "coalescent seed: " << randGen->getSeed() << "\n";
+			if ( !(msOutput || !tpedOutputPfx.empty() ) ) std::cerr << "coalescent seed: " << randGen->getSeed() << "\n";
 			if ( msOutput ) {
 				cout.precision( outputPrecision );
 				DemographyP dem = cosi.getDemography();
@@ -322,9 +324,9 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( showNumRecombs ) { PRINT( cosi.getRecomb()->getNumRecombs() ); }
 
 		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
-		if ( msOutput || !outfilebase.empty() || cosi.getCondSnpMgr() || customStats ) {
+		if ( msOutput || !tpedOutputPfx.empty() || !outfilebase.empty() || cosi.getCondSnpMgr() || customStats ) {
 			//PRINT( "freezing" );
-			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
+			muts->freeze( params->getInfSites() || msOutput || !tpedOutputPfx.empty() || cosi.getCondSnpMgr(),
 										cosi.getGenMap()->recomb_get_length() );
 			//PRINT( "frozen" );
 
@@ -352,7 +354,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 			}
 			
 			if ( msOutput ) 
-				 muts->print_haps_ms( cout, cosi.getDemography()->getSampleSizes(), cosi.getTreeStatsHook(),
+				 muts->print_haps_ms( cout, cosi.getTreeStatsHook(),
 															cosi.get_outputMutGens(),
 															outputRecombLocs ? &(cosi.getRecombRecorder()->getRecombLocs()) : NULL,
 															outputGenMap,
@@ -364,7 +366,10 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 															/*outputSimTimes ? &cpuTimer : */NULL,
 #endif															
 															outputEndGens ? &endGen : NULL,
-															cosi.leafOrder );
+															cosi.leavesInfo );
+			if ( !tpedOutputPfx.empty() ) 
+				muts->print_haps_tped( simNum, tpedOutputPfx,
+															 cosi.getGenMap(), outputPrecision, cosi.leavesInfo );
 		}  // output simulation results
 		// {
 		// 	boost::timer::cpu_times elapsed = cpuTimer.elapsed();

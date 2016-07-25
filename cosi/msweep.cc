@@ -9,7 +9,10 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
+#include <functional>
+#include <numeric>
 #include <boost/range/adaptor/map.hpp>
+#include <boost/range/numeric.hpp>
 #include <boost/array.hpp>
 #include <boost/assign/std/map.hpp>
 //#include <boost/units/detail/utility.hpp>
@@ -39,6 +42,7 @@
 #include <cosi/hooks.h>
 #include <cosi/mutlist.h>
 #include <cosi/demography.h>
+#include <cosi/leavesinfo.h>
 #include <cosi/msweep.h>
 #include <cosi/module.h>
 
@@ -676,36 +680,47 @@ ModuleP as_Module( MSweepP msweep ) { return msweep; }
 
 BaseModelP getSweepModel( MSweepP msweep ) { return msweep->sweepModel; }
 
-boost::shared_ptr< std::vector< leaf_id_t > >
-computeLeafOrder( MSweepP msweep ) {
+LeavesInfoP
+computeLeavesInfo( MSweepP msweep ) {
 	using util::STLContains;
-	boost::shared_ptr< std::vector< leaf_id_t > > leafOrder = boost::make_shared< std::vector< leaf_id_t > >();
+	LeavesInfoP leavesInfo;
 	BaseModelP sweepModel = msweep->sweepModel;
 	DemographyP demography = msweep->demography;
 	if ( msweep->baseModel->sweepInfo ) {
-		vector< leafset_p > const& pop2leaves = demography->get_pop2leaves();
+		leavesInfo = boost::make_shared< LeavesInfo >();
+		std::vector< leafset_p > const& pop2leaves = demography->get_pop2leaves();
+		std::vector< bool > leavesUsed( leafset_get_max_leaf_id() );
 		cosi_for_map_keys( pop, sweepModel->popInfos ) {
 			//std::cerr << "computeLeafOrder: pop=" << pop << "\n";
 			if ( STLContains( msweep->selPops, pop ) ) {
-				leafset_p leaves_sel = pop2leaves[ demography->dg_get_pop_index_by_name( pop ) ];
-				leafset_p leaves_uns =
-					 pop2leaves[ demography->dg_get_pop_index_by_name( util::at( msweep->pop2sib, pop ) ) ];
+				popid pop_sel = pop;
+				popid pop_uns = util::at( msweep->pop2sib, pop_sel );
+				leafset_p leaves_sel = pop2leaves[ demography->dg_get_pop_index_by_name( pop_sel ) ];
+				leafset_p leaves_uns = pop2leaves[ demography->dg_get_pop_index_by_name( pop_uns ) ];
 				//std::cerr << "leaves_sel=" << leaves_sel << " leaves_uns=" << leaves_uns << "\n";
 				msweep->selLeaves = leafset_union( msweep->selLeaves, leaves_sel );
 			
+				nchroms_t nleavesBef = leavesInfo->leafOrder.size();
 				COSI_FOR_LEAFSET( leaves_uns, leaf, {
-						leafOrder->push_back( leaf );
+						chkCond( (0<=leaf) && (((size_t)leaf)<leavesUsed.size()) && !leavesUsed[ leaf ], "leaf collision" );
+						leavesInfo->leafOrder.push_back( leaf );
+						leavesUsed[ leaf ] = true;
 					});
 				COSI_FOR_LEAFSET( leaves_sel, leaf, {
-						leafOrder->push_back( leaf );
+						chkCond(  (0<=leaf) && (((size_t)leaf)<leavesUsed.size()) && !leavesUsed[ leaf ], "leaf collision" );
+						leavesInfo->leafOrder.push_back( leaf );
+						leavesUsed[ leaf ] = true;
 					});
+				leavesInfo->sampleSizes.push_back( leavesInfo->leafOrder.size() - nleavesBef );
+				leavesInfo->popNames.push_back( pop_uns );
 			}  // if ( STLContains( msweep->selPops, pop ) )
 			else {
 				//std::cerr << "pop not in selPops\n";
 			}
 		} cosi_end_for;  // cosi_for_map( popInfo, sweepModel->popInfos )
+		chkCond( boost::accumulate( leavesUsed, true, std::logical_and<bool>() ), "some leaf unused" );
 	}
-	return leafOrder;
+	return leavesInfo;
 }  // computeLeafOrder()
 
 void addSelMut( MSweepP msweep, MutlistP muts ) {

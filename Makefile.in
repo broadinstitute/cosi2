@@ -215,7 +215,7 @@ am_libcosi_la_OBJECTS = libcosi_la-coalesce.lo \
 	libcosi_la-mutcontext.lo libcosi_la-condsnp.lo \
 	libcosi_la-hullmgr.lo libcosi_la-output_coal_data_cosi.lo \
 	libcosi_la-calc_pop_stats_cosi.lo libcosi_la-calc_Fst_cosi.lo \
-	libcosi_la-nthevt.lo $(am__objects_1) \
+	libcosi_la-nthevt.lo libcosi_la-leavesinfo.lo $(am__objects_1) \
 	libcosi_la-leafset-tree.lo libcosi_la-leafset-counts.lo
 libcosi_la_OBJECTS = $(am_libcosi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -1069,7 +1069,7 @@ COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/fi
 	$(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
 	$(SD)/sweep.cc $(SD)/msweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
 	$(SD)/traj.cc $(SD)/cositop.cc $(SD)/mutcontext.cc \
-	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/nthevt.cc
+	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/nthevt.cc $(SD)/leavesinfo.cc
 
 
 #if EHH
@@ -1102,7 +1102,8 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc \
 	$(SD)/output_coal_data_cosi.cc $(SD)/coal_data_cosi.h \
 	$(SD)/customstats.h $(SD)/calc_pop_stats_cosi.cc \
 	$(SD)/calc_Fst_cosi.cc $(SD)/module.h $(SD)/nthevt.cc \
-	$(SD)/nthevt.h $(COSIUTILHEADERS) $(SD)/leafset-tree.cc \
+	$(SD)/nthevt.h $(SD)/leavesinfo.cc $(SD)/leavesinfo.h \
+	$(COSIUTILHEADERS) $(SD)/leafset-tree.cc \
 	$(SD)/leafset-counts.cc
 libcosi_la_CPPFLAGS = $(COSI_CPPFLAGS)
 libcosi_la_CXXFLAGS = $(COSI_CXXFLAGS)
@@ -1443,6 +1444,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-leafset-counts.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-leafset-sizeonly.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-leafset-tree.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-leavesinfo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-migrate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-msweep.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcosi_la-mutate.Plo@am__quote@
@@ -1868,6 +1870,13 @@ libcosi_la-nthevt.lo: $(SD)/nthevt.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/nthevt.cc' object='libcosi_la-nthevt.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-nthevt.lo `test -f '$(SD)/nthevt.cc' || echo '$(srcdir)/'`$(SD)/nthevt.cc
+
+libcosi_la-leavesinfo.lo: $(SD)/leavesinfo.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -MT libcosi_la-leavesinfo.lo -MD -MP -MF $(DEPDIR)/libcosi_la-leavesinfo.Tpo -c -o libcosi_la-leavesinfo.lo `test -f '$(SD)/leavesinfo.cc' || echo '$(srcdir)/'`$(SD)/leavesinfo.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcosi_la-leavesinfo.Tpo $(DEPDIR)/libcosi_la-leavesinfo.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$(SD)/leavesinfo.cc' object='libcosi_la-leavesinfo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -c -o libcosi_la-leavesinfo.lo `test -f '$(SD)/leavesinfo.cc' || echo '$(srcdir)/'`$(SD)/leavesinfo.cc
 
 libcosi_la-leafset-tree.lo: $(SD)/leafset-tree.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcosi_la_CPPFLAGS) $(CPPFLAGS) $(libcosi_la_CXXFLAGS) $(CXXFLAGS) -MT libcosi_la-leafset-tree.lo -MD -MP -MF $(DEPDIR)/libcosi_la-leafset-tree.Tpo -c -o libcosi_la-leafset-tree.lo `test -f '$(SD)/leafset-tree.cc' || echo '$(srcdir)/'`$(SD)/leafset-tree.cc

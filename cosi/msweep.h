@@ -19,10 +19,10 @@ ModuleP as_Module( MSweepP );
 // ** Fn: getSweepModel - returns the [[sweep model]].
 BaseModelP getSweepModel( MSweepP );
 
-// ** Fn: computeLeafOrder - compute the proper order of [[leaves]] in the output.
+// ** Fn: computeLeavesInfo - compute the proper order of [[leaves]] in the output.
 //
-boost::shared_ptr< std::vector< leaf_id_t > >
-computeLeafOrder( MSweepP );
+LeavesInfoP
+computeLeavesInfo( MSweepP );
 
 // ** Fn: addSelMut - add to the list of mutations the selected mutation.
 void addSelMut( MSweepP, MutlistP );

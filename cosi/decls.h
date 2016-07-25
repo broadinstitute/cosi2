@@ -50,6 +50,7 @@ COSI_DECL(CondSnpDef); // defined in condsnp.h
 COSI_DECL(CondSnpMgr); // defined in condsnp.h
 
 COSI_DECL(BaseModel);  // defined in basemodel.h
+COSI_DECL(LeavesInfo);
 COSI_DECL(SweepInfo);
 COSI_DECL(MSweep); // defined in msweep.h
 COSI_DECL(Module); // defined in module.h

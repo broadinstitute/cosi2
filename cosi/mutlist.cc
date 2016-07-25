@@ -17,9 +17,11 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/foreach.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/io/ios_state.hpp>
 #include <cosi/general/utils.h>
 #include <cosi/mutlist.h>
+#include <cosi/leavesinfo.h>
 #include <cosi/stats.h>
 #include <cosi/genmap.h>
 
@@ -73,7 +75,8 @@ void Mutlist::freeze( bool_t inf_sites, len_bp_t length ) {
 	////////
 #ifndef COSI_LEAFSET_SIZEONLY
 #ifndef COSI_FREQONLY	
-	leaf2muts.resize( leafset_get_max_leaf_id() );
+	leaf2muts.clear();
+	leaf2muts.resize( leafset_get_max_leaf_id() + 1 );
 	for ( const_iterator it = muts.begin(); it != muts.end(); it++ ) {
 		std::vector< leaf_id_t > leavesVec;
 		leafset_get_leaves( it->leaves, std::back_inserter( leavesVec ) );
@@ -243,7 +246,7 @@ MutlistP Mutlist::loadFromMs( std::istream& is ) {
 //   recombLocs - if non-NULL, vector (unsorted) of recombination locations
 //   outputPrecision - number of decimal places in the output
 //
-void Mutlist::print_haps_ms( std::ostream& strm, const std::vector< nchroms_t >& sampleSizes,
+void Mutlist::print_haps_ms( std::ostream& strm,
 														 TreeStatsHookP treeStatsHook, bool_t outputMutGens,
 														 const std::vector< loc_t > *recombLocs,
 														 bool_t outputMutGlocs,
@@ -256,7 +259,9 @@ void Mutlist::print_haps_ms( std::ostream& strm, const std::vector< nchroms_t >&
 #endif														 
 														 *cpuTimer,
 														 const genid *endGen,
-														 boost::shared_ptr< const std::vector< leaf_id_t > > leafOrder ) const {
+														 LeavesInfoP leavesInfo ) const {
+
+	chkCond( ((bool)leavesInfo), "no leavesInfo" );
 
 	boost::io::ios_precision_saver strm_precision_saver( strm );
 	strm.precision( outputPrecision );
@@ -312,30 +317,30 @@ void Mutlist::print_haps_ms( std::ostream& strm, const std::vector< nchroms_t >&
 		}
 		//PRINT( "wrote header" );
 
-		std::vector< leaf_id_t > stdLeafOrder;
+		// std::vector< leaf_id_t > stdLeafOrder;
 
-		{
+		// {
 
-			leaf_id_t leaf = 0;
-			for (size_t ipop = 0; ipop < sampleSizes.size(); ipop++) {
-				if (sampleSizes[ipop] > 0) {
-					leaf_id_t popEndLeaf = leaf + sampleSizes[ipop];
+		// 	leaf_id_t leaf = 0;
+		// 	for (size_t ipop = 0; ipop < sampleSizes.size(); ipop++) {
+		// 		if (sampleSizes[ipop] > 0) {
+		// 			leaf_id_t popEndLeaf = leaf + sampleSizes[ipop];
 
-					for (; leaf < popEndLeaf; leaf++) {
-						stdLeafOrder.push_back( leaf );
-					}
-				}
-			}
-		}
-		if ( !leafOrder ) leafOrder = boost::make_shared< std::vector< leaf_id_t > >( stdLeafOrder );
+		// 			for (; leaf < popEndLeaf; leaf++) {
+		// 				stdLeafOrder.push_back( leaf );
+		// 			}
+		// 		}
+		// 	}
+		// }
+		// if ( !leafOrder ) leafOrder = boost::make_shared< std::vector< leaf_id_t > >( stdLeafOrder );
 		
-		BOOST_FOREACH( leaf_id_t leaf, *leafOrder ) {
+		BOOST_FOREACH( leaf_id_t leaf, leavesInfo->leafOrder ) {
 			memset( line.get(), '0', nmuts );
 			
 			const std::vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
 			ForEach( Mutlist::const_iterator m, leafMuts ) {
-				chkCond( 0 <= m->mutId );
-				chkCond( m->mutId < int(nmuts) );
+				chkCond( 0 <= m->mutId, "bad mutid" );
+				chkCond( m->mutId < int(nmuts), "bad mutid" );
 				
 				line.get()[ m->mutId ] = '1';
 			}
@@ -347,6 +352,114 @@ void Mutlist::print_haps_ms( std::ostream& strm, const std::vector< nchroms_t >&
 	strm << "\n";
 }  // print_haps_ms
 
+	///////
+
+//
+	void Mutlist::print_haps_tped( int simId, filename_t outFilePfx, 
+																 GenMapP genMap,
+																 int outputPrecision,
+																 LeavesInfoP leavesInfo ) const {
+
+	const Mutlist *mutlist = this;
+
+  //size_t nmuts = mutlist->size();
+
+// 	if ( treeStatsHook.get() ) {
+// 		treeStatsHook->printStats();
+// 	}
+// #ifndef COSI_NO_CPU_TIMER	
+// 	if ( cpuTimer ) {
+// 		boost::timer::cpu_times elapsed = cpuTimer->elapsed();
+// 		strm << "stat time " << (static_cast<double>( elapsed.user + elapsed.system ) / 1e8 ) << "\n";
+// 	}
+// #endif	
+// 	if ( endGen ) strm << "stat endGen " << *endGen << "\n";
+// 	if ( outputMutGlocs )
+// 		 strm << "region_len_cM: " << ( genMap->getRegionRecombRateAbs() * 100. ) << "\n";
+			 
+// 	strm << "segsites: " << nmuts << "\n";
+
+
+	nchroms_t nleaves = leavesInfo->leafOrder.size();
+	nchroms_t nleaves2 = 2*nleaves;
+
+	
+	std::vector<size_t> leaf2place( nleaves+1 );
+	for ( int i=0; i<nleaves; ++i )
+		leaf2place[ leavesInfo->leafOrder[i] ] = i;
+
+  using boost::filesystem::ofstream;
+
+	std::vector< ofstream > outfs( leavesInfo->popNames.size() );
+	for ( size_t k=0; k<leavesInfo->popNames.size(); ++k ) {
+		std::ostringstream fname;
+		fname << outFilePfx.native() << "_" << simId << "_" << leavesInfo->popNames[k] << ".tped";
+		outfs[k].open( fname.str(), ofstream::out | ofstream::trunc );
+		outfs[k].precision( outputPrecision );
+	}
+	
+	boost::scoped_array<char> line_orig( new char[ nleaves2 + 4 ] );
+	strcpy(  line_orig.get(), "" );
+	for ( leaf_id_t i = 0; i < nleaves; ++i )
+		strcat( line_orig.get(), " 1" );
+	strcat( line_orig.get(), "\n" );
+	boost::scoped_array<char> line( new char[ nleaves2 + 4 ] );
+	strcpy( line.get(), line_orig.get() );
+
+	if ( !mutlist->getMuts().empty() ) {
+
+		// strm << "positions:";
+		// ForEach( const Mut& m, mutlist->getMuts() ) strm << " " << get_loc( m.loc );
+		// strm << "\n";
+
+		// if ( outputMutGlocs ) {
+		// 	strm << "positions_genMap:";
+		// 	ForEach( const Mut& m, mutlist->getMuts() ) strm << " " << genMap->getGdPos( m.loc );
+		// 	strm << "\n";
+		// }
+
+		// if ( outputMutGens ) {
+		// 	strm << "muttimes:";
+		// 	ForEach( const Mut& m, mutlist->getMuts() ) strm << " " << m.gen;
+		// 	strm << "\n";
+		// }
+
+		// if ( recombLocs ) {
+		// 	std::vector< loc_t > recombLocsSorted( *recombLocs );
+		// 	std::sort( recombLocsSorted.begin(), recombLocsSorted.end() );
+		// 	strm << "recomblocs:";
+		// 	ForEach( const loc_t& recombLoc, recombLocsSorted )
+		// 		 strm << " " << get_ploc( recombLoc );
+		// 	strm << "\n";
+		// }
+		// //PRINT( "wrote header" );
+
+
+		
+		unsigned snpId=0;
+		std::vector< leaf_id_t > leavesVec;
+		for ( std::vector<Mut>::const_iterator m = getMuts().begin(); m != getMuts().end(); ++m, ++snpId ) {
+			memcpy( line.get(), line_orig.get(), nleaves2 );
+			leavesVec.clear();
+			leafset_get_leaves( m->leaves, std::back_inserter( leavesVec ) );
+			for ( std::vector<leaf_id_t>::const_iterator l_it = leavesVec.begin(); l_it != leavesVec.end(); ++l_it )
+				line.get()[ 2*(leaf2place[*l_it]) + 1 ] = '0';
+
+			const char *line_pop = line.get();
+			for ( size_t pop_idx = 0; pop_idx < leavesInfo->popNames.size(); ++pop_idx ) {
+				outfs[pop_idx] << "1 " << snpId << " " << genMap->norm2orig_gd(genMap->getGdPos( m->loc )) << " " << 
+					int(genMap->norm2orig_pd(get_ploc( m->loc ))) << " ";
+				size_t line_pop_sz = 2 * leavesInfo->sampleSizes[ pop_idx ];
+				std::string line_pop_str( line_pop, line_pop_sz );
+				outfs[pop_idx] << line_pop_str << "\n";
+				line_pop += line_pop_sz;
+			}
+			
+		}
+
+		//PRINT( "wrote haps" );
+	}
+}  // print_haps_tped
 
 
 // End class impl: Mutlist 

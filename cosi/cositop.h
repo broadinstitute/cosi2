@@ -43,6 +43,8 @@ private:
 	 // or in cosi format, written to separate .pos and .hap files for each population.
 	 bool_t msOutput;
 
+	 string tpedOutputPfx;
+
 	 // Field: outputMutGens
 	 // Whether to output mutation times.
 	 bool_t outputMutGens;

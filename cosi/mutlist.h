@@ -148,7 +148,7 @@ public:
 	 //   outputMutGens - whether to write out the time of each mutation
 	 //   recombLocs - if non-NULL, vector (unsorted) of recombination locations
 	 //   outputPrecision - number of decimal places in the output
-	 void print_haps_ms( std::ostream& strm, const vector< nchroms_t >& sampleSizes,
+	 void print_haps_ms( std::ostream& strm,
 											 TreeStatsHookP treeStatsHook,
 											 bool_t outputMutGens, const vector< loc_t > *recombLocs,
 											 bool_t outputMutGlocs,
@@ -161,8 +161,14 @@ public:
 #endif											 
 											 *cpuTimer,
 											 const genid *endGen,
-											 boost::shared_ptr< const std::vector< leaf_id_t > > leafOrder
+											 LeavesInfoP leavesInfo
 		 ) const;
+
+	void print_haps_tped( int simId, filename_t outFilePfx,
+												GenMapP genMap,
+												int outputPrecision,
+												LeavesInfoP leavesInfo ) const;
+
 
 	 // Method: loadFromMs
 	 // Load a Mutlist from the output of the ms simulator

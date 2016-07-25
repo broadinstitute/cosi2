@@ -39,6 +39,7 @@
 #include <cosi/condsnp.h>
 #include <cosi/output.h>
 #include <cosi/msweep.h>
+#include <cosi/leavesinfo.h>
 
 namespace cosi {
 
@@ -208,8 +209,10 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 		if ( params->getGeneConv2RecombRateRatio() > 0 ) 
 			 add( simulator->arrProcs, any_proc( setLabel( *geneConversion->createGeneConvProcesses(), "gcs" ) ) );
 
-		leafOrder = computeLeafOrder( msweep );
+		leavesInfo = computeLeavesInfo( msweep );
 	}
+	if ( !leavesInfo ) leavesInfo = computeStdLeavesInfo( demography->getSampleSizes(), 
+																												demography->getPopNames() );
 	
 	
 	sweep->sweep_setGenMap( genMap );

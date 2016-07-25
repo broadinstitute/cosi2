@@ -64,7 +64,7 @@ COSISOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/fi
 	$(SD)/seglist.cc $(SD)/segsumm.cc $(SD)/simulator.cc \
 	$(SD)/sweep.cc $(SD)/msweep.cc $(SD)/sweep1.cc $(SD)/sweep2.cc $(SD)/sweep3.cc $(SD)/genmap.cc $(SD)/stats.cc $(SD)/hooks.cc \
 	$(SD)/traj.cc $(SD)/cositop.cc $(SD)/mutcontext.cc \
-	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/nthevt.cc
+	$(SD)/condsnp.cc $(SD)/hullmgr.cc $(SD)/leafset-tree.cc $(SD)/leafset-counts.cc $(SD)/nthevt.cc $(SD)/leavesinfo.cc
 
 libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $(SD)/file.cc $(SD)/geneconversion.cc \
 	$(SD)/historical.cc $(SD)/basemodel.h \
@@ -79,6 +79,7 @@ libcosi_la_SOURCES = $(SD)/coalesce.cc $(SD)/coalescent.cc $(SD)/demography.cc $
 	$(SD)/mutcontext.h $(SD)/hullmgr.h $(SD)/hullmgr.cc \
 	$(SD)/cosicfg.h $(SD)/coalescent.h $(SD)/mutlist.h $(SD)/output_coal_data_cosi.cc $(SD)/coal_data_cosi.h $(SD)/customstats.h \
 	$(SD)/calc_pop_stats_cosi.cc $(SD)/calc_Fst_cosi.cc $(SD)/module.h $(SD)/nthevt.cc $(SD)/nthevt.h \
+	$(SD)/leavesinfo.cc $(SD)/leavesinfo.h \
 	$(COSIUTILHEADERS)
 
 libcosi_la_CPPFLAGS = $(COSI_CPPFLAGS)

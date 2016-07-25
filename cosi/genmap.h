@@ -105,7 +105,7 @@ public:
 
 	 void setStart( pd_orig_loc_t start );
 	 
-private:
+public:
 	 
 	 // Representation of the entire genetic map, as two parallel arrays of physical and genetic distance
 	 // from the start of the map.
