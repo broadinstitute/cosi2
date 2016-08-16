@@ -326,7 +326,7 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
 		if ( msOutput || !tpedOutputPfx.empty() || !outfilebase.empty() || cosi.getCondSnpMgr() || customStats ) {
 			//PRINT( "freezing" );
-			muts->freeze( params->getInfSites() || msOutput || !tpedOutputPfx.empty() || cosi.getCondSnpMgr(),
+			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
 										cosi.getGenMap()->recomb_get_length() );
 			//PRINT( "frozen" );
 

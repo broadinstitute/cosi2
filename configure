@@ -16037,41 +16037,7 @@ else
   :
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self" >&5
-$as_echo_n "checking whether C++ compiler accepts --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self... " >&6; }
-if ${ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$CXXFLAGS
-  CXXFLAGS="$CXXFLAGS  --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self=yes
-else
-  ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  CXXFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self" >&5
-$as_echo "$ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self" >&6; }
-if test "x$ax_cv_check_cxxflags____param_max_inline_insns_single_1000__Wno_unused_function__Wuninitialized__Wredundant_decls__Wpointer_arith__Wcast_qual__Wcast_align__Wformat__Woverloaded_virtual__Wstrict_null_sentinel__Wlogical_op___Wmissing_declarations__Winit_self" = xyes; then :
-  WARNFLAGS="${WARNFLAGS} --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self"
-else
-  :
-fi
-
+#AX_CHECK_COMPILE_FLAG([--param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self], [WARNFLAGS="${WARNFLAGS} --param max-inline-insns-single=1000 -Wno-unused-function -Wuninitialized -Wredundant-decls -Wpointer-arith -Wcast-qual -Wcast-align -Wformat -Woverloaded-virtual -Wstrict-null-sentinel -Wlogical-op 	-Wmissing-declarations -Winit-self"], [], [])
 
 #
 # LTO (link-time optimization)

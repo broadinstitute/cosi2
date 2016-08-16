@@ -434,7 +434,8 @@ void Mutlist::print_haps_ms( std::ostream& strm,
 		// }
 		// //PRINT( "wrote header" );
 
-
+		len_bp_t region_len_bp = genMap->recomb_get_length();
+		glen_cM_t region_len_cM = genMap->getRegionRecombRateAbs() * 100.0 ;
 		
 		unsigned snpId=0;
 		std::vector< leaf_id_t > leavesVec;
@@ -447,8 +448,8 @@ void Mutlist::print_haps_ms( std::ostream& strm,
 
 			const char *line_pop = line.get();
 			for ( size_t pop_idx = 0; pop_idx < leavesInfo->popNames.size(); ++pop_idx ) {
-				outfs[pop_idx] << "1 " << snpId << " " << genMap->norm2orig_gd(genMap->getGdPos( m->loc )) << " " << 
-					int(genMap->norm2orig_pd(get_ploc( m->loc ))) << " ";
+				outfs[pop_idx] << "1 " << snpId << " " << (region_len_cM * ToDouble(genMap->getGdPos( m->loc ))) << " " << 
+					int(region_len_bp * ToDouble(get_ploc( m->loc ))) << " ";
 				size_t line_pop_sz = 2 * leavesInfo->sampleSizes[ pop_idx ];
 				std::string line_pop_str( line_pop, line_pop_sz );
 				outfs[pop_idx] << line_pop_str << "\n";
