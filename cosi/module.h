@@ -38,52 +38,52 @@ class Module: HasRandGen {
 
 };  // class Module
 
-namespace dtl {
+// namespace dtl {
 
-namespace fusion = boost::fusion;
-namespace mpl = boost::mpl;
+// namespace fusion = boost::fusion;
+// namespace mpl = boost::mpl;
 
-template<typename T>
-struct make_out_signature_pair
-{
-	 typedef typename fusion::result_of::make_pair
-    <
-		 T, boost::shared_ptr<T>
-		 >::type type;
-};
+// template<typename T>
+// struct make_out_signature_pair
+// {
+// 	 typedef typename fusion::result_of::make_pair
+//     <
+// 		 T, boost::shared_ptr<T>
+// 		 >::type type;
+// };
 
-template<typename OutSignatures>
-struct module_map_impl
-{
-	 typedef typename fusion::result_of::as_map
-    <
-		 typename mpl::transform
-        <
-		 OutSignatures,
-			 make_out_signature_pair<mpl::_1>
-			 >::type
-		 >::type OutMap;
-};}  // namespace dtl
+// template<typename OutSignatures>
+// struct module_map_impl
+// {
+// 	 typedef typename fusion::result_of::as_map
+//     <
+// 		 typename mpl::transform
+//         <
+// 		 OutSignatures,
+// 			 make_out_signature_pair<mpl::_1>
+// 			 >::type
+// 		 >::type OutMap;
+// };}  // namespace dtl
 
 
 
-// * Class: Modules - a collection of modules.
-class Modules {
-public:
-	 typename dtl::module_map_impl< cosi_modules >::OutMap moduleMap;
+// // * Class: Modules - a collection of modules.
+// class Modules {
+// public:
+// 	 typename dtl::module_map_impl< cosi_modules >::OutMap moduleMap;
 
-	 template <typename M>
-	 boost::shared_ptr<M> addModule( boost::shared_ptr<M> mptr ) {
-		 boost::fusion::map<M>::at_key( moduleMap ) = mptr;
-		 return mptr;
-	 }
+// 	 template <typename M>
+// 	 boost::shared_ptr<M> addModule( boost::shared_ptr<M> mptr ) {
+// 		 boost::fusion::map<M>::at_key( moduleMap ) = mptr;
+// 		 return mptr;
+// 	 }
 
-};
+// };
 
-template <typename M>
-boost::shared_ptr<M> Module::getModule( Modules *mdls ) {
-	return boost::fusion::map<M>::at_key( mdls->moduleMap );
-}
+// // template <typename M>
+// // boost::shared_ptr<M> Module::getModule( Modules *mdls ) {
+// // 	return boost::fusion::map<M>::at_key( mdls->moduleMap );
+// // }
 
 
 }  // namespace cosi

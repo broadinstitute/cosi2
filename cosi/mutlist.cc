@@ -390,12 +390,12 @@ void Mutlist::print_haps_ms( std::ostream& strm,
 
   using boost::filesystem::ofstream;
 
-	std::vector< ofstream > outfs( leavesInfo->popNames.size() );
+	std::vector< boost::shared_ptr< ofstream > > outfs( leavesInfo->popNames.size() );
 	for ( size_t k=0; k<leavesInfo->popNames.size(); ++k ) {
 		std::ostringstream fname;
 		fname << outFilePfx.native() << "_" << simId << "_" << leavesInfo->popNames[k] << ".tped";
-		outfs[k].open( fname.str(), ofstream::out | ofstream::trunc );
-		outfs[k].precision( outputPrecision );
+		outfs[k] = boost::make_shared<ofstream>( fname.str(), ofstream::out | ofstream::trunc );
+		outfs[k]->precision( outputPrecision );
 	}
 	
 	boost::scoped_array<char> line_orig( new char[ nleaves2 + 4 ] );
@@ -448,11 +448,11 @@ void Mutlist::print_haps_ms( std::ostream& strm,
 
 			const char *line_pop = line.get();
 			for ( size_t pop_idx = 0; pop_idx < leavesInfo->popNames.size(); ++pop_idx ) {
-				outfs[pop_idx] << "1 " << snpId << " " << (region_len_cM * ToDouble(genMap->getGdPos( m->loc ))) << " " << 
+				(*outfs[pop_idx]) << "1 " << snpId << " " << (region_len_cM * ToDouble(genMap->getGdPos( m->loc ))) << " " << 
 					int(region_len_bp * ToDouble(get_ploc( m->loc ))) << " ";
 				size_t line_pop_sz = 2 * leavesInfo->sampleSizes[ pop_idx ];
 				std::string line_pop_str( line_pop, line_pop_sz );
-				outfs[pop_idx] << line_pop_str << "\n";
+				(*outfs[pop_idx]) << line_pop_str << "\n";
 				line_pop += line_pop_sz;
 			}
 			
