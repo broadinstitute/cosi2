@@ -415,12 +415,25 @@ private:
 // A selective sweep .
 class Event_MSweep: public HistEvents::Event {
 public:
+	struct standing_variation_tag { };
+
+
 	 Event_MSweep( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
 		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq;
+		 selBegPop = sweepPop;
+		 selBegGen = gen;
 		 if ( !( final_sel_freq.getMin() && final_sel_freq.getMax() &&
 						 0. <= final_sel_freq.getMin() && final_sel_freq.getMin() <= 1. ) )
 				BOOST_THROW_EXCEPTION( cosi_hist_event_error() << error_msg( "invalid final freq range" ) );
 	 }
+
+	Event_MSweep( HistEvents *histEvents_, istream& is, standing_variation_tag ): Event( histEvents_, is ) {
+		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq >> selBegPop >> selBegGen;
+		 if ( !( final_sel_freq.getMin() && final_sel_freq.getMax() &&
+						 0. <= final_sel_freq.getMin() && final_sel_freq.getMin() <= 1. ) )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error() << error_msg( "invalid final freq range" ) );
+	 }
+	
 
 	 // Method: typeStr
 	 // Return the string denoting this type of historical event in the <parameter file>.
@@ -428,10 +441,11 @@ public:
 	 // pop_event <eventType> <eventParams>
 	 // This method specifies the eventType.
 	 static const char *typeStr() { return "sweep_mult"; }
+	 static const char *typeStr_standing_variation() { return "sweep_mult_standing"; }
 	 virtual eventKind_t getEventKind() const { return E_SWEEP; }
 
 	 virtual void addToBaseModel( BaseModel& m ) const {
-		 setSweepInfo( m, gen, selCoeff, selPos, sweepPop, final_sel_freq  );
+		 setSweepInfo( m, gen, selCoeff, selPos, sweepPop, final_sel_freq, selBegPop, selBegGen  );
 	 }
 				
 	 virtual ~Event_MSweep();
@@ -440,7 +454,7 @@ public:
 			
 private:
 	 // Field: sweepPop
-	 // The population in which the sweep happens.
+	 // The population in which the selected allele is born
 	 popid sweepPop;
 
 	 // Field: selCoeff
@@ -454,6 +468,14 @@ private:
 	 // Field: final_sel_freq
 	 // The frequency of the derived allele at the end of the sweep.
 	 util::ValRange<freq_t> final_sel_freq;
+
+	 // Field: selBegGen
+	 // Generation when selection begins in `selBegPop`.
+	 genid selBegGen;
+
+	 // Field: selBegPop
+	 // Pop in which selection begins at time `selBegGen`
+	 popid selBegPop;
 };  // class Event_MSweep
 
 
@@ -839,6 +861,8 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 		else if ( typestr == sweep2::Event_SweepOnePop2_typeStr() ) event = sweep2::make_shared_Event_SweepOnePop2( this, is );
 		else if ( typestr == sweep3::Event_SweepOnePop3_typeStr() ) event = sweep3::make_shared_Event_SweepOnePop3( this, is );
 		else if (  typestr == Event_MSweep::typeStr() ) event.reset( new Event_MSweep( this, is ) );
+		else if (  typestr == Event_MSweep::typeStr_standing_variation() ) 
+			event.reset( new Event_MSweep( this, is, Event_MSweep::standing_variation_tag() ) );
 		else chkCond( False, "could not parse event %s", buffer );
 	} catch( ios::failure e ) {
 		chkCond( False, "could not parse event %s", buffer );

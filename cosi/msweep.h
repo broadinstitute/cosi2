@@ -29,7 +29,7 @@ void addSelMut( MSweepP, MutlistP );
 
 void setSweepInfo( BaseModel& baseModel,
 									 genid selGen, double selCoeff, loc_t selPos, popid selPop,
-									 util::ValRange<freq_t> final_sel_freq );
+									 util::ValRange<freq_t> final_sel_freq, popid selBegPop, genid selBegGen );
 
 }  // namespace cosi
 

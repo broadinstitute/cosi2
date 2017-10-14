@@ -60,19 +60,23 @@ struct SweepInfo {
 // *** Field: selPop - the population in which the selected allele is born.
 	 popid selPop;
 	 util::ValRange<freq_t> final_sel_freq;
+// *** Field: selBegPop - the population in which selection begins
+	popid selBegPop;
+// *** Field: selBegGen - the time at which selection begins
+	genid selBegGen;
 
 	 SweepInfo(): selGen( NULL_GEN ), selCoeff( 0.0 ), selPos( 0.0 ),
-								selPop( NULL_POPID ) { }
+								selPop( NULL_POPID ), selBegPop( NULL_POPID ), selBegGen( NULL_GEN ) { }
 	 SweepInfo( genid selGen_, double selCoeff_, loc_t selPos_, popid selPop_,
-							util::ValRange<freq_t> final_sel_freq_ ):
+							util::ValRange<freq_t> final_sel_freq_, popid selBegPop_, genid selBegGen_ ):
 		 selGen( selGen_ ), selCoeff( selCoeff_ ), selPos( selPos_ ), selPop( selPop_ ),
-		 final_sel_freq( final_sel_freq_ ) { }
+		 final_sel_freq( final_sel_freq_ ), selBegPop( selBegPop_ ), selBegGen( selBegGen_ ) { }
 };  // struct SweepInfo
 
 void setSweepInfo( BaseModel& baseModel,
 									 genid selGen, double selCoeff, loc_t selPos, popid selPop,
-									 util::ValRange<freq_t> final_sel_freq ) {
-	baseModel.sweepInfo = boost::make_shared<SweepInfo>( selGen, selCoeff, selPos, selPop, final_sel_freq );
+									 util::ValRange<freq_t> final_sel_freq, popid selBegPop, genid selBegGen ) {
+	baseModel.sweepInfo = boost::make_shared<SweepInfo>( selGen, selCoeff, selPos, selPop, final_sel_freq, selBegPop, selBegGen );
 }
 
 // ** class MSweep - implementation of selective sweep in multiple populations
@@ -145,6 +149,7 @@ public:
 			 } else
 					this->mtraj = this->simulateTrajFwd( baseModel, fits, sweepInfo.selGen,
 																							 begFreqs, endFreqs,
+																							 sweepInfo.selBegPop, sweepInfo.selBegGen, sweepInfo.selCoeff,
 																							 *randGen, maxAttempts );
 
 			 if(0){
@@ -394,6 +399,7 @@ public:
 										std::map<popid, std::map<genotype_t,double> > pop2fits,
 										genid begGen, std::map<popid,freq_t> begFreqs,
 										std::map<popid, util::ValRange<freq_t> > endFreqs,
+										popid selBegPop, genid selBegGen, double selCoeff,
 										URNG& urng,
 										size_t maxAttempts = 1000000 ) {
 		 cosi_using5( util::at, std::map, boost::assign::insert, boost::adaptors::map_keys,
@@ -455,14 +461,16 @@ public:
 					 { // if !trajFailed
 						 // for each pop, determine n_A and n_a after random mating and selection, but before migration
 						 std::map<popid, freq_t> b4mig_p_A;
-						 cosi_for_map( pop, fits, pop2fits ) {
-								 double fit_AA = at( fits, GT_AA ), fit_Aa = at( fits, GT_Aa ), fit_aa = at( fits, GT_aa );
-								 freq_t p_A = freqs[ pop ];
-								 freq_t p_a = 1. - p_A;
-								 double amt_A = p_A * p_A * fit_AA + p_A * p_a * fit_Aa;
-								 double amt_a = p_a * p_a * fit_aa + p_A * p_a * fit_Aa;
-								 b4mig_p_A[ pop ] = amt_A / ( amt_A + amt_a );
-								 if ( tr ) PRINT9( pop, fit_AA, fit_Aa, fit_aa, p_A, p_a, amt_A, amt_a, b4mig_p_A[pop] );
+						 cosi_for_map_keys( pop, pop2fits ) {
+							 double s = ( (pop == selBegPop) && (gen <= selBegGen) ) ? selCoeff : 0.;
+							 double fit_AA = 1.0 + s, fit_Aa = 1.0 + 0.5*s, fit_aa = 1.0;
+							 //	 double fit_AA = at( fits, GT_AA ), fit_Aa = at( fits, GT_Aa ), fit_aa = at( fits, GT_aa );
+							 freq_t p_A = freqs[ pop ];
+							 freq_t p_a = 1. - p_A;
+							 double amt_A = p_A * p_A * fit_AA + p_A * p_a * fit_Aa;
+							 double amt_a = p_a * p_a * fit_aa + p_A * p_a * fit_Aa;
+							 b4mig_p_A[ pop ] = amt_A / ( amt_A + amt_a );
+							 if ( tr ) PRINT9( pop, fit_AA, fit_Aa, fit_aa, p_A, p_a, amt_A, amt_a, b4mig_p_A[pop] );
 						 } cosi_end_for;
 
 						 // now model migration.
