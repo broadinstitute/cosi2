@@ -99,6 +99,7 @@ void ParamFileReader::file_read(boost::filesystem::path filename, FILE *segfp)
 /*********************************************************/
 
 void ParamFileReader::sample_distribution_values( char *buf ) {
+	bool sampled = false;
 	while ( char *beg = strstr( buf, "N(" ) ) {
 		double mean = NAN, std = NAN;
 		if ( sscanf( beg, "N(%lf,%lf)", &mean, &std ) != 2 )
@@ -109,6 +110,7 @@ void ParamFileReader::sample_distribution_values( char *buf ) {
 		s.replace( beg-buf, strchr( beg, ')' ) -  beg + 1,
 							 boost::lexical_cast<std::string>( nd( *getRandGen() ) ) );
 		strcpy( buf, s.c_str() );
+		sampled = true;
 	}
 
 	while ( char *beg = strstr( buf, "U(" ) ) {
@@ -122,6 +124,7 @@ void ParamFileReader::sample_distribution_values( char *buf ) {
 		s.replace( beg-buf, strchr( beg, ')' ) -  beg + 1,
 							 boost::lexical_cast<std::string>( ud( *getRandGen() ) ) );
 		strcpy( buf, s.c_str() );
+		sampled = true;
 	}
 
 	while ( char *beg = strstr( buf, "T(" ) ) {
@@ -135,6 +138,7 @@ void ParamFileReader::sample_distribution_values( char *buf ) {
 		s.replace( beg-buf, strchr( beg, ')' ) -  beg + 1,
 							 boost::lexical_cast<std::string>( td( *getRandGen() ) ) );
 		strcpy( buf, s.c_str() );
+		sampled = true;
 	}
 
 	while ( char *beg = strstr( buf, "E(" ) ) {
@@ -147,6 +151,11 @@ void ParamFileReader::sample_distribution_values( char *buf ) {
 		s.replace( beg-buf, strchr( beg, ')' ) -  beg + 1,
 							 boost::lexical_cast<std::string>( ed( *getRandGen() ) ) );
 		strcpy( buf, s.c_str() );
+		sampled = true;
+	}
+	if (sampled && getenv("COSI_SAVE_SAMPLED")) {
+		std::ofstream f(getenv("COSI_SAVE_SAMPLED"), std::ofstream::app);
+		f << buf;
 	}
 	
 }
