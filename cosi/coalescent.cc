@@ -120,16 +120,13 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	nodePool->setRandGen( getRandGen() );
 	params->getHistEvents()->setRandGen( getRandGen() );
 
-	if ( genMapToUse_ ) {
-		genMap = genMapToUse_;
-		if ( genmapRandomRegions )
-			 genMap->setStart( static_cast<len_bp_t>( getRandGen()->random_idx( genMapToUse_->recomb_get_map_length() - params->getLength() ) ) );
-	}
-	else {
-		 genMap = boost::make_shared<GenMap>( params->get_recombfileFN(), params->getLength() );
-		 if ( genMapShift > 0 ) genMap->setStart( genMapShift );
-	}
-
+	genMap = genMapToUse_ ? genMapToUse_ : boost::make_shared<GenMap>( params->get_recombfileFN(), params->getLength() );
+	if ( genmapRandomRegions ) {
+		util::chkCond( !(genMapShift > 0), "--genmapshift does not make sense with --genmapRandomRegions");
+		util::chkCond(genMap->recomb_get_map_length() > params->getLength(), "genetic map too short for --genmapRandomRegions");
+		genMap->setStart( static_cast<len_bp_t>( getRandGen()->random_idx( genMap->recomb_get_map_length() - params->getLength() ) ) );
+	} else if ( genMapShift > 0 )
+		genMap->setStart( genMapShift );
 
 	nodePool->setGenMap( genMap );
 	if ( params->getGeneConv2RecombRateRatio() == ZERO_FACTOR ) nodePool->setEnableGeneConv( False );
