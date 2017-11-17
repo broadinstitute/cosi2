@@ -186,13 +186,22 @@ public:
 					 f << "\n";
 				 }
 
-				 gens_t STEP(1);
-				 for ( genid gen = sweepInfo.selGen; gen >= genid(0); gen -= STEP ) {
-					 f << simNum << "\t" << gen;
-					 cosi_for_map_values( traj, *mtraj ) {
-						 f << "\t" << traj( gen );
-					 } cosi_end_for;
-					 f << "\n";
+				 if ( getenv("COSI_SAVE_TRAJ_SELBEG_ONLY") ) {
+						 f << simNum << "\t" << sweepInfo.selBegGen;
+						 cosi_for_map_values( traj, *mtraj ) {
+							 f << "\t" << traj( sweepInfo.selBegGen );
+						 } cosi_end_for;
+						 f << "\n";
+				 } else {
+
+					 gens_t STEP(1);
+					 for ( genid gen = sweepInfo.selGen; gen >= genid(0); gen -= STEP ) {
+						 f << simNum << "\t" << gen;
+						 cosi_for_map_values( traj, *mtraj ) {
+							 f << "\t" << traj( gen );
+						 } cosi_end_for;
+						 f << "\n";
+					 }
 				 }
 			 }
 			 // std::cerr.precision(8);
