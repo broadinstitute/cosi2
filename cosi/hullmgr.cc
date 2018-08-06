@@ -457,7 +457,9 @@ HullMgr::chooseRandomIntersection( RandGenP randGen ) const {
 	//nchroms_t hull1_pos = hull1.position();
 
 	ost_begs_t::const_iterator hull2 = hull1;
+#ifndef NDEBUG
 	ost_begs_t::const_iterator b = begs.begin();
+#endif
 	loc_t begCmp = loc_t( hull1->getBeg() - margin );
 	while ( true ) {
 		assert( hull2 != b );

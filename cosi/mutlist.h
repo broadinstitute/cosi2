@@ -35,9 +35,15 @@ using util::chkCond;
 class TreeStatsHook;
 typedef boost::shared_ptr<TreeStatsHook> TreeStatsHookP;
 
+typedef int mut_id_t;
+
+const mut_id_t NULL_MUT_ID(-1);
+
+
 // Struct: Mut
 // Represents one mutation.
 struct Mut: public boost::totally_ordered<Mut> {
+
 	 
 	 // Field: loc
 	 // The physical location of the mutation on the chromosome.
@@ -49,11 +55,11 @@ struct Mut: public boost::totally_ordered<Mut> {
 
 	 // Field: mutIdOrig
 	 // The number of this mutation, numbered from left to right of simulated region.
-	 int mutIdOrig;
+	 mut_id_t mutIdOrig;
 
 	 // Field: mutId
 	 // The id of this mutation, with any filtered out mutations removed.
-	 int mutId;
+	 mut_id_t mutId;
 
 	 // Field: gen
 	 // The generation in which this mutation was born.

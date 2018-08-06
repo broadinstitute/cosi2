@@ -32,8 +32,9 @@ namespace cosi {
 namespace lam = boost::lambda;
 namespace ran = boost::range;
 
-Mut::Mut() { }
+Mut::Mut(): mutIdOrig(NULL_MUT_ID), mutId(NULL_MUT_ID), gen(NULL_GEN), popName(NULL_POPID) { }
 Mut::Mut( loc_t loc_, leafset_p leaves_, genid gen_, popid popName_  ): loc( loc_ ), leaves( (leafset_p )leaves_ ),
+																																				mutIdOrig(NULL_MUT_ID), mutId(NULL_MUT_ID),
 																																				gen( gen_ ), popName( popName_ ) { }
 
 void Mutlist::addMut( loc_t loc, leafset_p leaves, genid gen, popid popName ) {
@@ -59,7 +60,7 @@ void Mutlist::freeze( bool_t inf_sites, len_bp_t length ) {
 
 	std::sort( muts.begin(), muts.end() );
 
-  int i = 0;
+  mut_id_t i = 0;
   for ( iterator mi = muts.begin(); mi != muts.end(); mi++, i++ )
 		 mi->mutIdOrig = i;
 
