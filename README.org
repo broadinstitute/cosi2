@@ -1,6 +1,8 @@
 #+TITLE: cosi2: Efficient simulator of exact and approximate coalescent with selection
 #+AUTHOR: Ilya Shlyakhter, Pardis C. Sabeti, Stephen F. Schaffner
 
+[[https://travis-ci.com/broadinstitute/cosi2.svg?branch=master]]
+
 cosi2 is an efficient coalescent simulator with support for selection, population structure, variable recombination rates,
 and gene conversion.  It supports exact and approximate simulation modes.
 
