@@ -12,3 +12,17 @@ libtool
 config.log
 config.status
 README.html
+*.log
+*.trs
+cosi/.dir-locals.el
+coalescent
+coalescent.flags.txt
+funcs_test
+get_recomap
+ost_test
+recomap_hapmap2
+recosimulate
+sample_stats_extra
+seglist_test
+test_arrproc
+test_funcs
