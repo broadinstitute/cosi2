@@ -332,9 +332,11 @@ ParamFileReader::file_get_data (FILE *fileptr, FILE *segfp)
 			break;
 		default:
 			ungetc(c, fileptr);
-			(void)fscanf(fileptr, "%s", var);
+			int n_read = fscanf(fileptr, "%s", var);
+			chkCond(n_read == 1, "error reading parameter file");
 			file_killwhitespace(fileptr);
-			(void)fgets(buffer, BUF_MAX, fileptr);
+			char *fgets_resullt = fgets(buffer, BUF_MAX, fileptr);
+			chkCond(fgets_result == buffer, "error reading parameter file");
 			//strcat( buffer, " " );  // make sure no error if eof
 			try {
 				try { file_proc_buff(var, buffer, segfp); }
