@@ -5,7 +5,7 @@
 #
 
 AC_PREREQ([2.68])
-AC_INIT([cosi], [2.3.0rc1], [ilya_shl@alum.mit.edu])
+AC_INIT([cosi], [2.3.1], [ilya_shl@alum.mit.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.9 tar-pax parallel-tests -Wall])

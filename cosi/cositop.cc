@@ -66,7 +66,7 @@ CoSiMain::CoSiMain():
 void CoSiMain::printCompileOptions() {
 	using std::cerr;
 
-	cerr << "cosi coalescent simulator, version 2.3.0rc4\n\n";
+	cerr << "cosi coalescent simulator, version 2.3.1\n\n";
 	cerr << "Compile-time options:\n";
 
 	cerr << "   COSI_SUPPORT_COALAPX (support for approximating the coalescent): " <<
