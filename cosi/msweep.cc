@@ -204,6 +204,43 @@ public:
 					 }
 				 }
 			 }
+
+
+			 if ( getenv( "COSI_SAVE_SWEEP_INFO") ) {
+
+				 static int simNum = 0;
+				 ++simNum;
+
+				 std::ofstream f;
+
+				 f.exceptions( std::ios::failbit | std::ios::badbit );
+				 std::ofstream::openmode mode = std::ofstream::out;
+				 if ( simNum > 1 ) mode = std::ofstream::out | std::ofstream::app;
+				 f.open( getenv( "COSI_SAVE_SWEEP_INFO"), mode );
+				 f.precision(12);
+
+				 // if ( simNum == 1 ) {
+				 // 	 f << "sim\tgen";
+				 // 	 cosi_for_map_keys( pop, *mtraj ) {
+				 // 		 f << "\tselfreq_" << pop;
+				 // 	 } cosi_end_for;
+				 // 	 f << "\n";
+				 // }
+
+				 {
+					 f << simNum << "\t" 
+						 << sweepInfo.selPop << "\t" 
+						 << sweepInfo.selBegGen << "\t"
+						 << sweepInfo.selCoeff << "\t"
+						 << sweepInfo.final_sel_freq << "\t";
+					 cosi_for_map( pop, traj, *mtraj ) {
+						 if ( pop == sweepInfo.selPop ) 
+							 f << traj( genid(0) );
+					 } cosi_end_for;
+					 f << "\n";
+				 }
+			 }
+
 			 // std::cerr.precision(8);
 			 // std::cerr << "got  traj: " << *this->mtraj << "\n";
 
