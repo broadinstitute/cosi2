@@ -230,11 +230,12 @@ public:
 				 {
 					 f << simNum << "\t" 
 						 << sweepInfo.selPop << "\t" 
+						 << sweepInfo.selGen << "\t"
+						 << sweepInfo.selBegPop << "\t"
 						 << sweepInfo.selBegGen << "\t"
 						 << sweepInfo.selCoeff << "\t"
-						 << sweepInfo.final_sel_freq << "\t";
 					 cosi_for_map( pop, traj, *mtraj ) {
-						 if ( pop == sweepInfo.selPop ) 
+						 if ( pop == sweepInfo.selBegPop ) 
 							 f << traj( genid(0) );
 					 } cosi_end_for;
 					 f << "\n";
