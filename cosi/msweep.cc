@@ -233,7 +233,8 @@ public:
 						 << sweepInfo.selGen << "\t"
 						 << sweepInfo.selBegPop << "\t"
 						 << sweepInfo.selBegGen << "\t"
-						 << sweepInfo.selCoeff << "\t"
+						 << sweepInfo.selCoeff << "\t";
+
 					 cosi_for_map( pop, traj, *mtraj ) {
 						 if ( pop == sweepInfo.selBegPop ) 
 							 f << traj( genid(0) );
