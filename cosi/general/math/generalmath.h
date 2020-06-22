@@ -1053,6 +1053,10 @@ public:
 	 }
 	 Function( Function const& f ):
 		 pieces( f.pieces ) { }
+
+	 Function operator=( Function const& f ) {
+		 pieces = f.pieces;
+	 }
    
 	 // template <typename TDomain2>
 	 // void addPiece( TDomain2 x,
