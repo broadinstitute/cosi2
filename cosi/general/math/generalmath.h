@@ -1051,12 +1051,6 @@ public:
 		 BOOST_STATIC_ASSERT(( boost::is_convertible< range_value_type,
 													 typename pieces_type::value_type >::value ));
 	 }
-	 Function( Function const& f ):
-		 pieces( f.pieces ) { }
-
-	 Function operator=( Function const& f ) {
-		 pieces = f.pieces;
-	 }
    
 	 // template <typename TDomain2>
 	 // void addPiece( TDomain2 x,
