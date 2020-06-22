@@ -25,7 +25,7 @@ TrajFromFile::TrajFromFile( filename_t fname, genid firstGen_, freq_t firstFreq_
 			freq_t a_freq;
 			trajStrm >> a_gen >> a_freq;
 			traj.insert( std::make_pair( a_gen, a_freq ) );
-		} catch( std::ifstream::failure e ) {
+		} catch( const std::ifstream::failure& ) {
 			break;
 		}
 	}

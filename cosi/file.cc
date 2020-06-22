@@ -342,11 +342,11 @@ ParamFileReader::file_get_data (FILE *fileptr, FILE *segfp)
 			}
 			try {
 				try { file_proc_buff(var, buffer, segfp); }
-				catch( const std::ios_base::failure& e ) {
+				catch( const std::ios_base::failure& ) {
 					BOOST_THROW_EXCEPTION( cosi_param_file_error()
 																 << boost::errinfo_errno( errno ) );
 				}
-				catch( std::exception const& e ) {
+				catch( const std::exception& e ) {
 
 					std::cerr << "genMap::readFrom - caught UNKNOWN exception of type " <<
 						 typeid( e ).name() << " demangled " << 

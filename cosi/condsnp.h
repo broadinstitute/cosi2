@@ -68,7 +68,7 @@ public:
 					 pop2cond.insert( make_pair( lexical_cast< popid >( condParts.front() ), util::ValRange<nchroms_t>( condParts.back() ) ) );
 				 }
 			 }
-		 } catch( std::exception& e ) {
+		 } catch( const std::exception& e ) {
 			 std::cerr << "error: " << e.what() << "\n";
 		 }
 		 

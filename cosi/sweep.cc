@@ -93,7 +93,7 @@ void Sweep::sweep_load_traj() {
 			genid gen;
 			freq_t freq;
 			try { f >> gen >> freq; }
-			catch( std::ios::failure fe ) { break; }
+			catch( const std::ios::failure&  ) { break; }
 			//PRINT2( gen, freq );
 			selAlleleFreqTraj.addPt( gen, freq );
 		}
