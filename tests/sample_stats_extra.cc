@@ -1602,7 +1602,7 @@ int sample_stats_main(int argc, char *argv[])
 		po::store(po::command_line_parser(argc, argv).options(desc).positional(positional_opts).run(), vm);
 		po::notify(vm);    
 	} 
-	catch(std::exception& e) {
+	catch(const std::exception& e) {
 		cerr << e.what() << "\n";
 		return EXIT_FAILURE;
 	}

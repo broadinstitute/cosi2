@@ -332,7 +332,7 @@ TSVIdx::TSVIdx( filename_t tsvFN, unsigned colNum, filename_t idxFN ) {
     std::istream::streampos lineBeg = tsvFile.tellg();
     std::string line;
     try { std::getline( tsvFile, line ); }
-    catch( std::ios::failure ) { break; }
+    catch( const std::ios::failure& ) { break; }
 		++lineNum;
 		if ( lineNum == 1 ) continue;
 
