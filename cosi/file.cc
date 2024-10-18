@@ -16,6 +16,7 @@
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
 #include <boost/random/triangle_distribution.hpp>
+#include <boost/random/gamma_distribution.hpp>
 #include <boost/random/exponential_distribution.hpp>
 #include <boost/core/demangle.hpp>
 #include <cosi/general/utils.h>
@@ -150,6 +151,18 @@ void ParamFileReader::sample_distribution_values( char *buf ) {
 		std::string s( buf );
 		s.replace( beg-buf, strchr( beg, ')' ) -  beg + 1,
 							 boost::lexical_cast<std::string>( ed( *getRandGen() ) ) );
+		strcpy( buf, s.c_str() );
+		sampled = true;
+	}
+	while ( char *beg = strstr( buf, "G(" ) ) {
+		double dalpha = NAN, dbeta = NAN;
+		if ( sscanf( beg, "G(%lf,%lf)", &dalpha, &dbeta ) != 2 )
+			 BOOST_THROW_EXCEPTION( cosi_param_file_error() <<
+															error_msg( "invalid parameter distribution spec" ) );
+		boost::random::gamma_distribution<double> gd( dalpha, dbeta );
+		std::string s( buf );
+		s.replace( beg-buf, strchr( beg, ')' ) -  beg + 1,
+							 boost::lexical_cast<std::string>( gd( *getRandGen() ) ) );
 		strcpy( buf, s.c_str() );
 		sampled = true;
 	}
