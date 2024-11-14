@@ -32,7 +32,6 @@ namespace cosi {
 void print_haps(DemographyP demography, const string& filebase, len_bp_int_t length, MutlistP mutlist, bool_t inf_sites,
 								int outputPrecision ) {
 
-  FILE *outf = NULL;
   freq_t freq;
 
   size_t nmuts = mutlist->size();
@@ -47,8 +46,9 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
   }
   *p = 0;
 
-  size_t the_buf_size = 16777216;
-  char *the_buf = (char *)malloc( the_buf_size );
+  //size_t the_buf_size = 16777216;
+  //char *the_buf = (char *)malloc( the_buf_size );
+  //char *the_buf = NULL;
 	leaf_id_t leaf = 0;
 	const vector< popid >& popNames = demography->getPopNames();
 	const vector< nchroms_t >& sampleSizes = demography->getSampleSizes();
@@ -57,65 +57,68 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
 
 			vector< nchroms_t > mutcount( nmuts );
 
-			string filename( (boost::format( "%s.hap-%d" ) % filebase % popNames[ipop]).str() );
-			outf = fopen(filename.c_str(), "wt");
-			if (outf == NULL) {fprintf(stderr, "Could not open %s\n", filename.c_str());}
-			if ( the_buf ) setvbuf( outf, the_buf, _IOFBF, the_buf_size );
+      { // output hap file
+        string filename( (boost::format( "%s.hap-%d" ) % filebase % popNames[ipop]).str() );
+        FILE *outf = fopen(filename.c_str(), "wt");
+        chkCond(outf != NULL, "could not open haps output file");
+        //if ( the_buf ) setvbuf( outf, the_buf, _IOFBF, the_buf_size );
 
 #if 0
-			static char buf[65536];
-			setvbuf( outf, buf, _IOFBF, 65536 );
+        static char buf[65536];
+        setvbuf( outf, buf, _IOFBF, 65536 );
 #endif		
-			leaf_id_t popEndLeaf = leaf + sampleSizes[ipop];
+        leaf_id_t popEndLeaf = leaf + sampleSizes[ipop];
+      
+        for ( ; leaf < popEndLeaf; leaf++) {
+          fprintf(outf, "%d\t%d\t", leaf, ToInt( popNames[ipop] ) );
+        
+          memcpy( line, blank_line, line_size ); 
+        
+          const vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
+          ForEach( Mutlist::const_iterator m, leafMuts ) {
+            int mutId = m->mutId;
+            chkCond(0 <= mutId, "bad mutId");
+            line[ 2 * mutId ] = '1';
+            mutcount[ mutId ]++;
+          }
+        
+          fputs( line, outf );
+          fputs( "\n", outf);
+        }  // write out haps for this pop
 
-			for ( ; leaf < popEndLeaf; leaf++) {
-				fprintf(outf, "%d\t%d\t", leaf, ToInt( popNames[ipop] ) );
-			
-				memcpy( line, blank_line, line_size ); 
-			
-				const vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
-				ForEach( Mutlist::const_iterator m, leafMuts ) {
-					int mutId = m->mutId;
-                                        chkCond(0 <= mutId, "bad mutId");
-					line[ 2 * mutId ] = '1';
-					mutcount[ mutId ]++;
-				}
-			
-				fputs( line, outf );
-				fputs( "\n", outf);
-			}  // write out haps for this pop
-
-      fclose(outf);
-			
-			string pos_filename( (boost::format( "%s.pos-%d" ) % filebase % popNames[ipop]).str() );
-
-      outf = fopen(pos_filename.c_str(), "wt");
-			if ( the_buf ) setvbuf( outf, the_buf, _IOFBF, the_buf_size );
-			
-      if (outf == NULL) {fprintf(stderr, "Could not open %s\n", pos_filename.c_str());}
-      fprintf(outf, "SNP     CHROM   CHROM_POS       ALLELE1 FREQ1   ALLELE2 FREQ2\n");
-      BOOST_AUTO( it, mutlist->getMuts().begin() );
-      for (size_t im = 0; im < nmuts; im++, it++) {
-				freq = (freq_t) mutcount[im] / sampleSizes[ipop];
-                                chkCond(0 <= ((int)it->mutIdOrig), "bad mutId");
-				if (inf_sites) {
-					fprintf(outf, "%d\t1\t%.*f\t1\t%.*f\t2\t%.*f\n", (int)(it->mutIdOrig+1),
-									outputPrecision, double( length * get_loc( it->loc ) ), 
-									outputPrecision, double( freq ), outputPrecision, double( 1 - freq ) );
-				}
-				else {
-					fprintf(outf, "%d\t1\t%d\t1\t%.*f\t2\t%.*f\n", (int)(it->mutIdOrig+1), (int) (length * get_loc( it->loc ) ), 
-									outputPrecision, double( freq ), outputPrecision, double( 1 - freq ) );
-				}
-			}
+        fclose(outf);
+      }
+      { // output pos file
+        string pos_filename( (boost::format( "%s.pos-%d" ) % filebase % popNames[ipop]).str() );
+        
+        FILE *outf = fopen(pos_filename.c_str(), "wt");
+        //if ( the_buf ) setvbuf( outf, the_buf, _IOFBF, the_buf_size );
+        
+        chkCond(outf != NULL, "could not open pos output file");
+        fprintf(outf, "SNP     CHROM   CHROM_POS       ALLELE1 FREQ1   ALLELE2 FREQ2\n");
+        BOOST_AUTO( it, mutlist->getMuts().begin() );
+        for (size_t im = 0; im < nmuts; im++, it++) {
+          freq = (freq_t) mutcount[im] / sampleSizes[ipop];
+          chkCond(0 <= ((int)it->mutIdOrig), "bad mutId");
+          if (inf_sites) {
+            fprintf(outf, "%d\t1\t%.*f\t1\t%.*f\t2\t%.*f\n", (int)(it->mutIdOrig+1),
+                    outputPrecision, double( length * get_loc( it->loc ) ), 
+                    outputPrecision, double( freq ), outputPrecision, double( 1 - freq ) );
+          }
+          else {
+            fprintf(outf, "%d\t1\t%d\t1\t%.*f\t2\t%.*f\n", (int)(it->mutIdOrig+1), (int) (length * get_loc( it->loc ) ), 
+                    outputPrecision, double( freq ), outputPrecision, double( 1 - freq ) );
+          }
+        }
+        fclose(outf);
+      }
 		}  // if this pop is nonempty
-		fclose(outf);
   }  // for each pop
 
 	using util::cosi_free;
   cosi_free( line );
   cosi_free( blank_line );
-  cosi_free( the_buf );
+  //cosi_free( the_buf );
 }
 
 void print_mut_contexts( DemographyP demography, const string& filebase, len_bp_int_t length, const mutcontext::mutContexts_t& mutContexts ) {
