@@ -33,7 +33,16 @@ struct leafset_struct;
 
 typedef leafset_struct leafset_t;
 typedef boost::intrusive_ptr<leafset_t> leafset_p;
+#ifdef __GNUC__
+#if ( __GNUC__ > 4 ) || ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ > 5 ) )
+#pragma GCC diagnostic push
+#endif
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#endif  
 leafset_t * const LEAFSET_NULL = ((leafset_t * const)NULL);
+#if defined(__GNUC__) && ( ( __GNUC__ > 4 ) || ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ > 5 ) ) )
+#pragma GCC diagnostic pop
+#endif
 
 extern const std::vector< popid > *leafset_leaf2popName;
 extern const std::vector<pop_idx_t> *leafset_popname2idx;
