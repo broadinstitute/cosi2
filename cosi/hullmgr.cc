@@ -460,7 +460,7 @@ HullMgr::chooseRandomIntersection( RandGenP randGen ) const {
 	ost_begs_t::const_iterator b = begs.begin();
 	loc_t begCmp = loc_t( hull1->getBeg() - margin );
 	while ( true ) {
-		assert( hull2 != b );
+          cosi::util::chkCond( hull2 != b, "error" );
 		hull2 = boost::prior( hull2 );
 		if ( hull2->getEnd() > begCmp )
 			 residue--;

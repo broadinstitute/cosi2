@@ -345,9 +345,18 @@ ParamFileReader::file_get_data (FILE *fileptr, FILE *segfp)
 			break;
 		default:
 			ungetc(c, fileptr);
+#ifdef __GNUC__
+#if ( __GNUC__ > 4 ) || ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ > 5 ) )
+#pragma GCC diagnostic push
+#endif
+#pragma GCC diagnostic ignored "-Wunused-result"
+#endif
 			(void)fscanf(fileptr, "%s", var);
 			file_killwhitespace(fileptr);
 			(void)fgets(buffer, BUF_MAX, fileptr);
+#if defined(__GNUC__) && ( ( __GNUC__ > 4 ) || ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ > 5 ) ) )
+#pragma GCC diagnostic pop
+#endif
 			//strcat( buffer, " " );  // make sure no error if eof
 			try {
 				try { file_proc_buff(var, buffer, segfp); }

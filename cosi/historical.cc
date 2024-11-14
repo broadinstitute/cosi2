@@ -864,7 +864,7 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 		else if (  typestr == Event_MSweep::typeStr_standing_variation() ) 
 			event.reset( new Event_MSweep( this, is, Event_MSweep::standing_variation_tag() ) );
 		else chkCond( False, "could not parse event %s", buffer );
-	} catch( ios::failure e ) {
+	} catch( const ios::failure& ) {
 		chkCond( False, "could not parse event %s", buffer );
 	}
 	return event;

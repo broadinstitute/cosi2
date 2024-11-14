@@ -34,6 +34,7 @@ namespace ran = boost::range;
 
 Mut::Mut() { }
 Mut::Mut( loc_t loc_, leafset_p leaves_, genid gen_, popid popName_  ): loc( loc_ ), leaves( (leafset_p )leaves_ ),
+                                                                        mutIdOrig(-1), mutId(-1),
 																																				gen( gen_ ), popName( popName_ ) { }
 
 void Mutlist::addMut( loc_t loc, leafset_p leaves, genid gen, popid popName ) {
@@ -215,12 +216,16 @@ MutlistP Mutlist::loadFromMs( std::istream& is ) {
 		leafset_p leafset( LEAFSET_NULL );
 		leaf_id_t leafId = 0;
 		ForEach( string chrom, chroms ) {
+                  chkCond(0 <= ((int)mutId), "bad mutId");
+                  chkCond(((int)mutId) < ((int)chrom.size()), "bad mutId");
 			if ( chrom[ mutId ] == '1' ) {
 				leafset = leafset_union( leafset, make_singleton_leafset( leafId ) );
 			}
 			leafId++;
 		}
 		chkCond( !leafset_is_empty( leafset ), "ms format error: a mutation has zero derived allele freq" );
+                chkCond(0 <= ((int)mutId), "bad mutId");
+                chkCond(((int)mutId) < ((int)mutLocs.size()), "bad mutId");
 		mutlist->addMut( loc_t( mutLocs[ mutId ] ), leafset, genid( 0.0 ), popid( 1 ) );
 	}  // for each mut
 
@@ -339,8 +344,8 @@ void Mutlist::print_haps_ms( std::ostream& strm,
 			
 			const std::vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
 			ForEach( Mutlist::const_iterator m, leafMuts ) {
-				chkCond( 0 <= m->mutId, "bad mutid" );
-				chkCond( m->mutId < int(nmuts), "bad mutid" );
+                          chkCond( 0 <= ((int)m->mutId), "bad mutid" );
+                          chkCond( ((int)m->mutId) < int(nmuts), "bad mutid" );
 				
 				line.get()[ m->mutId ] = '1';
 			}

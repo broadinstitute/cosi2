@@ -337,6 +337,12 @@ public:
 
 	 Function( ): val( std::numeric_limits<TRange>::quiet_NaN() ) { }
    Function( TRange val_ ): val( val_ ) { }
+   Function(const Function& other):
+     val(other.val) { }
+   Function& operator=(const Function& other) {
+     val = other.val;
+     return *this;
+   }
 
    TRange operator()( TDomain ) const { return val; }
 
@@ -1053,6 +1059,11 @@ public:
 	 }
 	 Function( Function const& f ):
 		 pieces( f.pieces ) { }
+         Function& operator=(const Function& other) {
+           pieces = other.pieces;
+           return *this;
+         }
+
    
 	 // template <typename TDomain2>
 	 // void addPiece( TDomain2 x,

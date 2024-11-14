@@ -76,6 +76,7 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
 				const vector< Mutlist::const_iterator >& leafMuts = mutlist->getLeafMuts( leaf );
 				ForEach( Mutlist::const_iterator m, leafMuts ) {
 					int mutId = m->mutId;
+                                        chkCond(0 <= mutId, "bad mutId");
 					line[ 2 * mutId ] = '1';
 					mutcount[ mutId ]++;
 				}
@@ -96,6 +97,7 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
       BOOST_AUTO( it, mutlist->getMuts().begin() );
       for (size_t im = 0; im < nmuts; im++, it++) {
 				freq = (freq_t) mutcount[im] / sampleSizes[ipop];
+                                chkCond(0 <= ((int)it->mutIdOrig), "bad mutId");
 				if (inf_sites) {
 					fprintf(outf, "%d\t1\t%.*f\t1\t%.*f\t2\t%.*f\n", (int)(it->mutIdOrig+1),
 									outputPrecision, double( length * get_loc( it->loc ) ), 
