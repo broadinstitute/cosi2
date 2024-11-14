@@ -1018,10 +1018,10 @@ public:
 	 
 	 TSVIdx( filename_t tsvFN, unsigned colNum, filename_t idxFN );
 
-	 std::istream::streampos getStreamPos( index_t idxVal );
+	 std::streampos getStreamPos( index_t idxVal );
 
 private:
-	 boost::container::flat_map<index_t, std::istream::streampos> idx2streamPos;
+	 boost::container::flat_map<index_t, std::streampos> idx2streamPos;
 };  // class TSVIdx
 
 }  // namespace tsv

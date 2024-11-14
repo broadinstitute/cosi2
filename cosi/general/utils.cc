@@ -16,6 +16,7 @@
 #include <string>
 #include <utility>
 #include <map>
+#include <iostream>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/foreach.hpp>
 #include <boost/io/ios_state.hpp>
@@ -323,13 +324,13 @@ namespace tsv {
 // Output params:
 //    - idxFN :: the output file
 TSVIdx::TSVIdx( filename_t tsvFN, unsigned colNum, filename_t idxFN ) {
-	boost::container::vector< std::pair< index_t, std::istream::streampos > > idx_streamPos;
+	boost::container::vector< std::pair< index_t, std::streampos > > idx_streamPos;
 	{
   boost::filesystem::ifstream tsvFile( tsvFN );
   tsvFile.exceptions( std::ios::failbit | std::ios::badbit );
 	int lineNum = 0;
   while ( true ) {
-    std::istream::streampos lineBeg = tsvFile.tellg();
+    std::streampos lineBeg = tsvFile.tellg();
     std::string line;
     try { std::getline( tsvFile, line ); }
     catch( std::ios::failure ) { break; }
