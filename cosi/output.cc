@@ -53,8 +53,7 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
 	const vector< popid >& popNames = demography->getPopNames();
 	const vector< nchroms_t >& sampleSizes = demography->getSampleSizes();
   for (size_t ipop = 0; ipop < popNames.size(); ipop++) {
-    if ( sampleSizes[ipop] > 0) {
-
+    {
 			vector< nchroms_t > mutcount( nmuts );
 
       { // output hap file
@@ -98,7 +97,7 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
         fprintf(outf, "SNP     CHROM   CHROM_POS       ALLELE1 FREQ1   ALLELE2 FREQ2\n");
         BOOST_AUTO( it, mutlist->getMuts().begin() );
         for (size_t im = 0; im < nmuts; im++, it++) {
-          freq = (freq_t) mutcount[im] / sampleSizes[ipop];
+          freq = (freq_t) ((sampleSizes[ipop] > 0) ? (mutcount[im] / sampleSizes[ipop]) : 0.0);
           chkCond(0 <= ((int)it->mutIdOrig), "bad mutId");
           if (inf_sites) {
             fprintf(outf, "%d\t1\t%.*f\t1\t%.*f\t2\t%.*f\n", (int)(it->mutIdOrig+1),
