@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cassert>
 #include <fstream>
+#include <limits>
 #include <boost/format.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/foreach.hpp>
@@ -97,7 +98,7 @@ void print_haps(DemographyP demography, const string& filebase, len_bp_int_t len
         fprintf(outf, "SNP     CHROM   CHROM_POS       ALLELE1 FREQ1   ALLELE2 FREQ2\n");
         BOOST_AUTO( it, mutlist->getMuts().begin() );
         for (size_t im = 0; im < nmuts; im++, it++) {
-          freq = (freq_t) ((sampleSizes[ipop] > 0) ? (mutcount[im] / sampleSizes[ipop]) : 0.0);
+          freq = (freq_t) ((sampleSizes[ipop] > 0) ? (mutcount[im] / sampleSizes[ipop]) : std::numeric_limits<freq_t>::quiet_NaN());
           chkCond(0 <= ((int)it->mutIdOrig), "bad mutId");
           if (inf_sites) {
             fprintf(outf, "%d\t1\t%.*f\t1\t%.*f\t2\t%.*f\n", (int)(it->mutIdOrig+1),
