@@ -433,10 +433,14 @@ public:
 		 std::ostringstream msgs;
 
 		 bool foundTrajectory = false;
+     boost::uint32_t n_attempts = 0;
 		 while( !foundTrajectory && maxAttempts-- >= 1 ) {
 			 msgs.str("");
 			 msgs.clear();
-			 //std::cerr << "-------------\n";
+       if (!(n_attempts % 10000)) {
+         std::cerr << "--- n_attempts=" << n_attempts << " -------------\n";
+       }
+       n_attempts++;
 			 pop2freqSelFn->clear();
 
 			 //if ( !(maxAttempts % 100000) ) std::cerr << "attempts left=" << maxAttempts << "\n";
