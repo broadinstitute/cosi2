@@ -127,13 +127,18 @@ public:
 				 double s;
 				 if ( pop != sweepInfo.selPop ) {
 					 begFreqs[ pop ] = 0.;
+				 } else {
+					 begFreqs[ pop ] = 1. / ( 2. * ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) ) );
+				 }
+
+				 if ( pop != sweepInfo.selBegPop ) {
 					 endFreqs[ pop ] = util::make_val_range( 0., 1. );
 					 s = 0;
 				 } else {
-					 begFreqs[ pop ] = 1. / ( 2. * ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) ) );
 					 endFreqs[ pop ] = sweepInfo.final_sel_freq;
 					 s = sweepInfo.selCoeff;
 				 }
+
 				 insert( fits[ pop ] )( GT_AA, 1. + s )( GT_Aa, 1. + 0.5*s )( GT_aa, 1. );
 			 } cosi_end_for;
 
@@ -413,6 +418,9 @@ public:
 										size_t maxAttempts = 1000000 ) {
 		 cosi_using5( util::at, std::map, boost::assign::insert, boost::adaptors::map_keys,
 									boost::range::push_back );
+
+     std::cerr << "simulateTrajFwd: begGen=" << begGen << " selBegGen=" << selBegGen 
+               << " selCoeff=" << selCoeff << " selBegPop=" << selBegPop << "\n";
 		 
 		 boost::shared_ptr<mpop_traj_t> pop2freqSelFn( new mpop_traj_t );
 
@@ -466,9 +474,13 @@ public:
 					 cosi_chk(  (*pop2freqSelFn)[pop](gen) == freqs[ pop ], "bug in piecewise fns" );
 					 
 					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
+           if (pop == selBegPop) {
+             //std::cerr << "gen=" << gen << " pop=" << pop << " freq=" << freqs[ pop ] << "\n";
+           }
 				 }  // for each pop
 				 if ( !haveNonZero ) { 
 					 trajFailed = true; 
+           //std::cerr << "traj failed!\n";
 				 }
 				 else 
 					 { // if !trajFailed
@@ -500,6 +512,9 @@ public:
 							 
 							 // genetic drift
 							 nchroms_float_t N = popInfo.popSizeFn( gen_next );
+               if (pop == selBegPop) {
+                 //std::cerr << "pop=" << pop << " gen_next=" << gen_next << " N=" << N << "\n";
+               }
 							 boost::random::binomial_distribution<nchroms_t> bdist( 2 * nchroms_t( ToDouble( N ) ), p_A );
 							 nchroms_t nsel_next_gen = bdist( urng );
 							 if ( tr ) PRINT5( 2*N, p_A, nsel_next_gen, bdist.param(), bdist );
