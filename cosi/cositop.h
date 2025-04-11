@@ -144,6 +144,10 @@ private:
 	 // ** Field: trajOnly
 	 // Whether to only simulate trajectories and output present-day freqs
 	 bool trajOnly;
+
+	 // ** Field: nTriesPerSim
+	 // Number of times to try a simulation
+   int nTriesPerSim;
 	 
 	 int parse_args( int argc, char *argv[] );
 	 static void printCompileOptions();

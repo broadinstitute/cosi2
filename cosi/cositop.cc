@@ -59,7 +59,7 @@ CoSiMain::CoSiMain():
 							 outputARGedges( False ), freqsOnly( False ),
 							 dropSingletonsFrac( 0 ), genmapRandomRegions( False ), outputPopInfo( False ),
 							 outputGenMap( False ), customStats( False ), customStatsExcludePop( NULL_POPID ),
-							 trajOnly( False )
+  trajOnly( False ), nTriesPerSim(1)
 {
 }
 
@@ -123,6 +123,7 @@ CoSiMain::parse_args( int argc, char *argv[] ) {
 		 ( "condsnp,c", po::value(&this->condSnpDef), "condition sims on a SNP at this loc with these freqs" )
 #endif
 		 ( "traj-only", po::bool_switch(&trajOnly), "just simulate trajectories and output present-day freqs" )
+		 ( "nTriesPerSim", po::value(&nTriesPerSim)->default_value(1), "number of times to try each simulation" )
 		 ;
 
 	po::options_description output_options( "Specifying the output format" );
@@ -248,136 +249,150 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 	GenMapP genMap;
 	for ( int simNum = 0; simNum < nsims; simNum++ ) {
 		curSimNum = simNum;
-#ifndef COSI_NO_CPU_TIMER		
-		if ( stopAfterNs > 0 && overallTimer.elapsed().wall > stopAfterNs ) {
-			cout << "// cosi-early-exit\n";
-			std::cerr << "cosi: exiting after " << overallTimer.elapsed().wall << " ns; completed " <<
-				 simNum << " of " << nsims << " sims.\n";
-			break;
-		}
-		
-		boost::timer::cpu_timer cpuTimer;
-#endif		
-		if ( showProgress && !( simNum % showProgress ) ) { std::cerr << " sim " << simNum << " of " << nsims << std::endl; }
-		CoSi cosi;
+    int attemptNum = 1;
+    bool attemptSucceeded = False;
+    while(!attemptSucceeded) {
+      try {
 
-		cosi.set_segfp( segfp );
-		cosi.set_logfp( logfp );
-		cosi.set_verbose( verbose );
-		cosi.set_trajFN( trajFN );
-		cosi.set_trajOutFN( trajOutFN );
-		cosi.set_outputTreeStats( outputTreeStats );
-		cosi.set_outputMutGens( outputMutGens );
-		cosi.set_outputRecombLocs( outputRecombLocs );
-		cosi.set_deltaTfactor( deltaTfactor );
-		cosi.set_genMapShift( genMapShift );
+#ifndef COSI_NO_CPU_TIMER		
+        if ( stopAfterNs > 0 && overallTimer.elapsed().wall > stopAfterNs ) {
+          cout << "// cosi-early-exit\n";
+          std::cerr << "cosi: exiting after " << overallTimer.elapsed().wall << " ns; completed " <<
+            simNum << " of " << nsims << " sims.\n";
+          break;
+        }
+		
+        boost::timer::cpu_timer cpuTimer;
+#endif		
+        if ( showProgress && !( simNum % showProgress ) ) { std::cerr << " sim " << simNum << " of " << nsims << std::endl; }
+        CoSi cosi;
+
+        cosi.set_segfp( segfp );
+        cosi.set_logfp( logfp );
+        cosi.set_verbose( verbose );
+        cosi.set_trajFN( trajFN );
+        cosi.set_trajOutFN( trajOutFN );
+        cosi.set_outputTreeStats( outputTreeStats );
+        cosi.set_outputMutGens( outputMutGens );
+        cosi.set_outputRecombLocs( outputRecombLocs );
+        cosi.set_deltaTfactor( deltaTfactor );
+        cosi.set_genMapShift( genMapShift );
 #ifdef COSI_SUPPORT_COALAPX		
-		cosi.set_maxCoalDist( plen_t( maxCoalDist ) );
-		cosi.set_maxCoalDistCvxHull( maxCoalDistCvxHull );
+        cosi.set_maxCoalDist( plen_t( maxCoalDist ) );
+        cosi.set_maxCoalDistCvxHull( maxCoalDistCvxHull );
 #endif
-		cosi.set_sweepFracSample( this->sweepFracSample );
+        cosi.set_sweepFracSample( this->sweepFracSample );
 
 #ifdef COSI_CONDSNP		
-		if ( condSnpDef ) cosi.set_condSnpDef( boost::make_shared<CondSnpDef>( *this->condSnpDef ) );
+        if ( condSnpDef ) cosi.set_condSnpDef( boost::make_shared<CondSnpDef>( *this->condSnpDef ) );
 #endif
-		cosi.set_recombfileFN( this->recombfileFN );
-		cosi.set_outputARGedges( this->outputARGedges );
-		cosi.set_genmapRandomRegions( this->genmapRandomRegions );
-		cosi.set_trajOnly( this->trajOnly );
+        cosi.set_recombfileFN( this->recombfileFN );
+        cosi.set_outputARGedges( this->outputARGedges );
+        cosi.set_genmapRandomRegions( this->genmapRandomRegions );
+        cosi.set_trajOnly( this->trajOnly );
 
-		cosi.setUpSim( paramfile, randGen, genMap );
+        cosi.setUpSim( paramfile, randGen, genMap );
 
-		if ( simNum == 0 ) {
-			randGen = cosi.getRandGen();
-			if ( !(msOutput || !tpedOutputPfx.empty() ) ) std::cerr << "coalescent seed: " << randGen->getSeed() << "\n";
-			if ( msOutput ) {
-				cout.precision( outputPrecision );
-				DemographyP dem = cosi.getDemography();
-				cout << "ms " << dem->getTotSamples() << " " << nsims << "\n";
-				if ( outputPopInfo ) {
-					cout << "pops " << dem->getPopNames().size();
-					for ( size_t popNum = 0; popNum < dem->getPopNames().size(); ++popNum )
-						 cout << " " << dem->getPopNames()[ popNum ] << " " << dem->getSampleSizes()[ popNum ];
-					cout << "\n";
-				}
-				cout << "cosi_rand " << randGen->getSeed() << "\n\n";
-			}
-			customstats::init( cosi.getDemography(), nsims, cosi.getParams()->getLength(), customStatsExcludePop );
-		}
+        if ( simNum == 0 ) {
+          randGen = cosi.getRandGen();
+          if ( !(msOutput || !tpedOutputPfx.empty() ) ) std::cerr << "coalescent seed: " << randGen->getSeed() << "\n";
+          if ( msOutput ) {
+            cout.precision( outputPrecision );
+            DemographyP dem = cosi.getDemography();
+            cout << "ms " << dem->getTotSamples() << " " << nsims << "\n";
+            if ( outputPopInfo ) {
+              cout << "pops " << dem->getPopNames().size();
+              for ( size_t popNum = 0; popNum < dem->getPopNames().size(); ++popNum )
+                cout << " " << dem->getPopNames()[ popNum ] << " " << dem->getSampleSizes()[ popNum ];
+              cout << "\n";
+            }
+            cout << "cosi_rand " << randGen->getSeed() << "\n\n";
+          }
+          customstats::init( cosi.getDemography(), nsims, cosi.getParams()->getLength(), customStatsExcludePop );
+        }
 
-		using boost::make_shared;
-		MutlistP muts = make_shared<Mutlist>();
-		if ( dropSingletonsFrac < 1e-10 )
-			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist>( muts ) );
-		else
-			 cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
-																																											 dropSingletonsFrac, randGen ) );
+        using boost::make_shared;
+        MutlistP muts = make_shared<Mutlist>();
+        if ( dropSingletonsFrac < 1e-10 )
+          cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist>( muts ) );
+        else
+          cosi.setMutProcessor( make_shared<MutProcessor_AddToMutlist_WithAscertainment>( muts,
+                                                                                          dropSingletonsFrac, randGen ) );
 
-		addSelMut( cosi.getMSweep(), muts );
+        addSelMut( cosi.getMSweep(), muts );
 
-		if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << "\n"; }
+        if ( msOutput ) { cout << "// seed=" << randGen->getSeed() << "\n"; }
 	
-		ParamFileReaderP params = cosi.getParams();
-		cosi.getMutate()->setFreqsOnly( freqsOnly );
-		genid endGen = cosi.runSim();
+        ParamFileReaderP params = cosi.getParams();
+        cosi.getMutate()->setFreqsOnly( freqsOnly );
+        genid endGen = cosi.runSim();
 
-		if ( showNumRecombs ) { PRINT( cosi.getRecomb()->getNumRecombs() ); }
+        if ( showNumRecombs ) { PRINT( cosi.getRecomb()->getNumRecombs() ); }
 
-		if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
-		if ( msOutput || !tpedOutputPfx.empty() || !outfilebase.empty() || cosi.getCondSnpMgr() || customStats ) {
-			//PRINT( "freezing" );
-			muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
-										cosi.getGenMap()->recomb_get_length() );
-			//PRINT( "frozen" );
+        if ( freqsOnly ) cosi.getMutate()->writeTreeSize();
+        if ( msOutput || !tpedOutputPfx.empty() || !outfilebase.empty() || cosi.getCondSnpMgr() || customStats ) {
+          //PRINT( "freezing" );
+          muts->freeze( params->getInfSites() || msOutput || cosi.getCondSnpMgr(),
+                        cosi.getGenMap()->recomb_get_length() );
+          //PRINT( "frozen" );
 
-			if ( cosi.getCondSnpMgr() ) cosi.getCondSnpMgr()->printResults( muts, cosi.getGenMap() );
+          if ( cosi.getCondSnpMgr() ) cosi.getCondSnpMgr()->printResults( muts, cosi.getGenMap() );
 			
-			if (!msOutput && !outfilebase.empty()) {
-			  std::ostringstream fbase;
-			  fbase << outfilebase.c_str();
-			  if ( nsims > 1 )
-			    fbase << "_" << simNum;
-			  print_haps( cosi.getDemography(), fbase.str(),
-										 params->getLength(), muts,
-										params->getInfSites(),
-										outputPrecision );
+          if (!msOutput && !outfilebase.empty()) {
+            std::ostringstream fbase;
+            fbase << outfilebase.c_str();
+            if ( nsims > 1 )
+              fbase << "_" << simNum;
+            print_haps( cosi.getDemography(), fbase.str(),
+                        params->getLength(), muts,
+                        params->getInfSites(),
+                        outputPrecision );
 #ifdef COSI_DEV_MUTCONTEXT				 
-				 if ( !outputMutContextsFor.empty() )
-				   print_mut_contexts( cosi.getDemography(), fbase.str(), params->getLength(),
-																mutcontext::getSavedMutContexts() );
+            if ( !outputMutContextsFor.empty() )
+              print_mut_contexts( cosi.getDemography(), fbase.str(), params->getLength(),
+                                  mutcontext::getSavedMutContexts() );
 #endif				 
-			}
+          }
 
-			if ( customStats ) {
-				customstats::record_sim( cosi.getDemography(), cosi.getGenMap(), params->getLength(),
-																 muts, params->getInfSites() );
-			}
+          if ( customStats ) {
+            customstats::record_sim( cosi.getDemography(), cosi.getGenMap(), params->getLength(),
+                                     muts, params->getInfSites() );
+          }
 			
-			if ( msOutput ) 
-				 muts->print_haps_ms( cout, cosi.getTreeStatsHook(),
-															cosi.get_outputMutGens(),
-															outputRecombLocs ? &(cosi.getRecombRecorder()->getRecombLocs()) : NULL,
-															outputGenMap,
-															cosi.getGenMap(),
-															outputPrecision,
+          if ( msOutput )
+            muts->print_haps_ms( cout, cosi.getTreeStatsHook(),
+                                 cosi.get_outputMutGens(),
+                                 outputRecombLocs ? &(cosi.getRecombRecorder()->getRecombLocs()) : NULL,
+                                 outputGenMap,
+                                 cosi.getGenMap(),
+                                 outputPrecision,
 #ifndef COSI_NO_CPU_TIMER
-															outputSimTimes ? &cpuTimer : NULL,
+                                 outputSimTimes ? &cpuTimer : NULL,
 #else															
-															/*outputSimTimes ? &cpuTimer : */NULL,
+                                 /*outputSimTimes ? &cpuTimer : */NULL,
 #endif															
-															outputEndGens ? &endGen : NULL,
-															cosi.leavesInfo );
-			if ( !tpedOutputPfx.empty() ) 
-				muts->print_haps_tped( simNum, tpedOutputPfx,
-															 cosi.getGenMap(), outputPrecision, cosi.leavesInfo );
-		}  // output simulation results
-		// {
-		// 	boost::timer::cpu_times elapsed = cpuTimer.elapsed();
-		// 	std::cerr << (static_cast<double>( elapsed.user + elapsed.system ) / 1e8 ) << "\n";
-		// }
+                                 outputEndGens ? &endGen : NULL,
+                                 cosi.leavesInfo );
+          if ( !tpedOutputPfx.empty() )
+            muts->print_haps_tped( simNum, tpedOutputPfx,
+                                   cosi.getGenMap(), outputPrecision, cosi.leavesInfo );
+        }  // output simulation results
+        // {
+        // 	boost::timer::cpu_times elapsed = cpuTimer.elapsed();
+        // 	std::cerr << (static_cast<double>( elapsed.user + elapsed.system ) / 1e8 ) << "\n";
+        // }
 		
 
-		genMap = cosi.getGenMap();
+        genMap = cosi.getGenMap();
+
+        attemptSucceeded = True;
+      } catch(const cosi_error& err) {
+        attemptNum++;
+        if (attemptNum > nTriesPerSim) {
+          throw;
+        }
+      }
+    }  // while(True)
 		
 	}  // for each simulation
 
