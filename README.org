@@ -171,6 +171,15 @@ simulated. The -m option requests output to be written to stdout in the format o
     output format (described below) this option must be specified; otherwise, mutations are filtered so that at most one
     lands within each basepair-length stretch of the simulated region.
 
+***** Special considerations
+
+      When modeling population splits, if possible, instead of splitting one population into two new ones and zeroing out
+      the size of the original one, use a single new population to model lineages that have split off.  Use the original
+      population to model remaining lineages.
+
+      When specifying event times, avoid specifying multiple events happening at exactly the same time.  Use small deviations
+      to randomize event times into nearby generations.
+
 *** Command-line options
 
   The following describes the main command-line options of =cosi2=.
