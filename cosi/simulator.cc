@@ -44,7 +44,7 @@ Simulator::Simulator( DemographyP demography_, GenMapP genMap_ ):
 genid
 Simulator::sim_execute (void) 
 {
-	if ( getenv( "COSI_NEWSIM" ) ) {
+	if ( !getenv( "COSI_OLDSIM" ) ) {
 		genid INF(1e30);
 		genid gen( 0. );
 		int stepNum=0;

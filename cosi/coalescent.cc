@@ -196,7 +196,7 @@ void CoSi::setUpSim( filename_t paramfile, RandGenP randGenToUse_, GenMapP genMa
 	mutate.reset( new Mutate( getRandGen(), params->getMu(), params->getLength() ) );
 	demography->dg_setMutate( mutate );
 
-	if ( getenv( "COSI_NEWSIM" ) ) {
+	if ( !getenv( "COSI_OLDSIM" ) ) {
 		migrate->setBaseModel( getSweepModel( msweep ) );
 		typedef arrival2::ArrivalProcess<genid, arrival2::Stoch< RandGen, arrival2::AnyProc > > any_proc;
 		add( simulator->arrProcs, any_proc( setLabel( *migrate->createMigrationProcesses(), "migrations" ) ) );

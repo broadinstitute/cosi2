@@ -86,7 +86,7 @@ void ParamFileReader::file_read(boost::filesystem::path filename, FILE *segfp)
 		}
 		file_get_data (infileptr, segfp);
 		fclose(infileptr);
-		if ( getenv( "COSI_NEWSIM" ) ) {
+		if ( !getenv( "COSI_OLDSIM" ) ) {
 			histEvents->constructBaseModel( baseModel );
 			// std::cerr.precision(16);
 			// std::cerr << *baseModel << "\n";
