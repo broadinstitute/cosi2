@@ -481,6 +481,58 @@ public:
 				 if ( !haveNonZero ) { 
 					 trajFailed = true; 
            //std::cerr << "traj failed!\n";
+
+           if ( getenv( "COSI_SAVE_FAILED_TRAJ") ) {
+
+             static int simNum = 0;
+             ++simNum;
+
+             boost::shared_ptr<mpop_traj_t> mtraj = pop2freqSelFn;
+
+             std::ofstream f;
+
+             f.exceptions( std::ios::failbit | std::ios::badbit );
+             std::ofstream::openmode mode = std::ofstream::out;
+             if ( simNum > 1 ) mode = std::ofstream::out | std::ofstream::app;
+             f.open( getenv( "COSI_SAVE_FAILED_TRAJ"), mode );
+             f.precision(12);
+
+             if ( simNum == 1 ) {
+               f << "sim\tgen";
+               cosi_for_map_keys( pop, *mtraj ) {
+                 f << "\tselfreq_" << pop;
+               } cosi_end_for;
+               cosi_for_map_keys( pop, *mtraj ) {
+                 f << "\tpopsize_" << pop;
+               } cosi_end_for;
+               f << "\n";
+             }
+
+             if ( getenv("COSI_SAVE_FAILED_TRAJ_SELBEG_ONLY") ) {
+               f << simNum << "\t" << selBegGen;
+               cosi_for_map_values( traj, *mtraj ) {
+                 f << "\t" << traj( selBegGen );
+               } cosi_end_for;
+               f << "\n";
+             } else 
+               {
+
+               gens_t STEP(1);
+               for ( genid gen = begGen; gen >= gen_next; gen -= STEP ) {
+                 f << simNum << "\t" << gen;
+                 cosi_for_map_values( traj, *mtraj ) {
+                   f << "\t" << traj( gen );
+                 } cosi_end_for;
+
+                 cosi_for_map_values( popInfo, baseModel->popInfos ) {
+                   f << "\t" << popInfo.popSizeFn( gen );
+                 } cosi_end_for;
+
+                 f << "\n";
+               }
+             }
+           }
+
 				 }
 				 else 
 					 { // if !trajFailed
