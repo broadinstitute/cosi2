@@ -39,6 +39,9 @@ struct BaseModel {
 			std::map< popid, math::Function< genid, prob_per_chrom_per_gen_t,
 																			 math::Piecewise< math::Const<> > > > migrRateTo;
 
+      // Field: popBirthGen - when the population came into being.
+      genid popBirthGen = genid( std::numeric_limits<double>::infinity() );
+
 			template <typename TSpec>
 			void setSizeFrom( genid fromGen, math::Function< genid, popsize_float_t, TSpec> const& f ) {
 				using namespace math;
@@ -48,6 +51,10 @@ struct BaseModel {
 					 cval( 1. ) /
 					 ( cval( 2.* gens_t(1.) * popsize_float_t(1.) ) * f ); 
 			}
+
+     void setPopBirthGen(genid popBirthGen_) {
+       popBirthGen = popBirthGen_;
+     }
 
 			void setSizeFrom( genid fromGen, popsize_float_t sz ) {
 				setSizeFrom( fromGen, math::fn_const< genid >( std::max( sz, popsize_float_t(1) ) ) );

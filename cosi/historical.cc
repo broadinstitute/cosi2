@@ -747,7 +747,11 @@ genid Event_Split::execute() {
 }
 
 void Event_Split::addToBaseModel( BaseModel& baseModel ) const {
+	using namespace math;
+
 	baseModel.popInfos[ newPop ].setMigrRate( fromPop, gen, prob_per_chrom_per_gen_t( 1.0 ) );
+	//baseModel.popInfos[ newPop ].setSizeFrom( gen + gens_t(2.0), fn_const<genid>( popsize_float_t( 1.0 ) ) );
+  baseModel.popInfos[ newPop ].setPopBirthGen(gen);
 }
 
 ////////////////////////

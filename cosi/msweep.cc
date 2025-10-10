@@ -348,6 +348,9 @@ public:
 			 BOOST_AUTO( & popInfoSel, sweepModel->popInfos[ selPop ] );
 			 BOOST_AUTO( & popInfoUns, sweepModel->popInfos[ unsPop ] );
 
+       popInfoSel.popBirthGen = popInfo.popBirthGen;
+       popInfoUns.popBirthGen = popInfo.popBirthGen;
+
 			 pop2sib.insert( std::make_pair( selPop, unsPop ) );
 			 pop2sib.insert( std::make_pair( unsPop, selPop ) );
 
@@ -472,10 +475,14 @@ public:
 					 if ( tr ) std::cerr << "aftset: " << (*pop2freqSelFn)[ pop ] << "\n";
 					 if ( tr ) std::cerr << "justset: gen=" << gen << " pop=" << pop << " freq=" << freqs[pop] << " f=" << (*pop2freqSelFn)[pop](gen) << "\n";
 					 cosi_chk(  (*pop2freqSelFn)[pop](gen) == freqs[ pop ], "bug in piecewise fns" );
-					 
-					 if ( freqs[ pop ] > 0 ) haveNonZero = true;
-           if (pop == selBegPop) {
-             //std::cerr << "gen=" << gen << " pop=" << pop << " freq=" << freqs[ pop ] << "\n";
+
+           // std::cerr << "pop" << pop << " birth " << at(baseModel->popInfos, pop).popBirthGen << std::endl;
+           if ( gen > at(baseModel->popInfos, pop).popBirthGen ) {
+             freqs [ pop ] = 0;
+           }
+
+           if ( freqs [ pop ] > 0 ) {
+             haveNonZero = True;
            }
 				 }  // for each pop
 				 if ( !haveNonZero ) { 
@@ -519,6 +526,7 @@ public:
 
                gens_t STEP(1);
                for ( genid gen = begGen; gen >= gen_next; gen -= STEP ) {
+
                  f << simNum << "\t" << gen;
                  cosi_for_map_values( traj, *mtraj ) {
                    f << "\t" << traj( gen );
@@ -553,26 +561,36 @@ public:
 						 // now model migration.
 						 // code below influenced by  msms simulator by Ewing and Hermisson, http://bioinformatics.oxfordjournals.org/content/suppl/2010/06/20/btq322.DC1/InternalManual.pdf
 						 cosi_for_map( pop, popInfo, baseModel->popInfos ) {
-							 frac_t nonMigFrac(1.0);
-							 freq_t p_A(0);
-							 cosi_for_map( srcPop, migrRateFn, popInfo.migrRateTo ) {
-								 frac_t migFrac_from_srcPop = migrRateFn( gen_next ) * STEP * nchroms_float_t(1);
-								 p_A += migFrac_from_srcPop * at( b4mig_p_A, srcPop );
-								 nonMigFrac -= migFrac_from_srcPop;
-							 } cosi_end_for;
-							 p_A += nonMigFrac * at( b4mig_p_A, pop );
+               if ( gen > popInfo.popBirthGen ) {
+                 freqs[ pop ] = 0.0;
+               } else {
+
+                 frac_t nonMigFrac(1.0);
+                 freq_t p_A(0);
+                 cosi_for_map( srcPop, migrRateFn, popInfo.migrRateTo ) {
+                   if ( gen <= at(baseModel->popInfos, srcPop).popBirthGen ) {
+                     frac_t migFrac_from_srcPop = migrRateFn( gen_next ) * STEP * nchroms_float_t(1);
+                     p_A += migFrac_from_srcPop * at( b4mig_p_A, srcPop );
+                     nonMigFrac -= migFrac_from_srcPop;
+                   }
+                 } cosi_end_for;
+                 p_A += nonMigFrac * at( b4mig_p_A, pop );
 							 
-							 // genetic drift
-							 nchroms_float_t N = popInfo.popSizeFn( gen_next );
-               if (pop == selBegPop) {
-                 //std::cerr << "pop=" << pop << " gen_next=" << gen_next << " N=" << N << "\n";
+                 // genetic drift
+                 nchroms_float_t N = popInfo.popSizeFn( gen_next );
+                 if (pop == selBegPop) {
+                   //std::cerr << "pop=" << pop << " gen_next=" << gen_next << " N=" << N << "\n";
+                 }
+                 boost::random::binomial_distribution<nchroms_t> bdist( 2 * nchroms_t( ToDouble( N ) ), p_A );
+                 nchroms_t nsel_next_gen = bdist( urng );
+                 if ( tr ) PRINT5( 2*N, p_A, nsel_next_gen, bdist.param(), bdist );
+                 freqs[ pop ] = nchroms_float_t( ToDouble( nsel_next_gen ) ) / ( 2 * N);
+                 if ( !( (0.0 <= freqs[ pop ] ) && (freqs[ pop ] <= 1.0) ) ) {
+                   std::cerr << " null freq: " << freqs[ pop ] << " pop " << pop << " gen " << gen << " N " << N << std::endl;
+                 }
+                 if ( tr ) std::cerr << "gen=" << gen << " pop=" << pop << " 2*N=" << (2*N) << " p_A=" << p_A  <<
+                             " nsel_next_gen=" << nsel_next_gen << " nonMigFrac=" << nonMigFrac << " p_A'=" << freqs[pop] << "\n";
                }
-							 boost::random::binomial_distribution<nchroms_t> bdist( 2 * nchroms_t( ToDouble( N ) ), p_A );
-							 nchroms_t nsel_next_gen = bdist( urng );
-							 if ( tr ) PRINT5( 2*N, p_A, nsel_next_gen, bdist.param(), bdist );
-							 freqs[ pop ] = nchroms_float_t( ToDouble( nsel_next_gen ) ) / ( 2 * N);
-							 if ( tr ) std::cerr << "gen=" << gen << " pop=" << pop << " 2*N=" << (2*N) << " p_A=" << p_A  << 
-													 " nsel_next_gen=" << nsel_next_gen << " nonMigFrac=" << nonMigFrac << " p_A'=" << freqs[pop] << "\n";
 
 						 } cosi_end_for;  // cosi_for_map( pop, popInfo, baseModel->popInfos )
 					 } // if !trajFailed
