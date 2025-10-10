@@ -264,7 +264,10 @@ CoSiMain::cosi_main(int argc, char *argv[]) {
 		
         boost::timer::cpu_timer cpuTimer;
 #endif		
-        if ( showProgress && !( simNum % showProgress ) ) { std::cerr << " sim " << simNum << " of " << nsims << std::endl; }
+        if ( showProgress && !( simNum % showProgress ) ) {
+          std::cerr << " sim " << simNum << " of "
+                    << nsims << " (attempt " << attemptNum << " of " << nTriesPerSim << ")" << std::endl;
+        }
         CoSi cosi;
 
         cosi.set_segfp( segfp );

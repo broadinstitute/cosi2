@@ -128,6 +128,12 @@ public:
 				 if ( pop != sweepInfo.selPop ) {
 					 begFreqs[ pop ] = 0.;
 				 } else {
+
+           if ( sweepInfo.selGen > popInfo.popBirthGen ) {
+             std::cerr << " impossible trajectory selGen " << sweepInfo.selGen << " popBirthGen " << popInfo.popBirthGen << "\n";
+             BOOST_THROW_EXCEPTION( cosi::cosi_error() << error_msg( "impossible trajectory - sel allele born before sel pop" ) );
+           }
+
 					 begFreqs[ pop ] = 1. / ( 2. * ToDouble( popInfo.popSizeFn( sweepInfo.selGen ) ) );
 				 }
 
@@ -424,7 +430,7 @@ public:
 
      std::cerr << "simulateTrajFwd: begGen=" << begGen << " selBegGen=" << selBegGen 
                << " selCoeff=" << selCoeff << " selBegPop=" << selBegPop << "\n";
-		 
+
 		 boost::shared_ptr<mpop_traj_t> pop2freqSelFn( new mpop_traj_t );
 
 		 std::vector<popid> pops;
@@ -629,8 +635,10 @@ public:
 		 }  // while traj not found
 		 if ( foundTrajectory )
 			 return pop2freqSelFn;
-		 else
+		 else {
+       std::cerr << " no traj found with given number of attempts \n";
 			 BOOST_THROW_EXCEPTION( cosi::cosi_error() << error_msg( "no trajectory found within given number of attempts" ) );
+     }
 	 }  // simulateTrajFwd
 
 	 static bool readTsvLine( std::istream& s, std::vector< std::string >& vec, size_t& lineNo,
