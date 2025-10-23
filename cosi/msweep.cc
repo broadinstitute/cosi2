@@ -383,26 +383,26 @@ public:
 				 popInfoUns.setSizeFrom( gen, szUns );
 			 }
 
-			 genid selBegGen = freqSelFn.getPieces().begin()->first;
-			 std::cerr << "begGen from freqSelFn: selBegGen=" << selBegGen << "\n";
+			 genid selGen = freqSelFn.getPieces().begin()->first;
+			 std::cerr << "selGen from freqSelFn: selGen=" << selGen << "\n";
 
 			 {
-				 BOOST_AUTO( lb, popInfo.popSizeFn.getPieces().lower_bound( selBegGen ) );
+				 BOOST_AUTO( lb, popInfo.popSizeFn.getPieces().lower_bound( selGen ) );
 				 popInfoUns.popSizeFn.getPieces().insert( popInfo.popSizeFn.getPieces().begin(), lb );
-				 popInfoUns.popSizeFn.getPieces().insert( std::make_pair( selBegGen, lb->second ) );
+				 popInfoUns.popSizeFn.getPieces().insert( std::make_pair( selGen, lb->second ) );
 			 }
 
 			 {
-				 BOOST_AUTO( lb, popInfo.coalRateFn.getPieces().lower_bound( selBegGen ) );
+				 BOOST_AUTO( lb, popInfo.coalRateFn.getPieces().lower_bound( selGen ) );
 				 popInfoUns.coalRateFn.getPieces().insert( popInfo.coalRateFn.getPieces().begin(), lb );
-				 popInfoUns.coalRateFn.getPieces().insert( std::make_pair( selBegGen, lb->second ) );
+				 popInfoUns.coalRateFn.getPieces().insert( std::make_pair( selGen, lb->second ) );
 			 }
 
 			 popInfoUns.migrRateTo = popInfo.migrRateTo;
 			 for( BOOST_AUTO( migr_it, popInfo.migrRateTo.begin() ); migr_it != popInfo.migrRateTo.end(); ++migr_it )
 					popInfoSel.migrRateTo[ pop2sib[ migr_it->first ] ] = migr_it->second;
 
-			 set( popInfoSel.migrRateTo[ unsPop ], selBegGen, prob_per_chrom_per_gen_t( 1 ) );
+			 set( popInfoSel.migrRateTo[ unsPop ], selGen, prob_per_chrom_per_gen_t( 1 ) );
 		 }
 
 		 return sweepModel;
