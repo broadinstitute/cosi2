@@ -194,6 +194,9 @@ public:
 					 cosi_for_map_keys( pop, *mtraj ) {
 						 f << "\tselfreq_" << pop;
 					 } cosi_end_for;
+           cosi_for_map_keys( pop, *mtraj ) {
+             f << "\tpopsize_" << pop;
+           } cosi_end_for;
 					 f << "\n";
 				 }
 
@@ -202,6 +205,9 @@ public:
 						 cosi_for_map_values( traj, *mtraj ) {
 							 f << "\t" << traj( sweepInfo.selBegGen );
 						 } cosi_end_for;
+             cosi_for_map_values( popInfo, baseModel->popInfos ) {
+               f << "\t" << popInfo.popSizeFn( sweepInfo.selBegGen );
+             } cosi_end_for;
 						 f << "\n";
 				 } else {
 
@@ -211,6 +217,9 @@ public:
 						 cosi_for_map_values( traj, *mtraj ) {
 							 f << "\t" << traj( gen );
 						 } cosi_end_for;
+             cosi_for_map_values( popInfo, baseModel->popInfos ) {
+               f << "\t" << popInfo.popSizeFn( gen );
+             } cosi_end_for;
 						 f << "\n";
 					 }
 				 }
@@ -375,7 +384,7 @@ public:
 			 }
 
 			 genid selBegGen = freqSelFn.getPieces().begin()->first;
-			 //std::cerr << "selBegGen=" << selBegGen << "\n";
+			 std::cerr << "begGen from freqSelFn: selBegGen=" << selBegGen << "\n";
 
 			 {
 				 BOOST_AUTO( lb, popInfo.popSizeFn.getPieces().lower_bound( selBegGen ) );
@@ -525,6 +534,9 @@ public:
                f << simNum << "\t" << selBegGen;
                cosi_for_map_values( traj, *mtraj ) {
                  f << "\t" << traj( selBegGen );
+               } cosi_end_for;
+               cosi_for_map_values( popInfo, baseModel->popInfos ) {
+                 f << "\t" << popInfo.popSizeFn( selBegGen );
                } cosi_end_for;
                f << "\n";
              } else 
