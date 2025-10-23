@@ -416,6 +416,7 @@ private:
 class Event_MSweep: public HistEvents::Event {
 public:
 	struct standing_variation_tag { };
+	struct standing_variation_frac_tag { };
 
 
 	 Event_MSweep( HistEvents *histEvents_, istream& is ): Event( histEvents_, is ) {
@@ -429,6 +430,22 @@ public:
 
 	Event_MSweep( HistEvents *histEvents_, istream& is, standing_variation_tag ): Event( histEvents_, is ) {
 		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq >> selBegPop >> selBegGen;
+
+		 if ( !( final_sel_freq.getMin() && final_sel_freq.getMax() &&
+						 0. <= final_sel_freq.getMin() && final_sel_freq.getMin() <= 1. ) )
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error() << error_msg( "invalid final freq range" ) );
+	 }
+	
+	Event_MSweep( HistEvents *histEvents_, istream& is, standing_variation_frac_tag ): Event( histEvents_, is ) {
+     frac_t selBegGenFrac = 0.0;
+		 is >> sweepPop >> gen >> selCoeff >> selPos >> final_sel_freq >> selBegPop >> selBegGenFrac;
+
+     if ( !( ( 0.0 <= selBegGenFrac ) && ( selBegGenFrac <= 1.0 ) ) ) {
+				BOOST_THROW_EXCEPTION( cosi_hist_event_error() << error_msg( "invalid selBegGenFrac (must be in [0,1])" ) );
+     }
+     
+     selBegGen = selBegGenFrac * gen;
+
 		 if ( !( final_sel_freq.getMin() && final_sel_freq.getMax() &&
 						 0. <= final_sel_freq.getMin() && final_sel_freq.getMin() <= 1. ) )
 				BOOST_THROW_EXCEPTION( cosi_hist_event_error() << error_msg( "invalid final freq range" ) );
@@ -442,6 +459,7 @@ public:
 	 // This method specifies the eventType.
 	 static const char *typeStr() { return "sweep_mult"; }
 	 static const char *typeStr_standing_variation() { return "sweep_mult_standing"; }
+	 static const char *typeStr_standing_variation_frac() { return "sweep_mult_standing_frac"; }
 	 virtual eventKind_t getEventKind() const { return E_SWEEP; }
 
 	 virtual void addToBaseModel( BaseModel& m ) const {
@@ -867,6 +885,8 @@ HistEvents::EventP HistEvents::parseEvent( const char *buffer ) {
 		else if (  typestr == Event_MSweep::typeStr() ) event.reset( new Event_MSweep( this, is ) );
 		else if (  typestr == Event_MSweep::typeStr_standing_variation() ) 
 			event.reset( new Event_MSweep( this, is, Event_MSweep::standing_variation_tag() ) );
+		else if (  typestr == Event_MSweep::typeStr_standing_variation_frac() ) 
+			event.reset( new Event_MSweep( this, is, Event_MSweep::standing_variation_frac_tag() ) );
 		else chkCond( False, "could not parse event %s", buffer );
 	} catch( const ios::failure& ) {
 		chkCond( False, "could not parse event %s", buffer );
