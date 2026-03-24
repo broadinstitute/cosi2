@@ -152,11 +152,8 @@ simulated. The -m option requests output to be written to stdout in the format o
 
     : pop_event sweep_mult_standing <pop> <T_mut_born> <selection coefficient> <position of causal allele (0.0-1.0)> <freq at generation 0> <selBegPop> <selBegGen>
 
-    =<pop>= gives the population in which the advantageous allele is born. =<Tend>= gives the generation at which sweep
-    ends (in the forward-time sense). The position of the advantageous allele is specified as a floating-point number in
-    the range 0.0-1.0, giving its relative position within the simulated region (for example, 0.5 puts the advantageous
-    allele in the middle of the region). The acceptable frequency range of the advantageous allele at time =<0>= (present-day) in selBegPop is specified as a range of numbers between 0.0 and 1.0, e.g. 0.5-0.95.  =<selBegPop>= specifies the population in which the
-    selection acts.  =<selBegGen>= specifies the generation at which selection begins acting in =<selBegPop>=.
+    =<pop>= gives the population in which the selected mutation is born. =<T_mut_born>= gives the generation at which the selected mutation is born. The relative position of the selected mutation within the simulated region is specified as a floating-point number in the range 0.0-1.0 (for example, 0.5 puts the selected
+    mutation in the middle of the region). The acceptable frequency range of the selected allele at time =<0>= (present-day) in selBegPop (see below) is specified as a range of numbers between 0.0 and 1.0, e.g. 0.5-0.95.  =<selBegPop>= specifies the population in which the selection acts.  =<selBegGen>= specifies the generation at which selection begins acting in =<selBegPop>=.
     
 ***** Misc parameters
 
