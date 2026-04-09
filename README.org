@@ -241,6 +241,9 @@ simulated. The -m option requests output to be written to stdout in the format o
     the ancestral allele.  Note that in the legacy format, a finite-sites mutation model is used unless
     =infinite_sites yes= is specified in the parameter file.
 
+    The .tped format is also supported, using the option =--tped tped-output-prefix=.  In the outputs,
+    1 denotes the ancestral allele while 0 denotes the derived allele.
+
 *** Generating recombination maps using =recosim=
 
     Usage: =recosimulate <parameter file name> <region size (bp)>=.
