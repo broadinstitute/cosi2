@@ -8,7 +8,7 @@ This is the user's manual for cosi2 coalescent simulator.
 
 * Downloading and installing cosi2
 
-cosi2 can be downloaded from http://broadinstitute.org/mpg/cosi2 .
+cosi2 can be downloaded from https://github.com/broadinstitute/cosi2 .
 
 Quick start instructions:
 
@@ -185,6 +185,8 @@ simulated. The -m option requests output to be written to stdout in the format o
     -p [ --paramfile ] arg          parameter file
     -R [ --recombfile ] arg         genetic map file (if specified, overrides the
                                     one in paramfile)
+    --genmapRandomRegions           for each simulation use a randomly chosen 
+                                    subregion of the genetic map
     -n [ --nsims ] arg (=1)         number of simulations to output
     -r [ --seed ] arg (=0)          random seed (0 to use current time)
 
@@ -203,6 +205,8 @@ simulated. The -m option requests output to be written to stdout in the format o
   Specifying the output format:
     -o [ --outfilebase ] arg base name for output files in cosi format
     -m [ --outms ]           write output to stdout in ms format
+    --tped                   write output to stdout in tped format
+                             (alleles: 1=ancestra, 0=derived)
 
   Specifying output details:
     -P [ --output-precision ] arg number of decimal places used for floats in the
@@ -211,6 +215,8 @@ simulated. The -m option requests output to be written to stdout in the format o
     -L [ --write-recomb-locs ]    output recombination locations
 
   Misc options:
+    -r N    specify random seed N
+    --nTriesPerSim   number of times to try each simulation
     -h [ --help ]                      produce help message
     -V [ --version ]                   print version info and compile-time 
                                        options
